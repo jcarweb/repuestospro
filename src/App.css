@@ -1,0 +1,106 @@
+/* Estilos básicos para el layout */
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Corregir espaciado del layout */
+.min-h-screen {
+  min-height: 100vh;
+}
+
+/* Asegurar que el contenido principal no tenga margen extra */
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+/* Ajustar el espaciado del sidebar para que el contenido esté más cerca */
+.lg\:ml-0 {
+  margin-left: 0;
+}
+
+.lg\:pl-4 {
+  padding-left: 1rem;
+}
+
+/* Asegurar que el contenido principal se ajuste correctamente */
+main {
+  width: 100%;
+  height: 100%;
+}
+
+/* Ajustar el sidebar para que no tenga margen extra */
+.sidebar-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 16rem;
+  z-index: 40;
+}
+
+/* Asegurar que las secciones cubran toda la pantalla */
+section {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Estilos específicos para el banner hero */
+.bg-gradient-to-r {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+}
+
+/* Mejorar la apariencia de los botones */
+.btn-primary {
+  @apply bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:bg-blue-700 transform hover:scale-105 shadow-lg;
+}
+
+.btn-secondary {
+  @apply border-2 border-white text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:bg-white hover:text-blue-600 transform hover:scale-105 shadow-lg;
+}
+
+/* Mejorar la apariencia de los inputs */
+input, select, textarea {
+  @apply transition-all duration-200;
+}
+
+input:focus, select:focus, textarea:focus {
+  @apply ring-2 ring-blue-500 border-transparent;
+}
+
+/* Animaciones suaves */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Utilidades adicionales */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

@@ -1,0 +1,45 @@
+{
+  "name": "repuestos-ecommerce",
+  "version": "1.0.0",
+  "description": "Ecommerce multiplataforma para repuestos de vehículos",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "vite --port 3000",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:fast": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" --kill-others",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "vite build",
+    "build:backend": "cd backend && npm run build",
+    "install:all": "npm install && cd backend && npm install",
+    "start": "cd backend && npm start",
+    "test:servers": "node test-servers.js",
+    "kill": "taskkill /F /IM node.exe"
+  },
+  "keywords": [
+    "ecommerce",
+    "repuestos",
+    "react",
+    "express",
+    "mongodb"
+  ],
+  "author": "RepuestosPro Team",
+  "license": "MIT",
+  "dependencies": {
+    "@tailwindcss/forms": "^0.5.10",
+    "lucide-react": "^0.263.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "autoprefixer": "^10.4.14",
+    "concurrently": "^8.2.2",
+    "postcss": "^8.4.24",
+    "tailwindcss": "^3.3.2",
+    "typescript": "^5.0.2",
+    "vite": "^4.3.9"
+  }
+}
