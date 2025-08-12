@@ -25,7 +25,14 @@ export const config = {
   // Configuración de bcrypt
   BCRYPT_ROUNDS: parseInt(process.env.BCRYPT_ROUNDS || '12'),
 
-  // Configuración de SMTP (para emails)
+  // Configuración de Email (compatibilidad con SMTP y nuevas variables)
+  EMAIL_HOST: process.env.EMAIL_HOST || process.env.SMTP_HOST || 'smtp.gmail.com',
+  EMAIL_PORT: parseInt(process.env.EMAIL_PORT || process.env.SMTP_PORT || '587'),
+  EMAIL_SECURE: process.env.EMAIL_SECURE === 'true' || false,
+  EMAIL_USER: process.env.EMAIL_USER || process.env.SMTP_USER || 'noreply@repuestospro.com',
+  EMAIL_PASS: process.env.EMAIL_PASS || process.env.SMTP_PASS || '',
+  
+  // Configuración de SMTP (mantener compatibilidad)
   SMTP_HOST: process.env.SMTP_HOST,
   SMTP_PORT: parseInt(process.env.SMTP_PORT || '587'),
   SMTP_USER: process.env.SMTP_USER,

@@ -2,22 +2,22 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-interface AdminRouteProps {
+interface DeliveryRouteProps {
   children: React.ReactNode;
 }
 
-const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
+const DeliveryRoute: React.FC<DeliveryRouteProps> = ({ children }) => {
   const { isAuthenticated, hasRole } = useAuth();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!hasRole('admin')) {
+  if (!hasRole('delivery')) {
     return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
 };
 
-export default AdminRoute; 
+export default DeliveryRoute;

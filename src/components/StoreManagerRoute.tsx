@@ -1,19 +1,19 @@
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 interface StoreManagerRouteProps {
   children: React.ReactNode;
 }
 
 const StoreManagerRoute: React.FC<StoreManagerRouteProps> = ({ children }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, hasRole } = useAuth();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (user?.role !== 'store_manager') {
+  if (!hasRole('store_manager')) {
     return <Navigate to="/" replace />;
   }
 

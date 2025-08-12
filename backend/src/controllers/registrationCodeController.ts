@@ -64,20 +64,21 @@ export class RegistrationCodeController {
         return;
       }
 
-      const registrationCode = await RegistrationCodeService.verifyCode(code);
+      const registrationCode = await RegistrationCodeService.verifyRegistrationCode(code);
 
       if (!registrationCode) {
         res.status(404).json({
           success: false,
-          message: 'Código de registro inválido o expirado'
+          message: 'Código de registro no encontrado o expirado'
         });
         return;
       }
 
       res.json({
         success: true,
-        message: 'Código válido',
+        message: 'Código de registro válido',
         data: {
+          code: registrationCode.code,
           email: registrationCode.email,
           role: registrationCode.role,
           expiresAt: registrationCode.expiresAt,
@@ -85,88 +86,46 @@ export class RegistrationCodeController {
         }
       });
     } catch (error) {
-      console.error('Error verificando código:', error);
+      console.error('Error verificando código de registro:', error);
       res.status(500).json({
         success: false,
-        message: 'Error interno del servidor'
+        message: error instanceof Error ? error.message : 'Error interno del servidor'
       });
     }
   }
 
-  // Iniciar proceso de registro
-  static async startRegistration(req: Request, res: Response): Promise<void> {
+  // Listar códigos de registro (solo admin)
+  static async listCodes(req: Request, res: Response): Promise<void> {
     try {
-      const { code } = req.body;
+      const userId = (req as any).user._id;
+      const { page = 1, limit = 10, status, role } = req.query;
 
-      if (!code) {
-        res.status(400).json({
-          success: false,
-          message: 'Código de registro requerido'
-        });
-        return;
+      const filters: any = { createdBy: userId };
+      
+      if (status) {
+        filters.status = status;
+      }
+      
+      if (role) {
+        filters.role = role;
       }
 
-      const registrationCode = await RegistrationCodeService.startRegistration(code);
-
-      res.json({
-        success: true,
-        message: 'Registro iniciado exitosamente',
-        data: {
-          email: registrationCode.email,
-          role: registrationCode.role,
-          expiresAt: registrationCode.expiresAt
+      const codes = await RegistrationCodeService.listRegistrationCodes(
+        userId.toString(),
+        {
+          page: Number(page),
+          limit: Number(limit),
+          filters
         }
-      });
-    } catch (error) {
-      console.error('Error iniciando registro:', error);
-      res.status(500).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Error interno del servidor'
-      });
-    }
-  }
-
-  // Completar registro
-  static async completeRegistration(req: Request, res: Response): Promise<void> {
-    try {
-      const { code } = req.body;
-      const userId = (req as any).user._id;
-
-      if (!code) {
-        res.status(400).json({
-          success: false,
-          message: 'Código de registro requerido'
-        });
-        return;
-      }
-
-      await RegistrationCodeService.completeRegistration(code, userId.toString());
+      );
 
       res.json({
         success: true,
-        message: 'Registro completado exitosamente'
-      });
-    } catch (error) {
-      console.error('Error completando registro:', error);
-      res.status(500).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Error interno del servidor'
-      });
-    }
-  }
-
-  // Obtener todos los códigos (solo admin)
-  static async getAllCodes(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).user._id;
-      const codes = await RegistrationCodeService.getAllCodes(userId.toString());
-
-      res.json({
-        success: true,
+        message: 'Códigos de registro obtenidos exitosamente',
         data: codes
       });
     } catch (error) {
-      console.error('Error obteniendo códigos:', error);
+      console.error('Error listando códigos de registro:', error);
       res.status(500).json({
         success: false,
         message: error instanceof Error ? error.message : 'Error interno del servidor'
@@ -174,26 +133,7 @@ export class RegistrationCodeController {
     }
   }
 
-  // Obtener estadísticas (solo admin)
-  static async getStats(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).user._id;
-      const stats = await RegistrationCodeService.getCodeStats(userId.toString());
-
-      res.json({
-        success: true,
-        data: stats
-      });
-    } catch (error) {
-      console.error('Error obteniendo estadísticas:', error);
-      res.status(500).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Error interno del servidor'
-      });
-    }
-  }
-
-  // Revocar código (solo admin)
+  // Revocar código de registro (solo admin)
   static async revokeCode(req: Request, res: Response): Promise<void> {
     try {
       const userId = (req as any).user._id;
@@ -207,14 +147,25 @@ export class RegistrationCodeController {
         return;
       }
 
-      await RegistrationCodeService.revokeCode(userId.toString(), codeId);
+      const result = await RegistrationCodeService.revokeRegistrationCode(
+        userId.toString(),
+        codeId
+      );
+
+      if (!result) {
+        res.status(404).json({
+          success: false,
+          message: 'Código de registro no encontrado'
+        });
+        return;
+      }
 
       res.json({
         success: true,
-        message: 'Código revocado exitosamente'
+        message: 'Código de registro revocado exitosamente'
       });
     } catch (error) {
-      console.error('Error revocando código:', error);
+      console.error('Error revocando código de registro:', error);
       res.status(500).json({
         success: false,
         message: error instanceof Error ? error.message : 'Error interno del servidor'
@@ -222,22 +173,101 @@ export class RegistrationCodeController {
     }
   }
 
-  // Limpiar códigos expirados (solo admin)
-  static async cleanExpiredCodes(req: Request, res: Response): Promise<void> {
+  // Obtener estadísticas de códigos (solo admin)
+  static async getStats(req: Request, res: Response): Promise<void> {
     try {
       const userId = (req as any).user._id;
-      const cleanedCount = await RegistrationCodeService.cleanExpiredCodes();
+
+      const stats = await RegistrationCodeService.getRegistrationCodeStats(userId.toString());
 
       res.json({
         success: true,
-        message: `${cleanedCount} códigos expirados fueron limpiados`,
-        data: { cleanedCount }
+        message: 'Estadísticas obtenidas exitosamente',
+        data: stats
       });
     } catch (error) {
-      console.error('Error limpiando códigos expirados:', error);
+      console.error('Error obteniendo estadísticas:', error);
       res.status(500).json({
         success: false,
-        message: 'Error interno del servidor'
+        message: error instanceof Error ? error.message : 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Reenviar código de registro (solo admin)
+  static async resendCode(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user._id;
+      const { codeId } = req.params;
+
+      if (!codeId) {
+        res.status(400).json({
+          success: false,
+          message: 'ID del código requerido'
+        });
+        return;
+      }
+
+      const result = await RegistrationCodeService.resendRegistrationCode(
+        userId.toString(),
+        codeId
+      );
+
+      if (!result) {
+        res.status(404).json({
+          success: false,
+          message: 'Código de registro no encontrado'
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        message: 'Código de registro reenviado exitosamente'
+      });
+    } catch (error) {
+      console.error('Error reenviando código de registro:', error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Obtener códigos por rol (solo admin)
+  static async getCodesByRole(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user._id;
+      const { role } = req.params;
+      const { page = 1, limit = 10 } = req.query;
+
+      if (!['admin', 'store_manager', 'delivery'].includes(role)) {
+        res.status(400).json({
+          success: false,
+          message: 'Rol inválido'
+        });
+        return;
+      }
+
+      const codes = await RegistrationCodeService.getRegistrationCodesByRole(
+        userId.toString(),
+        role,
+        {
+          page: Number(page),
+          limit: Number(limit)
+        }
+      );
+
+      res.json({
+        success: true,
+        message: `Códigos de registro para rol ${role} obtenidos exitosamente`,
+        data: codes
+      });
+    } catch (error) {
+      console.error('Error obteniendo códigos por rol:', error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Error interno del servidor'
       });
     }
   }

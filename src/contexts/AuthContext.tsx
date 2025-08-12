@@ -1,18 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  role: string;
-  isEmailVerified: boolean;
-  pin?: string;
-  fingerprintEnabled?: boolean;
-  twoFactorEnabled?: boolean;
-  loyaltyLevel?: string;
-  createdAt?: string;
-}
+import { User, UserRole } from '../types';
 
 interface AuthContextType {
   user: User | null;
@@ -26,6 +13,8 @@ interface AuthContextType {
   clearLocation: () => void;
   isAuthenticated: boolean;
   checkAuthStatus: () => Promise<boolean>;
+  hasRole: (role: UserRole) => boolean;
+  hasAnyRole: (roles: UserRole[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -100,16 +89,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return !!user && !!token;
   };
 
-  const login = (userData: User, userToken: string) => {
+  const login = (userData: User, authToken: string) => {
     setUser(userData);
-    setToken(userToken);
-    localStorage.setItem('token', userToken);
+    setToken(authToken);
+    localStorage.setItem('token', authToken);
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const loginAsync = async (email: string, password: string) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,24 +109,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error en la autenticación');
+        throw new Error(data.message || 'Error en el inicio de sesión');
       }
 
-      if (data.success && data.data) {
-        const userData = data.data.user;
-        const token = data.data.token;
-        
-        // Asegurar que el usuario tenga un rol
-        if (!userData.role) {
-          userData.role = 'user'; // Rol por defecto
-        }
-        
-        login(userData, token);
-      } else {
-        throw new Error(data.message || 'Error en la autenticación');
-      }
+      login(data.user, data.token);
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Error en loginAsync:', error);
       throw error;
     }
   };
@@ -145,6 +122,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     setUser(null);
     setToken(null);
+    setLocation(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   };
@@ -156,20 +134,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const updateLocation = (newLocation: { latitude: number; longitude: number }) => {
     setLocation(newLocation);
-    localStorage.setItem('location', JSON.stringify(newLocation));
   };
 
   const clearLocation = () => {
     setLocation(null);
-    localStorage.removeItem('location');
   };
 
-  const isAuthenticated = !!user && !!token;
-  
-  console.log('🔍 AuthContext - isAuthenticated:', isAuthenticated);
-  console.log('🔍 AuthContext - user:', user);
-  console.log('🔍 AuthContext - token:', token ? 'exists' : 'missing');
-  
+  const hasRole = (role: UserRole): boolean => {
+    return user?.role === role;
+  };
+
+  const hasAnyRole = (roles: UserRole[]): boolean => {
+    return user ? roles.includes(user.role) : false;
+  };
+
   const value: AuthContextType = {
     user,
     token,
@@ -180,16 +158,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     updateUser,
     updateLocation,
     clearLocation,
-    isAuthenticated,
-    checkAuthStatus
+    isAuthenticated: !!user && !!token,
+    checkAuthStatus,
+    hasRole,
+    hasAnyRole,
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
   }
 
   return (
