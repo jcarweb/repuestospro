@@ -1,241 +1,247 @@
 import React, { useState, useEffect } from 'react';
-import { X, Fingerprint, CheckCircle, AlertCircle, Smartphone } from 'lucide-react';
+import { Fingerprint, CheckCircle, AlertCircle, Smartphone } from 'lucide-react';
 
 interface FingerprintSetupProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  userId: string;
-  token: string;
+  onFingerprintSet: () => void;
+  onCancel: () => void;
 }
 
-const FingerprintSetup: React.FC<FingerprintSetupProps> = ({ 
-  isOpen, 
-  onClose, 
-  onSuccess, 
-  userId, 
-  token 
-}) => {
-  const [step, setStep] = useState<'check' | 'setup' | 'success' | 'error'>('check');
+const FingerprintSetup: React.FC<FingerprintSetupProps> = ({ onFingerprintSet, onCancel }) => {
   const [isSupported, setIsSupported] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [fingerprintData, setFingerprintData] = useState('');
 
   useEffect(() => {
-    if (isOpen) {
-      checkFingerprintSupport();
-    }
-  }, [isOpen]);
+    checkBiometricSupport();
+  }, []);
 
-  const checkFingerprintSupport = async () => {
+  const checkBiometricSupport = async () => {
     try {
       // Verificar si el navegador soporta WebAuthn
       if (!window.PublicKeyCredential) {
         setIsSupported(false);
-        setStep('error');
         setError('Tu navegador no soporta autenticación biométrica');
         return;
       }
 
-      // Verificar si el dispositivo tiene sensor de huella
+      // Verificar si el dispositivo tiene autenticación biométrica
       const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
       setIsSupported(available);
-      
-      if (available) {
-        setStep('setup');
-      } else {
-        setStep('error');
-        setError('Tu dispositivo no tiene sensor de huella digital o no está configurado');
+
+      if (!available) {
+        setError('Tu dispositivo no tiene autenticación biométrica disponible');
       }
     } catch (error) {
       setIsSupported(false);
-      setStep('error');
-      setError('Error verificando soporte de huella digital');
+      setError('Error verificando soporte biométrico');
     }
   };
 
   const setupFingerprint = async () => {
-    setIsLoading(true);
+    setLoading(true);
     setError('');
 
     try {
-      // Simular captura de huella digital
-      // En un entorno real, aquí se usaría la WebAuthn API
-      const mockFingerprintData = `fingerprint_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // Generar un challenge aleatorio
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+
+      // Crear las opciones de registro
+      const publicKeyOptions: PublicKeyCredentialCreationOptions = {
+        challenge,
+        rp: {
+          name: 'RepuestosPro',
+          id: window.location.hostname
+        },
+        user: {
+          id: new Uint8Array(16),
+          name: 'user@example.com',
+          displayName: 'Usuario'
+        },
+        pubKeyCredParams: [
+          {
+            type: 'public-key',
+            alg: -7 // ES256
+          }
+        ],
+        authenticatorSelection: {
+          authenticatorAttachment: 'platform',
+          userVerification: 'required'
+        },
+        timeout: 60000
+      };
+
+      // Crear la credencial
+      const credential = await navigator.credentials.create({
+        publicKey: publicKeyOptions
+      }) as PublicKeyCredential;
+
+      if (credential) {
+        // Enviar al servidor para registrar
+        const response = await fetch('http://localhost:5000/api/auth/setup-fingerprint', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            credentialId: Array.from(new Uint8Array(credential.rawId)),
+            clientDataJSON: Array.from(new Uint8Array(credential.response.clientDataJSON)),
+            attestationObject: Array.from(new Uint8Array((credential.response as any).attestationObject))
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          setIsEnrolled(true);
+          setTimeout(() => {
+            onFingerprintSet();
+          }, 2000);
+        } else {
+          setError(result.message || 'Error registrando huella dactilar');
+        }
+      }
+    } catch (error: any) {
+      console.error('Error setup fingerprint:', error);
       
-      // Enviar al backend
-      const response = await fetch('http://localhost:5000/api/auth/setup-fingerprint', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          fingerprintData: mockFingerprintData
-        })
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setFingerprintData(mockFingerprintData);
-        setStep('success');
+      if (error.name === 'NotAllowedError') {
+        setError('Registro cancelado por el usuario');
+      } else if (error.name === 'NotSupportedError') {
+        setError('Este tipo de autenticación no está soportado');
+      } else if (error.name === 'InvalidStateError') {
+        setError('Ya existe una credencial registrada');
       } else {
-        setError(result.message || 'Error configurando huella digital');
+        setError('Error configurando huella dactilar. Intenta de nuevo.');
       }
-    } catch (error) {
-      setError('Error de conexión. Intenta de nuevo.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleFingerprintAuth = async () => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      // Simular autenticación con huella
-      // En un entorno real, aquí se verificaría la huella
-      const response = await fetch('http://localhost:5000/api/auth/login/fingerprint', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          fingerprintData: fingerprintData
-        })
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        onSuccess();
-      } else {
-        setError(result.message || 'Error en autenticación con huella');
-      }
-    } catch (error) {
-      setError('Error de conexión. Intenta de nuevo.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (!isOpen) return null;
+  if (isSupported === null) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-8 w-full max-w-md mx-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Verificando soporte biométrico...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 w-full max-w-md mx-4">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {step === 'check' && 'Verificando huella digital'}
-            {step === 'setup' && 'Configurar huella digital'}
-            {step === 'success' && 'Huella configurada'}
-            {step === 'error' && 'Error de configuración'}
+        <div className="text-center">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
+            <Fingerprint className="h-8 w-8 text-blue-600" />
+          </div>
+          
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Configurar Huella Dactilar
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X size={24} />
-          </button>
-        </div>
 
-        {step === 'check' && (
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Verificando soporte de huella digital...</p>
-          </div>
-        )}
-
-        {step === 'setup' && (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Smartphone className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Configurar huella digital
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Para usar la autenticación con huella digital, primero debes configurarla en tu dispositivo.
+          {!isSupported ? (
+            <>
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center">
+                  <AlertCircle className="text-red-500 mr-2" size={20} />
+                  <span className="text-red-700 text-sm">{error}</span>
+                </div>
+              </div>
+              
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <Smartphone className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <div className="text-left">
+                    <h4 className="font-medium text-blue-900 mb-1">Requisitos:</h4>
+                    <ul className="text-sm text-blue-700 space-y-1">
+                      <li>• Dispositivo móvil Android o iOS</li>
+                      <li>• Sensor de huella dactilar</li>
+                      <li>• Navegador compatible (Chrome, Safari)</li>
+                      <li>• HTTPS habilitado</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : isEnrolled ? (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center">
+                <CheckCircle className="text-green-500 mr-2" size={20} />
+                <span className="text-green-700 text-sm">
+                  ¡Huella dactilar configurada exitosamente!
+                </span>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="text-gray-600 mb-6">
+                Configura tu huella dactilar para acceder rápidamente a tu cuenta. 
+                Esta opción solo está disponible en dispositivos móviles con sensor biométrico.
               </p>
-            </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="font-semibold text-blue-900 mb-2">Instrucciones:</h4>
-              <ol className="text-sm text-blue-800 space-y-1">
-                <li>1. Asegúrate de estar en un dispositivo móvil</li>
-                <li>2. Ve a Configuración → Seguridad → Huella digital</li>
-                <li>3. Agrega tu huella digital</li>
-                <li>4. Regresa aquí y haz clic en "Configurar"</li>
-              </ol>
-            </div>
-
-            <button
-              onClick={setupFingerprint}
-              disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-            >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Configurando...
-                </>
-              ) : (
-                <>
-                  <Fingerprint size={20} className="mr-2" />
-                  Configurar huella digital
-                </>
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center">
+                    <AlertCircle className="text-red-500 mr-2" size={20} />
+                    <span className="text-red-700 text-sm">{error}</span>
+                  </div>
+                </div>
               )}
-            </button>
-          </div>
-        )}
 
-        {step === 'success' && (
-          <div className="text-center space-y-4">
-            <CheckCircle className="w-16 h-16 text-green-600 mx-auto" />
-            <h3 className="text-lg font-semibold text-gray-900">
-              ¡Huella digital configurada!
-            </h3>
-            <p className="text-gray-600">
-              Ahora puedes usar tu huella digital para iniciar sesión de forma rápida y segura.
-            </p>
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-green-800 text-sm">
-                <strong>Nota:</strong> Esta función solo funciona en dispositivos móviles con sensor de huella digital.
-              </p>
-            </div>
-            <button
-              onClick={onSuccess}
-              className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Continuar
-            </button>
-          </div>
-        )}
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <Smartphone className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <div className="text-left">
+                    <h4 className="font-medium text-blue-900 mb-1">Instrucciones:</h4>
+                    <ul className="text-sm text-blue-700 space-y-1">
+                      <li>• Toca el sensor de huella dactilar</li>
+                      <li>• Sigue las instrucciones en pantalla</li>
+                      <li>• Puedes registrar múltiples dedos</li>
+                      <li>• Mantén presionado hasta completar</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
 
-        {step === 'error' && (
-          <div className="text-center space-y-4">
-            <AlertCircle className="w-16 h-16 text-red-600 mx-auto" />
-            <h3 className="text-lg font-semibold text-gray-900">
-              No se puede configurar huella digital
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {error}
-            </p>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800 text-sm">
-                <strong>Alternativas:</strong> Puedes usar tu contraseña, PIN o Google para iniciar sesión.
-              </p>
-            </div>
+          <div className="space-y-3">
+            {isSupported && !isEnrolled && (
+              <button
+                onClick={setupFingerprint}
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? 'Configurando...' : 'Configurar Huella Dactilar'}
+              </button>
+            )}
+            
             <button
-              onClick={onClose}
-              className="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
+              onClick={onCancel}
+              className="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors"
             >
-              Entendido
+              {isEnrolled ? 'Continuar' : 'Cancelar'}
             </button>
           </div>
-        )}
+
+          <div className="mt-6 text-xs text-gray-500">
+            <p className="mb-2">
+              <strong>Información de seguridad:</strong>
+            </p>
+            <ul className="text-left space-y-1">
+              <li>• Tu huella dactilar se almacena de forma segura</li>
+              <li>• Solo se usa para autenticación local</li>
+              <li>• Puedes desactivarla en cualquier momento</li>
+              <li>• Funciona offline una vez configurada</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );
