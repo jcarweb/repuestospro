@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useFavorites } from '../contexts/FavoritesContext';
+import AuthModal from './AuthModal';
 import { 
   ShoppingCart, 
   User, 
@@ -26,12 +27,19 @@ const Header: React.FC = () => {
   const { getFavoritesCount } = useFavorites();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const cartItemCount = getItemCount();
   const favoritesCount = getFavoritesCount();
 
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const handleAuthClick = (mode: 'login' | 'register') => {
+    setAuthMode(mode);
+    setShowAuthModal(true);
   };
 
   const isAdmin = user?.role === 'admin';
@@ -218,18 +226,18 @@ const Header: React.FC = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-2">
-                <Link
-                  to="/login"
+                <button
+                  onClick={() => handleAuthClick('login')}
                   className="text-gray-600 hover:text-blue-600 transition-colors"
                 >
                   Iniciar Sesión
-                </Link>
-                <Link
-                  to="/register"
+                </button>
+                <button
+                  onClick={() => handleAuthClick('register')}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Registrarse
-                </Link>
+                </button>
               </div>
             )}
 
@@ -341,6 +349,15 @@ const Header: React.FC = () => {
           </div>
         )}
       </div>
+      
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          initialMode={authMode}
+        />
+      )}
     </header>
   );
 };

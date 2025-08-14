@@ -17,8 +17,8 @@ if (!envExists) {
 let envContent = fs.readFileSync(envPath, 'utf8');
 
 console.log('📋 URLs actuales:');
-console.log('- Backend: Puerto 5001 (en lugar de 5000)');
-console.log('- Frontend: Puerto 3001 (en lugar de 3000)');
+console.log('- Backend: Puerto 5000(en lugar de 5000)');
+console.log('- Frontend: Puerto 3000 (en lugar de 3000)');
 
 // Corregir las URLs
 envContent = envContent.replace(/http:\/\/localhost:5000/g, 'http://localhost:5001');
@@ -30,11 +30,11 @@ fs.writeFileSync(envPath, envContent);
 console.log('\n✅ URLs corregidas en archivo .env:');
 console.log('  ✅ CORS_ORIGIN: http://localhost:3001');
 console.log('  ✅ FRONTEND_URL: http://localhost:3001');
-console.log('  ✅ GOOGLE_CALLBACK_URL: http://localhost:5001/api/auth/google/callback');
+console.log('  ✅ GOOGLE_CALLBACK_URL: http://localhost:5000/api/auth/google/callback');
 
 console.log('\n🎯 Para probar el sistema:');
 console.log('1. Reinicia el backend: npm run dev');
-console.log('2. Ve a http://localhost:3001');
+console.log('2. Ve a http://localhost:3000');
 console.log('3. Inicia sesión como administrador');
 console.log('4. Ve a "Códigos de Registro"');
 console.log('5. Crea un código de registro');

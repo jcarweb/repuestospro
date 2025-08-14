@@ -24,7 +24,7 @@ npm run free-port
 ### 3. Usar un puerto diferente
 Puedes cambiar el puerto en el archivo `.env`:
 ```
-PORT=5001
+PORT=5000
 ```
 
 ## Scripts Útiles
