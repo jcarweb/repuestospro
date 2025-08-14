@@ -27,7 +27,7 @@ export class AuthController {
   // Registrar usuario
   static async register(req: Request, res: Response): Promise<void> {
     try {
-      const { name, email, password, phone, pin, role = 'user' } = req.body;
+      const { name, email, password, phone, pin, role = 'client' } = req.body;
 
       // Validar email
       const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;

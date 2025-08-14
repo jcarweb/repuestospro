@@ -98,6 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const loginAsync = async (email: string, password: string) => {
     try {
+      console.log('🌐 Enviando request a:', `http://localhost:5000/api/auth/login`);
       const response = await fetch(`http://localhost:5000/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -106,15 +107,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
+      console.log('📡 Response status:', response.status);
       const data = await response.json();
+      console.log('📄 Response data:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Error en el inicio de sesión');
       }
 
-      login(data.user, data.token);
+      console.log('✅ Login exitoso, guardando datos...');
+      login(data.data.user, data.data.token);
     } catch (error) {
-      console.error('Error en loginAsync:', error);
+      console.error('❌ Error en loginAsync:', error);
       throw error;
     }
   };

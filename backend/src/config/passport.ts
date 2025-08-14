@@ -50,7 +50,7 @@ if (config.GOOGLE_CLIENT_ID && config.GOOGLE_CLIENT_SECRET) {
           googleId: profile.id,
           isEmailVerified: true,
           isActive: true,
-          role: 'user'
+          role: 'client'
         });
 
         return done(null, newUser);

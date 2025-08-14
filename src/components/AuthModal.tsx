@@ -73,8 +73,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
     try {
       if (mode === 'login') {
-        await loginAsync(formData.email, formData.password);
-        onClose();
+        try {
+          console.log('🔐 Intentando login con:', formData.email);
+          await loginAsync(formData.email, formData.password);
+          console.log('✅ Login exitoso');
+          onClose();
+        } catch (error: any) {
+          console.error('❌ Error en login:', error);
+          setError(error.message || 'Error en el inicio de sesión');
+        }
       } else if (mode === 'register') {
         const response = await fetch('http://localhost:5000/api/auth/register', {
           method: 'POST',
