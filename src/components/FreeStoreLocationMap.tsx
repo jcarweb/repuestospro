@@ -68,7 +68,11 @@ const FreeStoreLocationMap: React.FC<StoreLocationMapProps> = ({
     latitude: number;
     longitude: number;
     address: string;
-  } | null>(initialLocation ? {
+  } | null>((initialLocation && 
+    typeof initialLocation.latitude === 'number' && 
+    typeof initialLocation.longitude === 'number' &&
+    !isNaN(initialLocation.latitude) && 
+    !isNaN(initialLocation.longitude)) ? {
     latitude: initialLocation.latitude,
     longitude: initialLocation.longitude,
     address: ''
@@ -77,8 +81,14 @@ const FreeStoreLocationMap: React.FC<StoreLocationMapProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [searchAddress, setSearchAddress] = useState('');
 
-  // Ubicación inicial (Caracas, Venezuela)
-  const defaultLocation = initialLocation || { lat: 10.4806, lng: -66.9036 };
+  // Ubicación inicial (Caracas, Venezuela) - Validar que las coordenadas sean válidas
+  const defaultLocation = (initialLocation && 
+    typeof initialLocation.latitude === 'number' && 
+    typeof initialLocation.longitude === 'number' &&
+    !isNaN(initialLocation.latitude) && 
+    !isNaN(initialLocation.longitude)) 
+    ? { lat: initialLocation.latitude, lng: initialLocation.longitude }
+    : { lat: 10.4806, lng: -66.9036 };
 
   // Función para buscar dirección usando Nominatim
   const searchLocation = async () => {

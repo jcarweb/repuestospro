@@ -23,6 +23,7 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react';
+import FreeStoreLocationMap from '../components/FreeStoreLocationMap';
 
 interface Store {
   _id: string;
@@ -132,6 +133,24 @@ const AdminStores: React.FC = () => {
 
   // Estados para gestión de managers
   const [newManagerEmail, setNewManagerEmail] = useState('');
+  
+  // Estado para coordenadas del mapa
+  const [selectedCoordinates, setSelectedCoordinates] = useState<{
+    latitude: number;
+    longitude: number;
+    address: string;
+  } | null>(null);
+
+  // Función para manejar la selección de ubicación del mapa
+  const handleLocationSelect = (location: { latitude: number; longitude: number; address: string }) => {
+    setSelectedCoordinates(location);
+    setFormData(prev => ({
+      ...prev,
+      latitude: location.latitude.toString(),
+      longitude: location.longitude.toString(),
+      address: location.address
+    }));
+  };
 
   // Cargar tiendas
   const fetchStores = async () => {
@@ -203,6 +222,17 @@ const AdminStores: React.FC = () => {
 
   // Crear tienda
   const handleCreateStore = async () => {
+    // Validar que se haya seleccionado una ubicación
+    if (!selectedCoordinates) {
+      alert('Por favor selecciona la ubicación de la tienda en el mapa');
+      return;
+    }
+    
+    // Validar campos obligatorios
+    if (!formData.name || !formData.address || !formData.city || !formData.state || !formData.zipCode || !formData.phone || !formData.email) {
+      alert('Los campos nombre, dirección, ciudad, estado, código postal, teléfono y email son obligatorios');
+      return;
+    }
     try {
       const storeData = {
         ...formData,
@@ -238,6 +268,7 @@ const AdminStores: React.FC = () => {
           latitude: '', longitude: '', currency: 'USD', taxRate: '16.0',
           deliveryRadius: '10', minimumOrder: '0', autoAcceptOrders: false
         });
+        setSelectedCoordinates(null);
         fetchStores();
         fetchStats();
         alert('Tienda creada exitosamente');
@@ -250,25 +281,31 @@ const AdminStores: React.FC = () => {
     }
   };
 
-  // Actualizar tienda
-  const handleUpdateStore = async () => {
-    if (!selectedStore) return;
-    
-    try {
-      const storeData = {
-        ...formData,
-        coordinates: {
-          latitude: Number(formData.latitude) || 0,
-          longitude: Number(formData.longitude) || 0
-        },
-        settings: {
-          currency: formData.currency,
-          taxRate: Number(formData.taxRate),
-          deliveryRadius: Number(formData.deliveryRadius),
-          minimumOrder: Number(formData.minimumOrder),
-          autoAcceptOrders: formData.autoAcceptOrders
-        }
-      };
+     // Actualizar tienda
+   const handleUpdateStore = async () => {
+     if (!selectedStore) return;
+     
+     // Validar campos obligatorios
+     if (!formData.name || !formData.address || !formData.city || !formData.state || !formData.zipCode || !formData.phone || !formData.email) {
+       alert('Los campos nombre, dirección, ciudad, estado, código postal, teléfono y email son obligatorios');
+       return;
+     }
+     
+     try {
+       const storeData = {
+         ...formData,
+         coordinates: {
+           latitude: Number(formData.latitude) || 0,
+           longitude: Number(formData.longitude) || 0
+         },
+         settings: {
+           currency: formData.currency,
+           taxRate: Number(formData.taxRate),
+           deliveryRadius: Number(formData.deliveryRadius),
+           minimumOrder: Number(formData.minimumOrder),
+           autoAcceptOrders: formData.autoAcceptOrders
+         }
+       };
 
       const response = await fetch(`http://localhost:5000/api/stores/${selectedStore._id}`, {
         method: 'PUT',
@@ -383,32 +420,48 @@ const AdminStores: React.FC = () => {
     }
   };
 
-  // Abrir modal de edición
-  const openEditModal = (store: Store) => {
-    setSelectedStore(store);
-    setFormData({
-      name: store.name,
-      description: store.description || '',
-      address: store.address,
-      city: store.city,
-      state: store.state,
-      zipCode: store.zipCode,
-      country: store.country,
-      phone: store.phone,
-      email: store.email,
-      website: store.website || '',
-      logo: store.logo || '',
-      banner: store.banner || '',
-      latitude: store.coordinates.latitude.toString(),
-      longitude: store.coordinates.longitude.toString(),
-      currency: store.settings.currency,
-      taxRate: store.settings.taxRate.toString(),
-      deliveryRadius: store.settings.deliveryRadius.toString(),
-      minimumOrder: store.settings.minimumOrder.toString(),
-      autoAcceptOrders: store.settings.autoAcceptOrders
-    });
-    setShowEditModal(true);
-  };
+     // Abrir modal de edición
+   const openEditModal = (store: Store) => {
+     console.log('Abriendo modal de edición para tienda:', store.name);
+     console.log('Coordenadas de la tienda:', store.coordinates);
+     setSelectedStore(store);
+     setFormData({
+       name: store.name,
+       description: store.description || '',
+       address: store.address,
+       city: store.city,
+       state: store.state,
+       zipCode: store.zipCode,
+       country: store.country,
+       phone: store.phone,
+       email: store.email,
+       website: store.website || '',
+       logo: store.logo || '',
+       banner: store.banner || '',
+       latitude: store.coordinates.latitude.toString(),
+       longitude: store.coordinates.longitude.toString(),
+       currency: store.settings.currency,
+       taxRate: store.settings.taxRate.toString(),
+       deliveryRadius: store.settings.deliveryRadius.toString(),
+       minimumOrder: store.settings.minimumOrder.toString(),
+       autoAcceptOrders: store.settings.autoAcceptOrders
+     });
+           // Configurar las coordenadas iniciales para el mapa - Validar que existan
+      if (store.coordinates && 
+          typeof store.coordinates.latitude === 'number' && 
+          typeof store.coordinates.longitude === 'number' &&
+          !isNaN(store.coordinates.latitude) && 
+          !isNaN(store.coordinates.longitude)) {
+        setSelectedCoordinates({
+          latitude: store.coordinates.latitude,
+          longitude: store.coordinates.longitude,
+          address: store.address
+        });
+      } else {
+        setSelectedCoordinates(null);
+      }
+     setShowEditModal(true);
+   };
 
   // Abrir modal de visualización
   const openViewModal = (store: Store) => {
@@ -762,79 +815,139 @@ const AdminStores: React.FC = () => {
       {/* Modal para crear tienda */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div className="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Crear Nueva Tienda</h3>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Nombre de la tienda"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <textarea
-                  placeholder="Descripción"
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
-                />
-                <input
-                  type="text"
-                  placeholder="Dirección"
-                  value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <div className="grid grid-cols-2 gap-2">
+              
+              {/* Información básica */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nombre de la tienda *</label>
                   <input
                     type="text"
-                    placeholder="Ciudad"
-                    value={formData.city}
-                    onChange={(e) => setFormData({...formData, city: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Estado"
-                    value={formData.state}
-                    onChange={(e) => setFormData({...formData, state: e.target.value})}
+                    placeholder="Nombre de la tienda"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <input
-                  type="text"
-                  placeholder="Código postal"
-                  value={formData.zipCode}
-                  onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="tel"
-                  placeholder="Teléfono"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="url"
-                  placeholder="Sitio web (opcional)"
-                  value={formData.website}
-                  onChange={(e) => setFormData({...formData, website: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Descripción *</label>
+                  <textarea
+                    placeholder="Descripción"
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={3}
+                  />
+                </div>
               </div>
+
+              {/* Mapa de ubicación */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Ubicación de la Tienda *</label>
+                <div className="border border-gray-300 rounded-md p-4">
+                  <FreeStoreLocationMap
+                    onLocationSelect={handleLocationSelect}
+                    height="300px"
+                  />
+                </div>
+                {selectedCoordinates && (
+                  <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-sm">
+                    <span className="font-medium">Ubicación seleccionada:</span> {selectedCoordinates.address}
+                  </div>
+                )}
+              </div>
+
+                                             {/* Información de ubicación */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Dirección *</label>
+                    <input
+                      type="text"
+                      placeholder="Dirección"
+                      value={formData.address}
+                      onChange={(e) => setFormData({...formData, address: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Ciudad *</label>
+                    <input
+                      type="text"
+                      placeholder="Ciudad"
+                      value={formData.city}
+                      onChange={(e) => setFormData({...formData, city: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Estado *</label>
+                    <input
+                      type="text"
+                      placeholder="Estado"
+                      value={formData.state}
+                      onChange={(e) => setFormData({...formData, state: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Código Postal *</label>
+                    <input
+                      type="text"
+                      placeholder="Código Postal"
+                      value={formData.zipCode}
+                      onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+               {/* Información de contacto */}
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
+                   <input
+                     type="tel"
+                     placeholder="Teléfono"
+                     value={formData.phone}
+                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   />
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">Sitio web (opcional)</label>
+                   <input
+                     type="url"
+                     placeholder="Sitio web (opcional)"
+                     value={formData.website}
+                     onChange={(e) => setFormData({...formData, website: e.target.value})}
+                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   />
+                 </div>
+               </div>
               <div className="flex justify-end space-x-3 mt-6">
                 <button
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setSelectedCoordinates(null);
+                    setFormData({
+                      name: '', description: '', address: '', city: '', state: '', zipCode: '',
+                      country: 'Venezuela', phone: '', email: '', website: '', logo: '', banner: '',
+                      latitude: '', longitude: '', currency: 'USD', taxRate: '16.0',
+                      deliveryRadius: '10', minimumOrder: '0', autoAcceptOrders: false
+                    });
+                  }}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
                 >
                   Cancelar
@@ -851,97 +964,159 @@ const AdminStores: React.FC = () => {
         </div>
       )}
 
-      {/* Modal para editar tienda */}
-      {showEditModal && selectedStore && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Editar Tienda</h3>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Nombre de la tienda"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <textarea
-                  placeholder="Descripción"
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
-                />
-                <input
-                  type="text"
-                  placeholder="Dirección"
-                  value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    placeholder="Ciudad"
-                    value={formData.city}
-                    onChange={(e) => setFormData({...formData, city: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Estado"
-                    value={formData.state}
-                    onChange={(e) => setFormData({...formData, state: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Código postal"
-                  value={formData.zipCode}
-                  onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="tel"
-                  placeholder="Teléfono"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="url"
-                  placeholder="Sitio web (opcional)"
-                  value={formData.website}
-                  onChange={(e) => setFormData({...formData, website: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleUpdateStore}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Actualizar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+             {/* Modal para editar tienda */}
+       {showEditModal && selectedStore && (
+         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+           <div className="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+             <div className="mt-3">
+               <h3 className="text-lg font-medium text-gray-900 mb-4">Editar Tienda</h3>
+               
+               {/* Información básica */}
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">Nombre de la tienda *</label>
+                   <input
+                     type="text"
+                     placeholder="Nombre de la tienda"
+                     value={formData.name}
+                     onChange={(e) => setFormData({...formData, name: e.target.value})}
+                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   />
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                   <input
+                     type="email"
+                     placeholder="Email"
+                     value={formData.email}
+                     onChange={(e) => setFormData({...formData, email: e.target.value})}
+                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   />
+                 </div>
+                 <div className="md:col-span-2">
+                   <label className="block text-sm font-medium text-gray-700 mb-2">Descripción *</label>
+                   <textarea
+                     placeholder="Descripción"
+                     value={formData.description}
+                     onChange={(e) => setFormData({...formData, description: e.target.value})}
+                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                     rows={3}
+                   />
+                 </div>
+               </div>
+
+               {/* Mapa de ubicación */}
+               <div className="mb-6">
+                 <label className="block text-sm font-medium text-gray-700 mb-2">Ubicación de la Tienda *</label>
+                 <div className="border border-gray-300 rounded-md p-4">
+                                       <FreeStoreLocationMap
+                      onLocationSelect={handleLocationSelect}
+                      initialLocation={(selectedStore.coordinates && 
+                        typeof selectedStore.coordinates.latitude === 'number' && 
+                        typeof selectedStore.coordinates.longitude === 'number' &&
+                        !isNaN(selectedStore.coordinates.latitude) && 
+                        !isNaN(selectedStore.coordinates.longitude)) 
+                        ? selectedStore.coordinates 
+                        : undefined}
+                      height="300px"
+                    />
+                 </div>
+                 {selectedCoordinates && (
+                   <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-sm">
+                     <span className="font-medium">Ubicación seleccionada:</span> {selectedCoordinates.address}
+                   </div>
+                 )}
+               </div>
+
+               {/* Información de ubicación */}
+               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">Dirección *</label>
+                   <input
+                     type="text"
+                     placeholder="Dirección"
+                     value={formData.address}
+                     onChange={(e) => setFormData({...formData, address: e.target.value})}
+                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   />
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">Ciudad *</label>
+                   <input
+                     type="text"
+                     placeholder="Ciudad"
+                     value={formData.city}
+                     onChange={(e) => setFormData({...formData, city: e.target.value})}
+                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   />
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">Estado *</label>
+                   <input
+                     type="text"
+                     placeholder="Estado"
+                     value={formData.state}
+                     onChange={(e) => setFormData({...formData, state: e.target.value})}
+                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   />
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">Código Postal *</label>
+                   <input
+                     type="text"
+                     placeholder="Código Postal"
+                     value={formData.zipCode}
+                     onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
+                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   />
+                 </div>
+               </div>
+
+               {/* Información de contacto */}
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
+                   <input
+                     type="tel"
+                     placeholder="Teléfono"
+                     value={formData.phone}
+                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   />
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">Sitio web (opcional)</label>
+                   <input
+                     type="url"
+                     placeholder="Sitio web (opcional)"
+                     value={formData.website}
+                     onChange={(e) => setFormData({...formData, website: e.target.value})}
+                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   />
+                 </div>
+               </div>
+
+               <div className="flex justify-end space-x-3 mt-6">
+                 <button
+                   onClick={() => {
+                     setShowEditModal(false);
+                     setSelectedCoordinates(null);
+                   }}
+                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                 >
+                   Cancelar
+                 </button>
+                 <button
+                   onClick={handleUpdateStore}
+                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                 >
+                   Actualizar
+                 </button>
+               </div>
+             </div>
+           </div>
+         </div>
+       )}
 
       {/* Modal para ver detalles */}
       {showViewModal && selectedStore && (

@@ -126,6 +126,9 @@ class StoreController {
   // Crear nueva tienda
   async createStore(req: Request, res: Response) {
     try {
+      console.log('Datos recibidos para crear tienda:', req.body);
+      console.log('Usuario autenticado:', (req as any).user);
+      
       const {
         name,
         description,
@@ -145,10 +148,11 @@ class StoreController {
       } = req.body;
 
       // Validaciones básicas
-      if (!name || !address || !city || !state || !phone || !email) {
+      if (!name || !address || !city || !state || !zipCode || !phone || !email) {
+        console.log('Campos faltantes:', { name, address, city, state, zipCode, phone, email });
         return res.status(400).json({
           success: false,
-          message: 'Los campos nombre, dirección, ciudad, estado, teléfono y email son obligatorios'
+          message: 'Los campos nombre, dirección, ciudad, estado, código postal, teléfono y email son obligatorios'
         });
       }
 
@@ -183,12 +187,16 @@ class StoreController {
         managers: [userId] // El creador también es manager
       });
 
+      console.log('Guardando tienda en la base de datos...');
       await store.save();
+      console.log('Tienda guardada exitosamente:', store._id);
 
       // Actualizar el usuario para incluir la tienda
+      console.log('Actualizando usuario con la nueva tienda...');
       await User.findByIdAndUpdate(userId, {
         $push: { stores: store._id }
       });
+      console.log('Usuario actualizado exitosamente');
 
       res.status(201).json({
         success: true,
@@ -197,9 +205,11 @@ class StoreController {
       });
     } catch (error) {
       console.error('Error creando tienda:', error);
+      console.error('Stack trace:', error.stack);
       res.status(500).json({
         success: false,
-        message: 'Error interno del servidor'
+        message: 'Error interno del servidor',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
     }
   }
