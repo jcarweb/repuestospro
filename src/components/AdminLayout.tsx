@@ -22,12 +22,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <Menu className="w-6 h-6" />
       </button>
 
-      <div className="flex">
+      <div className="flex h-[calc(100vh-64px)]">
         {/* Sidebar */}
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
         {/* Contenido principal */}
-        <main className="flex-1 lg:ml-64">
+        <main className="flex-1 lg:ml-64 overflow-auto">
           <div className="p-6">
             {children}
           </div>
