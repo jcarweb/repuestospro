@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Product from '../models/Product';
 import User from '../models/User';
+import Store from '../models/Store';
 import emailService from '../services/emailService';
 import crypto from 'crypto';
 
@@ -137,7 +138,7 @@ const descriptions = {
 };
 
 // Función para generar un producto aleatorio
-function generateRandomProduct() {
+function generateRandomProduct(storeId?: string) {
   const category = categories[Math.floor(Math.random() * categories.length)];
   const brand = brands[Math.floor(Math.random() * brands.length)];
   const subcategoryList = (subcategories as any)[category];
@@ -158,7 +159,7 @@ function generateRandomProduct() {
   // Generar SKU interno del gestor
   const sku = generateInternalSKU(brand, category);
   
-  return {
+  const product: any = {
     name: `${productName} ${brand}`,
     description: `${description} compatible con vehículos ${brand}`,
     price: price,
@@ -188,6 +189,13 @@ function generateRandomProduct() {
     },
     popularity: Math.floor(Math.random() * 100) + 1
   };
+  
+  // Agregar storeId si se proporciona
+  if (storeId) {
+    product.store = storeId;
+  }
+  
+  return product;
 }
 
 // Función para generar código de parte original realista
@@ -209,6 +217,20 @@ function generateInternalSKU(brand: string, category: string): string {
   return `SKU-${brandCode}-${categoryCode}-${randomNum}`;
 }
 
+// Función para calcular distancia entre dos puntos geográficos (fórmula de Haversine)
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Radio de la Tierra en kilómetros
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const distance = R * c; // Distancia en kilómetros
+  return distance;
+}
+
 export class AdminController {
   // Generar productos de prueba
   async generateProducts(req: Request, res: Response) {
@@ -217,23 +239,44 @@ export class AdminController {
       console.log('📝 Request body:', req.body);
       console.log('👤 Usuario:', (req as any).user);
       
-      // Limpiar productos existentes
-      console.log('🗑️  Limpiando productos existentes...');
-      const deleteResult = await Product.deleteMany({});
-      console.log(`🗑️  Eliminados ${deleteResult.deletedCount} productos existentes`);
+      const { storeId } = req.body;
       
-      // Generar 150 productos de prueba
+      if (!storeId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Se requiere el ID de la tienda para generar productos'
+        });
+      }
+      
+      // Verificar que la tienda existe
+      const store = await Store.findById(storeId);
+      if (!store) {
+        return res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada'
+        });
+      }
+      
+      console.log(`🏪 Generando productos para tienda: ${store.name} (${store.city})`);
+      
+      // Limpiar productos existentes de esta tienda
+      console.log('🗑️  Limpiando productos existentes de la tienda...');
+      const deleteResult = await Product.deleteMany({ store: storeId });
+      console.log(`🗑️  Eliminados ${deleteResult.deletedCount} productos existentes de la tienda`);
+      
+      // Generar 150 productos de prueba para esta tienda
       console.log('🔧 Generando productos...');
       const products = [];
       for (let i = 0; i < 150; i++) {
-        products.push(generateRandomProduct());
+        const product = generateRandomProduct(storeId);
+        products.push(product);
       }
-      console.log(`📦 Generados ${products.length} productos en memoria`);
+      console.log(`📦 Generados ${products.length} productos en memoria para la tienda`);
       
       // Insertar productos en la base de datos
       console.log('💾 Insertando productos en la base de datos...');
       const result = await Product.insertMany(products);
-      console.log(`✅ Generados ${result.length} productos de prueba exitosamente`);
+      console.log(`✅ Generados ${result.length} productos de prueba exitosamente para la tienda`);
       
       // Mostrar ejemplo de producto generado
       if (result.length > 0) {
@@ -315,6 +358,124 @@ export class AdminController {
         success: false,
         message: 'Error interno del servidor al generar productos',
         error: error instanceof Error ? error.message : 'Error desconocido'
+      });
+    }
+  }
+
+  // Buscar productos por proximidad geográfica
+  static async findProductsByLocation(req: Request, res: Response) {
+    try {
+      const { latitude, longitude, radius = 10, category, brand, limit = 50 } = req.query;
+      
+      if (!latitude || !longitude) {
+        return res.status(400).json({
+          success: false,
+          message: 'Se requieren coordenadas de latitud y longitud'
+        });
+      }
+
+      const lat = parseFloat(latitude as string);
+      const lng = parseFloat(longitude as string);
+      const searchRadius = parseFloat(radius as string);
+      const maxResults = parseInt(limit as string);
+
+      // Construir filtro de búsqueda
+      const filter: any = {
+        isActive: true,
+        stock: { $gt: 0 } // Solo productos con stock disponible
+      };
+
+      if (category) {
+        filter.category = category;
+      }
+
+      if (brand) {
+        filter.brand = brand;
+      }
+
+      // Buscar tiendas dentro del radio especificado
+      const nearbyStores = await Store.find({
+        coordinates: {
+          $near: {
+            $geometry: {
+              type: 'Point',
+              coordinates: [lng, lat] // MongoDB usa [longitude, latitude]
+            },
+            $maxDistance: searchRadius * 1000 // Convertir km a metros
+          }
+        },
+        isActive: true
+      }).select('_id name city state coordinates');
+
+      if (nearbyStores.length === 0) {
+        return res.json({
+          success: true,
+          data: {
+            products: [],
+            stores: [],
+            total: 0,
+            message: 'No se encontraron tiendas cercanas'
+          }
+        });
+      }
+
+      // Obtener IDs de tiendas cercanas
+      const storeIds = nearbyStores.map(store => store._id);
+
+      // Buscar productos en tiendas cercanas
+      const products = await Product.find({
+        ...filter,
+        store: { $in: storeIds }
+      })
+      .populate('store', 'name city state coordinates')
+      .limit(maxResults)
+      .sort({ popularity: -1, price: 1 });
+
+      // Calcular distancia para cada producto
+      const productsWithDistance = products.map(product => {
+        const store = product.store as any;
+        const distance = calculateDistance(
+          lat, lng,
+          store.coordinates.latitude,
+          store.coordinates.longitude
+        );
+
+        return {
+          ...product.toObject(),
+          distance: Math.round(distance * 100) / 100, // Redondear a 2 decimales
+          storeInfo: {
+            name: store.name,
+            city: store.city,
+            state: store.state,
+            coordinates: store.coordinates
+          }
+        };
+      });
+
+      // Ordenar por distancia
+      productsWithDistance.sort((a, b) => a.distance - b.distance);
+
+      res.json({
+        success: true,
+        data: {
+          products: productsWithDistance,
+          stores: nearbyStores.map(store => ({
+            id: store._id,
+            name: store.name,
+            city: store.city,
+            state: store.state,
+            coordinates: store.coordinates
+          })),
+          total: productsWithDistance.length,
+          searchRadius: searchRadius,
+          userLocation: { latitude: lat, longitude: lng }
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error buscando productos por ubicación:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor al buscar productos'
       });
     }
   }
@@ -751,6 +912,144 @@ export class AdminController {
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Generar tiendas de prueba
+  static async generateStores(req: Request, res: Response) {
+    try {
+      // Datos de tiendas de prueba
+      const testStores = [
+        {
+          name: 'AutoParts Express',
+          description: 'Tienda especializada en repuestos automotrices de alta calidad',
+          address: 'Av. Principal, Centro Comercial Galerías',
+          city: 'Caracas',
+          state: 'Distrito Capital',
+          zipCode: '1010',
+          phone: '+58-212-555-0101',
+          email: 'autoparts.caracas@test.com',
+          coordinates: { latitude: 10.4806, longitude: -66.9036 }
+        },
+        {
+          name: 'Repuestos Pro',
+          description: 'Distribuidor autorizado de repuestos originales',
+          address: 'Calle Comercial, Zona Industrial',
+          city: 'Valencia',
+          state: 'Carabobo',
+          zipCode: '2001',
+          phone: '+58-241-555-0202',
+          email: 'repuestos.valencia@test.com',
+          coordinates: { latitude: 10.1579, longitude: -67.9972 }
+        },
+        {
+          name: 'Mega Parts',
+          description: 'La tienda más grande de repuestos del occidente',
+          address: 'Av. Libertador, Centro Comercial Mega',
+          city: 'Maracaibo',
+          state: 'Zulia',
+          zipCode: '4001',
+          phone: '+58-261-555-0303',
+          email: 'megaparts.maracaibo@test.com',
+          coordinates: { latitude: 10.6427, longitude: -71.6125 }
+        },
+        {
+          name: 'Auto Supply',
+          description: 'Suministros automotrices de calidad premium',
+          address: 'Calle Principal, Zona Centro',
+          city: 'Barquisimeto',
+          state: 'Lara',
+          zipCode: '3001',
+          phone: '+58-251-555-0404',
+          email: 'autosupply.barquisimeto@test.com',
+          coordinates: { latitude: 10.0731, longitude: -69.3227 }
+        },
+        {
+          name: 'Parts Center',
+          description: 'Centro de distribución de repuestos automotrices',
+          address: 'Av. Bolívar, Zona Industrial Norte',
+          city: 'Maracay',
+          state: 'Aragua',
+          zipCode: '2101',
+          phone: '+58-243-555-0505',
+          email: 'partscenter.maracay@test.com',
+          coordinates: { latitude: 10.2469, longitude: -67.5958 }
+        }
+      ];
+
+      // Buscar usuarios con rol store_manager para asignar como propietarios
+      const storeManagers = await User.find({ role: 'store_manager' }).limit(5);
+      
+      // Si no hay store_managers, crear algunos usuarios de prueba
+      let owners = storeManagers;
+      if (storeManagers.length < 5) {
+        const testUsers = [];
+        for (let i = 0; i < 5 - storeManagers.length; i++) {
+          const testUser = new User({
+            name: `Manager ${i + 1}`,
+            email: `manager${i + 1}@test.com`,
+            password: 'password123',
+            role: 'store_manager',
+            isEmailVerified: true,
+            isActive: true
+          });
+          await testUser.save();
+          testUsers.push(testUser);
+        }
+        owners = [...storeManagers, ...testUsers];
+      }
+
+      // Crear las tiendas
+      const createdStores = [];
+      for (let i = 0; i < testStores.length; i++) {
+        const storeData = testStores[i];
+        const owner = owners[i] || owners[0]; // Fallback al primer owner si no hay suficientes
+
+        const store = new Store({
+          ...storeData,
+          owner: owner._id,
+          managers: [owner._id],
+          businessHours: {
+            monday: { open: '08:00', close: '18:00', isOpen: true },
+            tuesday: { open: '08:00', close: '18:00', isOpen: true },
+            wednesday: { open: '08:00', close: '18:00', isOpen: true },
+            thursday: { open: '08:00', close: '18:00', isOpen: true },
+            friday: { open: '08:00', close: '18:00', isOpen: true },
+            saturday: { open: '08:00', close: '14:00', isOpen: true },
+            sunday: { open: '08:00', close: '14:00', isOpen: false }
+          },
+          settings: {
+            currency: 'USD',
+            taxRate: 16.0,
+            deliveryRadius: 10,
+            minimumOrder: 0,
+            autoAcceptOrders: false
+          }
+        });
+
+        await store.save();
+        createdStores.push(store);
+      }
+
+      res.json({
+        success: true,
+        message: 'Tiendas de prueba generadas exitosamente',
+        data: {
+          count: createdStores.length,
+          stores: createdStores.map(store => ({
+            id: store._id,
+            name: store.name,
+            city: store.city,
+            state: store.state
+          }))
+        }
+      });
+    } catch (error) {
+      console.error('Error generando tiendas de prueba:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor al generar tiendas'
       });
     }
   }

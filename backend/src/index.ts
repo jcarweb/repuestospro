@@ -21,6 +21,7 @@ import registrationCodeRoutes from './routes/registrationCodeRoutes';
 import promotionRoutes from './routes/promotionRoutes';
 import searchRoutes from './routes/search';
 import adminRoutes from './routes/adminRoutes';
+import storeRoutes from './routes/storeRoutes';
 
 const app = express();
 
@@ -122,6 +123,7 @@ app.use('/api/registration-codes', registrationCodeRoutes);
 app.use('/api/promotions', promotionRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api', storeRoutes);
 
 // Middleware para manejar rutas no encontradas
 app.use('*', (req, res) => {

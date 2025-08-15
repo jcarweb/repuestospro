@@ -13,7 +13,8 @@ import {
   TrendingUp,
   Settings,
   Key,
-  Database
+  Database,
+  Store
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -39,6 +40,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
       name: 'Usuarios',
       path: '/admin/users',
       icon: Users
+    },
+    {
+      name: 'Tiendas',
+      path: '/admin/stores',
+      icon: Store
     },
     {
       name: 'Productos',

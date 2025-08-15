@@ -16,6 +16,7 @@ export interface IProduct extends Document {
   tags: string[];
   specifications: Record<string, any>;
   popularity?: number;
+  store: mongoose.Types.ObjectId; // Tienda a la que pertenece el producto
   createdBy?: mongoose.Types.ObjectId; // Gestor que creó el producto
   updatedBy?: mongoose.Types.ObjectId; // Gestor que actualizó el producto
   createdAt: Date;
@@ -58,7 +59,6 @@ const ProductSchema = new Schema<IProduct>({
   sku: {
     type: String,
     required: true,
-    unique: true,
     trim: true
   },
   originalPartCode: {
@@ -94,6 +94,11 @@ const ProductSchema = new Schema<IProduct>({
     default: 0,
     min: 0
   },
+  store: {
+    type: Schema.Types.ObjectId,
+    ref: 'Store',
+    required: true
+  },
   createdBy: {
     type: Schema.Types.ObjectId,
     ref: 'User'
@@ -117,7 +122,11 @@ ProductSchema.index({ price: 1 });
 ProductSchema.index({ sku: 1 });
 ProductSchema.index({ originalPartCode: 1 });
 ProductSchema.index({ popularity: -1 });
+ProductSchema.index({ store: 1 }); // Índice para consultas por tienda
 ProductSchema.index({ createdBy: 1 });
 ProductSchema.index({ updatedBy: 1 });
+
+// Índice compuesto para SKU único por tienda
+ProductSchema.index({ sku: 1, store: 1 }, { unique: true });
 
 export default mongoose.model<IProduct>('Product', ProductSchema); 

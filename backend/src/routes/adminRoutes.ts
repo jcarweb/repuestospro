@@ -29,4 +29,14 @@ router.post('/generate-products', async (req, res) => {
   await adminController.generateProducts(req, res);
 });
 
+// Generar tiendas de prueba
+router.post('/generate-stores', async (req, res) => {
+  await AdminController.generateStores(req, res);
+});
+
+// Buscar productos por proximidad geográfica
+router.get('/products-by-location', async (req, res) => {
+  await AdminController.findProductsByLocation(req, res);
+});
+
 export default router; 

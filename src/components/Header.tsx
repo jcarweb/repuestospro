@@ -66,6 +66,12 @@ const Header: React.FC = () => {
               Categorías
             </Link>
             <Link 
+              to="/nearby-products" 
+              className="text-[#333333] hover:text-[#FFC300] transition-colors"
+            >
+              Repuestos Cercanos
+            </Link>
+            <Link 
               to="/" 
               className="text-[#333333] hover:text-[#FFC300] transition-colors"
             >

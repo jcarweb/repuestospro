@@ -21,6 +21,8 @@ import ReferralLanding from './pages/ReferralLanding';
 import ProductDetail from './pages/ProductDetail';
 import Categories from './pages/Categories';
 import CategoryProducts from './pages/CategoryProducts';
+import NearbyProducts from './pages/NearbyProducts';
+import StoreRegistration from './pages/StoreRegistration';
 
 // Páginas de cliente
 import Cart from './pages/Cart';
@@ -36,6 +38,7 @@ import ClientNotifications from './pages/ClientNotifications';
 // Páginas de administrador
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUsers from './pages/AdminUsers';
+import AdminStores from './pages/AdminStores';
 import AdminProducts from './pages/AdminProducts';
 import AdminCategories from './pages/AdminCategories';
 import AdminPromotions from './pages/AdminPromotions';
@@ -57,6 +60,7 @@ import StoreManagerAnalytics from './pages/StoreManagerAnalytics';
 import StoreManagerMessages from './pages/StoreManagerMessages';
 import StoreManagerReviews from './pages/StoreManagerReviews';
 import StoreManagerSettings from './pages/StoreManagerSettings';
+import StoreSetup from './pages/StoreSetup';
 
 // Páginas de delivery
 import DeliveryDashboard from './pages/DeliveryDashboard';
@@ -114,6 +118,13 @@ function AppContent() {
               <AdminRoute>
                 <AdminLayout>
                   <AdminUsers />
+                </AdminLayout>
+              </AdminRoute>
+            } />
+            <Route path="/stores" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <AdminStores />
                 </AdminLayout>
               </AdminRoute>
             } />
@@ -215,6 +226,8 @@ function AppContent() {
                   <Route path="/product/:id" element={<ProductDetail />} />
                   <Route path="/categories" element={<Categories />} />
                   <Route path="/category/:id" element={<CategoryProducts />} />
+                  <Route path="/nearby-products" element={<NearbyProducts />} />
+                  <Route path="/store-registration" element={<StoreRegistration />} />
 
                   {/* Rutas protegidas para clientes */}
                   <Route path="/cart" element={
@@ -317,6 +330,11 @@ function AppContent() {
                   <Route path="/store-manager/settings" element={
                     <StoreManagerRoute>
                       <StoreManagerSettings />
+                    </StoreManagerRoute>
+                  } />
+                  <Route path="/store-setup" element={
+                    <StoreManagerRoute>
+                      <StoreSetup />
                     </StoreManagerRoute>
                   } />
 

@@ -66,34 +66,7 @@ export interface IUser extends Document {
   };
   
   // Campos específicos para Store Manager
-  storeInfo?: {
-    name: string;
-    address: string;
-    phone: string;
-    email: string;
-    description?: string;
-    logo?: string;
-    banner?: string;
-    businessHours?: {
-      [key: string]: { // días de la semana
-        open: string;
-        close: string;
-        closed: boolean;
-      };
-    };
-    deliverySettings?: {
-      enabled: boolean;
-      freeDeliveryThreshold: number;
-      deliveryFee: number;
-      maxDeliveryDistance: number;
-    };
-    paymentSettings?: {
-      cash: boolean;
-      card: boolean;
-      transfer: boolean;
-      digitalWallet: boolean;
-    };
-  };
+  stores?: mongoose.Types.ObjectId[]; // Referencias a las tiendas que gestiona
   commissionRate?: number; // porcentaje de comisión por venta
   taxRate?: number; // porcentaje de impuestos
   
@@ -309,59 +282,10 @@ const userSchema = new Schema<IUser>({
   },
   
   // Campos específicos para Store Manager
-  storeInfo: {
-    name: String,
-    address: String,
-    phone: String,
-    email: String,
-    description: String,
-    logo: String,
-    banner: String,
-    businessHours: {
-      type: Map,
-      of: {
-        open: String,
-        close: String,
-        closed: Boolean
-      }
-    },
-    deliverySettings: {
-      enabled: {
-        type: Boolean,
-        default: true
-      },
-      freeDeliveryThreshold: {
-        type: Number,
-        default: 50
-      },
-      deliveryFee: {
-        type: Number,
-        default: 5
-      },
-      maxDeliveryDistance: {
-        type: Number,
-        default: 20
-      }
-    },
-    paymentSettings: {
-      cash: {
-        type: Boolean,
-        default: true
-      },
-      card: {
-        type: Boolean,
-        default: true
-      },
-      transfer: {
-        type: Boolean,
-        default: false
-      },
-      digitalWallet: {
-        type: Boolean,
-        default: false
-      }
-    }
-  },
+  stores: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Store'
+  }],
   commissionRate: {
     type: Number,
     default: 10 // 10% por defecto
@@ -404,7 +328,7 @@ userSchema.index({ role: 1 });
 userSchema.index({ location: '2dsphere' });
 userSchema.index({ referralCode: 1 });
 userSchema.index({ deliveryStatus: 1 });
-userSchema.index({ 'storeInfo.name': 1 });
+userSchema.index({ stores: 1 });
 
 // Métodos de instancia
 userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
