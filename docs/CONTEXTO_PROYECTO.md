@@ -1,8 +1,20 @@
-# Contexto del Proyecto - RepuestosPro
+# Contexto del Proyecto - PiezasYA
 
 ## Descripción General
 
-RepuestosPro es una plataforma de ecommerce especializada en la venta de repuestos de vehículos, diseñada para conectar a clientes con tiendas especializadas y facilitar la búsqueda, compra y entrega de repuestos automotrices.
+PiezasYA es una plataforma de ecommerce especializada en la venta de repuestos de vehículos, diseñada para conectar a clientes con tiendas especializadas y facilitar la búsqueda, compra y entrega de repuestos automotrices. El nombre "PiezasYA" refleja la rapidez y eficiencia del servicio: "El repuesto que buscas, al instante".
+
+## Paleta de Colores Corporativa
+
+La aplicación utiliza una paleta de colores específica que refleja los valores de la marca:
+
+| Color               | Hex       | Significado                          |
+| ------------------- | --------- | ------------------------------------ |
+| **Amarillo Racing** | `#FFC300` | Rapidez, energía, atención inmediata |
+| **Gris Carbón**     | `#333333` | Profesionalismo, confianza           |
+| **Negro Onix**      | `#000000` | Solidez, elegancia                   |
+| **Rojo Alerta**     | `#E63946` | Urgencia, acción, dinamismo          |
+| **Blanco Nieve**    | `#FFFFFF` | Limpieza, modernidad                 |
 
 ## Estructura del Proyecto
 

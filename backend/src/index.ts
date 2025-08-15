@@ -72,7 +72,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'API de RepuestosPro funcionando correctamente',
+    message: 'API de PiezasYA funcionando correctamente',
     version: '1.0.0',
     environment: config.NODE_ENV
   });

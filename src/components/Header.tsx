@@ -52,8 +52,8 @@ const Header: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <Package className="w-8 h-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">RepuestosPro</span>
+              <Package className="w-8 h-8 text-[#FFC300]" />
+              <span className="text-xl font-bold text-[#333333]">PiezasYA</span>
             </Link>
           </div>
 
@@ -61,20 +61,20 @@ const Header: React.FC = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
               to="/categories" 
-              className="text-gray-600 hover:text-blue-600 transition-colors"
+              className="text-[#333333] hover:text-[#FFC300] transition-colors"
             >
               Categorías
             </Link>
             <Link 
               to="/" 
-              className="text-gray-600 hover:text-blue-600 transition-colors"
+              className="text-[#333333] hover:text-[#FFC300] transition-colors"
             >
               Inicio
             </Link>
             {isAuthenticated && (
               <Link 
                 to="/profile" 
-                className="text-gray-600 hover:text-blue-600 transition-colors"
+                className="text-[#333333] hover:text-[#FFC300] transition-colors"
               >
                 Mi Perfil
               </Link>
@@ -83,7 +83,7 @@ const Header: React.FC = () => {
             {(isAdmin || isStoreManager) && (
               <Link 
                 to="/admin" 
-                className="text-gray-600 hover:text-blue-600 transition-colors"
+                className="text-[#333333] hover:text-[#FFC300] transition-colors"
               >
                 Panel Admin
               </Link>
@@ -103,20 +103,20 @@ const Header: React.FC = () => {
             </div>
 
             {/* Favorites */}
-            <Link to="/favorites" className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors">
+            <Link to="/favorites" className="relative p-2 text-[#333333] hover:text-[#FFC300] transition-colors">
               <Heart className="w-6 h-6" />
               {favoritesCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-[#E63946] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {favoritesCount}
                 </span>
               )}
             </Link>
 
             {/* Cart */}
-            <Link to="/cart" className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors">
+            <Link to="/cart" className="relative p-2 text-[#333333] hover:text-[#FFC300] transition-colors">
               <ShoppingCart className="w-6 h-6" />
               {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-[#E63946] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {cartItemCount}
                 </span>
               )}
@@ -127,7 +127,7 @@ const Header: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="flex items-center space-x-2 p-2 text-gray-600 hover:text-blue-600 transition-colors"
+                  className="flex items-center space-x-2 p-2 text-[#333333] hover:text-[#FFC300] transition-colors"
                 >
                   <User className="w-6 h-6" />
                   <span className="hidden sm:block text-sm font-medium">
@@ -228,13 +228,13 @@ const Header: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => handleAuthClick('login')}
-                  className="text-gray-600 hover:text-blue-600 transition-colors"
+                  className="text-[#333333] hover:text-[#FFC300] transition-colors"
                 >
                   Iniciar Sesión
                 </button>
                 <button
                   onClick={() => handleAuthClick('register')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  className="bg-[#FFC300] text-[#333333] px-4 py-2 rounded-lg hover:bg-[#E6B800] transition-colors font-semibold"
                 >
                   Registrarse
                 </button>

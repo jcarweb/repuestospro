@@ -10,11 +10,11 @@ const Footer = () => {
           <div className="md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
               <div className="text-2xl">🔧</div>
-              <span className="text-xl font-bold">RepuestosPro</span>
+              <span className="text-xl font-bold text-[#FFC300]">PiezasYA</span>
             </div>
             <p className="text-gray-300 mb-4">
-              Tu tienda de confianza para repuestos de vehículos. 
-              Ofrecemos la mejor calidad y servicio al mejor precio.
+              El repuesto que buscas, al instante. 
+              Tu tienda de confianza para repuestos de vehículos con la mejor calidad y servicio.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
@@ -74,7 +74,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-primary-400" />
-                <span className="text-gray-300">info@repuestospro.com</span>
+                <span className="text-gray-300">info@piezasyaya.com</span>
               </li>
               <li className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4 text-primary-400" />
@@ -91,7 +91,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2024 RepuestosPro. Todos los derechos reservados.
+              © 2024 PiezasYA. Todos los derechos reservados.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link to="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">

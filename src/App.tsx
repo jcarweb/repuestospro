@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
@@ -158,6 +158,11 @@ function AppContent() {
               } />
 
               {/* Rutas de administrador */}
+              <Route path="/admin" element={
+                <AdminRoute>
+                  <Navigate to="/admin/dashboard" replace />
+                </AdminRoute>
+              } />
               <Route path="/admin/dashboard" element={
                 <AdminRoute>
                   <AdminDashboard />
@@ -215,6 +220,11 @@ function AppContent() {
               } />
 
               {/* Rutas de gestor de tienda */}
+              <Route path="/store-manager" element={
+                <StoreManagerRoute>
+                  <Navigate to="/store-manager/dashboard" replace />
+                </StoreManagerRoute>
+              } />
               <Route path="/store-manager/dashboard" element={
                 <StoreManagerRoute>
                   <StoreManagerDashboard />
@@ -267,6 +277,11 @@ function AppContent() {
               } />
 
               {/* Rutas de delivery */}
+              <Route path="/delivery" element={
+                <DeliveryRoute>
+                  <Navigate to="/delivery/dashboard" replace />
+                </DeliveryRoute>
+              } />
               <Route path="/delivery/dashboard" element={
                 <DeliveryRoute>
                   <DeliveryDashboard />

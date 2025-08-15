@@ -812,7 +812,7 @@ export class AuthController {
 
       // Redirigir al frontend con el token
       const frontendUrl = config.CORS_ORIGIN;
-      res.redirect(`${frontendUrl}/auth/google/callback?token=${token}&user=${encodeURIComponent(JSON.stringify({
+      res.redirect(`${frontendUrl}/google-callback?token=${token}&user=${encodeURIComponent(JSON.stringify({
         id: user._id,
         name: user.name,
         email: user.email,
@@ -821,7 +821,7 @@ export class AuthController {
       }))}`);
     } catch (error) {
       console.error('Error en callback de Google:', error);
-      res.redirect(`${config.CORS_ORIGIN}/auth/google/error`);
+      res.redirect(`${config.CORS_ORIGIN}/google-callback?error=true`);
     }
   }
 

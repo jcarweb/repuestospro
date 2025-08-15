@@ -340,11 +340,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           {/* Header */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Package className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 bg-[#FFC300] rounded-lg flex items-center justify-center">
+                <Package className="w-5 h-5 text-[#333333]" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">RepuestosPro</h1>
+                <h1 className="text-lg font-semibold text-[#333333]">PiezasYA</h1>
                 <p className="text-sm text-gray-500 capitalize">
                   {user?.role === 'admin' && 'Administrador'}
                   {user?.role === 'store_manager' && 'Gestor de Tienda'}
@@ -367,8 +367,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       className={`
                         flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                         ${isActive(item.path)
-                          ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
-                          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                          ? 'bg-[#FFC300] bg-opacity-20 text-[#333333] border-r-2 border-[#FFC300]'
+                          : 'text-[#333333] hover:bg-[#FFC300] hover:bg-opacity-10 hover:text-[#333333]'
                         }
                       `}
                       onClick={onClose}

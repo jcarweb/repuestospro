@@ -186,6 +186,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       setShowLocationModal(true);
       return;
     }
+    
+    // Mostrar mensaje de carga
+    setLoading(true);
+    setError('');
+    
+    // Redirigir a Google OAuth
     window.location.href = 'http://localhost:5000/api/auth/google';
   };
 
@@ -462,11 +468,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
+                         <button
+               type="submit"
+               disabled={loading}
+               className="w-full bg-[#FFC300] text-[#333333] py-2 px-4 rounded-lg hover:bg-[#E6B800] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold"
+             >
               {loading ? 'Procesando...' : (
                 mode === 'login' ? 'Iniciar Sesión' :
                 mode === 'register' ? 'Registrarse' :
@@ -480,63 +486,63 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           <div className="mt-6 text-center space-y-2">
             {mode === 'login' && (
               <>
-                <button
-                  onClick={() => handleModeChange('pin-login')}
-                  className="text-blue-600 hover:text-blue-700 text-sm"
-                >
-                  Iniciar sesión con PIN
-                </button>
-                <div className="text-sm text-gray-600">
-                  ¿No tienes cuenta?{' '}
-                  <button
-                    onClick={() => handleModeChange('register')}
-                    className="text-blue-600 hover:text-blue-700"
-                  >
-                    Regístrate aquí
-                  </button>
-                </div>
-                <button
-                  onClick={() => handleModeChange('forgot-password')}
-                  className="text-blue-600 hover:text-blue-700 text-sm"
-                >
-                  ¿Olvidaste tu contraseña?
-                </button>
+                                 <button
+                   onClick={() => handleModeChange('pin-login')}
+                   className="text-[#FFC300] hover:text-[#E6B800] text-sm"
+                 >
+                   Iniciar sesión con PIN
+                 </button>
+                 <div className="text-sm text-[#333333]">
+                   ¿No tienes cuenta?{' '}
+                   <button
+                     onClick={() => handleModeChange('register')}
+                     className="text-[#FFC300] hover:text-[#E6B800]"
+                   >
+                     Regístrate aquí
+                   </button>
+                 </div>
+                 <button
+                   onClick={() => handleModeChange('forgot-password')}
+                   className="text-[#FFC300] hover:text-[#E6B800] text-sm"
+                 >
+                   ¿Olvidaste tu contraseña?
+                 </button>
               </>
             )}
 
-            {mode === 'register' && (
-              <div className="text-sm text-gray-600">
-                ¿Ya tienes cuenta?{' '}
-                <button
-                  onClick={() => handleModeChange('login')}
-                  className="text-blue-600 hover:text-blue-700"
-                >
-                  Inicia sesión aquí
-                </button>
-              </div>
-            )}
+                         {mode === 'register' && (
+               <div className="text-sm text-[#333333]">
+                 ¿Ya tienes cuenta?{' '}
+                 <button
+                   onClick={() => handleModeChange('login')}
+                   className="text-[#FFC300] hover:text-[#E6B800]"
+                 >
+                   Inicia sesión aquí
+                 </button>
+               </div>
+             )}
 
-            {mode === 'forgot-password' && (
-              <div className="text-sm text-gray-600">
-                <button
-                  onClick={() => handleModeChange('login')}
-                  className="text-blue-600 hover:text-blue-700"
-                >
-                  Volver al inicio de sesión
-                </button>
-              </div>
-            )}
+             {mode === 'forgot-password' && (
+               <div className="text-sm text-[#333333]">
+                 <button
+                   onClick={() => handleModeChange('login')}
+                   className="text-[#FFC300] hover:text-[#E6B800]"
+                 >
+                   Volver al inicio de sesión
+                 </button>
+               </div>
+             )}
 
-            {mode === 'pin-login' && (
-              <div className="text-sm text-gray-600">
-                <button
-                  onClick={() => handleModeChange('login')}
-                  className="text-blue-600 hover:text-blue-700"
-                >
-                  Volver al inicio de sesión
-                </button>
-              </div>
-            )}
+             {mode === 'pin-login' && (
+               <div className="text-sm text-[#333333]">
+                 <button
+                   onClick={() => handleModeChange('login')}
+                   className="text-[#FFC300] hover:text-[#E6B800]"
+                 >
+                   Volver al inicio de sesión
+                 </button>
+               </div>
+             )}
           </div>
         </div>
       </div>

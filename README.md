@@ -1,4 +1,4 @@
-# RepuestosPro - Ecommerce Multiplataforma
+# PiezasYA - Ecommerce Multiplataforma
 
 Un ecommerce completo para repuestos de vehículos (autos, motos y camiones) construido con **React** y **programación reactiva** en el backend.
 

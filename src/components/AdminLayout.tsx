@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Menu } from 'lucide-react';
-import Header from './Header';
+import AdminHeader from './AdminHeader';
 import Sidebar from './Sidebar';
 
 interface AdminLayoutProps {
@@ -12,12 +12,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <AdminHeader />
       
       {/* Botón para abrir/cerrar sidebar en móvil */}
       <button
         onClick={() => setIsSidebarOpen(true)}
-        className="fixed bottom-4 right-4 lg:hidden bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-40"
+        className="fixed bottom-4 right-4 lg:hidden bg-[#FFC300] text-[#333333] p-3 rounded-full shadow-lg hover:bg-[#E6B800] transition-colors z-40"
       >
         <Menu className="w-6 h-6" />
       </button>
@@ -27,8 +27,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
         {/* Contenido principal */}
-        <main className="flex-1 p-8 lg:ml-64">
-          {children}
+        <main className="flex-1 lg:ml-64">
+          <div className="p-6">
+            {children}
+          </div>
         </main>
       </div>
     </div>

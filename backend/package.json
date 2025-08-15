@@ -1,7 +1,7 @@
 {
-  "name": "repuestos-backend",
+  "name": "piezasyaya-backend",
   "version": "1.0.0",
-  "description": "Backend reactivo para ecommerce de repuestos de vehículos",
+  "description": "Backend reactivo para ecommerce de repuestos de vehículos - PiezasYA",
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
@@ -23,11 +23,12 @@
   "keywords": [
     "ecommerce",
     "repuestos",
+    "piezasyaya",
     "reactivo",
     "express",
     "mongodb"
   ],
-  "author": "RepuestosPro Team",
+  "author": "PiezasYA Team",
   "license": "MIT",
   "dependencies": {
     "@types/express-session": "^1.18.2",
