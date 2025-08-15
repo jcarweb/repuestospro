@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import Product from '../models/Product';
 import User from '../models/User';
+import emailService from '../services/emailService';
+import crypto from 'crypto';
 
 // Datos de prueba
 const brands = [
@@ -386,9 +388,15 @@ export class AdminController {
     try {
       const users = await User.find({}).select('-password').sort({ createdAt: -1 });
       
+      // Mapear los usuarios para incluir el campo 'id' además de '_id'
+      const mappedUsers = users.map(user => ({
+        ...user.toObject(),
+        id: user._id.toString()
+      }));
+      
       res.json({
         success: true,
-        users: users
+        users: mappedUsers
       });
     } catch (error) {
       console.error('Error getting users:', error);
@@ -413,9 +421,15 @@ export class AdminController {
         });
       }
       
+      // Mapear el usuario para incluir el campo 'id'
+      const mappedUser = {
+        ...user.toObject(),
+        id: user._id.toString()
+      };
+      
       res.json({
         success: true,
-        user: user
+        user: mappedUser
       });
     } catch (error) {
       console.error('Error getting user:', error);
@@ -452,7 +466,7 @@ export class AdminController {
       const tempPassword = Math.random().toString(36).slice(-8);
 
       // Crear el usuario
-      const user = new User({
+      const userData = {
         name,
         email,
         phone,
@@ -461,7 +475,9 @@ export class AdminController {
         isEmailVerified: false,
         isActive: true,
         referralCode: Math.random().toString(36).substring(2, 8).toUpperCase()
-      });
+      };
+
+      const user = new User(userData);
 
       await user.save();
 
@@ -472,7 +488,7 @@ export class AdminController {
         success: true,
         message: 'Usuario creado exitosamente',
         user: {
-          id: user._id,
+          id: user._id.toString(),
           name: user.name,
           email: user.email,
           phone: user.phone,
@@ -538,7 +554,7 @@ export class AdminController {
         success: true,
         message: 'Usuario actualizado exitosamente',
         user: {
-          id: user._id,
+          id: user._id.toString(),
           name: user.name,
           email: user.email,
           phone: user.phone,
@@ -664,6 +680,74 @@ export class AdminController {
       });
     } catch (error) {
       console.error('Error getting user stats:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Resetear contraseña de usuario desde admin
+  static async resetUserPassword(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+
+      // Buscar el usuario
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+      }
+
+      // Generar contraseña temporal
+      const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-4).toUpperCase();
+      
+      // Generar token de reset
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      
+      // Actualizar usuario con nueva contraseña temporal y token
+      user.password = tempPassword; // Se hasheará automáticamente
+      user.passwordResetToken = resetToken;
+      user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+      await user.save();
+
+      // Enviar email con contraseña temporal y enlace para cambiar
+      await emailService.sendAdminPasswordResetEmail(user.email, user.name, tempPassword, resetToken);
+
+      res.json({
+        success: true,
+        message: 'Contraseña reseteada exitosamente. Se ha enviado un email al usuario con la contraseña temporal.',
+        tempPassword: tempPassword // Solo para desarrollo, en producción no se debería enviar
+      });
+    } catch (error) {
+      console.error('Error reseteando contraseña de usuario:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Método temporal para verificar credenciales de email
+  static async checkEmailConfig(req: Request, res: Response) {
+    try {
+      const emailConfig = {
+        host: process.env.EMAIL_HOST || process.env.SMTP_HOST,
+        port: process.env.EMAIL_PORT || process.env.SMTP_PORT,
+        user: process.env.EMAIL_USER || process.env.SMTP_USER,
+        secure: process.env.EMAIL_SECURE,
+        // No mostrar la contraseña por seguridad
+        hasPassword: !!(process.env.EMAIL_PASS || process.env.SMTP_PASS)
+      };
+
+      res.json({
+        success: true,
+        emailConfig
+      });
+    } catch (error) {
+      console.error('Error verificando configuración de email:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

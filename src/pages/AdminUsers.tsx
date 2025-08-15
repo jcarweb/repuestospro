@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, Filter, MoreVertical, Edit, Trash2, Eye, Plus, X, Save, UserPlus } from 'lucide-react';
+import { Users, Search, Filter, MoreVertical, Edit, Trash2, Eye, Plus, X, Save, UserPlus, Key } from 'lucide-react';
 import type { User, UserRole } from '../types';
 
 interface UserFormData {
@@ -122,6 +122,8 @@ const AdminUsers: React.FC = () => {
         return;
       }
 
+      console.log('📤 Enviando datos desde frontend:', formData);
+
       const response = await fetch('http://localhost:5000/api/admin/users', {
         method: 'POST',
         headers: {
@@ -141,6 +143,7 @@ const AdminUsers: React.FC = () => {
       await fetchUsers();
       setShowCreateModal(false);
       setFormData({ name: '', email: '', phone: '', role: 'client' });
+      console.log('🔄 Formulario reseteado a:', { name: '', email: '', phone: '', role: 'client' });
     } catch (error) {
       console.error('Error creating user:', error);
       alert('Error al crear usuario: ' + (error instanceof Error ? error.message : 'Error desconocido'));
@@ -217,6 +220,42 @@ const AdminUsers: React.FC = () => {
     } catch (error) {
       console.error('Error deactivating user:', error);
       alert('Error al desactivar usuario: ' + (error instanceof Error ? error.message : 'Error desconocido'));
+    }
+  };
+
+  const handleResetPassword = async (userId: string, userName: string) => {
+    const confirmed = window.confirm(
+      `¿Estás seguro de que deseas resetear la contraseña de ${userName}? Se enviará un email con una contraseña temporal.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        alert('No hay token de autenticación');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al resetear contraseña');
+      }
+
+      alert('Contraseña reseteada exitosamente. Se ha enviado un email al usuario con la contraseña temporal.');
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      alert('Error al resetear contraseña: ' + (error instanceof Error ? error.message : 'Error desconocido'));
     }
   };
 
@@ -422,6 +461,13 @@ const AdminUsers: React.FC = () => {
                         title="Editar"
                       >
                         <Edit className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleResetPassword(user.id, user.name)}
+                        className="text-orange-600 hover:text-orange-900 p-1 rounded"
+                        title="Resetear contraseña"
+                      >
+                        <Key className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => handleDeleteUser(user.id)}

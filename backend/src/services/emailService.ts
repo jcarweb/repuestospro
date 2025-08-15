@@ -5,6 +5,13 @@ class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
+   /* console.log('🔧 Configuración de Email cargada:');
+    console.log('   Host:', config.EMAIL_HOST);
+    console.log('   Port:', config.EMAIL_PORT);
+    console.log('   User:', config.EMAIL_USER);
+    console.log('   Secure:', config.EMAIL_SECURE);
+    console.log('   Has Password:', !!config.EMAIL_PASS);*/
+    
     this.transporter = nodemailer.createTransport({
       host: config.EMAIL_HOST,
       port: config.EMAIL_PORT,
@@ -24,7 +31,7 @@ class EmailService {
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Bienvenido a RepuestosPro</title>
+        <title>Bienvenido a PiezasYA</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -38,12 +45,12 @@ class EmailService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>¡Bienvenido a RepuestosPro!</h1>
+            <h1>¡Bienvenido a PiezasYA!</h1>
             <p>Tu plataforma de repuestos automotrices</p>
           </div>
           <div class="content">
             <h2>Hola ${user.name},</h2>
-            <p>¡Gracias por registrarte en RepuestosPro! Tu cuenta ha sido creada exitosamente como <strong>${this.getRoleName(role)}</strong>.</p>
+            <p>¡Gracias por registrarte en PiezasYA! Tu cuenta ha sido creada exitosamente como <strong>${this.getRoleName(role)}</strong>.</p>
             
             <h3>${roleInfo.title}</h3>
             <ul>
@@ -61,11 +68,11 @@ class EmailService {
             
             <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
             
-            <p>Saludos,<br>El equipo de RepuestosPro</p>
+            <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
           <div class="footer">
             <p>Este es un email automático, por favor no respondas a este mensaje.</p>
-            <p>© 2024 RepuestosPro. Todos los derechos reservados.</p>
+            <p>© 2025 PiezasYA. Todos los derechos reservados.</p>
           </div>
         </div>
       </body>
@@ -73,9 +80,9 @@ class EmailService {
     `;
 
     await this.transporter.sendMail({
-      from: `"RepuestosPro" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${config.EMAIL_USER}>`,
       to: user.email,
-      subject: '¡Bienvenido a RepuestosPro!',
+      subject: '¡Bienvenido a PiezasYA!',
       html
     });
   }
@@ -88,7 +95,7 @@ class EmailService {
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Código de Registro - RepuestosPro</title>
+        <title>Código de Registro - PiezasYA</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -104,11 +111,11 @@ class EmailService {
         <div class="container">
           <div class="header">
             <h1>Código de Registro</h1>
-            <p>RepuestosPro - ${this.getRoleName(role)}</p>
+            <p>PiezasYA - ${this.getRoleName(role)}</p>
           </div>
           <div class="content">
             <h2>Hola,</h2>
-            <p>Has sido invitado a unirte a RepuestosPro como <strong>${this.getRoleName(role)}</strong>.</p>
+            <p>Has sido invitado a unirte a PiezasYA como <strong>${this.getRoleName(role)}</strong>.</p>
             
             <h3>Tu código de registro:</h3>
             <div class="code">${code}</div>
@@ -134,11 +141,11 @@ class EmailService {
             
             <p>Si no solicitaste este código, puedes ignorar este email.</p>
             
-            <p>Saludos,<br>El equipo de RepuestosPro</p>
+            <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
           <div class="footer">
             <p>Este es un email automático, por favor no respondas a este mensaje.</p>
-            <p>© 2024 RepuestosPro. Todos los derechos reservados.</p>
+            <p>© 2025 PiezasYA. Todos los derechos reservados.</p>
           </div>
         </div>
       </body>
@@ -146,7 +153,7 @@ class EmailService {
     `;
 
     await this.transporter.sendMail({
-      from: `"RepuestosPro" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${config.EMAIL_USER}>`,
       to: email,
       subject: `Código de Registro - ${this.getRoleName(role)}`,
       html
@@ -161,7 +168,7 @@ class EmailService {
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Restablecer Contraseña - RepuestosPro</title>
+        <title>Restablecer Contraseña - PiezasYA</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -176,11 +183,11 @@ class EmailService {
         <div class="container">
           <div class="header">
             <h1>Restablecer Contraseña</h1>
-            <p>RepuestosPro</p>
+            <p>PiezasYA</p>
           </div>
           <div class="content">
             <h2>Hola,</h2>
-            <p>Has solicitado restablecer tu contraseña en RepuestosPro.</p>
+            <p>Has solicitado restablecer tu contraseña en PiezasYA.</p>
             
             <p>Haz clic en el botón de abajo para crear una nueva contraseña:</p>
             
@@ -193,11 +200,11 @@ class EmailService {
             <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
             <p style="word-break: break-all; color: #667eea;">${resetUrl}</p>
             
-            <p>Saludos,<br>El equipo de RepuestosPro</p>
+            <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
           <div class="footer">
             <p>Este es un email automático, por favor no respondas a este mensaje.</p>
-            <p>© 2024 RepuestosPro. Todos los derechos reservados.</p>
+            <p>© 2025 PiezasYA. Todos los derechos reservados.</p>
           </div>
         </div>
       </body>
@@ -205,9 +212,9 @@ class EmailService {
     `;
 
     await this.transporter.sendMail({
-      from: `"RepuestosPro" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${config.EMAIL_USER}>`,
       to: email,
-      subject: 'Restablecer Contraseña - RepuestosPro',
+      subject: 'Restablecer Contraseña - PiezasYA',
       html
     });
   }
@@ -220,7 +227,7 @@ class EmailService {
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Verificar Email - RepuestosPro</title>
+        <title>Verificar Email - PiezasYA</title>
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -234,11 +241,11 @@ class EmailService {
         <div class="container">
           <div class="header">
             <h1>Verificar tu Email</h1>
-            <p>RepuestosPro</p>
+            <p>PiezasYA</p>
           </div>
           <div class="content">
             <h2>Hola,</h2>
-            <p>Gracias por registrarte en RepuestosPro. Para completar tu registro, necesitamos verificar tu dirección de email.</p>
+            <p>Gracias por registrarte en PiezasYA. Para completar tu registro, necesitamos verificar tu dirección de email.</p>
             
             <p>Haz clic en el botón de abajo para verificar tu email:</p>
             
@@ -247,11 +254,11 @@ class EmailService {
             <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
             <p style="word-break: break-all; color: #667eea;">${verificationUrl}</p>
             
-            <p>Saludos,<br>El equipo de RepuestosPro</p>
+            <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
           <div class="footer">
             <p>Este es un email automático, por favor no respondas a este mensaje.</p>
-            <p>© 2024 RepuestosPro. Todos los derechos reservados.</p>
+            <p>© 2025 PiezasYA. Todos los derechos reservados.</p>
           </div>
         </div>
       </body>
@@ -259,9 +266,79 @@ class EmailService {
     `;
 
     await this.transporter.sendMail({
-      from: `"RepuestosPro" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${config.EMAIL_USER}>`,
       to: email,
-      subject: 'Verificar tu Email - RepuestosPro',
+      subject: 'Verificar tu Email - PiezasYA',
+      html
+    });
+  }
+
+  async sendAdminPasswordResetEmail(email: string, userName: string, tempPassword: string, resetToken: string): Promise<void> {
+    const resetUrl = `${config.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Contraseña Temporal - PiezasYA</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #FFC300 0%, #E6B800 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .cta { background: #FFC300; color: #333; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; font-weight: bold; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+          .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+          .temp-password { background: #e8f5e8; border: 2px solid #4CAF50; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center; font-size: 18px; font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Contraseña Temporal</h1>
+            <p>PiezasYA - Panel de Administración</p>
+          </div>
+          <div class="content">
+            <h2>Hola ${userName},</h2>
+            <p>Un administrador ha reseteado tu contraseña en PiezasYA.</p>
+            
+            <div class="temp-password">
+              <strong>Tu contraseña temporal es:</strong><br>
+              <span style="font-size: 24px; letter-spacing: 2px;">${tempPassword}</span>
+            </div>
+            
+            <p>Por seguridad, te recomendamos cambiar esta contraseña temporal por una nueva:</p>
+            
+            <a href="${resetUrl}" class="cta">Cambiar Contraseña</a>
+            
+            <div class="warning">
+              <strong>Importante:</strong> 
+              <ul>
+                <li>Esta contraseña temporal es válida por 1 hora</li>
+                <li>Usa el enlace de arriba para establecer una nueva contraseña</li>
+                <li>Si no solicitaste este cambio, contacta inmediatamente al administrador</li>
+              </ul>
+            </div>
+            
+            <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+            <p style="word-break: break-all; color: #FFC300;">${resetUrl}</p>
+            
+            <p>Saludos,<br>El equipo de PiezasYA</p>
+          </div>
+          <div class="footer">
+            <p>Este es un email automático, por favor no respondas a este mensaje.</p>
+            <p>© 2025 PiezasYA. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    await this.transporter.sendMail({
+      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      to: email,
+      subject: 'Contraseña Temporal - PiezasYA',
       html
     });
   }

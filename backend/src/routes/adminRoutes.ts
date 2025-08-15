@@ -15,6 +15,10 @@ router.post('/users', AdminController.createUser);
 router.put('/users/:id', AdminController.updateUser);
 router.put('/users/:id/deactivate', AdminController.deactivateUser);
 router.put('/users/:id/reactivate', AdminController.reactivateUser);
+router.post('/users/:userId/reset-password', AdminController.resetUserPassword);
+
+// Verificar configuración de email (temporal)
+router.get('/email-config', AdminController.checkEmailConfig);
 
 // Estadísticas
 router.get('/users/stats', AdminController.getUserStats);

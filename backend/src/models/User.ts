@@ -465,6 +465,8 @@ userSchema.methods.generateBackupCodes = function(): string[] {
 
 // Middleware pre-save para generar referralCode si no existe
 userSchema.pre('save', async function(next) {
+
+  
   if (!this.referralCode) {
     let referralCode: string;
     let isUnique = false;
@@ -492,7 +494,11 @@ userSchema.pre('save', async function(next) {
     this.pin = await bcrypt.hash(this.pin, salt);
   }
 
+
+
   next();
 });
+
+
 
 export default mongoose.model<IUser>('User', userSchema); 

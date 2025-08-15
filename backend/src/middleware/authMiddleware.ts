@@ -56,6 +56,8 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     // Agregar el usuario al request
     (req as any).user = user;
     
+
+    
     next();
   } catch (error) {
     console.error('Error en middleware de autenticación:', error);
@@ -99,6 +101,8 @@ export const adminMiddleware = async (req: Request, res: Response, next: NextFun
         message: 'Acceso denegado. Se requieren permisos de administrador'
       });
     }
+
+
 
     next();
   } catch (error) {
