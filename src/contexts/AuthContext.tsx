@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, UserRole } from '../types';
+import type { User, UserRole } from '../types';
 
 interface AuthContextType {
-  user: User | null;
+  user: User | null | undefined;
   token: string | null;
   location: { latitude: number; longitude: number } | null;
+  isLoading: boolean;
   login: (user: User, token: string) => void;
   loginAsync: (email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -156,6 +157,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     token,
     location,
+    isLoading,
     login,
     loginAsync,
     logout,

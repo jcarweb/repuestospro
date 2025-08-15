@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Menu } from 'lucide-react';
 import AdminHeader from './AdminHeader';
-import Sidebar from './Sidebar';
+import AdminSidebar from './AdminSidebar';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -24,7 +24,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
       <div className="flex h-[calc(100vh-64px)]">
         {/* Sidebar */}
-        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
         {/* Contenido principal */}
         <main className="flex-1 lg:ml-64 overflow-auto">

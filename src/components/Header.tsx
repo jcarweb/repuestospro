@@ -80,12 +80,20 @@ const Header: React.FC = () => {
               </Link>
             )}
             {/* Admin Navigation */}
-            {(isAdmin || isStoreManager) && (
+            {isAdmin && (
               <Link 
-                to="/admin" 
+                to="/admin/dashboard" 
                 className="text-[#333333] hover:text-[#FFC300] transition-colors"
               >
                 Panel Admin
+              </Link>
+            )}
+            {isStoreManager && (
+              <Link 
+                to="/store-manager/dashboard" 
+                className="text-[#333333] hover:text-[#FFC300] transition-colors"
+              >
+                Panel Tienda
               </Link>
             )}
           </nav>
@@ -355,7 +363,6 @@ const Header: React.FC = () => {
         <AuthModal
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
-          initialMode={authMode}
         />
       )}
     </header>

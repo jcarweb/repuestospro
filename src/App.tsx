@@ -78,7 +78,19 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { isAuthenticated, hasRole } = useAuth();
+  const { isAuthenticated, hasRole, user, isLoading } = useAuth();
+
+  // Mostrar loading mientras se inicializa la autenticación
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FFC300] mx-auto mb-4"></div>
+          <p className="text-[#333333]">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Router>
@@ -185,7 +197,13 @@ function AppContent() {
               <div className={`flex-1 ${isAuthenticated ? 'lg:ml-64' : ''}`}>
                 <Routes>
                   {/* Rutas públicas */}
-                  <Route path="/" element={<Home />} />
+                  <Route path="/" element={
+                    isAuthenticated && user && user.role === 'admin' ? (
+                      <Navigate to="/admin/dashboard" replace />
+                    ) : (
+                      <Home />
+                    )
+                  } />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/register-with-code" element={<RegisterWithCode />} />
