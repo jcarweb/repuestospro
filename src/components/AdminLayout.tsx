@@ -23,11 +23,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       </button>
 
       <div className="flex h-[calc(100vh-64px)]">
-        {/* Sidebar */}
-        <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        {/* Sidebar - siempre visible en desktop */}
+        <div className="hidden lg:block w-64 bg-white shadow-lg">
+          <AdminSidebar isOpen={true} onClose={() => {}} />
+        </div>
+
+        {/* Sidebar móvil */}
+        <div className="lg:hidden">
+          <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        </div>
 
         {/* Contenido principal */}
-        <main className="flex-1 lg:ml-64 overflow-auto">
+        <main className="flex-1 overflow-auto bg-gray-50">
           <div className="p-6">
             {children}
           </div>
