@@ -1,20 +1,28 @@
 import express from 'express';
-import adminController from '../controllers/AdminController';
-import { authenticateToken, requireAdmin } from '../middleware';
+import { AdminController } from '../controllers/AdminController';
+import { authMiddleware, adminMiddleware } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-// Ruta de prueba simple
-router.get('/test', authenticateToken, requireAdmin, (req, res) => {
-  res.json({
-    success: true,
-    message: 'Ruta de administrador funcionando correctamente',
-    user: (req as any).user
-  });
-});
+// Aplicar middleware de autenticación y admin a todas las rutas
+router.use(authMiddleware);
+router.use(adminMiddleware);
 
-// Rutas para generación de productos (solo administradores)
-router.post('/generate-products', authenticateToken, requireAdmin, adminController.generateProducts);
-router.get('/product-stats', authenticateToken, requireAdmin, adminController.getProductStats);
+// Rutas de usuarios
+router.get('/users', AdminController.getUsers);
+router.get('/users/:id', AdminController.getUser);
+router.post('/users', AdminController.createUser);
+router.put('/users/:id', AdminController.updateUser);
+router.put('/users/:id/deactivate', AdminController.deactivateUser);
+router.put('/users/:id/reactivate', AdminController.reactivateUser);
+
+// Estadísticas
+router.get('/users/stats', AdminController.getUserStats);
+
+// Generar productos (mantener la funcionalidad existente)
+router.post('/generate-products', async (req, res) => {
+  const adminController = new AdminController();
+  await adminController.generateProducts(req, res);
+});
 
 export default router; 

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Product from '../models/Product';
+import User from '../models/User';
 
 // Datos de prueba
 const brands = [
@@ -206,7 +207,7 @@ function generateInternalSKU(brand: string, category: string): string {
   return `SKU-${brandCode}-${categoryCode}-${randomNum}`;
 }
 
-class AdminController {
+export class AdminController {
   // Generar productos de prueba
   async generateProducts(req: Request, res: Response) {
     try {
@@ -376,6 +377,296 @@ class AdminController {
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor al obtener estadísticas'
+      });
+    }
+  }
+
+  // Obtener todos los usuarios
+  static async getUsers(req: Request, res: Response) {
+    try {
+      const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+      
+      res.json({
+        success: true,
+        users: users
+      });
+    } catch (error) {
+      console.error('Error getting users:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Obtener un usuario específico
+  static async getUser(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      
+      const user = await User.findById(id).select('-password');
+      
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+      }
+      
+      res.json({
+        success: true,
+        user: user
+      });
+    } catch (error) {
+      console.error('Error getting user:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Crear un nuevo usuario
+  static async createUser(req: Request, res: Response) {
+    try {
+      const { name, email, phone, role = 'client' } = req.body;
+
+      // Validaciones
+      if (!name || !email) {
+        return res.status(400).json({
+          success: false,
+          message: 'Nombre y email son requeridos'
+        });
+      }
+
+      // Verificar si el email ya existe
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'El email ya está registrado'
+        });
+      }
+
+      // Generar contraseña temporal
+      const tempPassword = Math.random().toString(36).slice(-8);
+
+      // Crear el usuario
+      const user = new User({
+        name,
+        email,
+        phone,
+        role,
+        password: tempPassword, // Se hasheará automáticamente
+        isEmailVerified: false,
+        isActive: true,
+        referralCode: Math.random().toString(36).substring(2, 8).toUpperCase()
+      });
+
+      await user.save();
+
+      // Enviar email con credenciales temporales
+      // TODO: Implementar envío de email con credenciales
+
+      res.status(201).json({
+        success: true,
+        message: 'Usuario creado exitosamente',
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          isEmailVerified: user.isEmailVerified,
+          isActive: user.isActive,
+          createdAt: user.createdAt
+        },
+        tempPassword: tempPassword // Solo para desarrollo, en producción se enviaría por email
+      });
+    } catch (error) {
+      console.error('Error creating user:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Actualizar un usuario
+  static async updateUser(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { name, email, phone, role } = req.body;
+
+      // Validaciones
+      if (!name || !email) {
+        return res.status(400).json({
+          success: false,
+          message: 'Nombre y email son requeridos'
+        });
+      }
+
+      // Verificar si el usuario existe
+      const user = await User.findById(id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+      }
+
+      // Verificar si el email ya existe en otro usuario
+      if (email !== user.email) {
+        const existingUser = await User.findOne({ email, _id: { $ne: id } });
+        if (existingUser) {
+          return res.status(400).json({
+            success: false,
+            message: 'El email ya está registrado por otro usuario'
+          });
+        }
+      }
+
+      // Actualizar el usuario
+      user.name = name;
+      user.email = email;
+      user.phone = phone;
+      user.role = role;
+
+      await user.save();
+
+      res.json({
+        success: true,
+        message: 'Usuario actualizado exitosamente',
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          isEmailVerified: user.isEmailVerified,
+          isActive: user.isActive,
+          createdAt: user.createdAt
+        }
+      });
+    } catch (error) {
+      console.error('Error updating user:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Desactivar un usuario (borrado lógico)
+  static async deactivateUser(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      // Verificar si el usuario existe
+      const user = await User.findById(id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+      }
+
+      // No permitir desactivar al usuario actual
+      if (user._id.toString() === req.user?.id) {
+        return res.status(400).json({
+          success: false,
+          message: 'No puedes desactivar tu propia cuenta'
+        });
+      }
+
+      // Desactivar el usuario
+      user.isActive = false;
+      await user.save();
+
+      res.json({
+        success: true,
+        message: 'Usuario desactivado exitosamente'
+      });
+    } catch (error) {
+      console.error('Error deactivating user:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Reactivar un usuario
+  static async reactivateUser(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      // Verificar si el usuario existe
+      const user = await User.findById(id);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+      }
+
+      // Reactivar el usuario
+      user.isActive = true;
+      await user.save();
+
+      res.json({
+        success: true,
+        message: 'Usuario reactivado exitosamente'
+      });
+    } catch (error) {
+      console.error('Error reactivating user:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Obtener estadísticas de usuarios
+  static async getUserStats(req: Request, res: Response) {
+    try {
+      const totalUsers = await User.countDocuments();
+      const activeUsers = await User.countDocuments({ isActive: true });
+      const inactiveUsers = await User.countDocuments({ isActive: false });
+      const verifiedUsers = await User.countDocuments({ isEmailVerified: true });
+      const pendingUsers = await User.countDocuments({ isEmailVerified: false });
+
+      const usersByRole = await User.aggregate([
+        {
+          $group: {
+            _id: '$role',
+            count: { $sum: 1 }
+          }
+        }
+      ]);
+
+      const recentUsers = await User.find({})
+        .select('name email role createdAt')
+        .sort({ createdAt: -1 })
+        .limit(5);
+
+      res.json({
+        success: true,
+        stats: {
+          total: totalUsers,
+          active: activeUsers,
+          inactive: inactiveUsers,
+          verified: verifiedUsers,
+          pending: pendingUsers,
+          byRole: usersByRole,
+          recent: recentUsers
+        }
+      });
+    } catch (error) {
+      console.error('Error getting user stats:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
       });
     }
   }
