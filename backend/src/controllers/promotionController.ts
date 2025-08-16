@@ -2,12 +2,14 @@ import { Request, Response } from 'express';
 import PromotionService from '../services/promotionService';
 import Product from '../models/Product';
 import Category from '../models/Category';
+import Store from '../models/Store';
 
 export class PromotionController {
   // Crear nueva promoción
   static async createPromotion(req: Request, res: Response): Promise<void> {
     try {
       const userId = (req as any).user._id;
+      const userRole = (req as any).user.role;
       const promotionData = req.body;
 
       // Validar datos requeridos
@@ -37,6 +39,47 @@ export class PromotionController {
         return;
       }
 
+      // Lógica de tienda según el rol
+      if (userRole === 'admin') {
+        // Admin debe especificar la tienda
+        if (!promotionData.store) {
+          res.status(400).json({
+            success: false,
+            message: 'La tienda es requerida para administradores'
+          });
+          return;
+        }
+        
+        // Verificar que la tienda existe
+        const store = await Store.findById(promotionData.store);
+        if (!store) {
+          res.status(404).json({
+            success: false,
+            message: 'Tienda no encontrada'
+          });
+          return;
+        }
+      } else if (userRole === 'store_manager') {
+        // Store manager solo puede crear promociones para su tienda
+        const userStore = await Store.findOne({ manager: userId });
+        if (!userStore) {
+          res.status(403).json({
+            success: false,
+            message: 'No tienes una tienda asignada'
+          });
+          return;
+        }
+        
+        // Asignar automáticamente la tienda del manager
+        promotionData.store = userStore._id;
+      } else {
+        res.status(403).json({
+          success: false,
+          message: 'No tienes permisos para crear promociones'
+        });
+        return;
+      }
+
       const promotion = await PromotionService.createPromotion(promotionData, userId);
 
       res.status(201).json({
@@ -56,8 +99,36 @@ export class PromotionController {
   // Obtener todas las promociones
   static async getAllPromotions(req: Request, res: Response): Promise<void> {
     try {
+      const userId = (req as any).user._id;
+      const userRole = (req as any).user.role;
       const filters = req.query;
-      const promotions = await PromotionService.getAllPromotions(filters);
+
+      let promotions;
+      
+      if (userRole === 'admin') {
+        // Admin puede ver todas las promociones o filtrar por tienda
+        promotions = await PromotionService.getAllPromotions(filters);
+      } else if (userRole === 'store_manager') {
+        // Store manager solo ve promociones de su tienda
+        const userStore = await Store.findOne({ manager: userId });
+        if (!userStore) {
+          res.status(403).json({
+            success: false,
+            message: 'No tienes una tienda asignada'
+          });
+          return;
+        }
+        
+        // Agregar filtro de tienda
+        filters.store = userStore._id.toString();
+        promotions = await PromotionService.getAllPromotions(filters);
+      } else {
+        res.status(403).json({
+          success: false,
+          message: 'No tienes permisos para ver promociones'
+        });
+        return;
+      }
 
       res.json({
         success: true,
@@ -205,9 +276,40 @@ export class PromotionController {
   // Obtener productos disponibles para promociones
   static async getAvailableProducts(req: Request, res: Response): Promise<void> {
     try {
-      const products = await Product.find({ isActive: true })
-        .select('name price image description category')
+      const userId = (req as any).user._id;
+      const userRole = (req as any).user.role;
+      const { storeId } = req.query; // Para admin que puede especificar tienda
+
+      let productFilter: any = { isActive: true };
+
+      if (userRole === 'admin') {
+        // Admin puede ver productos de todas las tiendas o filtrar por tienda específica
+        if (storeId) {
+          productFilter.store = storeId;
+        }
+      } else if (userRole === 'store_manager') {
+        // Store manager solo ve productos de su tienda
+        const userStore = await Store.findOne({ manager: userId });
+        if (!userStore) {
+          res.status(403).json({
+            success: false,
+            message: 'No tienes una tienda asignada'
+          });
+          return;
+        }
+        productFilter.store = userStore._id;
+      } else {
+        res.status(403).json({
+          success: false,
+          message: 'No tienes permisos para ver productos'
+        });
+        return;
+      }
+
+      const products = await Product.find(productFilter)
+        .select('name price image description category store')
         .populate('category', 'name')
+        .populate('store', 'name')
         .sort({ name: 1 });
 
       res.json({
@@ -216,6 +318,36 @@ export class PromotionController {
       });
     } catch (error) {
       console.error('Error obteniendo productos:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Obtener tiendas disponibles para promociones (solo admin)
+  static async getAvailableStores(req: Request, res: Response): Promise<void> {
+    try {
+      const userRole = (req as any).user.role;
+
+      if (userRole !== 'admin') {
+        res.status(403).json({
+          success: false,
+          message: 'Solo los administradores pueden ver la lista de tiendas'
+        });
+        return;
+      }
+
+      const stores = await Store.find({ isActive: true })
+        .select('name description address city state')
+        .sort({ name: 1 });
+
+      res.json({
+        success: true,
+        data: stores
+      });
+    } catch (error) {
+      console.error('Error obteniendo tiendas:', error);
       res.status(500).json({
         success: false,
         message: error.message || 'Error interno del servidor'

@@ -7,14 +7,54 @@ export class PromotionService {
   // Crear una nueva promoción
   static async createPromotion(promotionData: any, createdBy: string): Promise<IPromotion> {
     try {
+      console.log('🔍 Debug - CreateData recibido:', promotionData);
+
+      // Convertir fechas si vienen como strings
+      if (promotionData.startDate && typeof promotionData.startDate === 'string') {
+        promotionData.startDate = new Date(promotionData.startDate);
+        console.log('🔍 Debug - startDate convertida:', promotionData.startDate);
+      }
+      if (promotionData.endDate && typeof promotionData.endDate === 'string') {
+        promotionData.endDate = new Date(promotionData.endDate);
+        console.log('🔍 Debug - endDate convertida:', promotionData.endDate);
+      }
+
+      // Asegurar que isActive sea boolean
+      if (promotionData.isActive !== undefined) {
+        promotionData.isActive = Boolean(promotionData.isActive);
+        console.log('🔍 Debug - isActive convertido:', promotionData.isActive);
+      }
+
+      // Validar fechas antes de crear
+      if (promotionData.startDate && promotionData.endDate) {
+        const startDate = new Date(promotionData.startDate);
+        const endDate = new Date(promotionData.endDate);
+        
+        console.log('🔍 Debug - Validando fechas:', { startDate, endDate });
+        
+        if (startDate >= endDate) {
+          throw new Error('La fecha de fin debe ser posterior a la fecha de inicio');
+        }
+      }
+
       const promotion = new Promotion({
         ...promotionData,
         createdBy: new mongoose.Types.ObjectId(createdBy)
       });
 
       await promotion.save();
-      return promotion;
+      
+      console.log('🔍 Debug - Promoción creada:', promotion);
+      
+      // Retornar la promoción con populate
+      return await promotion.populate([
+        { path: 'products', select: 'name price image description store' },
+        { path: 'categories', select: 'name' },
+        { path: 'createdBy', select: 'name email' },
+        { path: 'store', select: 'name address city state' }
+      ]);
     } catch (error) {
+      console.error('❌ Error creando promoción:', error);
       throw new Error(`Error creando promoción: ${error.message}`);
     }
   }
@@ -23,9 +63,10 @@ export class PromotionService {
   static async getAllPromotions(filters: any = {}): Promise<IPromotion[]> {
     try {
       const query = Promotion.find()
-        .populate('products', 'name price image')
+        .populate('products', 'name price image store')
         .populate('categories', 'name')
         .populate('createdBy', 'name email')
+        .populate('store', 'name address city state')
         .sort({ createdAt: -1 });
 
       // Aplicar filtros
@@ -45,6 +86,11 @@ export class PromotionService {
         query.where('endDate', { $lte: new Date(filters.endDate) });
       }
 
+      // Filtro por tienda
+      if (filters.store) {
+        query.where('store', filters.store);
+      }
+
       return await query.exec();
     } catch (error) {
       throw new Error(`Error obteniendo promociones: ${error.message}`);
@@ -55,9 +101,10 @@ export class PromotionService {
   static async getPromotionById(id: string): Promise<IPromotion | null> {
     try {
       return await Promotion.findById(id)
-        .populate('products', 'name price image description')
+        .populate('products', 'name price image description store')
         .populate('categories', 'name')
-        .populate('createdBy', 'name email');
+        .populate('createdBy', 'name email')
+        .populate('store', 'name address city state');
     } catch (error) {
       throw new Error(`Error obteniendo promoción: ${error.message}`);
     }
@@ -66,12 +113,51 @@ export class PromotionService {
   // Actualizar promoción
   static async updatePromotion(id: string, updateData: any): Promise<IPromotion | null> {
     try {
-      return await Promotion.findByIdAndUpdate(
+      console.log('🔍 Debug - UpdateData recibido:', updateData);
+
+      // Convertir fechas si vienen como strings
+      if (updateData.startDate && typeof updateData.startDate === 'string') {
+        updateData.startDate = new Date(updateData.startDate);
+        console.log('🔍 Debug - startDate convertida:', updateData.startDate);
+      }
+      if (updateData.endDate && typeof updateData.endDate === 'string') {
+        updateData.endDate = new Date(updateData.endDate);
+        console.log('🔍 Debug - endDate convertida:', updateData.endDate);
+      }
+
+      // Asegurar que isActive sea boolean
+      if (updateData.isActive !== undefined) {
+        updateData.isActive = Boolean(updateData.isActive);
+        console.log('🔍 Debug - isActive convertido:', updateData.isActive);
+      }
+
+      // Validar fechas antes de actualizar
+      if (updateData.startDate && updateData.endDate) {
+        const startDate = new Date(updateData.startDate);
+        const endDate = new Date(updateData.endDate);
+        
+        console.log('🔍 Debug - Validando fechas:', { startDate, endDate });
+        
+        if (startDate >= endDate) {
+          throw new Error('La fecha de fin debe ser posterior a la fecha de inicio');
+        }
+      }
+
+      const promotion = await Promotion.findByIdAndUpdate(
         id,
         { ...updateData, updatedAt: new Date() },
-        { new: true, runValidators: true }
-      ).populate('products categories createdBy');
+        { new: true, runValidators: false } // Desactivar validadores del modelo temporalmente
+      )
+      .populate('products', 'name price image description store')
+      .populate('categories', 'name')
+      .populate('createdBy', 'name email')
+      .populate('store', 'name address city state');
+
+      console.log('🔍 Debug - Promoción actualizada:', promotion);
+
+      return promotion;
     } catch (error) {
+      console.error('❌ Error actualizando promoción:', error);
       throw new Error(`Error actualizando promoción: ${error.message}`);
     }
   }

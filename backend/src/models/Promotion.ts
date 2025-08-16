@@ -200,6 +200,8 @@ PromotionSchema.index({ isActive: 1, startDate: 1, endDate: 1 });
 PromotionSchema.index({ products: 1 });
 PromotionSchema.index({ categories: 1 });
 PromotionSchema.index({ createdBy: 1 });
+PromotionSchema.index({ store: 1 }); // Índice para consultas por tienda
+PromotionSchema.index({ store: 1, isActive: 1 }); // Índice compuesto para tienda y estado
 
 // Método para verificar si la promoción está vigente
 PromotionSchema.methods.isValid = function(): boolean {

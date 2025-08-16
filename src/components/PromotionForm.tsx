@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Calendar, Tag, DollarSign, Percent, Package, Type } from 'lucide-react';
+import { X, Plus, Trash2, Calendar, Tag, DollarSign, Percent, Package, Type, Store } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+
+interface Store {
+  _id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+}
 
 interface Product {
   _id: string;
@@ -7,6 +16,10 @@ interface Product {
   price: number;
   image: string;
   category: {
+    name: string;
+  };
+  store: {
+    _id: string;
     name: string;
   };
 }
@@ -28,6 +41,7 @@ interface PromotionFormData {
   customText?: string;
   products: string[];
   categories: string[];
+  store: string; // Agregado campo de tienda
   startDate: string;
   startTime: string;
   endDate: string;
@@ -57,6 +71,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
   isEditing = false,
   token
 }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState<PromotionFormData>({
     name: '',
     description: '',
@@ -68,6 +83,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
     customText: '',
     products: [],
     categories: [],
+    store: '', // Inicializar campo de tienda
     startDate: '',
     startTime: '00:00',
     endDate: '',
@@ -82,15 +98,22 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     if (isOpen) {
-      fetchProducts();
       fetchCategories();
+      if (user?.role === 'admin') {
+        fetchStores();
+      }
       if (promotion && isEditing) {
+        console.log('🔍 Debug - Promotion.isActive:', promotion.isActive);
+        console.log('🔍 Debug - Promotion.isActive type:', typeof promotion.isActive);
+        console.log('🔍 Debug - Promotion.isActive value:', promotion.isActive);
+        
         setFormData({
           name: promotion.name,
           description: promotion.description,
@@ -102,25 +125,90 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
           customText: promotion.customText || '',
           products: promotion.products.map((p: any) => p._id),
           categories: promotion.categories?.map((c: any) => c._id) || [],
+          store: promotion.store?._id || '', // Agregar tienda
           startDate: promotion.startDate.split('T')[0],
           startTime: promotion.startTime || '00:00',
           endDate: promotion.endDate.split('T')[0],
           endTime: promotion.endTime || '23:59',
-          isActive: promotion.isActive,
+          isActive: promotion.isActive === true || promotion.isActive === 'true', // Manejo más robusto
           ribbonText: promotion.ribbonText || 'PROMO',
           ribbonPosition: promotion.ribbonPosition || 'top-left',
           showOriginalPrice: promotion.showOriginalPrice,
           showDiscountAmount: promotion.showDiscountAmount,
           maxUses: promotion.maxUses
         });
-        setSelectedProducts(promotion.products || []);
+        
+        console.log('🔍 Debug - FormData.isActive después de setFormData:', promotion.isActive === true || promotion.isActive === 'true');
+        
+        // Los productos seleccionados se establecerán después de cargar los productos
       }
     }
-  }, [isOpen, promotion, isEditing]);
+  }, [isOpen, promotion, isEditing, user]);
+
+  // Efecto separado para cargar productos cuando cambie la tienda
+  useEffect(() => {
+    if (isOpen) {
+      fetchProducts();
+    }
+  }, [isOpen, formData.store, user?.role]);
+
+  // Efecto para establecer productos seleccionados cuando se cargan los productos y estamos editando
+  useEffect(() => {
+    if (isEditing && promotion && products.length > 0) {
+      console.log('🔍 Debug - Estableciendo productos seleccionados');
+      console.log('🔍 Debug - Products disponibles:', products.length);
+      console.log('🔍 Debug - Promotion products:', promotion.products);
+      
+      // Filtrar los productos que están en la promoción y están disponibles en la lista actual
+      const availableSelectedProducts = products.filter(product => 
+        promotion.products.some((p: any) => p._id === product._id)
+      );
+      
+      console.log('🔍 Debug - Productos disponibles seleccionados:', availableSelectedProducts.length);
+      
+      if (availableSelectedProducts.length > 0) {
+        setSelectedProducts(availableSelectedProducts);
+        // También actualizar formData.products si está vacío
+        if (formData.products.length === 0) {
+          setFormData(prev => ({
+            ...prev,
+            products: availableSelectedProducts.map(p => p._id)
+          }));
+        }
+      }
+    }
+  }, [products, isEditing, promotion]);
+
+  const fetchStores = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/promotions/stores/available', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setStores(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching stores:', error);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/promotions/products/available', {
+      // Para store_manager, solo obtener productos de su tienda
+      const params = new URLSearchParams();
+      if (user?.role === 'store_manager') {
+        // Los productos ya vendrán filtrados por tienda desde el backend
+      } else if (user?.role === 'admin') {
+        // Para admin, filtrar por la tienda seleccionada
+        if (formData.store) {
+          params.append('storeId', formData.store);
+        }
+      }
+
+      const response = await fetch(`http://localhost:5000/api/promotions/products/available?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -128,6 +216,15 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
       if (response.ok) {
         const data = await response.json();
         setProducts(data.data);
+        
+        // Si estamos editando y cambió la tienda, limpiar productos seleccionados
+        if (isEditing && promotion && formData.store !== promotion.store?._id) {
+          setFormData(prev => ({
+            ...prev,
+            products: []
+          }));
+          setSelectedProducts([]);
+        }
       }
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -155,6 +252,16 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
       ...prev,
       [field]: value
     }));
+
+    // Si se cambia la tienda (solo para admin), limpiar productos seleccionados
+    if (field === 'store' && user?.role === 'admin') {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value,
+        products: [] // Limpiar productos seleccionados
+      }));
+      setSelectedProducts([]); // Limpiar productos seleccionados visualmente
+    }
   };
 
   const handleProductSelect = (product: Product) => {
@@ -196,9 +303,20 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
     setLoading(true);
 
     try {
+      console.log('🔍 Debug - FormData:', formData);
+      console.log('🔍 Debug - SelectedProducts:', selectedProducts);
+      console.log('🔍 Debug - IsEditing:', isEditing);
+      console.log('🔍 Debug - Promotion:', promotion);
+
       // Validaciones
       if (!formData.name || !formData.description) {
         alert('Nombre y descripción son requeridos');
+        return;
+      }
+
+      // Validación de tienda para administradores
+      if (user?.role === 'admin' && !formData.store) {
+        alert('Debe seleccionar una tienda');
         return;
       }
 
@@ -207,14 +325,31 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
         return;
       }
 
-      if (new Date(formData.startDate) >= new Date(formData.endDate)) {
+      // Validación más robusta de fechas
+      const startDate = new Date(formData.startDate + 'T' + (formData.startTime || '00:00'));
+      const endDate = new Date(formData.endDate + 'T' + (formData.endTime || '23:59'));
+      
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        alert('Fechas inválidas');
+        return;
+      }
+
+      if (startDate >= endDate) {
         alert('La fecha de fin debe ser posterior a la fecha de inicio');
         return;
       }
 
+      // Validación de productos mejorada
       if (formData.products.length === 0) {
-        alert('Debe seleccionar al menos un producto');
-        return;
+        // Si estamos editando, verificar si la promoción original tenía productos
+        if (isEditing && promotion && promotion.products && promotion.products.length > 0) {
+          console.log('⚠️ Editando promoción con productos existentes, pero formData.products está vacío');
+          // Usar los productos de la promoción original
+          formData.products = promotion.products.map((p: any) => p._id);
+        } else {
+          alert('Debe seleccionar al menos un producto');
+          return;
+        }
       }
 
       // Validaciones específicas por tipo
@@ -238,6 +373,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
         return;
       }
 
+      console.log('✅ Enviando datos:', formData);
       onSubmit(formData);
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -332,6 +468,39 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
               </select>
             </div>
           </div>
+
+          {/* Campo de tienda */}
+          {user?.role === 'admin' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tienda *
+              </label>
+              <select
+                value={formData.store}
+                onChange={(e) => handleInputChange('store', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">Seleccionar tienda</option>
+                {stores.map((store) => (
+                  <option key={store._id} value={store._id}>
+                    {store.name} - {store.city}, {store.state}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {user?.role === 'store_manager' && (
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-center">
+                <Store className="w-5 h-5 text-blue-600 mr-2" />
+                <span className="text-sm text-blue-800">
+                  <strong>Tienda asignada:</strong> La promoción se creará automáticamente para tu tienda
+                </span>
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -507,6 +676,18 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
           <div className="border-t pt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Productos</h3>
             
+            {/* Mensaje informativo para admin */}
+            {user?.role === 'admin' && !formData.store && (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center">
+                  <Store className="w-5 h-5 text-yellow-600 mr-2" />
+                  <span className="text-sm text-yellow-800">
+                    <strong>Selecciona una tienda</strong> para ver los productos disponibles
+                  </span>
+                </div>
+              </div>
+            )}
+            
             {/* Productos seleccionados */}
             {selectedProducts.length > 0 && (
               <div className="mb-4">
@@ -536,43 +717,55 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
               </div>
             )}
 
-            {/* Buscar productos */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Buscar Productos
-              </label>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Buscar por nombre o categoría..."
-              />
-            </div>
+            {/* Buscar productos - solo mostrar si hay productos disponibles */}
+            {products.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Buscar Productos
+                </label>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Buscar por nombre o categoría..."
+                />
+              </div>
+            )}
 
-            {/* Lista de productos */}
-            <div className="mt-4 max-h-60 overflow-y-auto border border-gray-200 rounded-lg">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product._id}
-                  className={`flex items-center justify-between p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
-                    formData.products.includes(product._id) ? 'bg-blue-50' : ''
-                  }`}
-                  onClick={() => handleProductSelect(product)}
-                >
-                  <div className="flex items-center space-x-3">
-                    <img src={product.image} alt={product.name} className="w-10 h-10 object-cover rounded" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{product.name}</p>
-                      <p className="text-xs text-gray-500">{product.category.name} • ${product.price}</p>
+            {/* Lista de productos - solo mostrar si hay productos disponibles */}
+            {products.length > 0 && (
+              <div className="mt-4 max-h-60 overflow-y-auto border border-gray-200 rounded-lg">
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product._id}
+                    className={`flex items-center justify-between p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
+                      formData.products.includes(product._id) ? 'bg-blue-50' : ''
+                    }`}
+                    onClick={() => handleProductSelect(product)}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <img src={product.image} alt={product.name} className="w-10 h-10 object-cover rounded" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{product.name}</p>
+                        <p className="text-xs text-gray-500">{product.category.name} • ${product.price}</p>
+                      </div>
                     </div>
+                    {formData.products.includes(product._id) && (
+                      <Plus className="h-4 w-4 text-blue-600" />
+                    )}
                   </div>
-                  {formData.products.includes(product._id) && (
-                    <Plus className="h-4 w-4 text-blue-600" />
-                  )}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
+
+            {/* Mensaje cuando no hay productos */}
+            {products.length === 0 && formData.store && (
+              <div className="p-4 text-center bg-gray-50 rounded-lg">
+                <Store className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-600">No hay productos disponibles en esta tienda</p>
+              </div>
+            )}
           </div>
 
           {/* Configuración visual */}
