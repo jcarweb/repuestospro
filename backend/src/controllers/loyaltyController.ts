@@ -4,6 +4,7 @@ import User from '../models/User';
 import Review from '../models/Review';
 import Reward from '../models/Reward';
 import RewardRedemption from '../models/RewardRedemption';
+import PointsPolicy from '../models/PointsPolicy';
 
 export class LoyaltyController {
   // Obtener estadísticas de fidelización del usuario
@@ -342,6 +343,370 @@ export class LoyaltyController {
       });
     } catch (error) {
       console.error('Error obteniendo estadísticas de tracking:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // ===== ADMIN ENDPOINTS =====
+
+  // Obtener todos los premios (admin)
+  static async getAllRewards(req: Request, res: Response): Promise<void> {
+    try {
+      const rewards = await Reward.find().sort({ createdAt: -1 });
+      
+      res.json({
+        success: true,
+        data: rewards
+      });
+    } catch (error) {
+      console.error('Error obteniendo premios:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Crear premio (admin)
+  static async createReward(req: Request, res: Response): Promise<void> {
+    try {
+      const { name, description, pointsRequired, cashRequired, category, stock, isActive } = req.body;
+      
+      // Manejar la subida de imagen
+      let image = '';
+      if (req.file) {
+        image = `/uploads/${req.file.filename}`;
+      }
+
+      const reward = new Reward({
+        name,
+        description,
+        image,
+        pointsRequired: Number(pointsRequired),
+        cashRequired: Number(cashRequired),
+        category,
+        stock: Number(stock),
+        isActive: isActive === 'true' || isActive === true,
+        createdBy: (req as any).user._id
+      });
+
+      await reward.save();
+
+      res.json({
+        success: true,
+        message: 'Premio creado exitosamente',
+        data: reward
+      });
+    } catch (error) {
+      console.error('Error creando premio:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Actualizar premio (admin)
+  static async updateReward(req: Request, res: Response): Promise<void> {
+    try {
+      const { rewardId } = req.params;
+      const updateData = req.body;
+      
+      if (req.file) {
+        updateData.image = `/uploads/${req.file.filename}`;
+      }
+
+      // Convertir tipos de datos
+      if (updateData.pointsRequired) updateData.pointsRequired = Number(updateData.pointsRequired);
+      if (updateData.cashRequired) updateData.cashRequired = Number(updateData.cashRequired);
+      if (updateData.stock) updateData.stock = Number(updateData.stock);
+      if (updateData.isActive !== undefined) {
+        updateData.isActive = updateData.isActive === 'true' || updateData.isActive === true;
+      }
+
+      const reward = await Reward.findByIdAndUpdate(
+        rewardId,
+        updateData,
+        { new: true }
+      );
+
+      if (!reward) {
+        res.status(404).json({
+          success: false,
+          message: 'Premio no encontrado'
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        message: 'Premio actualizado exitosamente',
+        data: reward
+      });
+    } catch (error) {
+      console.error('Error actualizando premio:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Obtener todos los canjes (admin)
+  static async getAllRedemptions(req: Request, res: Response): Promise<void> {
+    try {
+      const redemptions = await RewardRedemption.find()
+        .populate('userId', 'name email')
+        .populate('rewardId', 'name description image')
+        .sort({ createdAt: -1 });
+
+      res.json({
+        success: true,
+        data: redemptions
+      });
+    } catch (error) {
+      console.error('Error obteniendo canjes:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Actualizar estado de canje (admin)
+  static async updateRedemptionStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const { redemptionId } = req.params;
+      const { status, notes } = req.body;
+
+      const redemption = await RewardRedemption.findByIdAndUpdate(
+        redemptionId,
+        { status, notes },
+        { new: true }
+      ).populate('userId', 'name email')
+       .populate('rewardId', 'name description image');
+
+      if (!redemption) {
+        res.status(404).json({
+          success: false,
+          message: 'Canje no encontrado'
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        message: 'Estado actualizado exitosamente',
+        data: redemption
+      });
+    } catch (error) {
+      console.error('Error actualizando estado:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Actualizar tracking de canje (admin)
+  static async updateRedemptionTracking(req: Request, res: Response): Promise<void> {
+    try {
+      const { redemptionId } = req.params;
+      const { trackingNumber } = req.body;
+
+      const redemption = await RewardRedemption.findByIdAndUpdate(
+        redemptionId,
+        { 
+          trackingNumber,
+          status: 'shipped' // Automáticamente cambia a enviado
+        },
+        { new: true }
+      ).populate('userId', 'name email')
+       .populate('rewardId', 'name description image');
+
+      if (!redemption) {
+        res.status(404).json({
+          success: false,
+          message: 'Canje no encontrado'
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        message: 'Tracking actualizado exitosamente',
+        data: redemption
+      });
+    } catch (error) {
+      console.error('Error actualizando tracking:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Obtener políticas de puntos (admin)
+  static async getPointsPolicies(req: Request, res: Response): Promise<void> {
+    try {
+      const policies = await PointsPolicy.find().sort({ action: 1 });
+      
+      res.json({
+        success: true,
+        data: policies
+      });
+    } catch (error) {
+      console.error('Error obteniendo políticas:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Actualizar políticas de puntos (admin)
+  static async updatePointsPolicies(req: Request, res: Response): Promise<void> {
+    try {
+      const { policies } = req.body;
+
+      // Eliminar políticas existentes
+      await PointsPolicy.deleteMany({});
+
+      // Crear nuevas políticas
+      const newPolicies = await PointsPolicy.insertMany(
+        policies.map((policy: any) => ({
+          ...policy,
+          createdBy: (req as any).user._id
+        }))
+      );
+
+      res.json({
+        success: true,
+        message: 'Políticas actualizadas exitosamente',
+        data: newPolicies
+      });
+    } catch (error) {
+      console.error('Error actualizando políticas:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Obtener estadísticas detalladas (admin)
+  static async getAdminStats(req: Request, res: Response): Promise<void> {
+    try {
+      // Obtener estadísticas básicas
+      const totalUsers = await User.countDocuments({ role: 'client' });
+      const activeUsers = await User.countDocuments({ 
+        role: 'client', 
+        lastLogin: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } 
+      });
+
+      // Obtener estadísticas de premios
+      const totalRewards = await Reward.countDocuments();
+      const activeRewards = await Reward.countDocuments({ isActive: true });
+
+      // Obtener estadísticas de canjes
+      const totalRedemptions = await RewardRedemption.countDocuments();
+      const pendingRedemptions = await RewardRedemption.countDocuments({ status: 'pending' });
+      const completedRedemptions = await RewardRedemption.countDocuments({ 
+        status: { $in: ['delivered', 'shipped'] } 
+      });
+
+      // Obtener estadísticas de reseñas
+      const totalReviews = await Review.countDocuments();
+      const averageRating = await Review.aggregate([
+        { $group: { _id: null, avgRating: { $avg: '$rating' } } }
+      ]);
+
+      // Obtener premios más populares
+      const topRewards = await RewardRedemption.aggregate([
+        { $group: { _id: '$rewardId', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 5 },
+        {
+          $lookup: {
+            from: 'rewards',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'reward'
+          }
+        },
+        { $unwind: '$reward' },
+        {
+          $project: {
+            name: '$reward.name',
+            redemptions: '$count',
+            points: '$reward.pointsRequired'
+          }
+        }
+      ]);
+
+      // Calcular crecimiento mensual (simulado por ahora)
+      const monthlyGrowth = 12.5; // Esto vendría de un cálculo real
+
+      // Actividad reciente (simulada por ahora)
+      const recentActivity = [
+        {
+          type: 'purchase',
+          description: 'Compra realizada por Juan Pérez',
+          points: 25,
+          date: new Date().toISOString()
+        },
+        {
+          type: 'review',
+          description: 'Reseña enviada por María García',
+          points: 10,
+          date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          type: 'referral',
+          description: 'Nuevo cliente referido por Carlos López',
+          points: 50,
+          date: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          type: 'redemption',
+          description: 'Premio canjeado por Ana Rodríguez',
+          points: -100,
+          date: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+        }
+      ];
+
+      // Calcular puntos totales (simulado)
+      const totalPoints = 45678;
+      const pointsIssued = 67890;
+      const pointsRedeemed = 22212;
+
+      const stats = {
+        totalUsers,
+        activeUsers,
+        totalPoints,
+        pointsIssued,
+        pointsRedeemed,
+        totalRewards,
+        activeRewards,
+        totalRedemptions,
+        pendingRedemptions,
+        completedRedemptions,
+        averageRating: averageRating[0]?.avgRating || 0,
+        totalReviews,
+        monthlyGrowth,
+        topRewards,
+        recentActivity
+      };
+
+      res.json({
+        success: true,
+        data: stats
+      });
+    } catch (error) {
+      console.error('Error obteniendo estadísticas:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

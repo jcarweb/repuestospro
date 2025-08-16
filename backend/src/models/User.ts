@@ -353,7 +353,7 @@ userSchema.methods.incrementLoginAttempts = async function(): Promise<void> {
     });
   }
 
-  const updates = { $inc: { loginAttempts: 1 } };
+  const updates: any = { $inc: { loginAttempts: 1 } };
   
   // Bloquear cuenta después de 5 intentos fallidos por 2 horas
   if (this.loginAttempts + 1 >= 5 && !this.isAccountLocked()) {
@@ -392,7 +392,7 @@ userSchema.pre('save', async function(next) {
 
   
   if (!this.referralCode) {
-    let referralCode: string;
+    let referralCode = '';
     let isUnique = false;
     
     while (!isUnique) {
