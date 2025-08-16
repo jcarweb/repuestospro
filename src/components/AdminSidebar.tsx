@@ -14,7 +14,8 @@ import {
   Settings,
   Key,
   Database,
-  Store
+  Store,
+  FolderOpen
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -55,6 +56,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
       name: 'Categorías',
       path: '/admin/categories',
       icon: Database
+    },
+    {
+      name: 'Subcategorías',
+      path: '/admin/subcategories',
+      icon: FolderOpen
     },
     {
       name: 'Promociones',

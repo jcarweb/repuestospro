@@ -11,6 +11,7 @@ export interface IPromotion extends Document {
   customText?: string;
   products: mongoose.Types.ObjectId[];
   categories?: mongoose.Types.ObjectId[];
+  store: mongoose.Types.ObjectId; // Referencia a la tienda
   startDate: Date;
   startTime: String; // HH:mm format
   endDate: Date;
@@ -111,6 +112,11 @@ const PromotionSchema = new Schema<IPromotion>({
     type: Schema.Types.ObjectId,
     ref: 'Category'
   }],
+  store: {
+    type: Schema.Types.ObjectId,
+    ref: 'Store',
+    required: true
+  },
   startDate: {
     type: Date,
     required: true

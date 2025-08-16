@@ -41,6 +41,7 @@ import AdminUsers from './pages/AdminUsers';
 import AdminStores from './pages/AdminStores';
 import AdminProducts from './pages/AdminProducts';
 import AdminCategories from './pages/AdminCategories';
+import AdminSubcategories from './pages/AdminSubcategories';
 import AdminPromotions from './pages/AdminPromotions';
 import AdminSales from './pages/AdminSales';
 import AdminLoyalty from './pages/AdminLoyalty';
@@ -139,6 +140,13 @@ function AppContent() {
               <AdminRoute>
                 <AdminLayout>
                   <AdminCategories />
+                </AdminLayout>
+              </AdminRoute>
+            } />
+            <Route path="/subcategories" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <AdminSubcategories />
                 </AdminLayout>
               </AdminRoute>
             } />

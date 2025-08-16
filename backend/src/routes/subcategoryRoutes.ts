@@ -14,4 +14,7 @@ router.put('/subcategories/:id', authMiddleware, adminMiddleware, SubcategoryCon
 router.delete('/subcategories/:id', authMiddleware, adminMiddleware, SubcategoryController.deleteSubcategory);
 router.patch('/subcategories/:id/toggle-status', authMiddleware, adminMiddleware, SubcategoryController.toggleSubcategoryStatus);
 
+// Ruta para estadísticas (solo admin)
+router.get('/admin/subcategories/stats', authMiddleware, adminMiddleware, SubcategoryController.getSubcategoryStats);
+
 export default router; 
