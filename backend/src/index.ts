@@ -111,7 +111,7 @@ app.get('/api/db-status', async (req, res) => {
 });
 
 // Configurar archivos estáticos para uploads
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static('../uploads'));
 
 // Rutas de la API
 app.use('/api/products', productRoutes);

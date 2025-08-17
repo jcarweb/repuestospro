@@ -15,9 +15,15 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false
+      },
+      '/uploads': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false
       }
     }
   },
+  publicDir: 'public',
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', 'lucide-react']
   },

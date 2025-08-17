@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { Award, Users, Gift, Star, Plus, Settings, Package, X } from 'lucide-react';
 import RewardForm from '../components/RewardForm';
 import RedemptionManagement from '../components/RedemptionManagement';
@@ -57,6 +58,9 @@ interface PointsPolicy {
 type TabType = 'overview' | 'rewards' | 'redemptions' | 'policies';
 
 const AdminLoyalty: React.FC = () => {
+  const { user, token } = useAuth();
+  
+
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [showRewardForm, setShowRewardForm] = useState(false);
   const [editingReward, setEditingReward] = useState<Reward | null>(null);
@@ -110,8 +114,17 @@ const AdminLoyalty: React.FC = () => {
 
   const loadRewards = async () => {
     try {
+      if (!token) {
+        return;
+      }
+      
       setIsLoading(true);
-      const response = await fetch('/api/loyalty/rewards');
+      const response = await fetch('/api/loyalty/rewards', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
       if (response.ok) {
         const data = await response.json();
         setRewards(data.data || []);
@@ -125,7 +138,11 @@ const AdminLoyalty: React.FC = () => {
 
   const loadRedemptions = async () => {
     try {
-      const response = await fetch('/api/loyalty/redemptions');
+      const response = await fetch('/api/loyalty/redemptions', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setRedemptions(data.data || []);
@@ -137,7 +154,11 @@ const AdminLoyalty: React.FC = () => {
 
   const loadPolicies = async () => {
     try {
-      const response = await fetch('/api/loyalty/policies');
+      const response = await fetch('/api/loyalty/policies', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setPolicies(data.data || []);
@@ -149,7 +170,11 @@ const AdminLoyalty: React.FC = () => {
 
   const loadDetailedStats = async () => {
     try {
-      const response = await fetch('/api/loyalty/admin/stats');
+      const response = await fetch('/api/loyalty/admin/stats', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setDetailedStats(data.data);
@@ -159,8 +184,15 @@ const AdminLoyalty: React.FC = () => {
     }
   };
 
+
+
   const handleCreateReward = async (rewardData: any) => {
     try {
+      if (!token) {
+        alert('Error: No hay token de autenticación. Por favor, inicia sesión nuevamente.');
+        return;
+      }
+      
       setIsLoading(true);
       const formData = new FormData();
       
@@ -174,19 +206,19 @@ const AdminLoyalty: React.FC = () => {
 
       const response = await fetch('/api/loyalty/rewards', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData
       });
 
       if (response.ok) {
         const result = await response.json();
-        console.log('Premio creado exitosamente:', result);
         await loadRewards();
         setShowRewardForm(false);
-        // Aquí podrías mostrar un mensaje de éxito
         alert('Premio creado exitosamente');
       } else {
         const errorData = await response.json();
-        console.error('Error en la respuesta:', errorData);
         alert(`Error al crear premio: ${errorData.message || 'Error desconocido'}`);
       }
     } catch (error) {
@@ -212,6 +244,9 @@ const AdminLoyalty: React.FC = () => {
 
       const response = await fetch(`/api/loyalty/rewards/${editingReward?._id}`, {
         method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData
       });
 
@@ -240,16 +275,26 @@ const AdminLoyalty: React.FC = () => {
       const response = await fetch(`/api/loyalty/redemptions/${redemptionId}/status`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ status, notes })
       });
 
       if (response.ok) {
         await loadRedemptions();
+        
+        // Mostrar mensaje de confirmación para estado entregado
+        if (status === 'delivered') {
+          alert('✅ Premio marcado como entregado exitosamente');
+        }
+      } else {
+        const errorData = await response.json();
+        alert(`Error al actualizar estado: ${errorData.message || 'Error desconocido'}`);
       }
     } catch (error) {
       console.error('Error actualizando estado:', error);
+      alert('Error al actualizar estado. Verifica la conexión.');
     }
   };
 
@@ -258,7 +303,8 @@ const AdminLoyalty: React.FC = () => {
       const response = await fetch(`/api/loyalty/redemptions/${redemptionId}/tracking`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ trackingNumber })
       });
@@ -277,7 +323,8 @@ const AdminLoyalty: React.FC = () => {
       const response = await fetch('/api/loyalty/policies', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ policies: newPolicies })
       });

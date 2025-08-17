@@ -378,7 +378,7 @@ export class LoyaltyController {
       // Manejar la subida de imagen
       let image = '';
       if (req.file) {
-        image = `/uploads/${req.file.filename}`;
+        image = `/uploads/rewards/${req.file.filename}`;
       }
 
       const reward = new Reward({
@@ -416,7 +416,7 @@ export class LoyaltyController {
       const updateData = req.body;
       
       if (req.file) {
-        updateData.image = `/uploads/${req.file.filename}`;
+        updateData.image = `/uploads/rewards/${req.file.filename}`;
       }
 
       // Convertir tipos de datos

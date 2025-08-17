@@ -55,7 +55,8 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
     { value: 'approved', label: 'Aprobado' },
     { value: 'rejected', label: 'Rechazado' },
     { value: 'shipped', label: 'Enviado' },
-    { value: 'delivered', label: 'Entregado' }
+    { value: 'delivered', label: 'Entregado' },
+    { value: 'delivered_only', label: 'Solo Entregados' }
   ];
 
   const statusColors = {
@@ -80,7 +81,14 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
       redemption.userId.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       redemption.rewardId.name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = statusFilter === 'all' || redemption.status === statusFilter;
+    let matchesStatus = false;
+    if (statusFilter === 'all') {
+      matchesStatus = true;
+    } else if (statusFilter === 'delivered_only') {
+      matchesStatus = redemption.status === 'delivered';
+    } else {
+      matchesStatus = redemption.status === statusFilter;
+    }
     
     return matchesSearch && matchesStatus;
   });
@@ -118,6 +126,20 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
     <div className="bg-white rounded-lg shadow">
       {/* Header con filtros */}
       <div className="p-6 border-b border-gray-200">
+        {/* Estadísticas rápidas */}
+        <div className="flex flex-wrap gap-4 mb-4">
+          <div className="flex items-center space-x-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+            <span>Total: {redemptions.length}</span>
+          </div>
+          <div className="flex items-center space-x-2 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
+            <span>Pendientes: {redemptions.filter(r => r.status === 'pending').length}</span>
+          </div>
+          <div className="flex items-center space-x-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+            <CheckCircle className="w-4 h-4" />
+            <span>Entregados: {redemptions.filter(r => r.status === 'delivered').length}</span>
+          </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Búsqueda */}
           <div className="flex-1">
@@ -243,6 +265,14 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
                         <StatusIcon className="w-3 h-3 mr-1" />
                         {statusOptions.find(opt => opt.value === redemption.status)?.label}
                       </span>
+                      {redemption.status === 'delivered' && (
+                        <div className="mt-1">
+                          <span className="inline-flex items-center px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Entregado
+                          </span>
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(redemption.createdAt)}
@@ -358,6 +388,8 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
                         className={`px-3 py-1 text-xs rounded-md ${
                           selectedRedemption.status === status
                             ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                            : status === 'delivered'
+                            ? 'bg-green-100 text-green-700 hover:bg-green-200 font-semibold'
                             : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                         }`}
                       >
@@ -366,6 +398,31 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
                     ))}
                   </div>
                 </div>
+
+                {/* Botón destacado para marcar como entregado */}
+                {selectedRedemption.status !== 'delivered' && (
+                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h5 className="text-sm font-medium text-green-800">Marcar como Entregado</h5>
+                        <p className="text-xs text-green-600 mt-1">
+                          Confirma que el premio ha sido entregado al cliente
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (window.confirm('¿Estás seguro de que quieres marcar este premio como entregado?')) {
+                            handleStatusChange(selectedRedemption._id, 'delivered');
+                          }
+                        }}
+                        className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
+                      >
+                        <CheckCircle className="w-4 h-4 inline mr-1" />
+                        Entregado
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Agregar tracking */}
                 {selectedRedemption.status === 'approved' && (
