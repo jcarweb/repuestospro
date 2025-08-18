@@ -22,8 +22,8 @@ export const config = {
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutos
   RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
 
-  // Configuración de bcrypt
-  BCRYPT_ROUNDS: parseInt(process.env.BCRYPT_ROUNDS || '12'),
+  // Configuración de argon2
+  ARGON2_MEMORY_COST: parseInt(process.env.ARGON2_MEMORY_COST || '65536'),
 
   // Configuración de Email (compatibilidad con SMTP y nuevas variables)
   EMAIL_HOST: process.env.EMAIL_HOST || process.env.SMTP_HOST || 'smtp.gmail.com',

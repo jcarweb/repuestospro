@@ -371,7 +371,8 @@ class EmailService {
             'Configuración de Google Analytics',
             'Gestión del sistema de lealtad y premios',
             'Configuración de currency, impuestos y tasas',
-            'Creación de otros usuarios administradores'
+            'Creación de otros usuarios administradores',
+            'Revisión y aprobación de solicitudes de publicidad'
           ],
           ctaText: 'Acceder al Panel de Administración'
         };
@@ -388,7 +389,8 @@ class EmailService {
             'Asignación y reasignación de delivery',
             'Configuración de cupones de descuento',
             'Manejo de mensajería privada con clientes',
-            'Control de valoraciones y comentarios'
+            'Control de valoraciones y comentarios',
+            'Solicitud de campañas publicitarias'
           ],
           ctaText: 'Acceder a la Gestión de Tienda'
         };
@@ -424,6 +426,392 @@ class EmailService {
           ctaText: 'Comenzar a Comprar'
         };
     }
+  }
+
+  // Métodos para solicitudes de publicidad
+  async sendAdvertisementRequestConfirmation(
+    email: string, 
+    campaignName: string, 
+    estimates: { estimatedReach: number; estimatedClicks: number; estimatedCost: number }
+  ): Promise<void> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Confirmación de Solicitud de Publicidad - PiezasYA</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .estimate-box { background: white; margin: 20px 0; padding: 20px; border-radius: 5px; border: 2px solid #667eea; }
+          .estimate-item { display: flex; justify-content: space-between; margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>¡Solicitud de Publicidad Recibida!</h1>
+            <p>PiezasYA - Campaña: ${campaignName}</p>
+          </div>
+          <div class="content">
+            <h2>Hola,</h2>
+            <p>Hemos recibido tu solicitud de publicidad para la campaña <strong>"${campaignName}"</strong>.</p>
+            
+            <p>Tu solicitud está siendo procesada y será revisada por nuestro equipo de administración. Te notificaremos cuando tengamos una respuesta.</p>
+            
+            <div class="estimate-box">
+              <h3>📊 Estimaciones de tu Campaña</h3>
+              <div class="estimate-item">
+                <span><strong>Alcance Estimado:</strong></span>
+                <span>${estimates.estimatedReach.toLocaleString()} impresiones</span>
+              </div>
+              <div class="estimate-item">
+                <span><strong>Clicks Estimados:</strong></span>
+                <span>${estimates.estimatedClicks.toLocaleString()} clicks</span>
+              </div>
+              <div class="estimate-item">
+                <span><strong>Costo Estimado:</strong></span>
+                <span>$${estimates.estimatedCost.toFixed(2)} USD</span>
+              </div>
+            </div>
+            
+            <p><strong>Próximos pasos:</strong></p>
+            <ol>
+              <li>Nuestro equipo revisará tu solicitud (1-2 días hábiles)</li>
+              <li>Te enviaremos una notificación de aprobación o rechazo</li>
+              <li>Si es aprobada, tu campaña será activada automáticamente</li>
+            </ol>
+            
+            <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+            
+            <p>Saludos,<br>El equipo de PiezasYA</p>
+          </div>
+          <div class="footer">
+            <p>Este es un email automático, por favor no respondas a este mensaje.</p>
+            <p>© 2025 PiezasYA. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    await this.transporter.sendMail({
+      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      to: email,
+      subject: `Solicitud de Publicidad Recibida - ${campaignName}`,
+      html
+    });
+  }
+
+  async sendAdvertisementRequestNotification(
+    adminEmail: string, 
+    campaignName: string, 
+    storeManagerId: string
+  ): Promise<void> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Nueva Solicitud de Publicidad - PiezasYA</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .alert { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+          .cta { background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🆕 Nueva Solicitud de Publicidad</h1>
+            <p>PiezasYA - Panel de Administración</p>
+          </div>
+          <div class="content">
+            <h2>Hola Administrador,</h2>
+            
+            <div class="alert">
+              <strong>Se ha recibido una nueva solicitud de publicidad que requiere tu revisión.</strong>
+            </div>
+            
+            <p><strong>Detalles de la solicitud:</strong></p>
+            <ul>
+              <li><strong>Campaña:</strong> ${campaignName}</li>
+              <li><strong>Gestor de Tienda ID:</strong> ${storeManagerId}</li>
+              <li><strong>Estado:</strong> Pendiente de revisión</li>
+            </ul>
+            
+            <p>Por favor, revisa la solicitud en el panel de administración y toma una decisión de aprobación o rechazo.</p>
+            
+            <a href="${config.FRONTEND_URL}/admin/advertisement-requests" class="cta">Revisar Solicitud</a>
+            
+            <p>Saludos,<br>Sistema de PiezasYA</p>
+          </div>
+          <div class="footer">
+            <p>Este es un email automático, por favor no respondas a este mensaje.</p>
+            <p>© 2025 PiezasYA. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    await this.transporter.sendMail({
+      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      to: adminEmail,
+      subject: 'Nueva Solicitud de Publicidad - Requiere Revisión',
+      html
+    });
+  }
+
+  async sendAdvertisementApproval(
+    email: string, 
+    campaignName: string, 
+    advertisementId: string, 
+    adminNotes?: string
+  ): Promise<void> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>¡Publicidad Aprobada! - PiezasYA</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .success-box { background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 5px; margin: 20px 0; }
+          .notes-box { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+          .cta { background: #28a745; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>✅ ¡Publicidad Aprobada!</h1>
+            <p>PiezasYA - Campaña: ${campaignName}</p>
+          </div>
+          <div class="content">
+            <h2>¡Excelentes noticias!</h2>
+            
+            <div class="success-box">
+              <h3>Tu solicitud de publicidad ha sido <strong>APROBADA</strong></h3>
+              <p>La campaña <strong>"${campaignName}"</strong> ha sido revisada y aprobada por nuestro equipo de administración.</p>
+            </div>
+            
+            <p><strong>Detalles de la publicidad:</strong></p>
+            <ul>
+              <li><strong>ID de Publicidad:</strong> ${advertisementId}</li>
+              <li><strong>Estado:</strong> Aprobada y lista para activación</li>
+              <li><strong>Próximo paso:</strong> Será activada automáticamente según la programación</li>
+            </ul>
+            
+            ${adminNotes ? `
+            <div class="notes-box">
+              <h4>📝 Notas del Administrador:</h4>
+              <p>${adminNotes}</p>
+            </div>
+            ` : ''}
+            
+            <p>Recibirás reportes periódicos sobre el rendimiento de tu campaña según las preferencias que configuraste.</p>
+            
+            <a href="${config.FRONTEND_URL}/store-manager/advertisement-requests" class="cta">Ver Detalles de la Campaña</a>
+            
+            <p>¡Gracias por confiar en PiezasYA para tu publicidad!</p>
+            
+            <p>Saludos,<br>El equipo de PiezasYA</p>
+          </div>
+          <div class="footer">
+            <p>Este es un email automático, por favor no respondas a este mensaje.</p>
+            <p>© 2025 PiezasYA. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    await this.transporter.sendMail({
+      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      to: email,
+      subject: `¡Publicidad Aprobada! - ${campaignName}`,
+      html
+    });
+  }
+
+  async sendAdvertisementRejection(
+    email: string, 
+    campaignName: string, 
+    rejectionReason: string
+  ): Promise<void> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Solicitud de Publicidad Rechazada - PiezasYA</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .rejection-box { background: #f8d7da; border: 1px solid #f5c6cb; padding: 20px; border-radius: 5px; margin: 20px 0; }
+          .reason-box { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+          .cta { background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>❌ Solicitud Rechazada</h1>
+            <p>PiezasYA - Campaña: ${campaignName}</p>
+          </div>
+          <div class="content">
+            <h2>Hola,</h2>
+            
+            <div class="rejection-box">
+              <h3>Tu solicitud de publicidad ha sido <strong>RECHAZADA</strong></h3>
+              <p>Lamentamos informarte que la campaña <strong>"${campaignName}"</strong> no ha sido aprobada por nuestro equipo de administración.</p>
+            </div>
+            
+            <div class="reason-box">
+              <h4>📝 Motivo del Rechazo:</h4>
+              <p>${rejectionReason}</p>
+            </div>
+            
+            <p><strong>¿Qué puedes hacer?</strong></p>
+            <ul>
+              <li>Revisar y corregir los puntos mencionados en el motivo del rechazo</li>
+              <li>Crear una nueva solicitud con las correcciones necesarias</li>
+              <li>Contactar a nuestro equipo si tienes dudas sobre los requisitos</li>
+            </ul>
+            
+            <a href="${config.FRONTEND_URL}/store-manager/advertisement-requests" class="cta">Crear Nueva Solicitud</a>
+            
+            <p>Estamos aquí para ayudarte a crear una campaña exitosa. No dudes en contactarnos si necesitas orientación.</p>
+            
+            <p>Saludos,<br>El equipo de PiezasYA</p>
+          </div>
+          <div class="footer">
+            <p>Este es un email automático, por favor no respondas a este mensaje.</p>
+            <p>© 2025 PiezasYA. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    await this.transporter.sendMail({
+      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      to: email,
+      subject: `Solicitud de Publicidad Rechazada - ${campaignName}`,
+      html
+    });
+  }
+
+  async sendAdvertisementReport(
+    email: string,
+    campaignName: string,
+    reportData: {
+      impressions: number;
+      clicks: number;
+      conversions: number;
+      spend: number;
+      ctr: number;
+      cpm: number;
+      cpc: number;
+      period: string;
+    }
+  ): Promise<void> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Reporte de Campaña - PiezasYA</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+          .metric-box { background: white; padding: 15px; border-radius: 5px; border-left: 4px solid #667eea; text-align: center; }
+          .metric-value { font-size: 24px; font-weight: bold; color: #667eea; }
+          .metric-label { font-size: 12px; color: #666; margin-top: 5px; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>📊 Reporte de Campaña</h1>
+            <p>PiezasYA - ${campaignName}</p>
+            <p>Período: ${reportData.period}</p>
+          </div>
+          <div class="content">
+            <h2>Hola,</h2>
+            <p>Aquí tienes el reporte de rendimiento de tu campaña <strong>"${campaignName}"</strong> para el período ${reportData.period}.</p>
+            
+            <div class="metrics-grid">
+              <div class="metric-box">
+                <div class="metric-value">${reportData.impressions.toLocaleString()}</div>
+                <div class="metric-label">Impresiones</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-value">${reportData.clicks.toLocaleString()}</div>
+                <div class="metric-label">Clicks</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-value">${reportData.conversions.toLocaleString()}</div>
+                <div class="metric-label">Conversiones</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-value">$${reportData.spend.toFixed(2)}</div>
+                <div class="metric-label">Gasto</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-value">${reportData.ctr.toFixed(2)}%</div>
+                <div class="metric-label">CTR</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-value">$${reportData.cpm.toFixed(2)}</div>
+                <div class="metric-label">CPM</div>
+              </div>
+            </div>
+            
+            <p><strong>Resumen:</strong></p>
+            <ul>
+              <li>Tu campaña ha alcanzado ${reportData.impressions.toLocaleString()} personas</li>
+              <li>Ha generado ${reportData.clicks.toLocaleString()} clicks</li>
+              <li>El costo por click promedio es de $${reportData.cpc.toFixed(2)}</li>
+              <li>El gasto total del período es de $${reportData.spend.toFixed(2)}</li>
+            </ul>
+            
+            <p>Saludos,<br>El equipo de PiezasYA</p>
+          </div>
+          <div class="footer">
+            <p>Este es un email automático, por favor no respondas a este mensaje.</p>
+            <p>© 2025 PiezasYA. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    await this.transporter.sendMail({
+      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      to: email,
+      subject: `Reporte de Campaña - ${campaignName} (${reportData.period})`,
+      html
+    });
   }
 }
 

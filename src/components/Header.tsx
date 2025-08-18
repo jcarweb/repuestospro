@@ -27,6 +27,7 @@ const Header: React.FC = () => {
   const { getFavoritesCount } = useFavorites();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const cartItemCount = getItemCount();
@@ -140,7 +141,7 @@ const Header: React.FC = () => {
             {isAuthenticated ? (
               <div className="relative">
                 <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center space-x-2 p-2 text-[#333333] hover:text-[#FFC300] transition-colors"
                 >
                   <User className="w-6 h-6" />
@@ -150,7 +151,7 @@ const Header: React.FC = () => {
                 </button>
 
                 {/* Dropdown Menu */}
-                {isMenuOpen && (
+                {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                     <Link
                       to="/profile"

@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import bcrypt from 'bcryptjs';
+import * as argon2 from 'argon2';
 import crypto from 'crypto';
 
 export interface IUser extends Document {
@@ -143,7 +143,7 @@ const userSchema = new Schema<IUser>({
   pin: {
     type: String,
     minlength: 4,
-    maxlength: 60 // Aumentado para permitir el hash de bcrypt
+    maxlength: 60 // Aumentado para permitir el hash de argon2
   },
   fingerprintData: {
     type: String,
@@ -332,12 +332,12 @@ userSchema.index({ stores: 1 });
 
 // Métodos de instancia
 userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
+  return argon2.verify(this.password, candidatePassword);
 };
 
 userSchema.methods.comparePin = async function(candidatePin: string): Promise<boolean> {
   if (!this.pin) return false;
-  return bcrypt.compare(candidatePin, this.pin);
+  return argon2.verify(this.pin, candidatePin);
 };
 
 userSchema.methods.isAccountLocked = function(): boolean {
@@ -407,15 +407,13 @@ userSchema.pre('save', async function(next) {
   }
 
   // Hash password si ha sido modificado
-  if (this.isModified('password')) {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+  if (this.isModified('password') && this.password) {
+    this.password = await argon2.hash(this.password);
   }
 
   // Hash PIN si ha sido modificado
-  if (this.isModified('pin')) {
-    const salt = await bcrypt.genSalt(10);
-    this.pin = await bcrypt.hash(this.pin, salt);
+  if (this.isModified('pin') && this.pin) {
+    this.pin = await argon2.hash(this.pin);
   }
 
 

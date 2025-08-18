@@ -43,6 +43,7 @@ import AdminProducts from './pages/AdminProducts';
 import AdminCategories from './pages/AdminCategories';
 import AdminSubcategories from './pages/AdminSubcategories';
 import AdminPromotions from './pages/AdminPromotions';
+import AdminAdvertisements from './pages/AdminAdvertisements';
 import AdminSales from './pages/AdminSales';
 import AdminLoyalty from './pages/AdminLoyalty';
 import AdminAnalytics from './pages/AdminAnalytics';
@@ -154,6 +155,13 @@ function AppContent() {
               <AdminRoute>
                 <AdminLayout>
                   <AdminPromotions />
+                </AdminLayout>
+              </AdminRoute>
+            } />
+            <Route path="/advertisements" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <AdminAdvertisements />
                 </AdminLayout>
               </AdminRoute>
             } />
