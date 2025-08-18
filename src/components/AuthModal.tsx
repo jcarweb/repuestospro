@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics';
 import { useLocation } from '../hooks/useLocation';
 import LocationPermissionModal from './LocationPermissionModal';
+import TwoFactorVerification from './TwoFactorVerification';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -19,6 +20,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [error, setError] = useState('');
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [locationGranted, setLocationGranted] = useState(false);
+  const [showTwoFactor, setShowTwoFactor] = useState(false);
+  const [tempToken, setTempToken] = useState('');
+  const [userData, setUserData] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,7 +32,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     phone: ''
   });
   
-  const { loginAsync, user } = useAuth();
+  const { loginAsync, login, user } = useAuth();
   const { location } = useLocation();
   
   // Google Analytics hook
@@ -59,6 +63,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     onClose();
   };
 
+  const handleTwoFactorSuccess = (user: any, token: string) => {
+    login(user, token);
+    setShowTwoFactor(false);
+    onClose();
+  };
+
+  const handleTwoFactorClose = () => {
+    setShowTwoFactor(false);
+    setTempToken('');
+    setUserData(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -80,6 +96,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           onClose();
         } catch (error: any) {
           console.error('❌ Error en login:', error);
+          
+          // Verificar si es un error de 2FA requerido
+          if (error.message === '2FA_REQUIRED' && (error as any).requiresTwoFactor) {
+            console.log('🔐 2FA requerido en AuthModal');
+            console.log('📋 Datos del error:', {
+              userData: (error as any).userData,
+              tempToken: (error as any).tempToken ? 'existe' : 'no existe'
+            });
+            setError(''); // Limpiar cualquier error previo
+            setUserData((error as any).userData);
+            setTempToken((error as any).tempToken);
+            setShowTwoFactor(true);
+            setLoading(false);
+            return;
+          }
+          
           setError(error.message || 'Error en el inicio de sesión');
         }
       } else if (mode === 'register') {
@@ -552,6 +584,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         isOpen={showLocationModal}
         onLocationGranted={handleLocationGranted}
         onLocationDenied={handleLocationDenied}
+      />
+
+      {/* Modal de verificación 2FA */}
+      <TwoFactorVerification
+        isOpen={showTwoFactor}
+        onClose={handleTwoFactorClose}
+        onSuccess={handleTwoFactorSuccess}
+        email={formData.email}
+        tempToken={tempToken}
       />
     </>
   );

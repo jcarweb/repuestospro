@@ -4,7 +4,7 @@ const axios = require('axios');
 const API_URL = 'http://localhost:5000/api';
 const EMAIL = 'admin@repuestospro.com';
 const PASSWORD = 'Test123!';
-const TWO_FA_CODE = '040944'; // Código actual del usuario admin
+const TWO_FA_CODE = '848982'; // Código actual del usuario admin
 
 async function test2FACompleteFlow() {
   try {

@@ -146,6 +146,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error(data.message || 'Error en el inicio de sesión');
       }
 
+      // Verificar si requiere 2FA
+      if (data.requiresTwoFactor) {
+        console.log('🔐 2FA requerido, lanzando error especial');
+        const error = new Error('2FA_REQUIRED');
+        (error as any).requiresTwoFactor = true;
+        (error as any).tempToken = data.tempToken;
+        (error as any).userData = data.data.user;
+        throw error;
+      }
+
       console.log('✅ Login exitoso, guardando datos...');
       login(data.data.user, data.data.token);
     } catch (error) {

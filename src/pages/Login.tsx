@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { User, Lock, Eye, EyeOff } from 'lucide-react';
 import TwoFactorVerification from '../components/TwoFactorVerification';
+import Test2FAModal from '../components/Test2FAModal';
+import Debug2FAModal from '../components/Debug2FAModal';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -24,40 +26,43 @@ const Login: React.FC = () => {
     try {
       console.log('🔐 Iniciando login...', { email });
       
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-      console.log('📡 Respuesta del servidor:', data);
-
-      if (!response.ok) {
-        console.error('❌ Error en login:', data);
-        throw new Error(data.message || 'Error en el inicio de sesión');
-      }
-
-      // Verificar si requiere 2FA
-      if (data.requiresTwoFactor) {
-        console.log('🔐 2FA requerido, mostrando modal...');
-        console.log('🔍 Estado del modal 2FA:', { showTwoFactor, tempToken: data.tempToken ? 'existe' : 'no existe' });
-        setUserData(data.data.user);
-        setTempToken(data.tempToken);
-        setShowTwoFactor(true);
-        setLoading(false);
-        return;
-      }
-
-      // Login normal exitoso
+      // Usar loginAsync del AuthContext
+      await loginAsync(email, password);
+      
+      // Si llegamos aquí, el login fue exitoso sin 2FA
       console.log('✅ Login exitoso, navegando...');
-      login(data.data.user, data.data.token);
       navigate('/admin/dashboard');
+      
     } catch (error: any) {
       console.error('❌ Error en handleSubmit:', error);
-      setError(error.message || 'Error al iniciar sesión');
+      
+      // Verificar si es un error de 2FA requerido
+      console.log('🔍 Verificando tipo de error:', error.message);
+      console.log('🔍 Error completo:', error);
+      
+      if (error.message === '2FA_REQUIRED' && (error as any).requiresTwoFactor) {
+        console.log('🔐 2FA requerido, mostrando modal...');
+        console.log('📋 Datos del error:', {
+          userData: (error as any).userData,
+          tempToken: (error as any).tempToken ? 'existe' : 'no existe'
+        });
+        setError(''); // Limpiar cualquier error previo
+        setUserData((error as any).userData);
+        setTempToken((error as any).tempToken);
+        setShowTwoFactor(true);
+        console.log('🔍 Estado showTwoFactor establecido a true');
+        setLoading(false);
+        return;
+      } else {
+        console.log('❌ No es error de 2FA requerido');
+        console.log('❌ Error message:', error.message);
+        console.log('❌ requiresTwoFactor:', (error as any).requiresTwoFactor);
+      }
+      
+      // Solo mostrar error si no es 2FA requerido
+      if (error.message !== '2FA_REQUIRED') {
+        setError(error.message || 'Error al iniciar sesión');
+      }
     } finally {
       setLoading(false);
     }
@@ -75,6 +80,12 @@ const Login: React.FC = () => {
     setUserData(null);
   };
 
+  console.log('🔍 Login render - Estado del modal:', { 
+    showTwoFactor, 
+    tempToken: tempToken ? 'existe' : 'no existe',
+    userData: userData ? 'existe' : 'no existe'
+  });
+  
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -158,6 +169,27 @@ const Login: React.FC = () => {
                 )}
               </button>
             </div>
+
+            {/* Botón de prueba para forzar modal */}
+            <div>
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('🧪 Botón de prueba clickeado');
+                  setShowTwoFactor(true);
+                  setTempToken('test-token');
+                  setUserData({ email: 'test@test.com' });
+                }}
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                🧪 Probar Modal 2FA
+              </button>
+            </div>
+
+            {/* Componente de debug */}
+            <div className="mt-4">
+              <Debug2FAModal />
+            </div>
           </form>
 
           <div className="mt-6">
@@ -176,6 +208,12 @@ const Login: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de prueba */}
+      <Test2FAModal
+        isOpen={showTwoFactor}
+        onClose={handleTwoFactorClose}
+      />
 
       {/* Modal de verificación 2FA */}
       <TwoFactorVerification

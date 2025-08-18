@@ -135,7 +135,7 @@ const TwoFactorVerification: React.FC<TwoFactorVerificationProps> = ({
             El código cambia cada 30 segundos
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            Código de prueba: 040944
+            Código de prueba: 612927
           </p>
         </div>
       </div>
