@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Settings, Globe, Moon, Sun, Bell, Eye, EyeOff, Palette } from 'lucide-react';
+import { Settings, Globe, Moon, Sun, Bell, Eye, EyeOff, Palette, Activity } from 'lucide-react';
+import ActivityHistory from '../components/ActivityHistory';
+import { useLayoutContext } from '../hooks/useLayoutContext';
+import { profileService } from '../services/profileService';
+import type { UserProfile } from '../services/profileService';
 
 interface SettingsState {
   theme: string;
@@ -19,6 +23,9 @@ interface SettingsState {
 
 const Configuration: React.FC = () => {
   const { user } = useAuth();
+  const { containerClasses, contentClasses } = useLayoutContext();
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [settings, setSettings] = useState<SettingsState>({
     theme: 'light',
     language: 'es',
@@ -33,15 +40,77 @@ const Configuration: React.FC = () => {
       showPhone: false
     }
   });
+  const [showActivityHistory, setShowActivityHistory] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const updateNotificationSetting = (key: keyof SettingsState['notifications'], value: boolean) => {
-    setSettings(prev => ({
-      ...prev,
-      notifications: {
-        ...prev.notifications,
-        [key]: value
+  // Cargar perfil del usuario
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        setLoading(true);
+        const userProfile = await profileService.getProfile();
+        setProfile(userProfile);
+        
+        // Actualizar configuraciones con datos del perfil
+        setSettings(prev => ({
+          ...prev,
+          notifications: {
+            email: userProfile.emailNotifications,
+            push: userProfile.pushNotifications,
+            sms: userProfile.marketingEmails
+          }
+        }));
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        setMessage({ type: 'error', text: 'Error al cargar el perfil' });
+      } finally {
+        setLoading(false);
       }
-    }));
+    };
+
+    loadProfile();
+  }, []);
+
+  const updateNotificationSetting = async (key: keyof SettingsState['notifications'], value: boolean) => {
+    try {
+      setLoading(true);
+      
+      // Actualizar estado local
+      setSettings(prev => ({
+        ...prev,
+        notifications: {
+          ...prev.notifications,
+          [key]: value
+        }
+      }));
+
+      // Actualizar en el backend
+      const notificationData = {
+        emailNotifications: key === 'email' ? value : settings.notifications.email,
+        pushNotifications: key === 'push' ? value : settings.notifications.push,
+        marketingEmails: key === 'sms' ? value : settings.notifications.sms
+      };
+
+      const result = await profileService.updateNotifications(notificationData);
+      setMessage({ type: 'success', text: result.message });
+    } catch (error: any) {
+      console.error('Error updating notification settings:', error);
+      setMessage({ 
+        type: 'error', 
+        text: error.response?.data?.message || 'Error al actualizar las notificaciones' 
+      });
+      
+      // Revertir cambios en caso de error
+      setSettings(prev => ({
+        ...prev,
+        notifications: {
+          ...prev.notifications,
+          [key]: !value
+        }
+      }));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updatePrivacySetting = (key: keyof SettingsState['privacy'], value: boolean | string) => {
@@ -54,9 +123,35 @@ const Configuration: React.FC = () => {
     }));
   };
 
+  if (loading && !profile) {
+    return (
+      <div className={containerClasses}>
+        <div className={contentClasses}>
+          <div className="bg-white shadow rounded-lg p-6">
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-2 text-gray-600">Cargando configuración...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className={containerClasses}>
+      <div className={contentClasses}>
+        {/* Mensaje de estado */}
+        {message && (
+          <div className={`mb-4 p-4 rounded-lg ${
+            message.type === 'success' 
+              ? 'bg-green-50 border border-green-200 text-green-800' 
+              : 'bg-red-50 border border-red-200 text-red-800'
+          }`}>
+            {message.text}
+          </div>
+        )}
+
         <div className="bg-white shadow rounded-lg">
           {/* Header */}
           <div className="px-6 py-4 border-b border-gray-200">
@@ -273,6 +368,30 @@ const Configuration: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Activity History Section */}
+        <div className="mt-8 bg-white shadow rounded-lg">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Activity className="w-5 h-5 text-gray-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Historial de Actividades</h3>
+              </div>
+              <button
+                onClick={() => setShowActivityHistory(!showActivityHistory)}
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
+                {showActivityHistory ? 'Ocultar' : 'Ver historial'}
+              </button>
+            </div>
+          </div>
+          
+          {showActivityHistory && (
+            <div className="px-6 py-4">
+              <ActivityHistory />
+            </div>
+          )}
         </div>
       </div>
     </div>

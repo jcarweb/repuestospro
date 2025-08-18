@@ -305,7 +305,7 @@ staffMiddleware: Permite cualquier rol excepto 'client'
 ### Variables de Entorno Requeridas
 ```env
 # Base de datos
-MONGODB_URI=mongodb://localhost:27017/repuestospro
+MONGODB_URI=mongodb://localhost:27017/PiezasYA
 
 # JWT
 JWT_SECRET=your-secret-key
@@ -315,7 +315,7 @@ JWT_EXPIRES_IN=7d
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_SECURE=false
-EMAIL_USER=noreply@repuestospro.com
+EMAIL_USER=noreply@PiezasYA.com
 EMAIL_PASS=your-email-password
 
 # Google OAuth
@@ -329,7 +329,7 @@ VITE_API_URL=http://localhost:5000/api
 ## Estructura de Archivos
 
 ```
-repuestospro/
+PiezasYA/
 ├── src/                    # Frontend React
 │   ├── components/         # Componentes reutilizables
 │   ├── pages/             # Páginas de la aplicación

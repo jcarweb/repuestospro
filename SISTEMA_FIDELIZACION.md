@@ -1,8 +1,8 @@
-# Sistema de Fidelización - RepuestosPro
+# Sistema de Fidelización - PiezasYA
 
 ## 📋 Descripción General
 
-El sistema de fidelización de RepuestosPro permite a los administradores gestionar un programa completo de lealtad para clientes, incluyendo la creación de premios, gestión de canjes y configuración de políticas de puntos.
+El sistema de fidelización de PiezasYA permite a los administradores gestionar un programa completo de lealtad para clientes, incluyendo la creación de premios, gestión de canjes y configuración de políticas de puntos.
 
 ## 🎯 Funcionalidades Principales
 
@@ -198,4 +198,4 @@ Para dudas o problemas con el sistema de fidelización:
 
 **Versión**: 1.0.0  
 **Última actualización**: Diciembre 2024  
-**Desarrollado por**: Equipo RepuestosPro
+**Desarrollado por**: Equipo PiezasYA

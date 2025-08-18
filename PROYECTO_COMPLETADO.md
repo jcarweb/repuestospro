@@ -1,8 +1,8 @@
-# 🎉 RepuestosPro - Proyecto Completado
+# 🎉 PiezasYA - Proyecto Completado
 
 ## ✅ **Estado del Proyecto**
 
-El proyecto **RepuestosPro** ha sido **completamente configurado** y está listo para desarrollo. Se ha creado un ecommerce multiplataforma para repuestos de carros, motos y camiones con las siguientes características:
+El proyecto **PiezasYA** ha sido **completamente configurado** y está listo para desarrollo. Se ha creado un ecommerce multiplataforma para repuestos de carros, motos y camiones con las siguientes características:
 
 ## 🏗️ **Arquitectura Implementada**
 
@@ -167,7 +167,7 @@ JWT_SECRET=tu-super-secret-jwt-key
 
 ## 🎉 **Conclusión**
 
-El proyecto **RepuestosPro** está **100% funcional** y listo para desarrollo. Se ha implementado:
+El proyecto **PiezasYA** está **100% funcional** y listo para desarrollo. Se ha implementado:
 
 - ✅ Arquitectura completa frontend/backend
 - ✅ Configuración de desarrollo optimizada

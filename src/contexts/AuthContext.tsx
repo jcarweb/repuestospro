@@ -86,8 +86,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const checkAuthStatus = async (): Promise<boolean> => {
-    // Implementación simplificada
-    return !!user && !!token;
+    try {
+      const storedToken = localStorage.getItem('token');
+      if (!storedToken) {
+        return false;
+      }
+
+      // Verificar token con el backend
+      const response = await fetch('http://localhost:5000/api/auth/verify', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${storedToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        setToken(storedToken);
+        return true;
+      } else {
+        // Token inválido, limpiar datos
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        setToken(null);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+      return false;
+    }
   };
 
   const login = (userData: User, authToken: string) => {

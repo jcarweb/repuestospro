@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo    Iniciando RepuestosPro
+echo    Iniciando PiezasYA
 echo ========================================
 echo.
 

@@ -27,6 +27,7 @@ router.get('/google/error', AuthController.googleAuthError);
 // Rutas protegidas (requieren autenticación)
 router.use(authMiddleware);
 
+router.get('/verify', AuthController.verifyToken);
 router.post('/logout', AuthController.logout);
 router.get('/profile', AuthController.getProfile);
 router.put('/profile', AuthController.updateProfile);

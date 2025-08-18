@@ -325,9 +325,9 @@ Este proyecto está bajo la Licencia MIT.
 
 ## 📞 Contacto
 
-- **Email**: info@repuestospro.com
-- **Teléfono**: +1 (555) 123-4567
-- **Dirección**: 123 Calle Principal, Ciudad, Estado 12345
+- **Email**: jcarweb.designer@gmail.com
+- **Teléfono**: +58 (412) 012-3044
+- **Dirección**: Caracas - Venezuela
 
 ## 🙏 Agradecimientos
 
@@ -340,4 +340,4 @@ Este proyecto está bajo la Licencia MIT.
 
 Desarrollado con ❤️ para la comunidad automotriz
 
-**RepuestosPro** - Tu tienda de confianza para repuestos de vehículos
+**PiezasYA** - Tu tienda de confianza para repuestos de vehículos

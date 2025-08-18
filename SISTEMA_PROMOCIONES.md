@@ -328,4 +328,4 @@ npm run clean:test
 
 **Versión**: 1.0.0  
 **Última actualización**: Diciembre 2024  
-**Mantenido por**: Equipo de Desarrollo RepuestosPro
+**Mantenido por**: Equipo de Desarrollo PiezasYA

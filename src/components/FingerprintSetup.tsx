@@ -51,7 +51,7 @@ const FingerprintSetup: React.FC<FingerprintSetupProps> = ({ onFingerprintSet, o
       const publicKeyOptions: PublicKeyCredentialCreationOptions = {
         challenge,
         rp: {
-          name: 'RepuestosPro',
+          name: 'PiezasYA',
           id: window.location.hostname
         },
         user: {

@@ -488,8 +488,8 @@ const Loyalty: React.FC = () => {
            isOpen={showShareModal}
            onClose={() => setShowShareModal(false)}
            referralCode={stats.referralCode}
-           shareUrl="https://repuestospro.com"
-           shareText="¡Únete a RepuestosPro y gana puntos con mi código de referido!"
+           shareUrl="https://PiezasYA.com"
+           shareText="¡Únete a PiezasYA y gana puntos con mi código de referido!"
          />
        )}
 

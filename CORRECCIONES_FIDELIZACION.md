@@ -159,4 +159,4 @@ El sistema de fidelización ahora tiene:
 
 **Estado:** ✅ **CORREGIDO Y FUNCIONAL**  
 **Fecha:** Diciembre 2024  
-**Desarrollado por:** Equipo RepuestosPro
+**Desarrollado por:** Equipo PiezasYA

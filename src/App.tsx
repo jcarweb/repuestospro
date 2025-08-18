@@ -207,6 +207,28 @@ function AppContent() {
                 </AdminLayout>
               </AdminRoute>
             } />
+            {/* Rutas de perfil para admin */}
+            <Route path="/profile" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <Profile />
+                </AdminLayout>
+              </AdminRoute>
+            } />
+            <Route path="/security" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <Security />
+                </AdminLayout>
+              </AdminRoute>
+            } />
+            <Route path="/configuration" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <Configuration />
+                </AdminLayout>
+              </AdminRoute>
+            } />
           </Routes>
         } />
 
@@ -353,6 +375,23 @@ function AppContent() {
                       <StoreSetup />
                     </StoreManagerRoute>
                   } />
+                  
+                  {/* Rutas de perfil para gestor de tienda */}
+                  <Route path="/store-manager/profile" element={
+                    <StoreManagerRoute>
+                      <Profile />
+                    </StoreManagerRoute>
+                  } />
+                  <Route path="/store-manager/security" element={
+                    <StoreManagerRoute>
+                      <Security />
+                    </StoreManagerRoute>
+                  } />
+                  <Route path="/store-manager/configuration" element={
+                    <StoreManagerRoute>
+                      <Configuration />
+                    </StoreManagerRoute>
+                  } />
 
                   {/* Rutas de delivery */}
                   <Route path="/delivery" element={
@@ -398,6 +437,23 @@ function AppContent() {
                   <Route path="/delivery/profile" element={
                     <DeliveryRoute>
                       <DeliveryProfile />
+                    </DeliveryRoute>
+                  } />
+                  
+                  {/* Rutas de perfil para delivery */}
+                  <Route path="/delivery/user-profile" element={
+                    <DeliveryRoute>
+                      <Profile />
+                    </DeliveryRoute>
+                  } />
+                  <Route path="/delivery/security" element={
+                    <DeliveryRoute>
+                      <Security />
+                    </DeliveryRoute>
+                  } />
+                  <Route path="/delivery/configuration" element={
+                    <DeliveryRoute>
+                      <Configuration />
                     </DeliveryRoute>
                   } />
                 </Routes>

@@ -1,8 +1,8 @@
-# Sistema de Roles Actualizado - RepuestosPro
+# Sistema de Roles Actualizado - PiezasYA
 
 ## Resumen de Cambios
 
-Se ha actualizado completamente el sistema de roles de la aplicación RepuestosPro para implementar las directrices especificadas. Los cambios incluyen la reestructuración de roles, nuevos campos específicos para cada rol, middlewares de autorización mejorados y funcionalidades específicas por rol.
+Se ha actualizado completamente el sistema de roles de la aplicación PiezasYA para implementar las directrices especificadas. Los cambios incluyen la reestructuración de roles, nuevos campos específicos para cada rol, middlewares de autorización mejorados y funcionalidades específicas por rol.
 
 ## Roles Implementados
 

@@ -73,7 +73,7 @@ export class AuthController {
 
       // Enviar email de verificación
       try {
-        await emailService.sendEmailVerification(user.email, emailVerificationToken, user.name);
+        await emailService.sendEmailVerificationEmail(user.email, emailVerificationToken);
       } catch (emailError) {
         console.error('Error enviando email de verificación:', emailError);
         // No fallar el registro si el email falla
@@ -150,8 +150,8 @@ export class AuthController {
         return;
       }
 
-      // Verificar si el email está verificado
-      if (!user.isEmailVerified) {
+      // Verificar si el email está verificado (solo en producción)
+      if (!user.isEmailVerified && config.NODE_ENV === 'production') {
         res.status(403).json({
           success: false,
           message: 'Debes verificar tu email antes de poder iniciar sesión. Revisa tu bandeja de entrada o solicita un nuevo enlace de verificación.',
@@ -863,7 +863,7 @@ export class AuthController {
 
       // Enviar email de verificación
       try {
-        await emailService.sendEmailVerification(user.email, emailVerificationToken, user.name);
+        await emailService.sendEmailVerificationEmail(user.email, emailVerificationToken);
       } catch (emailError) {
         console.error('Error enviando email de verificación:', emailError);
         res.status(500).json({
@@ -937,8 +937,8 @@ export class AuthController {
         return;
       }
 
-      // Verificar si el email está verificado
-      if (!user.isEmailVerified) {
+      // Verificar si el email está verificado (solo en producción)
+      if (!user.isEmailVerified && config.NODE_ENV === 'production') {
         res.status(403).json({
           success: false,
           message: 'Debes verificar tu email antes de poder iniciar sesión. Revisa tu bandeja de entrada o solicita un nuevo enlace de verificación.',
@@ -1000,8 +1000,8 @@ export class AuthController {
 
       // Generar secreto
       const secret = speakeasy.generateSecret({
-        name: `RepuestosPro (${user.email})`,
-        issuer: 'RepuestosPro'
+        name: `PiezasYA (${user.email})`,
+        issuer: 'PiezasYA'
       });
 
       // Generar QR code
@@ -1473,6 +1473,54 @@ export class AuthController {
       });
     } catch (error) {
       console.error('Error regenerando códigos de respaldo:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Verificar token
+  static async verifyToken(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user._id;
+      const user = await User.findById(userId).select('-password -twoFactorSecret -backupCodes');
+
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        message: 'Token válido',
+        data: {
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            role: user.role,
+            isEmailVerified: user.isEmailVerified,
+            isActive: user.isActive,
+            pin: user.pin,
+            fingerprintEnabled: user.fingerprintEnabled,
+            twoFactorEnabled: user.twoFactorEnabled,
+            emailNotifications: user.emailNotifications,
+            pushNotifications: user.pushNotifications,
+            marketingEmails: user.marketingEmails,
+            points: user.points,
+            loyaltyLevel: user.loyaltyLevel,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error verificando token:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

@@ -1,8 +1,8 @@
-# 🚀 Instrucciones Finales - RepuestosPro
+# 🚀 Instrucciones Finales - PiezasYA
 
 ## ✅ **Proyecto Completado**
 
-El proyecto **RepuestosPro** está **100% configurado** y listo para ejecutarse. Se ha solucionado el error de TypeScript en el modelo de Product.
+El proyecto **PiezasYA** está **100% configurado** y listo para ejecutarse. Se ha solucionado el error de TypeScript en el modelo de Product.
 
 ## 🎯 **Cómo Ejecutar el Proyecto**
 

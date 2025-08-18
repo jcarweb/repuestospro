@@ -1,4 +1,4 @@
-# 🚀 Guía Rápida - RepuestosPro
+# 🚀 Guía Rápida - PiezasYA
 
 ## ✅ Problema Solucionado
 

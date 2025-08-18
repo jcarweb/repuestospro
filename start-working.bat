@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo    RepuestosPro - Script Funcional
+echo    PiezasYA - Script Funcional
 echo ========================================
 echo.
 

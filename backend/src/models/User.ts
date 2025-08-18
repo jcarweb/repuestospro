@@ -110,7 +110,8 @@ const userSchema = new Schema<IUser>({
     required: function(this: IUser) {
       return !this.googleId; // Password no requerido si tiene Google ID
     },
-    minlength: 6
+    minlength: 6,
+    maxlength: 100 // Aumentado para permitir el hash de argon2
   },
   phone: {
     type: String,
@@ -143,7 +144,7 @@ const userSchema = new Schema<IUser>({
   pin: {
     type: String,
     minlength: 4,
-    maxlength: 60 // Aumentado para permitir el hash de argon2
+    maxlength: 100 // Aumentado para permitir el hash de argon2 (más largo)
   },
   fingerprintData: {
     type: String,
@@ -332,12 +333,32 @@ userSchema.index({ stores: 1 });
 
 // Métodos de instancia
 userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
-  return argon2.verify(this.password, candidatePassword);
+  try {
+    // Verificar si la contraseña almacenada tiene el formato correcto de Argon2
+    if (!this.password || !this.password.startsWith('$argon2')) {
+      console.error('Password format error:', this.password);
+      return false;
+    }
+    return await argon2.verify(this.password, candidatePassword);
+  } catch (error) {
+    console.error('Error comparing password:', error);
+    return false;
+  }
 };
 
 userSchema.methods.comparePin = async function(candidatePin: string): Promise<boolean> {
   if (!this.pin) return false;
-  return argon2.verify(this.pin, candidatePin);
+  try {
+    // Verificar si el PIN almacenado tiene el formato correcto de Argon2
+    if (!this.pin.startsWith('$argon2')) {
+      console.error('PIN format error:', this.pin);
+      return false;
+    }
+    return await argon2.verify(this.pin, candidatePin);
+  } catch (error) {
+    console.error('Error comparing PIN:', error);
+    return false;
+  }
 };
 
 userSchema.methods.isAccountLocked = function(): boolean {
@@ -406,14 +427,24 @@ userSchema.pre('save', async function(next) {
     this.referralCode = referralCode;
   }
 
-  // Hash password si ha sido modificado
-  if (this.isModified('password') && this.password) {
-    this.password = await argon2.hash(this.password);
+  // Hash password si ha sido modificado y no está ya hasheado
+  if (this.isModified('password') && this.password && !this.password.startsWith('$argon2')) {
+    try {
+      this.password = await argon2.hash(this.password);
+    } catch (error) {
+      console.error('Error hashing password:', error);
+      // Si hay error en el hash, mantener la contraseña original
+    }
   }
 
-  // Hash PIN si ha sido modificado
-  if (this.isModified('pin') && this.pin) {
-    this.pin = await argon2.hash(this.pin);
+  // Hash PIN si ha sido modificado y no está ya hasheado
+  if (this.isModified('pin') && this.pin && !this.pin.startsWith('$argon2')) {
+    try {
+      this.pin = await argon2.hash(this.pin);
+    } catch (error) {
+      console.error('Error hashing PIN:', error);
+      // Si hay error en el hash, mantener el PIN original
+    }
   }
 
 

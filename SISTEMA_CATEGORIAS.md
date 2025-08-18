@@ -228,4 +228,4 @@ Para reportar problemas o solicitar nuevas funcionalidades:
 
 **Versión**: 1.0.0  
 **Última actualización**: Enero 2025  
-**Mantenido por**: Equipo de Desarrollo RepuestosPro
+**Mantenido por**: Equipo de Desarrollo PiezasYA

@@ -2,7 +2,7 @@
 
 ## ✅ Estado del Proyecto: **COMPLETADO**
 
-El sistema de fidelización para RepuestosPro ha sido **implementado exitosamente** con todas las funcionalidades solicitadas.
+El sistema de fidelización para PiezasYA ha sido **implementado exitosamente** con todas las funcionalidades solicitadas.
 
 ## 🚀 Funcionalidades Implementadas
 
@@ -170,4 +170,4 @@ node seed-points-policies-final.js
 
 **🎯 Estado:** **COMPLETADO Y LISTO PARA USO**  
 **📅 Fecha de Finalización:** Diciembre 2024  
-**👥 Desarrollado por:** Equipo RepuestosPro
+**👥 Desarrollado por:** Equipo PiezasYA

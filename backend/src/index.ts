@@ -24,6 +24,8 @@ import advertisementRequestRoutes from './routes/advertisementRequestRoutes';
 import searchRoutes from './routes/search';
 import adminRoutes from './routes/adminRoutes';
 import storeRoutes from './routes/storeRoutes';
+import activityRoutes from './routes/activityRoutes';
+import profileRoutes from './routes/profileRoutes';
 
 const app = express();
 
@@ -131,6 +133,8 @@ app.use('/api/advertisement-requests', advertisementRequestRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api', storeRoutes);
+app.use('/api/activities', activityRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Middleware para manejar rutas no encontradas
 app.use('*', (req, res) => {

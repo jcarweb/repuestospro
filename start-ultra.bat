@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo    RepuestosPro - Inicio Ultra-Rápido
+echo    PiezasYA - Inicio Ultra-Rápido
 echo ========================================
 echo.
 

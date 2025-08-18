@@ -29,7 +29,7 @@ export const config = {
   EMAIL_HOST: process.env.EMAIL_HOST || process.env.SMTP_HOST || 'smtp.gmail.com',
   EMAIL_PORT: parseInt(process.env.EMAIL_PORT || process.env.SMTP_PORT || '587'),
   EMAIL_SECURE: process.env.EMAIL_SECURE === 'true' || false,
-  EMAIL_USER: process.env.EMAIL_USER || process.env.SMTP_USER || 'noreply@repuestospro.com',
+  EMAIL_USER: process.env.EMAIL_USER || process.env.SMTP_USER || 'noreply@piezasya.com',
   EMAIL_PASS: process.env.EMAIL_PASS || process.env.SMTP_PASS || '',
   
   // Configuración de SMTP (mantener compatibilidad)

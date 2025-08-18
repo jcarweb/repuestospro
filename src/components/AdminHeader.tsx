@@ -1,15 +1,43 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Package, User, LogOut, Bell } from 'lucide-react';
+import { Package, User, LogOut, Bell, Settings, Shield } from 'lucide-react';
 
 const AdminHeader: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  
+  // Ref para detectar clicks fuera del menú
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar menú cuando se hace click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isUserMenuOpen]);
 
   const handleLogout = () => {
     logout();
     navigate('/');
+    setIsUserMenuOpen(false);
+  };
+
+  const handleMenuClick = (path: string) => {
+    // Para el admin, siempre navegar a las rutas del admin
+    navigate(`/admin${path}`);
+    setIsUserMenuOpen(false);
   };
 
   return (
@@ -33,21 +61,55 @@ const AdminHeader: React.FC = () => {
         </button>
 
         {/* User menu */}
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-            <User className="w-4 h-4 text-gray-600" />
-          </div>
-          <div className="hidden sm:block">
-            <p className="text-sm font-medium text-[#333333]">{user?.name}</p>
-            <p className="text-xs text-gray-500">Administrador</p>
-          </div>
+        <div className="relative" ref={userMenuRef}>
           <button
-            onClick={handleLogout}
-            className="p-2 text-gray-400 hover:text-[#E63946] transition-colors"
-            title="Cerrar sesión"
+            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+            className="flex items-center space-x-3 p-2 text-[#333333] hover:text-[#FFC300] transition-colors rounded-lg hover:bg-gray-50"
           >
-            <LogOut className="w-5 h-5" />
+            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+              <User className="w-4 h-4 text-gray-600" />
+            </div>
+            <div className="hidden sm:block">
+              <p className="text-sm font-medium text-[#333333]">{user?.name}</p>
+              <p className="text-xs text-gray-500">Administrador</p>
+            </div>
           </button>
+
+          {/* Dropdown Menu */}
+          {isUserMenuOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+              <button
+                onClick={() => handleMenuClick('/profile')}
+                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 w-full text-left"
+              >
+                <User className="w-4 h-4" />
+                <span>Perfil</span>
+              </button>
+              <button
+                onClick={() => handleMenuClick('/security')}
+                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 w-full text-left"
+              >
+                <Shield className="w-4 h-4" />
+                <span>Seguridad</span>
+              </button>
+              <button
+                onClick={() => handleMenuClick('/configuration')}
+                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 w-full text-left"
+              >
+                <Settings className="w-4 h-4" />
+                <span>Configuración</span>
+              </button>
+              
+              <hr className="my-2" />
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 w-full text-left"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Cerrar Sesión</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

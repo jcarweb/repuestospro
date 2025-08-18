@@ -65,7 +65,7 @@ async function createAdminUser() {
     // Crear usuario administrador
     const adminUser = new User({
       name: 'Administrador',
-      email: 'admin@repuestospro.com',
+      email: 'admin@piezasya.com',
       password: hashedPassword,
       role: 'admin',
       isEmailVerified: true,
@@ -78,7 +78,7 @@ async function createAdminUser() {
     await adminUser.save();
 
     console.log('✅ Usuario administrador creado exitosamente:');
-    console.log(`   Email: admin@repuestospro.com`);
+    console.log(`   Email: admin@piezasya.com`);
     console.log(`   Contraseña: admin123`);
     console.log(`   Role: admin`);
     console.log(`   Código de referido: ${referralCode}`);
