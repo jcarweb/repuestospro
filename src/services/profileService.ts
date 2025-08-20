@@ -5,6 +5,7 @@ export interface UserProfile {
   name: string;
   email: string;
   phone?: string;
+  avatar?: string; // URL de la imagen de perfil
   role: 'admin' | 'client' | 'delivery' | 'store_manager';
   isEmailVerified: boolean;
   isActive: boolean;
@@ -267,6 +268,17 @@ class ProfileService {
       return response.data;
     } catch (error) {
       console.error('Error uploading avatar:', error);
+      throw error;
+    }
+  }
+
+  // Eliminar foto de perfil
+  async deleteAvatar(): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await api.delete('/profile/avatar');
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting avatar:', error);
       throw error;
     }
   }

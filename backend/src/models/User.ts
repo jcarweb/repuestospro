@@ -8,6 +8,7 @@ export interface IUser extends Document {
   password: string;
   phone?: string;
   googleId?: string;
+  avatar?: string; // URL de la imagen de perfil
   role: 'admin' | 'client' | 'delivery' | 'store_manager';
   isEmailVerified: boolean;
   isActive: boolean;
@@ -133,6 +134,10 @@ const userSchema = new Schema<IUser>({
   googleId: {
     type: String,
     sparse: true
+  },
+  avatar: {
+    type: String,
+    default: '/uploads/perfil/default-avatar.svg' // Avatar por defecto
   },
   role: {
     type: String,

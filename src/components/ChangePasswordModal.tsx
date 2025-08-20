@@ -100,8 +100,8 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               <Lock className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Cambiar Contraseña</h2>
-              <p className="text-sm text-gray-500">Actualiza tu contraseña de seguridad</p>
+              <h2 className="text-lg font-semibold text-gray-900">{t('securityModal.changePassword')}</h2>
+              <p className="text-sm text-gray-500">{t('securityModal.changePasswordDescription')}</p>
             </div>
           </div>
           <button
@@ -138,7 +138,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           {/* Contraseña actual */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Contraseña Actual
+              {t('securityModal.currentPassword')}
             </label>
             <div className="relative">
               <input
@@ -147,7 +147,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 disabled={isLoading}
                 className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-                placeholder="Ingresa tu contraseña actual"
+                placeholder={t('securityModal.currentPasswordPlaceholder')}
                 required
               />
               <button
@@ -163,7 +163,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           {/* Nueva contraseña */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nueva Contraseña
+              {t('securityModal.newPassword')}
             </label>
             <div className="relative">
               <input
@@ -172,7 +172,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 onChange={(e) => setNewPassword(e.target.value)}
                 disabled={isLoading}
                 className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-                placeholder="Ingresa tu nueva contraseña"
+                placeholder={t('securityModal.newPasswordPlaceholder')}
                 required
               />
               <button
@@ -187,27 +187,27 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             {/* Validaciones de contraseña */}
             {newPassword && (
               <div className="mt-3 space-y-2">
-                <p className="text-xs font-medium text-gray-700">La contraseña debe contener:</p>
+                <p className="text-xs font-medium text-gray-700">{t('securityModal.passwordMustContain')}</p>
                 <div className="space-y-1">
                   <div className={`flex items-center gap-2 text-xs ${passwordValidation.length ? 'text-green-600' : 'text-gray-500'}`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${passwordValidation.length ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                    Al menos 8 caracteres
+                    {t('securityModal.minLength')}
                   </div>
                   <div className={`flex items-center gap-2 text-xs ${passwordValidation.uppercase ? 'text-green-600' : 'text-gray-500'}`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${passwordValidation.uppercase ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                    Al menos una letra mayúscula
+                    {t('securityModal.uppercase')}
                   </div>
                   <div className={`flex items-center gap-2 text-xs ${passwordValidation.lowercase ? 'text-green-600' : 'text-gray-500'}`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${passwordValidation.lowercase ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                    Al menos una letra minúscula
+                    {t('securityModal.lowercase')}
                   </div>
                   <div className={`flex items-center gap-2 text-xs ${passwordValidation.number ? 'text-green-600' : 'text-gray-500'}`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${passwordValidation.number ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                    Al menos un número
+                    {t('securityModal.number')}
                   </div>
                   <div className={`flex items-center gap-2 text-xs ${passwordValidation.special ? 'text-green-600' : 'text-gray-500'}`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${passwordValidation.special ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                    Al menos un carácter especial
+                    {t('securityModal.specialChar')}
                   </div>
                 </div>
               </div>
@@ -217,7 +217,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           {/* Confirmar nueva contraseña */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Confirmar Nueva Contraseña
+              {t('securityModal.confirmPassword')}
             </label>
             <div className="relative">
               <input
@@ -232,7 +232,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                       : 'border-red-300 focus:ring-red-500'
                     : 'border-gray-300'
                 }`}
-                placeholder="Confirma tu nueva contraseña"
+                placeholder={t('securityModal.confirmPasswordPlaceholder')}
                 required
               />
               <button
@@ -247,7 +247,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             {/* Mensaje de confirmación */}
             {confirmPassword && (
               <div className={`mt-2 text-xs ${passwordsMatch ? 'text-green-600' : 'text-red-600'}`}>
-                {passwordsMatch ? '✓ Las contraseñas coinciden' : '✗ Las contraseñas no coinciden'}
+                {passwordsMatch ? `✓ ${t('securityModal.passwordsMatch')}` : `✗ ${t('securityModal.passwordsNotMatch')}`}
               </div>
             )}
           </div>
@@ -257,12 +257,12 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             <div className="flex items-start gap-2">
               <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
               <div className="text-xs text-blue-800">
-                <p className="font-medium mb-1">Consejos de seguridad:</p>
+                <p className="font-medium mb-1">{t('securityModal.securityTips')}</p>
                 <ul className="space-y-1">
-                  <li>• No uses información personal como fechas de nacimiento</li>
-                  <li>• Evita contraseñas comunes como "123456" o "password"</li>
-                  <li>• Considera usar un gestor de contraseñas</li>
-                  <li>• Cambia tu contraseña regularmente</li>
+                  <li>• {t('securityModal.tip1')}</li>
+                  <li>• {t('securityModal.tip2')}</li>
+                  <li>• {t('securityModal.tip3')}</li>
+                  <li>• {t('securityModal.tip4')}</li>
                 </ul>
               </div>
             </div>
@@ -277,7 +277,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             disabled={isLoading}
             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50"
           >
-            Cancelar
+            {t('securityModal.cancel')}
           </button>
           <button
             type="submit"
@@ -285,7 +285,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             disabled={!canSubmit || isLoading}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Cambiando...' : 'Cambiar Contraseña'}
+            {isLoading ? t('securityModal.changing') : t('securityModal.changePassword')}
           </button>
         </div>
       </div>

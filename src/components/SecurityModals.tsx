@@ -324,7 +324,7 @@ export const FingerprintModal: React.FC<FingerprintModalProps> = ({ isOpen, onCl
 interface TwoFactorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { enabled: boolean; code?: string }) => Promise<{ secret?: string; backupCodes?: string[] }>;
+  onSubmit: (data: { enabled: boolean; code?: string }) => Promise<{ secret?: string; backupCodes?: string[]; googleAuthUrl?: string }>;
   onComplete?: () => Promise<void>;
   isEnabled: boolean;
   userEmail?: string;
@@ -482,12 +482,12 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
                 <Shield className="h-8 w-8 text-orange-600" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {isEnabled ? '¿Desactivar 2FA?' : '¿Activar 2FA?'}
+                {isEnabled ? t('securityModals.2fa.deactivateQuestion') : t('securityModals.2fa.activateQuestion')}
               </h3>
               <p className="text-gray-600 mb-6">
                 {isEnabled 
-                  ? 'Tu cuenta volverá a usar solo contraseña para el acceso.'
-                  : 'Añadirá una capa extra de seguridad a tu cuenta usando códigos de verificación.'
+                  ? t('securityModals.2fa.deactivateDescription')
+                  : t('securityModals.2fa.activateDescription')
                 }
               </p>
             </div>
@@ -496,9 +496,9 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
           {step === 'setup' && qrData && (
             <div className="space-y-4">
               <div className="text-center">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Configurar Google Authenticator</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">{t('securityModals.2fa.setupGoogleAuthenticator')}</h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Escanea este código QR con Google Authenticator o cualquier aplicación compatible
+                  {t('securityModals.2fa.scanQRDescription')}
                 </p>
                 
                 {/* QR Code */}
@@ -514,7 +514,7 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
 
                 {/* Código manual */}
                 <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-4">
-                  <p className="text-xs text-gray-600 mb-1">Código manual (si no puedes escanear):</p>
+                  <p className="text-xs text-gray-600 mb-1">{t('securityModals.2fa.manualCodeTitle')}</p>
                   <div className="bg-white border border-gray-300 rounded px-3 py-2">
                     <code className="text-sm font-mono text-gray-800 break-all">{qrData.secret}</code>
                   </div>
@@ -525,13 +525,13 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
                   <div className="flex items-start gap-2">
                     <PhoneIcon className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                     <div className="text-sm text-blue-700">
-                      <p className="font-medium mb-1">Instrucciones:</p>
+                      <p className="font-medium mb-1">{t('securityModals.2fa.instructionsTitle')}</p>
                       <ol className="text-xs space-y-1 list-decimal list-inside">
-                        <li>Descarga Google Authenticator desde tu tienda de aplicaciones</li>
-                        <li>Abre la aplicación y toca el botón "+"</li>
-                        <li>Selecciona "Escanear código QR"</li>
-                        <li>Apunta la cámara al código QR de arriba</li>
-                        <li>O ingresa manualmente el código secreto</li>
+                        <li>{t('securityModals.2fa.instruction1')}</li>
+                        <li>{t('securityModals.2fa.instruction2')}</li>
+                        <li>{t('securityModals.2fa.instruction3')}</li>
+                        <li>{t('securityModals.2fa.instruction4')}</li>
+                        <li>{t('securityModals.2fa.instruction5')}</li>
                       </ol>
                     </div>
                   </div>
@@ -542,8 +542,8 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
                 <div className="flex items-start gap-2">
                   <div className="h-2 w-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
                   <div className="text-sm text-orange-700">
-                    <p className="font-medium mb-1">Códigos de respaldo:</p>
-                    <p className="text-xs mb-2">Guarda estos códigos en un lugar seguro. Te permitirán acceder si pierdes tu dispositivo.</p>
+                    <p className="font-medium mb-1">{t('securityModals.2fa.backupCodesTitle')}</p>
+                    <p className="text-xs mb-2">{t('securityModals.2fa.backupCodesSaveDescription')}</p>
                     <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                       {qrData.backupCodes.map((code, index) => (
                         <div key={index} className="bg-white px-2 py-1 rounded border">
@@ -556,16 +556,16 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
                       className="mt-2 flex items-center gap-1 text-xs text-orange-600 hover:text-orange-700"
                     >
                       <Download className="h-3 w-3" />
-                      Descargar códigos
+                      {t('securityModals.2fa.downloadCodesButton')}
                     </button>
                   </div>
                 </div>
               </div>
 
               <div className="text-center">
-                <h4 className="text-md font-medium text-gray-900 mb-3">Verificar configuración</h4>
+                <h4 className="text-md font-medium text-gray-900 mb-3">{t('securityModals.2fa.verifyConfiguration')}</h4>
                 <p className="text-sm text-gray-600 mb-4">
-                  Abre Google Authenticator y ingresa el código de 6 dígitos que aparece
+                  {t('securityModals.2fa.verifyConfigurationDescription')}
                 </p>
                 
                 {/* Icono de Google Authenticator */}
@@ -584,7 +584,7 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
                     autoFocus
                   />
                   <p className="text-xs text-gray-500 mt-2">
-                    El código cambia cada 30 segundos
+                    {t('securityModals.2fa.codeChangesEvery30Seconds')}
                   </p>
                 </div>
               </div>
@@ -597,7 +597,7 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
             onClick={handleClose}
             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            Cancelar
+            {t('securityModal.cancel')}
           </button>
           
           {step === 'confirm' && (
@@ -610,7 +610,7 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
                   : 'bg-orange-600 hover:bg-orange-700 focus:ring-orange-500'
               }`}
             >
-              {isLoading ? 'Procesando...' : (isEnabled ? 'Desactivar' : 'Activar')}
+              {isLoading ? t('securityModals.2fa.processing') : (isEnabled ? t('securityModals.2fa.deactivate') : t('securityModals.2fa.activate'))}
             </button>
           )}
 
@@ -620,14 +620,14 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
                 onClick={handleClose}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
               >
-                Cancelar
+                {t('securityModal.cancel')}
               </button>
               <button
                 onClick={handleVerify}
                 disabled={isLoading || verificationCode.length !== 6}
                 className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Verificando...' : 'Verificar y Activar'}
+                {isLoading ? t('securityModals.2fa.verifying') : t('securityModals.2fa.verifyAndActivate')}
               </button>
             </div>
           )}
@@ -663,9 +663,9 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
       setIsLoading(true);
       setError(null);
       await onResendEmail();
-      setSuccess('Email de verificación enviado correctamente');
+      setSuccess(t('securityModals.email.emailSentSuccessfully'));
     } catch (error: any) {
-      setError(error.message || 'Error al enviar el email de verificación');
+      setError(error.message || t('securityModals.email.errorSendingEmail'));
     } finally {
       setIsLoading(false);
     }
@@ -688,7 +688,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
               <Mail className="h-5 w-5 text-green-600" />
             </div>
             <h2 className="text-lg font-semibold text-gray-900">
-              Verificación de Email
+              {t('securityModals.email.title')}
             </h2>
           </div>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
@@ -722,20 +722,20 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
             
             {isVerified ? (
               <>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Email Verificado</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{t('securityModals.email.verified')}</h3>
                 <p className="text-gray-600 mb-4">
                   Tu email <strong>{email}</strong> está verificado y tu cuenta está completamente activa.
                 </p>
                 <div className="bg-green-50 border border-green-200 rounded-md p-4">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-green-800">Cuenta verificada y segura</span>
+                    <span className="text-sm text-green-800">{t('securityModals.email.accountVerified')}</span>
                   </div>
                 </div>
               </>
             ) : (
               <>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Verificar Email</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{t('securityModals.email.verifyEmail')}</h3>
                 <p className="text-gray-600 mb-4">
                   Necesitas verificar tu email <strong>{email}</strong> para completar la configuración de tu cuenta.
                 </p>
@@ -743,12 +743,12 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
                   <div className="flex items-start gap-2">
                     <div className="h-2 w-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0"></div>
                     <div className="text-sm text-yellow-700">
-                      <p className="font-medium mb-1">Pasos para verificar:</p>
+                      <p className="font-medium mb-1">{t('securityModals.email.verificationSteps')}</p>
                       <ul className="text-xs space-y-1">
-                        <li>• Revisa tu bandeja de entrada</li>
-                        <li>• Busca el email de verificación</li>
-                        <li>• Haz clic en el enlace de verificación</li>
-                        <li>• Si no lo encuentras, revisa la carpeta de spam</li>
+                        <li>• {t('securityModals.email.step1')}</li>
+                        <li>• {t('securityModals.email.step2')}</li>
+                        <li>• {t('securityModals.email.step3')}</li>
+                        <li>• {t('securityModals.email.step4')}</li>
                       </ul>
                     </div>
                   </div>
@@ -763,7 +763,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
             onClick={handleClose}
             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            Cerrar
+            {t('securityModals.email.close')}
           </button>
           
           {!isVerified && (
@@ -772,7 +772,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
               disabled={isLoading}
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Enviando...' : 'Reenviar Email'}
+              {isLoading ? t('securityModals.email.sending') : t('securityModals.email.resendEmail')}
             </button>
           )}
         </div>

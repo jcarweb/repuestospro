@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { 
@@ -10,7 +10,9 @@ import {
   Save, 
   X, 
   Activity, 
-  Navigation
+  Navigation,
+  Upload,
+  Trash2
 } from 'lucide-react';
 import ActivityHistory from '../components/ActivityHistory';
 import WorkingLocationMap from '../components/WorkingLocationMap';
@@ -38,6 +40,8 @@ const Profile: React.FC = () => {
   } | null>(null);
   const [showActivityHistory, setShowActivityHistory] = useState(false);
   const [showLocationMap, setShowLocationMap] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -140,6 +144,83 @@ const Profile: React.FC = () => {
     setMessage(null);
   };
 
+  // Manejar selección de archivo para avatar
+  const handleAvatarSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleAvatarUpload(file);
+    }
+  };
+
+  // Subir avatar
+  const handleAvatarUpload = async (file: File) => {
+    try {
+      setUploadingAvatar(true);
+      setMessage(null);
+
+      // Validar tipo de archivo
+      if (!file.type.startsWith('image/')) {
+        setMessage({ type: 'error', text: t('profile.invalidImageType') });
+        return;
+      }
+
+      // Validar tamaño (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage({ type: 'error', text: t('profile.imageTooLarge') });
+        return;
+      }
+
+      const result = await profileService.uploadAvatar(file);
+      
+      setMessage({ type: 'success', text: result.message });
+      
+      // Recargar perfil para obtener la nueva URL del avatar
+      const userProfile = await profileService.getProfile();
+      setProfile(userProfile);
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.message || t('profile.errorUploadingAvatar')
+      });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  // Eliminar avatar
+  const handleAvatarDelete = async () => {
+    try {
+      setUploadingAvatar(true);
+      setMessage(null);
+
+      const result = await profileService.deleteAvatar();
+      setMessage({ type: 'success', text: result.message });
+      
+      // Recargar perfil
+      const userProfile = await profileService.getProfile();
+      setProfile(userProfile);
+    } catch (error: any) {
+      console.error('Error deleting avatar:', error);
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.message || t('profile.errorDeletingAvatar')
+      });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  // Obtener URL del avatar
+  const getAvatarUrl = () => {
+    if (profile?.avatar) {
+      return profile.avatar.startsWith('http') 
+        ? profile.avatar 
+        : `${window.location.origin}${profile.avatar}`;
+    }
+    return '/uploads/perfil/default-avatar.svg';
+  };
+
   // Manejar selección de ubicación
   const handleLocationSelect = async (location: { latitude: number; longitude: number; address: string }) => {
     try {
@@ -223,6 +304,74 @@ const Profile: React.FC = () => {
                   </button>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Avatar Section */}
+          <div className="px-6 py-6 border-b border-gray-200">
+            <div className="flex items-center space-x-6">
+              {/* Avatar Display */}
+              <div className="relative">
+                <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-gray-300">
+                  <img
+                    src={getAvatarUrl()}
+                    alt={t('profile.avatar')}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/uploads/perfil/default-avatar.svg';
+                    }}
+                  />
+                </div>
+                
+                {/* Loading overlay */}
+                {uploadingAvatar && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  </div>
+                )}
+              </div>
+
+              {/* Avatar Actions */}
+              <div className="flex-1">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {t('profile.avatar')}
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  {t('profile.avatarDescription')}
+                </p>
+                
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>{t('profile.uploadAvatar')}</span>
+                  </button>
+                  
+                  {profile?.avatar && profile.avatar !== '/uploads/perfil/default-avatar.svg' && (
+                    <button
+                      onClick={handleAvatarDelete}
+                      disabled={uploadingAvatar}
+                      className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>{t('profile.deleteAvatar')}</span>
+                    </button>
+                  )}
+                </div>
+                
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarSelect}
+                  className="hidden"
+                />
+              </div>
             </div>
           </div>
 

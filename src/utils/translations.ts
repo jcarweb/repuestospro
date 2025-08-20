@@ -7015,6 +7015,46 @@ export const translations: Translations = {
     en: 'Location updated successfully',
     pt: 'Localização atualizada com sucesso'
   },
+  'profile.avatar': {
+    es: 'Foto de Perfil',
+    en: 'Profile Picture',
+    pt: 'Foto do Perfil'
+  },
+  'profile.avatarDescription': {
+    es: 'Sube una foto de perfil para personalizar tu cuenta. Formatos soportados: JPG, PNG, GIF. Tamaño máximo: 5MB.',
+    en: 'Upload a profile picture to personalize your account. Supported formats: JPG, PNG, GIF. Maximum size: 5MB.',
+    pt: 'Faça upload de uma foto de perfil para personalizar sua conta. Formatos suportados: JPG, PNG, GIF. Tamanho máximo: 5MB.'
+  },
+  'profile.uploadAvatar': {
+    es: 'Subir Foto',
+    en: 'Upload Photo',
+    pt: 'Fazer Upload da Foto'
+  },
+  'profile.deleteAvatar': {
+    es: 'Eliminar Foto',
+    en: 'Delete Photo',
+    pt: 'Excluir Foto'
+  },
+  'profile.invalidImageType': {
+    es: 'Tipo de archivo no válido. Solo se permiten imágenes.',
+    en: 'Invalid file type. Only images are allowed.',
+    pt: 'Tipo de arquivo inválido. Apenas imagens são permitidas.'
+  },
+  'profile.imageTooLarge': {
+    es: 'La imagen es demasiado grande. Tamaño máximo: 5MB.',
+    en: 'The image is too large. Maximum size: 5MB.',
+    pt: 'A imagem é muito grande. Tamanho máximo: 5MB.'
+  },
+  'profile.errorUploadingAvatar': {
+    es: 'Error al subir la foto de perfil',
+    en: 'Error uploading profile picture',
+    pt: 'Erro ao fazer upload da foto do perfil'
+  },
+  'profile.errorDeletingAvatar': {
+    es: 'Error al eliminar la foto de perfil',
+    en: 'Error deleting profile picture',
+    pt: 'Erro ao excluir a foto do perfil'
+  },
   // ===== SECURITY PAGE =====
   'security.title': {
     es: 'Configuración de Seguridad',
@@ -7729,6 +7769,7 @@ export const translations: Translations = {
     en: 'Close',
     pt: 'Fechar'
   },
+
   // ===== SECURITY MODALS =====
 
 
@@ -7791,6 +7832,131 @@ export const translations: Translations = {
     es: 'Cancelar',
     en: 'Cancel',
     pt: 'Cancelar'
+  },
+  'securityModal.changePassword': {
+    es: 'Cambiar Contraseña',
+    en: 'Change Password',
+    pt: 'Alterar Senha'
+  },
+  'securityModal.changePasswordDescription': {
+    es: 'Actualiza tu contraseña de seguridad',
+    en: 'Update your security password',
+    pt: 'Atualize sua senha de segurança'
+  },
+  'securityModal.currentPassword': {
+    es: 'Contraseña Actual',
+    en: 'Current Password',
+    pt: 'Senha Atual'
+  },
+  'securityModal.currentPasswordPlaceholder': {
+    es: 'Ingresa tu contraseña actual',
+    en: 'Enter your current password',
+    pt: 'Digite sua senha atual'
+  },
+  'securityModal.newPassword': {
+    es: 'Nueva Contraseña',
+    en: 'New Password',
+    pt: 'Nova Senha'
+  },
+  'securityModal.newPasswordPlaceholder': {
+    es: 'Ingresa tu nueva contraseña',
+    en: 'Enter your new password',
+    pt: 'Digite sua nova senha'
+  },
+  'securityModal.confirmPassword': {
+    es: 'Confirmar Nueva Contraseña',
+    en: 'Confirm New Password',
+    pt: 'Confirmar Nova Senha'
+  },
+  'securityModal.confirmPasswordPlaceholder': {
+    es: 'Confirma tu nueva contraseña',
+    en: 'Confirm your new password',
+    pt: 'Confirme sua nova senha'
+  },
+  'securityModal.passwordMustContain': {
+    es: 'La contraseña debe contener:',
+    en: 'Password must contain:',
+    pt: 'A senha deve conter:'
+  },
+  'securityModal.securityTips': {
+    es: 'Consejos de seguridad:',
+    en: 'Security tips:',
+    pt: 'Dicas de segurança:'
+  },
+  'securityModal.tip1': {
+    es: 'No uses información personal como fechas de nacimiento',
+    en: 'Do not use personal information like birth dates',
+    pt: 'Não use informações pessoais como datas de nascimento'
+  },
+  'securityModal.tip2': {
+    es: 'Evita contraseñas comunes como "123456" o "password"',
+    en: 'Avoid common passwords like "123456" or "password"',
+    pt: 'Evite senhas comuns como "123456" ou "password"'
+  },
+  'securityModal.tip3': {
+    es: 'Considera usar un gestor de contraseñas',
+    en: 'Consider using a password manager',
+    pt: 'Considere usar um gerenciador de senhas'
+  },
+  'securityModal.tip4': {
+    es: 'Cambia tu contraseña regularmente',
+    en: 'Change your password regularly',
+    pt: 'Altere sua senha regularmente'
+  },
+  'securityModal.changing': {
+    es: 'Cambiando...',
+    en: 'Changing...',
+    pt: 'Alterando...'
+  },
+  'securityModals.2fa.manualCodeTitle': {
+    es: 'Código manual (si no puedes escanear):',
+    en: 'Manual code (if you cannot scan):',
+    pt: 'Código manual (se não conseguir escanear):'
+  },
+  'securityModals.2fa.instructionsTitle': {
+    es: 'Instrucciones:',
+    en: 'Instructions:',
+    pt: 'Instruções:'
+  },
+  'securityModals.2fa.backupCodesTitle': {
+    es: 'Códigos de respaldo:',
+    en: 'Backup codes:',
+    pt: 'Códigos de backup:'
+  },
+  'securityModals.2fa.backupCodesSaveDescription': {
+    es: 'Guarda estos códigos en un lugar seguro. Te permitirán acceder si pierdes tu dispositivo.',
+    en: 'Save these codes in a safe place. They will allow you to access if you lose your device.',
+    pt: 'Guarde esses códigos em um local seguro. Eles permitirão que você acesse se perder seu dispositivo.'
+  },
+  'securityModals.2fa.downloadCodesButton': {
+    es: 'Descargar códigos',
+    en: 'Download codes',
+    pt: 'Baixar códigos'
+  },
+  'securityModals.2fa.verifyConfiguration': {
+    es: 'Verificar configuración',
+    en: 'Verify configuration',
+    pt: 'Verificar configuração'
+  },
+  'securityModals.2fa.verifyConfigurationDescription': {
+    es: 'Abre Google Authenticator y ingresa el código de 6 dígitos que aparece',
+    en: 'Open Google Authenticator and enter the 6-digit code that appears',
+    pt: 'Abra o Google Authenticator e digite o código de 6 dígitos que aparece'
+  },
+  'securityModals.2fa.codeChangesEvery30Seconds': {
+    es: 'El código cambia cada 30 segundos',
+    en: 'The code changes every 30 seconds',
+    pt: 'O código muda a cada 30 segundos'
+  },
+  'securityModals.2fa.activate': {
+    es: 'Activar',
+    en: 'Activate',
+    pt: 'Ativar'
+  },
+  'securityModals.2fa.deactivate': {
+    es: 'Desactivar',
+    en: 'Deactivate',
+    pt: 'Desativar'
   },
   'redemptionManagement.noRedemptions': {
     es: 'No se encontraron canjes',

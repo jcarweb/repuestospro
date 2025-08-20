@@ -1,6 +1,6 @@
 import express from 'express';
 import { authMiddleware } from '../middleware/authMiddleware';
-import profileController from '../controllers/profileController';
+import profileController, { profileUpload } from '../controllers/profileController';
 
 const router = express.Router();
 
@@ -38,7 +38,10 @@ router.put('/preferences', profileController.updatePreferences);
 router.put('/push-notifications', profileController.updatePushNotifications);
 
 // Subir foto de perfil
-router.post('/avatar', profileController.uploadAvatar);
+router.post('/avatar', profileUpload.single('avatar'), profileController.uploadAvatar);
+
+// Eliminar foto de perfil
+router.delete('/avatar', profileController.deleteAvatar);
 
 // Obtener historial de actividades
 router.get('/activities', profileController.getActivities);

@@ -3,12 +3,56 @@ import User from '../models/User';
 import Activity from '../models/Activity';
 import * as argon2 from 'argon2';
 import { generateTwoFactorSecret, verifyTwoFactorCode, generateGoogleAuthenticatorUrl } from '../utils/twoFactorUtils';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+
+// Configuración de multer para subida de imágenes de perfil
+const profileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = 'uploads/perfil/';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, 'profile-' + uniqueSuffix + ext);
+  }
+});
+
+export const profileUpload = multer({ 
+  storage: profileStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB máximo
+  },
+  fileFilter: (req, file, cb) => {
+    // Verificar que sea una imagen
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Solo se permiten archivos de imagen'));
+    }
+  }
+});
+
+// Extend Request interface to include user
+interface AuthenticatedRequest extends Request {
+  user?: {
+    _id: string;
+    id: string;
+    email: string;
+    role: string;
+  };
+}
 
 class ProfileController {
   // Obtener perfil del usuario
-  async getProfile(req: Request, res: Response) {
+  async getProfile(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = (req as any).user?._id;
+      const userId = req.user?._id;
       
       const user = await User.findById(userId).select('-password -twoFactorSecret -backupCodes');
       
@@ -33,9 +77,9 @@ class ProfileController {
   }
 
   // Actualizar información del perfil
-  async updateProfile(req: Request, res: Response) {
+  async updateProfile(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = (req as any).user?._id;
+      const userId = req.user?._id;
       const { name, email, phone } = req.body;
 
       const user = await User.findById(userId);
@@ -91,7 +135,8 @@ class ProfileController {
         data: {
           name: user.name,
           email: user.email,
-          phone: user.phone
+          phone: user.phone,
+          avatar: user.avatar
         }
       });
     } catch (error) {
@@ -104,10 +149,10 @@ class ProfileController {
   }
 
   // Cambiar contraseña
-  async changePassword(req: Request, res: Response) {
+  async changePassword(req: AuthenticatedRequest, res: Response) {
     try {
       console.log('🔍 Iniciando cambio de contraseña...');
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       const { currentPassword, newPassword } = req.body;
 
       console.log('📋 Datos recibidos:', { userId, hasCurrentPassword: !!currentPassword, hasNewPassword: !!newPassword });
@@ -173,9 +218,9 @@ class ProfileController {
   }
 
   // Configurar PIN
-  async setPin(req: Request, res: Response) {
+  async setPin(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       const { pin, currentPassword } = req.body;
 
       if (!pin || !currentPassword) {
@@ -229,9 +274,9 @@ class ProfileController {
   }
 
   // Configurar huella digital
-  async setFingerprint(req: Request, res: Response) {
+  async setFingerprint(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       const { fingerprintData, enabled } = req.body;
 
       const user = await User.findById(userId);
@@ -278,10 +323,10 @@ class ProfileController {
   }
 
   // Configurar autenticación de dos factores
-  async setTwoFactor(req: Request, res: Response) {
+  async setTwoFactor(req: AuthenticatedRequest, res: Response) {
     try {
       console.log('🔍 Iniciando configuración de 2FA...');
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       const { enabled, code } = req.body;
 
       console.log('📋 Datos recibidos:', { userId, enabled, hasCode: !!code });
@@ -362,10 +407,10 @@ class ProfileController {
   }
 
   // Actualizar configuraciones de notificaciones
-  async updateNotifications(req: Request, res: Response) {
+  async updateNotifications(req: AuthenticatedRequest, res: Response) {
     try {
       console.log('🔍 updateNotifications - Request body:', req.body);
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       const { emailNotifications, pushNotifications, marketingEmails } = req.body;
 
       const user = await User.findById(userId);
@@ -417,9 +462,9 @@ class ProfileController {
   }
 
   // Actualizar configuraciones de privacidad
-  async updatePrivacy(req: Request, res: Response) {
+  async updatePrivacy(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       const { profileVisibility, showEmail, showPhone } = req.body;
 
       const user = await User.findById(userId);
@@ -472,9 +517,9 @@ class ProfileController {
   }
 
   // Actualizar configuración de tema e idioma
-  async updatePreferences(req: Request, res: Response) {
+  async updatePreferences(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       const { theme, language } = req.body;
 
       const user = await User.findById(userId);
@@ -523,9 +568,9 @@ class ProfileController {
   }
 
   // Actualizar configuraciones de notificaciones push
-  async updatePushNotifications(req: Request, res: Response) {
+  async updatePushNotifications(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       const { pushEnabled, pushToken } = req.body;
 
       const user = await User.findById(userId);
@@ -574,24 +619,53 @@ class ProfileController {
   }
 
   // Subir foto de perfil
-  async uploadAvatar(req: Request, res: Response) {
+  async uploadAvatar(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = req.user?.id;
-      // Aquí implementarías la lógica para subir y procesar la imagen
-      // Por ahora solo registramos la actividad
+      const userId = req.user?._id;
+      
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: 'No se ha proporcionado ninguna imagen'
+        });
+      }
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+      }
+
+      // Eliminar imagen anterior si existe y no es el avatar por defecto
+      if (user.avatar && user.avatar !== '/uploads/perfil/default-avatar.svg') {
+        const oldAvatarPath = path.join(process.cwd(), user.avatar);
+        if (fs.existsSync(oldAvatarPath)) {
+          fs.unlinkSync(oldAvatarPath);
+        }
+      }
+
+      // Actualizar avatar del usuario
+      const avatarUrl = `/uploads/perfil/${req.file.filename}`;
+      user.avatar = avatarUrl;
+      await user.save();
 
       // Registrar actividad
       await Activity.createActivity(
         userId,
         'avatar_upload',
         'Usuario subió nueva foto de perfil',
-        {},
+        { avatarUrl },
         true
       );
 
       res.json({
         success: true,
-        message: 'Foto de perfil actualizada correctamente'
+        message: 'Foto de perfil actualizada correctamente',
+        data: {
+          avatar: avatarUrl
+        }
       });
     } catch (error) {
       console.error('Error uploading avatar:', error);
@@ -602,10 +676,60 @@ class ProfileController {
     }
   }
 
-  // Obtener historial de actividades
-  async getActivities(req: Request, res: Response) {
+  // Eliminar foto de perfil
+  async deleteAvatar(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+      }
+
+      // Eliminar imagen anterior si existe y no es el avatar por defecto
+      if (user.avatar && user.avatar !== '/uploads/perfil/default-avatar.svg') {
+        const oldAvatarPath = path.join(process.cwd(), user.avatar);
+        if (fs.existsSync(oldAvatarPath)) {
+          fs.unlinkSync(oldAvatarPath);
+        }
+      }
+
+      // Restablecer al avatar por defecto
+      user.avatar = '/uploads/perfil/default-avatar.svg';
+      await user.save();
+
+      // Registrar actividad
+      await Activity.createActivity(
+        userId,
+        'avatar_deleted',
+        'Usuario eliminó su foto de perfil',
+        {},
+        true
+      );
+
+      res.json({
+        success: true,
+        message: 'Foto de perfil eliminada correctamente',
+        data: {
+          avatar: user.avatar
+        }
+      });
+    } catch (error) {
+      console.error('Error deleting avatar:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Obtener historial de actividades
+  async getActivities(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?._id;
       const limit = parseInt(req.query.limit as string) || 20;
       const skip = parseInt(req.query.skip as string) || 0;
 
@@ -626,3 +750,4 @@ class ProfileController {
 }
 
 export default new ProfileController();
+traducciones faltantes 
