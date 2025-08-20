@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Award, Users, Gift, Star, Plus, Settings, Package, X } from 'lucide-react';
 import RewardForm from '../components/RewardForm';
 import RedemptionManagement from '../components/RedemptionManagement';
@@ -59,6 +60,7 @@ type TabType = 'overview' | 'rewards' | 'redemptions' | 'policies';
 
 const AdminLoyalty: React.FC = () => {
   const { user, token } = useAuth();
+  const { t } = useLanguage();
   
 
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -72,36 +74,36 @@ const AdminLoyalty: React.FC = () => {
 
   const stats = [
     {
-      title: 'Clientes Activos',
+      title: t('adminLoyalty.stats.activeCustomers'),
       value: '1,234',
       icon: Users,
-      color: 'bg-blue-500'
+      color: 'bg-[#FFC300]'
     },
     {
-      title: 'Puntos Otorgados',
+      title: t('adminLoyalty.stats.pointsAwarded'),
       value: '45,678',
       icon: Award,
-      color: 'bg-green-500'
+      color: 'bg-[#FFC300]'
     },
     {
-      title: 'Premios Canjeados',
+      title: t('adminLoyalty.stats.rewardsRedeemed'),
       value: '89',
       icon: Gift,
-      color: 'bg-purple-500'
+      color: 'bg-[#FFC300]'
     },
     {
-      title: 'Valoración Promedio',
+      title: t('adminLoyalty.stats.averageRating'),
       value: '4.5',
       icon: Star,
-      color: 'bg-yellow-500'
+      color: 'bg-[#FFC300]'
     }
   ];
 
   const tabs = [
-    { id: 'overview', label: 'Resumen', icon: Award },
-    { id: 'rewards', label: 'Premios', icon: Gift },
-    { id: 'redemptions', label: 'Canjes', icon: Package },
-    { id: 'policies', label: 'Políticas', icon: Settings }
+    { id: 'overview', label: t('adminLoyalty.tabs.overview'), icon: Award },
+    { id: 'rewards', label: t('adminLoyalty.tabs.rewards'), icon: Gift },
+    { id: 'redemptions', label: t('adminLoyalty.tabs.redemptions'), icon: Package },
+    { id: 'policies', label: t('adminLoyalty.tabs.policies'), icon: Settings }
   ];
 
   useEffect(() => {
@@ -189,7 +191,7 @@ const AdminLoyalty: React.FC = () => {
   const handleCreateReward = async (rewardData: any) => {
     try {
       if (!token) {
-        alert('Error: No hay token de autenticación. Por favor, inicia sesión nuevamente.');
+        alert(t('adminLoyalty.messages.error.noToken'));
         return;
       }
       
@@ -216,14 +218,14 @@ const AdminLoyalty: React.FC = () => {
         const result = await response.json();
         await loadRewards();
         setShowRewardForm(false);
-        alert('Premio creado exitosamente');
+        alert(t('adminLoyalty.messages.rewardCreated'));
       } else {
         const errorData = await response.json();
-        alert(`Error al crear premio: ${errorData.message || 'Error desconocido'}`);
+        alert(`${t('adminLoyalty.messages.error.createReward')}: ${errorData.message || t('adminLoyalty.messages.error.unknown')}`);
       }
     } catch (error) {
       console.error('Error creando premio:', error);
-      alert('Error al crear premio. Verifica la conexión.');
+      alert(t('adminLoyalty.messages.error.connection'));
     } finally {
       setIsLoading(false);
     }
@@ -256,15 +258,15 @@ const AdminLoyalty: React.FC = () => {
         await loadRewards();
         setEditingReward(null);
         setShowRewardForm(false);
-        alert('Premio actualizado exitosamente');
+        alert(t('adminLoyalty.messages.rewardUpdated'));
       } else {
         const errorData = await response.json();
         console.error('Error en la respuesta:', errorData);
-        alert(`Error al actualizar premio: ${errorData.message || 'Error desconocido'}`);
+        alert(`${t('adminLoyalty.messages.error.updateReward')}: ${errorData.message || t('adminLoyalty.messages.error.unknown')}`);
       }
     } catch (error) {
       console.error('Error actualizando premio:', error);
-      alert('Error al actualizar premio. Verifica la conexión.');
+      alert(t('adminLoyalty.messages.error.connection'));
     } finally {
       setIsLoading(false);
     }
@@ -286,15 +288,15 @@ const AdminLoyalty: React.FC = () => {
         
         // Mostrar mensaje de confirmación para estado entregado
         if (status === 'delivered') {
-          alert('✅ Premio marcado como entregado exitosamente');
+          alert(t('adminLoyalty.messages.statusUpdated'));
         }
       } else {
         const errorData = await response.json();
-        alert(`Error al actualizar estado: ${errorData.message || 'Error desconocido'}`);
+        alert(`${t('adminLoyalty.messages.error.updateStatus')}: ${errorData.message || t('adminLoyalty.messages.error.unknown')}`);
       }
     } catch (error) {
       console.error('Error actualizando estado:', error);
-      alert('Error al actualizar estado. Verifica la conexión.');
+      alert(t('adminLoyalty.messages.error.connection'));
     }
   };
 
@@ -376,7 +378,7 @@ const AdminLoyalty: React.FC = () => {
                 {/* Resumen de premios y canjes */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="bg-white rounded-lg shadow p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Premios Activos</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('adminLoyalty.overview.activeRewards')}</h3>
                     <div className="space-y-3">
                       {rewards.slice(0, 3).map(reward => (
                         <div key={reward._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -390,7 +392,7 @@ const AdminLoyalty: React.FC = () => {
                             </div>
                           </div>
                           <span className={`px-2 py-1 text-xs rounded-full ${reward.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {reward.isActive ? 'Activo' : 'Inactivo'}
+                            {reward.isActive ? t('adminLoyalty.overview.active') : t('adminLoyalty.overview.inactive')}
                           </span>
                         </div>
                       ))}
@@ -398,7 +400,7 @@ const AdminLoyalty: React.FC = () => {
                   </div>
 
                   <div className="bg-white rounded-lg shadow p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Canjes Recientes</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('adminLoyalty.overview.recentRedemptions')}</h3>
                     <div className="space-y-3">
                       {redemptions.slice(0, 3).map(redemption => (
                         <div key={redemption._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -428,23 +430,23 @@ const AdminLoyalty: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Gestión de Premios</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t('adminLoyalty.rewards.title')}</h2>
               <button
                 onClick={() => setShowRewardForm(true)}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="flex items-center space-x-2 px-4 py-2 bg-[#FFC300] text-white rounded-md hover:bg-[#E6B000]"
               >
                 <Plus className="w-4 h-4" />
-                <span>Nuevo Premio</span>
+                <span>{t('adminLoyalty.rewards.newReward')}</span>
               </button>
             </div>
 
             {showRewardForm && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
                 <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
                   <div className="flex-shrink-0 p-6 border-b border-gray-200">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-2xl font-bold text-gray-900">
-                        {editingReward ? 'Editar Premio' : 'Crear Nuevo Premio'}
+                      <h2 className="text-2xl font-bold text-[#FFC300]">
+                        {editingReward ? t('adminLoyalty.rewards.editReward') : t('adminLoyalty.rewards.createNewReward')}
                       </h2>
                       <button
                         onClick={() => {
@@ -477,11 +479,11 @@ const AdminLoyalty: React.FC = () => {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Premio</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Puntos</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('adminLoyalty.rewards.table.reward')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('adminLoyalty.rewards.table.points')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('adminLoyalty.rewards.table.stock')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('adminLoyalty.rewards.table.status')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('adminLoyalty.rewards.table.actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -509,15 +511,15 @@ const AdminLoyalty: React.FC = () => {
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             reward.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                           }`}>
-                            {reward.isActive ? 'Activo' : 'Inactivo'}
+                            {reward.isActive ? t('adminLoyalty.overview.active') : t('adminLoyalty.overview.inactive')}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
                             onClick={() => handleEditReward(reward)}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-[#FFC300] hover:text-[#E6B000]"
                           >
-                            Editar
+                            {t('adminLoyalty.rewards.edit')}
                           </button>
                         </td>
                       </tr>
@@ -533,7 +535,7 @@ const AdminLoyalty: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Gestión de Canjes</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t('adminLoyalty.redemptions.title')}</h2>
             </div>
 
             <RedemptionManagement
@@ -549,7 +551,7 @@ const AdminLoyalty: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Políticas de Puntos</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t('adminLoyalty.policies.title')}</h2>
             </div>
 
             <PointsPolicyForm
@@ -568,8 +570,8 @@ const AdminLoyalty: React.FC = () => {
   return (
     <div className="p-4">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Gestión de Fidelización</h1>
-        <p className="text-gray-600 mt-2">Administra el programa de lealtad de clientes</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('adminLoyalty.title')}</h1>
+        <p className="text-gray-600 mt-2">{t('adminLoyalty.subtitle')}</p>
       </div>
 
       {/* Pestañas */}
@@ -583,7 +585,7 @@ const AdminLoyalty: React.FC = () => {
                 onClick={() => setActiveTab(tab.id as TabType)}
                 className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
+                    ? 'border-[#FFC300] text-[#FFC300]'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguageChange } from '../hooks/useLanguageChange';
 import { Users, Search, Filter, MoreVertical, Edit, Trash2, Eye, Plus, X, Save, UserPlus, Key } from 'lucide-react';
 import type { User, UserRole } from '../types';
 
@@ -10,6 +12,9 @@ interface UserFormData {
 }
 
 const AdminUsers: React.FC = () => {
+  const { t, tWithParams } = useLanguage();
+  const { forceUpdate } = useLanguageChange(); // Para asegurar re-renders
+  
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +66,7 @@ const AdminUsers: React.FC = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Error response:', errorData);
-        throw new Error(errorData.message || 'Error al cargar usuarios');
+        throw new Error(errorData.message || t('adminUsers.errors.loadUsers'));
       }
 
       const data = await response.json();
@@ -77,7 +82,7 @@ const AdminUsers: React.FC = () => {
       console.error('Error fetching users:', error);
       // En caso de error, mostrar mensaje pero no usar datos de ejemplo
       setUsers([]);
-      alert('Error al cargar usuarios: ' + (error instanceof Error ? error.message : 'Error desconocido'));
+      alert(t('adminUsers.errors.loadUsers') + ': ' + (error instanceof Error ? error.message : 'Error desconocido'));
     } finally {
       setLoading(false);
     }
@@ -118,7 +123,7 @@ const AdminUsers: React.FC = () => {
       const token = localStorage.getItem('token');
       
       if (!token) {
-        alert('No hay token de autenticación');
+        alert(t('adminUsers.errors.noToken'));
         return;
       }
 
@@ -136,17 +141,17 @@ const AdminUsers: React.FC = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error al crear usuario');
+        throw new Error(data.message || t('adminUsers.errors.createUser'));
       }
 
-      alert('Usuario creado exitosamente');
+      alert(t('adminUsers.messages.userCreated'));
       await fetchUsers();
       setShowCreateModal(false);
       setFormData({ name: '', email: '', phone: '', role: 'client' });
       console.log('🔄 Formulario reseteado a:', { name: '', email: '', phone: '', role: 'client' });
     } catch (error) {
       console.error('Error creating user:', error);
-      alert('Error al crear usuario: ' + (error instanceof Error ? error.message : 'Error desconocido'));
+      alert(t('adminUsers.errors.createUser') + ': ' + (error instanceof Error ? error.message : 'Error desconocido'));
     }
   };
 
@@ -157,7 +162,7 @@ const AdminUsers: React.FC = () => {
       const token = localStorage.getItem('token');
       
       if (!token) {
-        alert('No hay token de autenticación');
+        alert(t('adminUsers.errors.noToken'));
         return;
       }
 
@@ -173,24 +178,22 @@ const AdminUsers: React.FC = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error al actualizar usuario');
+        throw new Error(data.message || t('adminUsers.errors.updateUser'));
       }
 
-      alert('Usuario actualizado exitosamente');
+      alert(t('adminUsers.messages.userUpdated'));
       await fetchUsers();
       setShowEditModal(false);
       setSelectedUser(null);
       setFormData({ name: '', email: '', phone: '', role: 'client' });
     } catch (error) {
       console.error('Error updating user:', error);
-      alert('Error al actualizar usuario: ' + (error instanceof Error ? error.message : 'Error desconocido'));
+      alert(t('adminUsers.errors.updateUser') + ': ' + (error instanceof Error ? error.message : 'Error desconocido'));
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
-    const confirmed = window.confirm(
-      '¿Estás seguro de que deseas desactivar este usuario? El usuario no podrá acceder al sistema.'
-    );
+    const confirmed = window.confirm(t('adminUsers.confirmations.deactivate'));
 
     if (!confirmed) return;
 
@@ -198,7 +201,7 @@ const AdminUsers: React.FC = () => {
       const token = localStorage.getItem('token');
       
       if (!token) {
-        alert('No hay token de autenticación');
+        alert(t('adminUsers.errors.noToken'));
         return;
       }
 
@@ -212,21 +215,19 @@ const AdminUsers: React.FC = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error al desactivar usuario');
+        throw new Error(data.message || t('adminUsers.errors.deactivateUser'));
       }
 
       await fetchUsers();
-      alert('Usuario desactivado correctamente');
+      alert(t('adminUsers.messages.userDeactivated'));
     } catch (error) {
       console.error('Error deactivating user:', error);
-      alert('Error al desactivar usuario: ' + (error instanceof Error ? error.message : 'Error desconocido'));
+      alert(t('adminUsers.errors.deactivateUser') + ': ' + (error instanceof Error ? error.message : 'Error desconocido'));
     }
   };
 
   const handleResetPassword = async (userId: string, userName: string) => {
-    const confirmed = window.confirm(
-      `¿Estás seguro de que deseas resetear la contraseña de ${userName}? Se enviará un email con una contraseña temporal.`
-    );
+    const confirmed = window.confirm(tWithParams('adminUsers.confirmations.resetPassword', { userName }));
 
     if (!confirmed) return;
 
@@ -234,7 +235,7 @@ const AdminUsers: React.FC = () => {
       const token = localStorage.getItem('token');
       
       if (!token) {
-        alert('No hay token de autenticación');
+        alert(t('adminUsers.errors.noToken'));
         return;
       }
 
@@ -249,13 +250,13 @@ const AdminUsers: React.FC = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error al resetear contraseña');
+        throw new Error(data.message || t('adminUsers.errors.resetPassword'));
       }
 
-      alert('Contraseña reseteada exitosamente. Se ha enviado un email al usuario con la contraseña temporal.');
+      alert(t('adminUsers.messages.passwordReset'));
     } catch (error) {
       console.error('Error resetting password:', error);
-      alert('Error al resetear contraseña: ' + (error instanceof Error ? error.message : 'Error desconocido'));
+      alert(t('adminUsers.errors.resetPassword') + ': ' + (error instanceof Error ? error.message : 'Error desconocido'));
     }
   };
 
@@ -277,10 +278,10 @@ const AdminUsers: React.FC = () => {
 
   const getRoleLabel = (role: UserRole) => {
     const labels = {
-      admin: 'Administrador',
-      client: 'Cliente',
-      delivery: 'Repartidor',
-      store_manager: 'Gestor de Tienda'
+      admin: t('adminUsers.roles.admin'),
+      client: t('adminUsers.roles.client'),
+      delivery: t('adminUsers.roles.delivery'),
+      store_manager: t('adminUsers.roles.storeManager')
     };
     return labels[role];
   };
@@ -302,9 +303,9 @@ const AdminUsers: React.FC = () => {
   };
 
   const getStatusLabel = (user: User) => {
-    if (!user.isActive) return 'Inactivo';
-    if (!user.isEmailVerified) return 'Pendiente';
-    return 'Activo';
+    if (!user.isActive) return t('adminUsers.status.inactive');
+    if (!user.isEmailVerified) return t('adminUsers.status.pending');
+    return t('adminUsers.status.active');
   };
 
   const formatDate = (dateString: string) => {
@@ -329,31 +330,31 @@ const AdminUsers: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[#333333]">Gestión de Usuarios</h1>
-            <p className="text-gray-600">Administra los usuarios del sistema</p>
+            <h1 className="text-3xl font-bold text-[#333333] dark:text-[#FFC300]">{t('adminUsers.title')}</h1>
+            <p className="text-gray-600 dark:text-white">{t('adminUsers.subtitle')}</p>
           </div>
           <button 
             onClick={() => setShowCreateModal(true)}
             className="bg-[#FFC300] text-[#333333] px-4 py-2 rounded-lg hover:bg-[#E6B800] transition-colors font-semibold flex items-center space-x-2"
           >
             <UserPlus className="w-5 h-5" />
-            <span>Agregar Usuario</span>
+            <span>{t('adminUsers.addUser')}</span>
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div className="bg-white dark:bg-[#333333] rounded-lg shadow p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Buscar usuarios..."
+                placeholder={t('adminUsers.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
               />
             </div>
           </div>
@@ -361,62 +362,62 @@ const AdminUsers: React.FC = () => {
             <select 
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
             >
-              <option value="">Todos los roles</option>
-              <option value="admin">Administrador</option>
-              <option value="store_manager">Gestor de Tienda</option>
-              <option value="delivery">Repartidor</option>
-              <option value="client">Cliente</option>
+              <option value="">{t('adminUsers.filters.allRoles')}</option>
+              <option value="admin">{t('adminUsers.roles.admin')}</option>
+              <option value="store_manager">{t('adminUsers.roles.storeManager')}</option>
+              <option value="delivery">{t('adminUsers.roles.delivery')}</option>
+              <option value="client">{t('adminUsers.roles.client')}</option>
             </select>
             <select 
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
             >
-              <option value="">Todos los estados</option>
-              <option value="active">Activo</option>
-              <option value="inactive">Inactivo</option>
-              <option value="pending">Pendiente</option>
+              <option value="">{t('adminUsers.filters.allStatuses')}</option>
+              <option value="active">{t('adminUsers.filters.active')}</option>
+              <option value="inactive">{t('adminUsers.filters.inactive')}</option>
+              <option value="pending">{t('adminUsers.filters.pending')}</option>
             </select>
           </div>
         </div>
       </div>
 
       {/* Users Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-[#333333]">
-            Usuarios ({filteredUsers.length})
+      <div className="bg-white dark:bg-[#333333] rounded-lg shadow overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-[#555555]">
+          <h3 className="text-lg font-semibold text-[#333333] dark:text-[#FFC300]">
+            {t('adminUsers.table.title')} ({filteredUsers.length})
           </h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-[#555555]">
+            <thead className="bg-gray-50 dark:bg-[#444444]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Usuario
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                  {t('adminUsers.table.headers.user')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                  {t('adminUsers.table.headers.email')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rol
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                  {t('adminUsers.table.headers.role')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                  {t('adminUsers.table.headers.status')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Fecha de Registro
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                  {t('adminUsers.table.headers.registrationDate')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                  {t('adminUsers.table.headers.actions')}
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-[#333333] divide-y divide-gray-200 dark:divide-[#555555]">
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
+                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-[#444444]">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
@@ -425,13 +426,13 @@ const AdminUsers: React.FC = () => {
                         </div>
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-[#333333]">{user.name}</div>
-                        <div className="text-sm text-gray-500">ID: {user.id}</div>
+                        <div className="text-sm font-medium text-[#333333] dark:text-white">{user.name}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-300">ID: {user.id}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-[#333333]">{user.email}</div>
+                    <div className="text-sm text-[#333333] dark:text-white">{user.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
@@ -443,36 +444,36 @@ const AdminUsers: React.FC = () => {
                       {getStatusLabel(user)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.createdAt ? formatDate(user.createdAt) : 'N/A'}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                    {user.createdAt ? formatDate(user.createdAt) : t('adminUsers.details.na')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <button 
                         onClick={() => openViewModal(user)}
                         className="text-blue-600 hover:text-blue-900 p-1 rounded"
-                        title="Ver detalles"
+                        title={t('adminUsers.actions.view')}
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => openEditModal(user)}
                         className="text-green-600 hover:text-green-900 p-1 rounded"
-                        title="Editar"
+                        title={t('adminUsers.actions.edit')}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => handleResetPassword(user.id, user.name)}
                         className="text-orange-600 hover:text-orange-900 p-1 rounded"
-                        title="Resetear contraseña"
+                        title={t('adminUsers.actions.resetPassword')}
                       >
                         <Key className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => handleDeleteUser(user.id)}
                         className="text-red-600 hover:text-red-900 p-1 rounded"
-                        title="Desactivar"
+                        title={t('adminUsers.actions.deactivate')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -490,7 +491,7 @@ const AdminUsers: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-[#333333]">Crear Usuario</h2>
+              <h2 className="text-xl font-semibold text-[#333333]">{t('adminUsers.modals.create.title')}</h2>
               <button 
                 onClick={() => setShowCreateModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -503,7 +504,7 @@ const AdminUsers: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-[#333333] mb-1">
-                    Nombre completo
+                    {t('adminUsers.form.fullName')}
                   </label>
                   <input
                     type="text"
@@ -516,7 +517,7 @@ const AdminUsers: React.FC = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-[#333333] mb-1">
-                    Email
+                    {t('adminUsers.form.email')}
                   </label>
                   <input
                     type="email"
@@ -529,7 +530,7 @@ const AdminUsers: React.FC = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-[#333333] mb-1">
-                    Teléfono
+                    {t('adminUsers.form.phone')}
                   </label>
                   <input
                     type="tel"
@@ -541,17 +542,17 @@ const AdminUsers: React.FC = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-[#333333] mb-1">
-                    Rol
+                    {t('adminUsers.form.role')}
                   </label>
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({...formData, role: e.target.value as UserRole})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
                   >
-                    <option value="client">Cliente</option>
+                    <option value="client">{t('adminUsers.roles.client')}</option>
                   </select>
                   <p className="text-xs text-gray-500 mt-1">
-                    Los usuarios con roles especiales se crean mediante códigos de referidos
+                    {t('adminUsers.form.roleNote')}
                   </p>
                 </div>
               </div>
@@ -562,13 +563,13 @@ const AdminUsers: React.FC = () => {
                   onClick={() => setShowCreateModal(false)}
                   className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
-                  Cancelar
+                  {t('adminUsers.form.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-[#FFC300] text-[#333333] rounded-lg hover:bg-[#E6B800] font-semibold"
                 >
-                  Crear Usuario
+                  {t('adminUsers.form.create')}
                 </button>
               </div>
             </form>
@@ -581,7 +582,7 @@ const AdminUsers: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-[#333333]">Editar Usuario</h2>
+              <h2 className="text-xl font-semibold text-[#333333]">{t('adminUsers.modals.edit.title')}</h2>
               <button 
                 onClick={() => setShowEditModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -594,7 +595,7 @@ const AdminUsers: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-[#333333] mb-1">
-                    Nombre completo
+                    {t('adminUsers.form.fullName')}
                   </label>
                   <input
                     type="text"
@@ -607,7 +608,7 @@ const AdminUsers: React.FC = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-[#333333] mb-1">
-                    Email
+                    {t('adminUsers.form.email')}
                   </label>
                   <input
                     type="email"
@@ -620,7 +621,7 @@ const AdminUsers: React.FC = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-[#333333] mb-1">
-                    Teléfono
+                    {t('adminUsers.form.phone')}
                   </label>
                   <input
                     type="tel"
@@ -632,17 +633,17 @@ const AdminUsers: React.FC = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-[#333333] mb-1">
-                    Rol
+                    {t('adminUsers.form.role')}
                   </label>
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({...formData, role: e.target.value as UserRole})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
                   >
-                    <option value="admin">Administrador</option>
-                    <option value="store_manager">Gestor de Tienda</option>
-                    <option value="delivery">Repartidor</option>
-                    <option value="client">Cliente</option>
+                    <option value="admin">{t('adminUsers.roles.admin')}</option>
+                    <option value="store_manager">{t('adminUsers.roles.storeManager')}</option>
+                    <option value="delivery">{t('adminUsers.roles.delivery')}</option>
+                    <option value="client">{t('adminUsers.roles.client')}</option>
                   </select>
                 </div>
               </div>
@@ -653,13 +654,13 @@ const AdminUsers: React.FC = () => {
                   onClick={() => setShowEditModal(false)}
                   className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
-                  Cancelar
+                  {t('adminUsers.form.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-[#FFC300] text-[#333333] rounded-lg hover:bg-[#E6B800] font-semibold"
                 >
-                  Guardar Cambios
+                  {t('adminUsers.form.save')}
                 </button>
               </div>
             </form>
@@ -672,7 +673,7 @@ const AdminUsers: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-[#333333]">Detalles del Usuario</h2>
+              <h2 className="text-xl font-semibold text-[#333333]">{t('adminUsers.modals.view.title')}</h2>
               <button 
                 onClick={() => setShowViewModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -683,43 +684,43 @@ const AdminUsers: React.FC = () => {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-500">Nombre</label>
+                <label className="block text-sm font-medium text-gray-500">{t('adminUsers.form.fullName')}</label>
                 <p className="text-[#333333]">{selectedUser.name}</p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-500">Email</label>
+                <label className="block text-sm font-medium text-gray-500">{t('adminUsers.form.email')}</label>
                 <p className="text-[#333333]">{selectedUser.email}</p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-500">Teléfono</label>
-                <p className="text-[#333333]">{selectedUser.phone || 'No especificado'}</p>
+                <label className="block text-sm font-medium text-gray-500">{t('adminUsers.details.phone')}</label>
+                <p className="text-[#333333]">{selectedUser.phone || t('adminUsers.details.notSpecified')}</p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-500">Rol</label>
+                <label className="block text-sm font-medium text-gray-500">{t('adminUsers.details.role')}</label>
                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(selectedUser.role)}`}>
                   {getRoleLabel(selectedUser.role)}
                 </span>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-500">Estado</label>
+                <label className="block text-sm font-medium text-gray-500">{t('adminUsers.details.status')}</label>
                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedUser)}`}>
                   {getStatusLabel(selectedUser)}
                 </span>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-500">Email Verificado</label>
-                <p className="text-[#333333]">{selectedUser.isEmailVerified ? 'Sí' : 'No'}</p>
+                <label className="block text-sm font-medium text-gray-500">{t('adminUsers.details.emailVerified')}</label>
+                <p className="text-[#333333]">{selectedUser.isEmailVerified ? t('adminUsers.details.yes') : t('adminUsers.details.no')}</p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-500">Fecha de Registro</label>
+                <label className="block text-sm font-medium text-gray-500">{t('adminUsers.details.registrationDate')}</label>
                 <p className="text-[#333333]">
-                  {selectedUser.createdAt ? formatDate(selectedUser.createdAt) : 'N/A'}
+                  {selectedUser.createdAt ? formatDate(selectedUser.createdAt) : t('adminUsers.details.na')}
                 </p>
               </div>
             </div>
@@ -729,7 +730,7 @@ const AdminUsers: React.FC = () => {
                 onClick={() => setShowViewModal(false)}
                 className="px-4 py-2 bg-[#FFC300] text-[#333333] rounded-lg hover:bg-[#E6B800] font-semibold"
               >
-                Cerrar
+                {t('adminUsers.form.close')}
               </button>
             </div>
           </div>

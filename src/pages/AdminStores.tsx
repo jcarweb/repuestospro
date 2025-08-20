@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { 
   Store, 
   Plus, 
@@ -90,6 +91,7 @@ interface StoreStats {
 
 const AdminStores: React.FC = () => {
   const { user, token } = useAuth();
+  const { t } = useLanguage();
   const [stores, setStores] = useState<Store[]>([]);
   const [stats, setStats] = useState<StoreStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -224,13 +226,13 @@ const AdminStores: React.FC = () => {
   const handleCreateStore = async () => {
     // Validar que se haya seleccionado una ubicación
     if (!selectedCoordinates) {
-      alert('Por favor selecciona la ubicación de la tienda en el mapa');
+      alert(t('adminStores.errors.locationRequired'));
       return;
     }
     
     // Validar campos obligatorios
     if (!formData.name || !formData.address || !formData.city || !formData.state || !formData.zipCode || !formData.phone || !formData.email) {
-      alert('Los campos nombre, dirección, ciudad, estado, código postal, teléfono y email son obligatorios');
+      alert(t('adminStores.errors.requiredFields'));
       return;
     }
     try {
@@ -271,13 +273,13 @@ const AdminStores: React.FC = () => {
         setSelectedCoordinates(null);
         fetchStores();
         fetchStats();
-        alert('Tienda creada exitosamente');
+        alert(t('adminStores.messages.storeCreated'));
       } else {
-        alert(data.message || 'Error creando tienda');
+        alert(data.message || t('adminStores.errors.createStore'));
       }
     } catch (error) {
       console.error('Error creando tienda:', error);
-      alert('Error de conexión');
+      alert(t('adminStores.errors.connection'));
     }
   };
 
@@ -287,7 +289,7 @@ const AdminStores: React.FC = () => {
      
      // Validar campos obligatorios
      if (!formData.name || !formData.address || !formData.city || !formData.state || !formData.zipCode || !formData.phone || !formData.email) {
-       alert('Los campos nombre, dirección, ciudad, estado, código postal, teléfono y email son obligatorios');
+       alert(t('adminStores.errors.requiredFields'));
        return;
      }
      
@@ -322,19 +324,19 @@ const AdminStores: React.FC = () => {
         setShowEditModal(false);
         setSelectedStore(null);
         fetchStores();
-        alert('Tienda actualizada exitosamente');
+        alert(t('adminStores.messages.storeUpdated'));
       } else {
-        alert(data.message || 'Error actualizando tienda');
+        alert(data.message || t('adminStores.errors.updateStore'));
       }
     } catch (error) {
       console.error('Error actualizando tienda:', error);
-      alert('Error de conexión');
+      alert(t('adminStores.errors.connection'));
     }
   };
 
   // Desactivar tienda
   const handleDeactivateStore = async (storeId: string) => {
-    const confirmed = window.confirm('¿Estás seguro de que deseas desactivar esta tienda?');
+    const confirmed = window.confirm(t('adminStores.confirmations.deactivate'));
     if (!confirmed) return;
 
     try {
@@ -350,13 +352,13 @@ const AdminStores: React.FC = () => {
       if (data.success) {
         fetchStores();
         fetchStats();
-        alert('Tienda desactivada exitosamente');
+        alert(t('adminStores.messages.storeDeactivated'));
       } else {
-        alert(data.message || 'Error desactivando tienda');
+        alert(data.message || t('adminStores.errors.deactivateStore'));
       }
     } catch (error) {
       console.error('Error desactivando tienda:', error);
-      alert('Error de conexión');
+      alert(t('adminStores.errors.connection'));
     }
   };
 
@@ -379,13 +381,13 @@ const AdminStores: React.FC = () => {
       if (data.success) {
         setNewManagerEmail('');
         fetchStores();
-        alert('Manager agregado exitosamente');
+        alert(t('adminStores.messages.managerAdded'));
       } else {
-        alert(data.message || 'Error agregando manager');
+        alert(data.message || t('adminStores.errors.addManager'));
       }
     } catch (error) {
       console.error('Error agregando manager:', error);
-      alert('Error de conexión');
+      alert(t('adminStores.errors.connection'));
     }
   };
 
@@ -393,7 +395,7 @@ const AdminStores: React.FC = () => {
   const handleRemoveManager = async (managerId: string) => {
     if (!selectedStore) return;
 
-    const confirmed = window.confirm('¿Estás seguro de que deseas remover este manager?');
+    const confirmed = window.confirm(t('adminStores.confirmations.removeManager'));
     if (!confirmed) return;
 
     try {
@@ -410,13 +412,13 @@ const AdminStores: React.FC = () => {
       
       if (data.success) {
         fetchStores();
-        alert('Manager removido exitosamente');
+        alert(t('adminStores.messages.managerRemoved'));
       } else {
-        alert(data.message || 'Error removiendo manager');
+        alert(data.message || t('adminStores.errors.removeManager'));
       }
     } catch (error) {
       console.error('Error removiendo manager:', error);
-      alert('Error de conexión');
+      alert(t('adminStores.errors.connection'));
     }
   };
 
@@ -480,8 +482,8 @@ const AdminStores: React.FC = () => {
       <div className="p-4">
         <div className="text-center py-12">
           <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Acceso Denegado</h2>
-          <p className="text-gray-600">No tienes permisos para acceder a esta página.</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('adminStores.access.denied')}</h2>
+          <p className="text-gray-600">{t('adminStores.access.noPermissions')}</p>
         </div>
       </div>
     );
@@ -490,46 +492,46 @@ const AdminStores: React.FC = () => {
   return (
     <div className="p-4">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Gestión de Tiendas</h1>
-        <p className="text-gray-600 mt-2">Administra las tiendas del sistema</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('adminStores.title')}</h1>
+        <p className="text-gray-600 mt-2">{t('adminStores.subtitle')}</p>
       </div>
 
       {/* Estadísticas */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="bg-white dark:bg-[#333333] p-4 rounded-lg shadow">
             <div className="flex items-center">
               <Store className="w-8 h-8 text-blue-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Total</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalStores}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-white">{t('adminStores.stats.total')}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-[#FFC300]">{stats.totalStores}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="bg-white dark:bg-[#333333] p-4 rounded-lg shadow">
             <div className="flex items-center">
               <CheckCircle className="w-8 h-8 text-green-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Activas</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.activeStores}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-white">{t('adminStores.stats.active')}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-[#FFC300]">{stats.activeStores}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="bg-white dark:bg-[#333333] p-4 rounded-lg shadow">
             <div className="flex items-center">
               <XCircle className="w-8 h-8 text-red-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Inactivas</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.inactiveStores}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-white">{t('adminStores.stats.inactive')}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-[#FFC300]">{stats.inactiveStores}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="bg-white dark:bg-[#333333] p-4 rounded-lg shadow">
             <div className="flex items-center">
               <BarChart3 className="w-8 h-8 text-purple-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Ciudades</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.storesByCity.length}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-white">{t('adminStores.stats.cities')}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-[#FFC300]">{stats.storesByCity.length}</p>
               </div>
             </div>
           </div>
@@ -542,19 +544,19 @@ const AdminStores: React.FC = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Buscar tiendas..."
+            placeholder={t('adminStores.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         
         <select
           value={selectedCity}
           onChange={(e) => setSelectedCity(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="all">Todas las ciudades</option>
+          <option value="all">{t('adminStores.filters.allCities')}</option>
           {stats?.storesByCity.map((city) => (
             <option key={city._id} value={city._id}>{city._id} ({city.count})</option>
           ))}
@@ -563,9 +565,9 @@ const AdminStores: React.FC = () => {
         <select
           value={selectedState}
           onChange={(e) => setSelectedState(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="all">Todos los estados</option>
+          <option value="all">{t('adminStores.filters.allStates')}</option>
           {stats?.storesByState.map((state) => (
             <option key={state._id} value={state._id}>{state._id} ({state.count})</option>
           ))}
@@ -574,70 +576,70 @@ const AdminStores: React.FC = () => {
         <select
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="all">Todos los estados</option>
-          <option value="active">Activas</option>
-          <option value="inactive">Inactivas</option>
+          <option value="all">{t('adminStores.filters.allStatuses')}</option>
+          <option value="active">{t('adminStores.filters.active')}</option>
+          <option value="inactive">{t('adminStores.filters.inactive')}</option>
         </select>
         
-        <button 
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Crear Tienda
-        </button>
+                 <button 
+           onClick={() => setShowCreateModal(true)}
+           className="flex items-center gap-2 bg-[#FFC300] text-[#333333] px-4 py-2 rounded-lg hover:bg-[#E6B800] transition-colors font-semibold"
+         >
+           <Plus className="w-5 h-5" />
+           {t('adminStores.createStore')}
+         </button>
       </div>
 
       {/* Tabla de tiendas */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-[#333333] rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-[#555555]">
+            <thead className="bg-gray-50 dark:bg-[#444444]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tienda
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                  {t('adminStores.table.headers.store')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ubicación
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                  {t('adminStores.table.headers.location')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contacto
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                  {t('adminStores.table.headers.contact')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Propietario
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                  {t('adminStores.table.headers.owner')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Managers
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                  {t('adminStores.table.headers.managers')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                  {t('adminStores.table.headers.status')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                  {t('adminStores.table.headers.actions')}
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-[#333333] divide-y divide-gray-200 dark:divide-[#555555]">
               {loading ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-4 text-center">
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                      <span className="ml-2">Cargando tiendas...</span>
+                      <span className="ml-2">{t('adminStores.table.loading')}</span>
                     </div>
                   </td>
                 </tr>
               ) : stores.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                    No se encontraron tiendas
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500 dark:text-gray-300">
+                    {t('adminStores.table.noData')}
                   </td>
                 </tr>
               ) : (
                 stores.map((store) => (
-                  <tr key={store._id} className="hover:bg-gray-50">
+                  <tr key={store._id} className="hover:bg-gray-50 dark:hover:bg-[#444444]">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -654,8 +656,8 @@ const AdminStores: React.FC = () => {
                           )}
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{store.name}</div>
-                          <div className="text-sm text-gray-500">{store.description}</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{store.name}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-300">{store.description}</div>
                         </div>
                       </div>
                     </td>
@@ -663,39 +665,39 @@ const AdminStores: React.FC = () => {
                       <div className="flex items-center">
                         <MapPin className="w-4 h-4 text-gray-400 mr-2" />
                         <div>
-                          <div className="text-sm text-gray-900">{store.city}, {store.state}</div>
-                          <div className="text-sm text-gray-500">{store.address}</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{store.city}, {store.state}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-300">{store.address}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="space-y-1">
-                        <div className="flex items-center text-sm text-gray-900">
+                        <div className="flex items-center text-sm text-gray-900 dark:text-white">
                           <Phone className="w-4 h-4 text-gray-400 mr-2" />
                           {store.phone}
                         </div>
-                        <div className="flex items-center text-sm text-gray-500">
+                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-300">
                           <Mail className="w-4 h-4 text-gray-400 mr-2" />
                           {store.email}
                         </div>
                         {store.website && (
-                          <div className="flex items-center text-sm text-gray-500">
+                          <div className="flex items-center text-sm text-gray-500 dark:text-gray-300">
                             <Globe className="w-4 h-4 text-gray-400 mr-2" />
                             {store.website}
                           </div>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       <div>
                         <div className="font-medium">{store.owner.name}</div>
-                        <div className="text-gray-500">{store.owner.email}</div>
+                        <div className="text-gray-500 dark:text-gray-300">{store.owner.email}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Users className="w-4 h-4 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900">{store.managers.length} managers</span>
+                        <span className="text-sm text-gray-900 dark:text-white">{store.managers.length} {t('adminStores.table.managersCount')}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -704,7 +706,7 @@ const AdminStores: React.FC = () => {
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {store.isActive ? 'Activa' : 'Inactiva'}
+                        {store.isActive ? t('adminStores.status.active') : t('adminStores.status.inactive')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -712,28 +714,28 @@ const AdminStores: React.FC = () => {
                         <button 
                           onClick={() => openViewModal(store)}
                           className="text-blue-600 hover:text-blue-900 p-1 rounded"
-                          title="Ver detalles"
+                          title={t('adminStores.actions.view')}
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => openEditModal(store)}
                           className="text-green-600 hover:text-green-900 p-1 rounded"
-                          title="Editar"
+                          title={t('adminStores.actions.edit')}
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => openManagersModal(store)}
                           className="text-purple-600 hover:text-purple-900 p-1 rounded"
-                          title="Gestionar managers"
+                          title={t('adminStores.actions.manageManagers')}
                         >
                           <Users className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleDeactivateStore(store._id)}
                           className="text-red-600 hover:text-red-900 p-1 rounded"
-                          title="Desactivar"
+                          title={t('adminStores.actions.deactivate')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -755,22 +757,22 @@ const AdminStores: React.FC = () => {
                 disabled={currentPage === 1}
                 className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
               >
-                Anterior
+                {t('adminStores.pagination.previous')}
               </button>
               <button
                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
                 className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
               >
-                Siguiente
+                {t('adminStores.pagination.next')}
               </button>
             </div>
             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm text-gray-700">
-                  Mostrando <span className="font-medium">{((currentPage - 1) * 20) + 1}</span> a{' '}
-                  <span className="font-medium">{Math.min(currentPage * 20, totalStores)}</span> de{' '}
-                  <span className="font-medium">{totalStores}</span> resultados
+                  {t('adminStores.pagination.showing')} <span className="font-medium">{((currentPage - 1) * 20) + 1}</span> {t('adminStores.pagination.to')}{' '}
+                  <span className="font-medium">{Math.min(currentPage * 20, totalStores)}</span> {t('adminStores.pagination.of')}{' '}
+                  <span className="font-medium">{totalStores}</span> {t('adminStores.pagination.results')}
                 </p>
               </div>
               <div>
@@ -812,27 +814,27 @@ const AdminStores: React.FC = () => {
         )}
       </div>
 
-      {/* Modal para crear tienda */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Crear Nueva Tienda</h3>
+             {/* Modal para crear tienda */}
+       {showCreateModal && (
+         <div className="fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full z-50">
+           <div className="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white dark:bg-[#333333] max-h-[90vh] overflow-y-auto">
+             <div className="mt-3">
+               <h3 className="text-lg font-medium text-gray-900 dark:text-[#FFC300] mb-4">{t('adminStores.modals.create.title')}</h3>
               
               {/* Información básica */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Nombre de la tienda *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminStores.form.storeName')}</label>
                   <input
                     type="text"
-                    placeholder="Nombre de la tienda"
+                    placeholder={t('adminStores.form.storeNamePlaceholder')}
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminStores.form.email')}</label>
                   <input
                     type="email"
                     placeholder="Email"
@@ -842,9 +844,9 @@ const AdminStores: React.FC = () => {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Descripción *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminStores.form.description')}</label>
                   <textarea
-                    placeholder="Descripción"
+                    placeholder={t('adminStores.form.descriptionPlaceholder')}
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -853,59 +855,59 @@ const AdminStores: React.FC = () => {
                 </div>
               </div>
 
-              {/* Mapa de ubicación */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Ubicación de la Tienda *</label>
-                <div className="border border-gray-300 rounded-md p-4">
-                  <FreeStoreLocationMap
-                    onLocationSelect={handleLocationSelect}
-                    height="300px"
-                  />
-                </div>
-                {selectedCoordinates && (
-                  <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-sm">
-                    <span className="font-medium">Ubicación seleccionada:</span> {selectedCoordinates.address}
-                  </div>
-                )}
-              </div>
+                             {/* Mapa de ubicación */}
+               <div className="mb-6">
+                 <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">{t('adminStores.form.location')}</label>
+                 <div className="border border-gray-300 dark:border-[#555555] rounded-md p-4">
+                   <FreeStoreLocationMap
+                     onLocationSelect={handleLocationSelect}
+                     height="300px"
+                   />
+                 </div>
+                 {selectedCoordinates && (
+                   <div className="mt-2 p-2 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded text-sm">
+                     <span className="font-medium dark:text-white">{t('adminStores.form.locationSelected')}</span> <span className="dark:text-green-200">{selectedCoordinates.address}</span>
+                   </div>
+                 )}
+               </div>
 
                                              {/* Información de ubicación */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Dirección *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminStores.form.address')}</label>
                     <input
                       type="text"
-                      placeholder="Dirección"
+                      placeholder={t('adminStores.form.addressPlaceholder')}
                       value={formData.address}
                       onChange={(e) => setFormData({...formData, address: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Ciudad *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminStores.form.city')}</label>
                     <input
                       type="text"
-                      placeholder="Ciudad"
+                      placeholder={t('adminStores.form.cityPlaceholder')}
                       value={formData.city}
                       onChange={(e) => setFormData({...formData, city: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Estado *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminStores.form.state')}</label>
                     <input
                       type="text"
-                      placeholder="Estado"
+                      placeholder={t('adminStores.form.statePlaceholder')}
                       value={formData.state}
                       onChange={(e) => setFormData({...formData, state: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Código Postal *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminStores.form.zipCode')}</label>
                     <input
                       type="text"
-                      placeholder="Código Postal"
+                      placeholder={t('adminStores.form.zipCodePlaceholder')}
                       value={formData.zipCode}
                       onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -936,70 +938,70 @@ const AdminStores: React.FC = () => {
                    />
                  </div>
                </div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setSelectedCoordinates(null);
-                    setFormData({
-                      name: '', description: '', address: '', city: '', state: '', zipCode: '',
-                      country: 'Venezuela', phone: '', email: '', website: '', logo: '', banner: '',
-                      latitude: '', longitude: '', currency: 'USD', taxRate: '16.0',
-                      deliveryRadius: '10', minimumOrder: '0', autoAcceptOrders: false
-                    });
-                  }}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleCreateStore}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Crear
-                </button>
-              </div>
+                             <div className="flex justify-end space-x-3 mt-6">
+                 <button
+                   onClick={() => {
+                     setShowCreateModal(false);
+                     setSelectedCoordinates(null);
+                     setFormData({
+                       name: '', description: '', address: '', city: '', state: '', zipCode: '',
+                       country: 'Venezuela', phone: '', email: '', website: '', logo: '', banner: '',
+                       latitude: '', longitude: '', currency: 'USD', taxRate: '16.0',
+                       deliveryRadius: '10', minimumOrder: '0', autoAcceptOrders: false
+                     });
+                   }}
+                   className="px-4 py-2 bg-gray-300 dark:bg-[#555555] text-gray-700 dark:text-white rounded-md hover:bg-gray-400 dark:hover:bg-[#666666]"
+                 >
+                   {t('adminStores.form.cancel')}
+                 </button>
+                 <button
+                   onClick={handleCreateStore}
+                   className="px-4 py-2 bg-[#FFC300] text-[#333333] rounded-md hover:bg-[#E6B800] font-semibold"
+                 >
+                   {t('adminStores.form.create')}
+                 </button>
+               </div>
             </div>
           </div>
         </div>
       )}
 
-             {/* Modal para editar tienda */}
-       {showEditModal && selectedStore && (
-         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-           <div className="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
-             <div className="mt-3">
-               <h3 className="text-lg font-medium text-gray-900 mb-4">Editar Tienda</h3>
+                     {/* Modal para editar tienda */}
+        {showEditModal && selectedStore && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white dark:bg-[#333333] max-h-[90vh] overflow-y-auto">
+              <div className="mt-3">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-[#FFC300] mb-4">{t('adminStores.modals.edit.title')}</h3>
                
                {/* Información básica */}
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                  <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-2">Nombre de la tienda *</label>
+                   <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">{t('adminStores.form.storeName')}</label>
                    <input
                      type="text"
-                     placeholder="Nombre de la tienda"
+                     placeholder={t('adminStores.form.storeNamePlaceholder')}
                      value={formData.name}
                      onChange={(e) => setFormData({...formData, name: e.target.value})}
-                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                     className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                    />
                  </div>
                  <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                   <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">{t('adminStores.form.email')}</label>
                    <input
                      type="email"
                      placeholder="Email"
                      value={formData.email}
                      onChange={(e) => setFormData({...formData, email: e.target.value})}
-                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                     className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                    />
                  </div>
                  <div className="md:col-span-2">
-                   <label className="block text-sm font-medium text-gray-700 mb-2">Descripción *</label>
+                   <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">{t('adminStores.form.description')}</label>
                    <textarea
-                     placeholder="Descripción"
+                     placeholder={t('adminStores.form.descriptionPlaceholder')}
                      value={formData.description}
                      onChange={(e) => setFormData({...formData, description: e.target.value})}
-                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                     className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                      rows={3}
                    />
                  </div>
@@ -1007,7 +1009,7 @@ const AdminStores: React.FC = () => {
 
                {/* Mapa de ubicación */}
                <div className="mb-6">
-                 <label className="block text-sm font-medium text-gray-700 mb-2">Ubicación de la Tienda *</label>
+                 <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminStores.form.location')}</label>
                  <div className="border border-gray-300 rounded-md p-4">
                                        <FreeStoreLocationMap
                       onLocationSelect={handleLocationSelect}
@@ -1023,7 +1025,7 @@ const AdminStores: React.FC = () => {
                  </div>
                  {selectedCoordinates && (
                    <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-sm">
-                     <span className="font-medium">Ubicación seleccionada:</span> {selectedCoordinates.address}
+                     <span className="font-medium">{t('adminStores.form.locationSelected')}</span> {selectedCoordinates.address}
                    </div>
                  )}
                </div>
@@ -1031,40 +1033,40 @@ const AdminStores: React.FC = () => {
                {/* Información de ubicación */}
                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                  <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-2">Dirección *</label>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminStores.form.address')}</label>
                    <input
                      type="text"
-                     placeholder="Dirección"
+                     placeholder={t('adminStores.form.addressPlaceholder')}
                      value={formData.address}
                      onChange={(e) => setFormData({...formData, address: e.target.value})}
                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                    />
                  </div>
                  <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-2">Ciudad *</label>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminStores.form.city')}</label>
                    <input
                      type="text"
-                     placeholder="Ciudad"
+                     placeholder={t('adminStores.form.cityPlaceholder')}
                      value={formData.city}
                      onChange={(e) => setFormData({...formData, city: e.target.value})}
                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                    />
                  </div>
                  <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-2">Estado *</label>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminStores.form.state')}</label>
                    <input
                      type="text"
-                     placeholder="Estado"
+                     placeholder={t('adminStores.form.statePlaceholder')}
                      value={formData.state}
                      onChange={(e) => setFormData({...formData, state: e.target.value})}
                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                    />
                  </div>
                  <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-2">Código Postal *</label>
+                   <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminStores.form.zipCode')}</label>
                    <input
                      type="text"
-                     placeholder="Código Postal"
+                     placeholder={t('adminStores.form.zipCodePlaceholder')}
                      value={formData.zipCode}
                      onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1096,50 +1098,50 @@ const AdminStores: React.FC = () => {
                  </div>
                </div>
 
-               <div className="flex justify-end space-x-3 mt-6">
-                 <button
-                   onClick={() => {
-                     setShowEditModal(false);
-                     setSelectedCoordinates(null);
-                   }}
-                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                 >
-                   Cancelar
-                 </button>
-                 <button
-                   onClick={handleUpdateStore}
-                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                 >
-                   Actualizar
-                 </button>
-               </div>
+                               <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    onClick={() => {
+                      setShowEditModal(false);
+                      setSelectedCoordinates(null);
+                    }}
+                    className="px-4 py-2 bg-gray-300 dark:bg-[#555555] text-gray-700 dark:text-white rounded-md hover:bg-gray-400 dark:hover:bg-[#666666]"
+                  >
+                    {t('adminStores.form.cancel')}
+                  </button>
+                  <button
+                    onClick={handleUpdateStore}
+                    className="px-4 py-2 bg-[#FFC300] text-[#333333] rounded-md hover:bg-[#E6B800] font-semibold"
+                  >
+                    {t('adminStores.form.update')}
+                  </button>
+                </div>
              </div>
            </div>
          </div>
        )}
 
-      {/* Modal para ver detalles */}
-      {showViewModal && selectedStore && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Detalles de la Tienda</h3>
+             {/* Modal para ver detalles */}
+       {showViewModal && selectedStore && (
+         <div className="fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full z-50">
+           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-[#333333]">
+             <div className="mt-3">
+               <h3 className="text-lg font-medium text-gray-900 dark:text-[#FFC300] mb-4">{t('adminStores.modals.view.title')}</h3>
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Nombre:</label>
+                  <label className="text-sm font-medium text-gray-700">{t('adminStores.details.name')}</label>
                   <p className="text-sm text-gray-900">{selectedStore.name}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Descripción:</label>
-                  <p className="text-sm text-gray-900">{selectedStore.description || 'Sin descripción'}</p>
+                  <label className="text-sm font-medium text-gray-700">{t('adminStores.details.description')}</label>
+                  <p className="text-sm text-gray-900">{selectedStore.description || t('adminStores.details.noDescription')}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Dirección:</label>
+                  <label className="text-sm font-medium text-gray-700">{t('adminStores.details.address')}</label>
                   <p className="text-sm text-gray-900">{selectedStore.address}</p>
                   <p className="text-sm text-gray-500">{selectedStore.city}, {selectedStore.state} {selectedStore.zipCode}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Contacto:</label>
+                  <label className="text-sm font-medium text-gray-700">{t('adminStores.details.contact')}</label>
                   <p className="text-sm text-gray-900">{selectedStore.phone}</p>
                   <p className="text-sm text-gray-900">{selectedStore.email}</p>
                   {selectedStore.website && (
@@ -1147,52 +1149,52 @@ const AdminStores: React.FC = () => {
                   )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Propietario:</label>
+                  <label className="text-sm font-medium text-gray-700">{t('adminStores.details.owner')}</label>
                   <p className="text-sm text-gray-900">{selectedStore.owner.name}</p>
                   <p className="text-sm text-gray-500">{selectedStore.owner.email}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Managers:</label>
-                  <p className="text-sm text-gray-900">{selectedStore.managers.length} managers</p>
+                  <label className="text-sm font-medium text-gray-700">{t('adminStores.details.managers')}</label>
+                  <p className="text-sm text-gray-900">{selectedStore.managers.length} {t('adminStores.table.managersCount')}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Estado:</label>
-                  <p className="text-sm text-gray-900">{selectedStore.isActive ? 'Activa' : 'Inactiva'}</p>
+                  <label className="text-sm font-medium text-gray-700">{t('adminStores.details.status')}</label>
+                  <p className="text-sm text-gray-900">{selectedStore.isActive ? t('adminStores.status.active') : t('adminStores.status.inactive')}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Configuración:</label>
-                  <p className="text-sm text-gray-900">Moneda: {selectedStore.settings.currency}</p>
-                  <p className="text-sm text-gray-900">IVA: {selectedStore.settings.taxRate}%</p>
-                  <p className="text-sm text-gray-900">Radio de entrega: {selectedStore.settings.deliveryRadius} km</p>
+                  <label className="text-sm font-medium text-gray-700">{t('adminStores.details.settings')}</label>
+                  <p className="text-sm text-gray-900">{t('adminStores.details.currency')} {selectedStore.settings.currency}</p>
+                  <p className="text-sm text-gray-900">{t('adminStores.details.taxRate')} {selectedStore.settings.taxRate}%</p>
+                  <p className="text-sm text-gray-900">{t('adminStores.details.deliveryRadius')} {selectedStore.settings.deliveryRadius} {t('adminStores.details.km')}</p>
                 </div>
               </div>
-              <div className="flex justify-end mt-6">
-                <button
-                  onClick={() => setShowViewModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                >
-                  Cerrar
-                </button>
-              </div>
+                             <div className="flex justify-end mt-6">
+                 <button
+                   onClick={() => setShowViewModal(false)}
+                   className="px-4 py-2 bg-[#FFC300] text-[#333333] rounded-md hover:bg-[#E6B800] font-semibold"
+                 >
+                   {t('adminStores.form.close')}
+                 </button>
+               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal para gestionar managers */}
-      {showManagersModal && selectedStore && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Gestionar Managers - {selectedStore.name}</h3>
+             {/* Modal para gestionar managers */}
+       {showManagersModal && selectedStore && (
+         <div className="fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full z-50">
+           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-[#333333]">
+             <div className="mt-3">
+               <h3 className="text-lg font-medium text-gray-900 dark:text-[#FFC300] mb-4">{t('adminStores.modals.managers.title')} - {selectedStore.name}</h3>
               
               {/* Agregar manager */}
               <div className="mb-6">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Agregar Manager</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">{t('adminStores.managers.addManager')}</h4>
                 <div className="flex space-x-2">
                   <input
                     type="email"
-                    placeholder="Email del usuario"
+                    placeholder={t('adminStores.managers.userEmail')}
                     value={newManagerEmail}
                     onChange={(e) => setNewManagerEmail(e.target.value)}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1201,14 +1203,14 @@ const AdminStores: React.FC = () => {
                     onClick={handleAddManager}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                   >
-                    Agregar
+                    {t('adminStores.managers.add')}
                   </button>
                 </div>
               </div>
 
               {/* Lista de managers */}
               <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Managers Actuales</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">{t('adminStores.managers.currentManagers')}</h4>
                 <div className="space-y-2">
                   {selectedStore.managers.map((manager) => (
                     <div key={manager._id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
@@ -1219,26 +1221,26 @@ const AdminStores: React.FC = () => {
                       <button
                         onClick={() => handleRemoveManager(manager._id)}
                         className="text-red-600 hover:text-red-900 p-1"
-                        title="Remover manager"
+                        title={t('adminStores.managers.remove')}
                       >
                         <XCircle className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
                   {selectedStore.managers.length === 0 && (
-                    <p className="text-sm text-gray-500">No hay managers asignados</p>
+                    <p className="text-sm text-gray-500">{t('adminStores.managers.noManagers')}</p>
                   )}
                 </div>
               </div>
 
-              <div className="flex justify-end mt-6">
-                <button
-                  onClick={() => setShowManagersModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                >
-                  Cerrar
-                </button>
-              </div>
+                             <div className="flex justify-end mt-6">
+                 <button
+                   onClick={() => setShowManagersModal(false)}
+                   className="px-4 py-2 bg-[#FFC300] text-[#333333] rounded-md hover:bg-[#E6B800] font-semibold"
+                 >
+                   {t('adminStores.form.close')}
+                 </button>
+               </div>
             </div>
           </div>
         </div>

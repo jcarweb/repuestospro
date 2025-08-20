@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Calendar, Tag, DollarSign, Percent, Package, Type, Store } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Store {
   _id: string;
@@ -72,6 +73,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
   token
 }) => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState<PromotionFormData>({
     name: '',
     description: '',
@@ -420,11 +422,11 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">
-            {isEditing ? 'Editar Promoción' : 'Crear Nueva Promoción'}
+          <h2 className="text-2xl font-bold text-[#FFC300]">
+            {isEditing ? t('promotionForm.title.edit') : t('promotionForm.title.create')}
           </h2>
           <button
             onClick={onClose}
@@ -439,32 +441,32 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre de la Promoción *
+                {t('promotionForm.name')}
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Ej: Descuento de Verano"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
+                placeholder={t('promotionForm.namePlaceholder')}
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tipo de Promoción *
+                {t('promotionForm.type')}
               </label>
               <select
                 value={formData.type}
                 onChange={(e) => handleInputChange('type', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                 required
               >
-                <option value="percentage">Porcentaje</option>
-                <option value="fixed">Monto Fijo</option>
-                <option value="buy_x_get_y">Compra X Obtén Y</option>
-                <option value="custom">Personalizado</option>
+                <option value="percentage">{t('promotionForm.types.percentage')}</option>
+                <option value="fixed">{t('promotionForm.types.fixed')}</option>
+                <option value="buy_x_get_y">{t('promotionForm.types.buyXGetY')}</option>
+                <option value="custom">{t('promotionForm.types.custom')}</option>
               </select>
             </div>
           </div>
@@ -473,15 +475,15 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
           {user?.role === 'admin' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tienda *
+                {t('promotionForm.store')}
               </label>
               <select
                 value={formData.store}
                 onChange={(e) => handleInputChange('store', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                 required
               >
-                <option value="">Seleccionar tienda</option>
+                <option value="">{t('promotionForm.selectStore')}</option>
                 {stores.map((store) => (
                   <option key={store._id} value={store._id}>
                     {store.name} - {store.city}, {store.state}
@@ -496,7 +498,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
               <div className="flex items-center">
                 <Store className="w-5 h-5 text-blue-600 mr-2" />
                 <span className="text-sm text-blue-800">
-                  <strong>Tienda asignada:</strong> La promoción se creará automáticamente para tu tienda
+                  <strong>{t('promotionForm.assignedStore')}</strong> {t('promotionForm.assignedStoreMessage')}
                 </span>
               </div>
             </div>
@@ -504,14 +506,14 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Descripción *
+              {t('promotionForm.description')}
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
               rows={3}
-              placeholder="Describe la promoción..."
+              placeholder={t('promotionForm.descriptionPlaceholder')}
               required
             />
           </div>
@@ -519,13 +521,13 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
           {/* Configuración específica por tipo */}
           <div className="border-t pt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Configuración de {getTypeLabel(formData.type)}
+              {t('promotionForm.discountPercentage')}
             </h3>
 
             {formData.type === 'percentage' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Porcentaje de Descuento *
+                  {t('promotionForm.discountPercentage')}
                 </label>
                 <div className="relative">
                   <input
@@ -547,7 +549,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
             {formData.type === 'fixed' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Monto de Descuento *
+                  {t('promotionForm.discountAmount')}
                 </label>
                 <div className="relative">
                   <input
@@ -570,7 +572,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cantidad a Comprar *
+                    {t('promotionForm.buyQuantity')}
                   </label>
                   <input
                     type="number"
@@ -583,7 +585,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cantidad a Obtener *
+                    {t('promotionForm.getQuantity')}
                   </label>
                   <input
                     type="number"
@@ -600,14 +602,14 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
             {formData.type === 'custom' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Texto Personalizado *
+                  {t('promotionForm.customText')}
                 </label>
                 <input
                   type="text"
                   value={formData.customText}
                   onChange={(e) => handleInputChange('customText', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ej: ¡Oferta Especial!"
+                                     placeholder={t('promotionForm.customTextPlaceholder')}
                   required
                 />
               </div>
@@ -616,11 +618,11 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
 
           {/* Fechas */}
           <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Fechas y Horas de Vigencia</h3>
+                         <h3 className="text-lg font-medium text-gray-900 mb-4">{t('promotionForm.datesAndTimes')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fecha de Inicio *
+                  {t('promotionForm.startDate')}
                 </label>
                 <input
                   type="date"
@@ -632,7 +634,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hora de Inicio
+                  {t('promotionForm.startTime')}
                 </label>
                 <input
                   type="time"
@@ -643,7 +645,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fecha de Fin *
+                  {t('promotionForm.endDate')}
                 </label>
                 <input
                   type="date"
@@ -655,7 +657,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hora de Fin
+                  {t('promotionForm.endTime')}
                 </label>
                 <input
                   type="time"
@@ -667,14 +669,14 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
             </div>
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-800">
-                💡 <strong>Consejo:</strong> Si no especificas una hora, la promoción se activará a las 00:00 del día de inicio y terminará a las 23:59 del día de fin.
+                                 💡 <strong>{t('promotionForm.tip')}</strong> {t('promotionForm.timeTip')}
               </p>
             </div>
           </div>
 
           {/* Productos */}
           <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Productos</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('promotionForm.products')}</h3>
             
             {/* Mensaje informativo para admin */}
             {user?.role === 'admin' && !formData.store && (
@@ -682,7 +684,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                 <div className="flex items-center">
                   <Store className="w-5 h-5 text-yellow-600 mr-2" />
                   <span className="text-sm text-yellow-800">
-                    <strong>Selecciona una tienda</strong> para ver los productos disponibles
+                    <strong>{t('promotionForm.selectStoreFirst')}</strong> {t('promotionForm.selectStoreFirstMessage')}
                   </span>
                 </div>
               </div>
@@ -692,7 +694,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
             {selectedProducts.length > 0 && (
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Productos Seleccionados ({selectedProducts.length})
+                  {t('promotionForm.selectedProducts')} ({selectedProducts.length})
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {selectedProducts.map((product) => (
@@ -720,15 +722,15 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
             {/* Buscar productos - solo mostrar si hay productos disponibles */}
             {products.length > 0 && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Buscar Productos
-                </label>
+                                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                   {t('promotionForm.searchProducts')}
+                 </label>
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Buscar por nombre o categoría..."
+                                     placeholder={t('promotionForm.searchProductsPlaceholder')}
                 />
               </div>
             )}
@@ -763,20 +765,20 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
             {products.length === 0 && formData.store && (
               <div className="p-4 text-center bg-gray-50 rounded-lg">
                 <Store className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">No hay productos disponibles en esta tienda</p>
+                                 <p className="text-sm text-gray-600">{t('promotionForm.noProductsAvailable')}</p>
               </div>
             )}
           </div>
 
           {/* Configuración visual */}
           <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Configuración Visual</h3>
+                         <h3 className="text-lg font-medium text-gray-900 mb-4">{t('promotionForm.visualConfig')}</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Texto del Cintillo
-                </label>
+                                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                   {t('promotionForm.ribbonText')}
+                 </label>
                 <input
                   type="text"
                   value={formData.ribbonText}
@@ -787,18 +789,18 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Posición del Cintillo
-                </label>
+                                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                   {t('promotionForm.ribbonPosition')}
+                 </label>
                 <select
                   value={formData.ribbonPosition}
                   onChange={(e) => handleInputChange('ribbonPosition', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="top-left">Superior Izquierda</option>
-                  <option value="top-right">Superior Derecha</option>
-                  <option value="bottom-left">Inferior Izquierda</option>
-                  <option value="bottom-right">Inferior Derecha</option>
+                                     <option value="top-left">{t('promotionForm.ribbonPositions.topLeft')}</option>
+                   <option value="top-right">{t('promotionForm.ribbonPositions.topRight')}</option>
+                   <option value="bottom-left">{t('promotionForm.ribbonPositions.bottomLeft')}</option>
+                   <option value="bottom-right">{t('promotionForm.ribbonPositions.bottomRight')}</option>
                 </select>
               </div>
             </div>
@@ -813,7 +815,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label htmlFor="showOriginalPrice" className="ml-2 block text-sm text-gray-900">
-                  Mostrar precio original tachado
+                  {t('promotionForm.showOriginalPrice')}
                 </label>
               </div>
 
@@ -826,7 +828,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label htmlFor="showDiscountAmount" className="ml-2 block text-sm text-gray-900">
-                  Mostrar monto de descuento
+                  {t('promotionForm.showDiscountAmount')}
                 </label>
               </div>
             </div>
@@ -834,12 +836,12 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
 
           {/* Configuración adicional */}
           <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Configuración Adicional</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('promotionForm.additionalConfig')}</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Límite de Usos (Opcional)
+                  {t('promotionForm.usageLimit')}
                 </label>
                 <input
                   type="number"
@@ -847,7 +849,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                   onChange={(e) => handleInputChange('maxUses', e.target.value ? Number(e.target.value) : undefined)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   min="1"
-                  placeholder="Sin límite"
+                  placeholder={t('promotionForm.noLimit')}
                 />
               </div>
 
@@ -860,7 +862,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
-                  Promoción activa
+                  {t('promotionForm.activePromotion')}
                 </label>
               </div>
             </div>
@@ -871,16 +873,16 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
             >
-              Cancelar
+              {t('promotionForm.cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 bg-[#FFC300] text-white rounded-md hover:bg-[#E6B000] disabled:opacity-50"
             >
-              {loading ? 'Guardando...' : (isEditing ? 'Guardar Cambios' : 'Crear Promoción')}
+              {loading ? t('promotionForm.saving') : (isEditing ? t('promotionForm.update') : t('promotionForm.create'))}
             </button>
           </div>
         </form>

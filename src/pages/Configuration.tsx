@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Settings, Globe, Moon, Sun, Bell, Eye, EyeOff, Palette, Activity } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
+import { Settings, Globe, Moon, Sun, Bell, Eye, EyeOff, Palette, Activity, Smartphone } from 'lucide-react';
 import ActivityHistory from '../components/ActivityHistory';
 import { useLayoutContext } from '../hooks/useLayoutContext';
 import { profileService } from '../services/profileService';
+import { pushNotificationService } from '../services/pushNotificationService';
+import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSelector from '../components/LanguageSelector';
 import type { UserProfile } from '../services/profileService';
 
 interface SettingsState {
@@ -23,9 +27,20 @@ interface SettingsState {
 
 const Configuration: React.FC = () => {
   const { user } = useAuth();
+  const { theme, language, toggleTheme, setLanguage } = useTheme();
+  const { t } = useLanguage();
   const { containerClasses, contentClasses } = useLayoutContext();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [pushStatus, setPushStatus] = useState<{
+    supported: boolean;
+    subscribed: boolean;
+    permission: NotificationPermission;
+  }>({
+    supported: false,
+    subscribed: false,
+    permission: 'default'
+  });
   const [settings, setSettings] = useState<SettingsState>({
     theme: 'light',
     language: 'es',
@@ -43,7 +58,7 @@ const Configuration: React.FC = () => {
   const [showActivityHistory, setShowActivityHistory] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Cargar perfil del usuario
+  // Cargar perfil del usuario y verificar estado de push notifications
   useEffect(() => {
     const loadProfile = async () => {
       try {
@@ -54,22 +69,46 @@ const Configuration: React.FC = () => {
         // Actualizar configuraciones con datos del perfil
         setSettings(prev => ({
           ...prev,
+          theme: userProfile.theme || 'light',
+          language: userProfile.language || 'es',
           notifications: {
             email: userProfile.emailNotifications,
             push: userProfile.pushNotifications,
             sms: userProfile.marketingEmails
+          },
+          privacy: {
+            profileVisibility: userProfile.profileVisibility || 'public',
+            showEmail: userProfile.showEmail || false,
+            showPhone: userProfile.showPhone || false
           }
         }));
+
+        // Verificar estado de push notifications
+        const pushSupported = pushNotificationService.isPushSupported();
+        if (pushSupported) {
+          const status = await pushNotificationService.getSubscriptionStatus();
+          setPushStatus({
+            supported: true,
+            subscribed: status.subscribed,
+            permission: status.permission
+          });
+        } else {
+          setPushStatus({
+            supported: false,
+            subscribed: false,
+            permission: 'denied'
+          });
+        }
       } catch (error) {
         console.error('Error loading profile:', error);
-        setMessage({ type: 'error', text: 'Error al cargar el perfil' });
+        setMessage({ type: 'error', text: t('message.error') });
       } finally {
         setLoading(false);
       }
     };
 
     loadProfile();
-  }, []);
+  }, []); // Removido [t] para evitar múltiples llamadas
 
   const updateNotificationSetting = async (key: keyof SettingsState['notifications'], value: boolean) => {
     try {
@@ -95,6 +134,8 @@ const Configuration: React.FC = () => {
       setMessage({ type: 'success', text: result.message });
     } catch (error: any) {
       console.error('Error updating notification settings:', error);
+      console.error('Error response:', error.response);
+      console.error('Error request:', error.request);
       setMessage({ 
         type: 'error', 
         text: error.response?.data?.message || 'Error al actualizar las notificaciones' 
@@ -113,24 +154,145 @@ const Configuration: React.FC = () => {
     }
   };
 
-  const updatePrivacySetting = (key: keyof SettingsState['privacy'], value: boolean | string) => {
-    setSettings(prev => ({
-      ...prev,
-      privacy: {
-        ...prev.privacy,
-        [key]: value
+  const updatePrivacySetting = async (key: keyof SettingsState['privacy'], value: boolean | string) => {
+    try {
+      setLoading(true);
+      
+      // Actualizar estado local
+      setSettings(prev => ({
+        ...prev,
+        privacy: {
+          ...prev.privacy,
+          [key]: value
+        }
+      }));
+
+      // Actualizar en el backend
+      const privacyData = {
+        profileVisibility: key === 'profileVisibility' ? value as string : settings.privacy.profileVisibility,
+        showEmail: key === 'showEmail' ? value as boolean : settings.privacy.showEmail,
+        showPhone: key === 'showPhone' ? value as boolean : settings.privacy.showPhone
+      };
+
+      const result = await profileService.updatePrivacy(privacyData);
+      setMessage({ type: 'success', text: result.message });
+    } catch (error: any) {
+      console.error('Error updating privacy settings:', error);
+      console.error('Error response:', error.response);
+      console.error('Error request:', error.request);
+      setMessage({ 
+        type: 'error', 
+        text: error.response?.data?.message || t('message.error')
+      });
+      
+      // Revertir cambios en caso de error
+      setSettings(prev => ({
+        ...prev,
+        privacy: {
+          ...prev.privacy,
+          [key]: key === 'profileVisibility' ? settings.privacy.profileVisibility : !value
+        }
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateThemeSetting = async (newTheme: 'light' | 'dark') => {
+    try {
+      setLoading(true);
+      
+      // Actualizar tema local usando el contexto
+      toggleTheme();
+      
+      // Actualizar en el backend
+      await profileService.updatePreferences({
+        theme: newTheme,
+        language: settings.language
+      });
+      
+      setMessage({ type: 'success', text: t('message.preferences.updated') });
+    } catch (error: any) {
+      console.error('Error updating theme:', error);
+      setMessage({ 
+        type: 'error', 
+        text: error.response?.data?.message || t('message.error')
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateLanguageSetting = async (newLanguage: 'es' | 'en' | 'pt') => {
+    try {
+      setLoading(true);
+      
+      // Actualizar idioma local usando el contexto
+      setLanguage(newLanguage);
+      
+      // Actualizar configuración local
+      setSettings(prev => ({
+        ...prev,
+        language: newLanguage
+      }));
+      
+      // Actualizar en el backend
+      await profileService.updatePreferences({
+        theme: settings.theme,
+        language: newLanguage
+      });
+      
+      setMessage({ type: 'success', text: t('message.preferences.updated') });
+    } catch (error: any) {
+      console.error('Error updating language:', error);
+      setMessage({ 
+        type: 'error', 
+        text: error.response?.data?.message || t('message.error')
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePushNotificationToggle = async (enabled: boolean) => {
+    try {
+      setLoading(true);
+      
+      if (enabled) {
+        // Suscribirse a notificaciones push
+        await pushNotificationService.subscribeToPush();
+        setPushStatus(prev => ({ ...prev, subscribed: true }));
+        setMessage({ type: 'success', text: t('notifications.push.subscribed') });
+      } else {
+        // Desuscribirse de notificaciones push
+        await pushNotificationService.unsubscribeFromPush();
+        setPushStatus(prev => ({ ...prev, subscribed: false }));
+        setMessage({ type: 'success', text: t('notifications.push.unsubscribed') });
       }
-    }));
+
+      // Actualizar configuración en el backend
+      await profileService.updatePushNotifications({
+        pushEnabled: enabled
+      });
+    } catch (error: any) {
+      console.error('Error toggling push notifications:', error);
+      setMessage({ 
+        type: 'error', 
+        text: error.message || t('message.error')
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading && !profile) {
     return (
       <div className={containerClasses}>
         <div className={contentClasses}>
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className="bg-white dark:bg-dark-secondary shadow rounded-lg p-6">
             <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-2 text-gray-600">Cargando configuración...</span>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-racing-500"></div>
+              <span className="ml-2 text-gray-600 dark:text-dark-secondary">{t('configuration.loading')}</span>
             </div>
           </div>
         </div>
@@ -152,11 +314,11 @@ const Configuration: React.FC = () => {
           </div>
         )}
 
-        <div className="bg-white shadow rounded-lg">
+        <div className="bg-white dark:bg-dark-secondary shadow rounded-lg">
           {/* Header */}
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-900">Configuración</h1>
-            <p className="text-gray-600">Personaliza tu experiencia</p>
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-dark">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-dark">{t('configuration.title')}</h1>
+            <p className="text-gray-600 dark:text-dark-secondary">{t('configuration.subtitle')}</p>
           </div>
 
           {/* Configuration Options */}
@@ -164,34 +326,34 @@ const Configuration: React.FC = () => {
             <div className="space-y-8">
               {/* Theme */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Apariencia</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-dark mb-4">{t('appearance.title')}</h3>
                 <div className="space-y-4">
-                  <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="border border-gray-200 dark:border-dark rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Palette className="w-6 h-6 text-blue-600" />
+                        <Palette className="w-6 h-6 text-racing-500" />
                         <div>
-                          <h4 className="font-medium text-gray-900">Tema</h4>
-                          <p className="text-sm text-gray-600">Elige entre tema claro u oscuro</p>
+                          <h4 className="font-medium text-gray-900 dark:text-dark">{t('appearance.theme')}</h4>
+                          <p className="text-sm text-gray-600 dark:text-dark-secondary">{t('appearance.theme.description')}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => setSettings(prev => ({ ...prev, theme: 'light' }))}
-                          className={`p-2 rounded-lg ${
-                            settings.theme === 'light' 
-                              ? 'bg-blue-600 text-white' 
-                              : 'bg-gray-200 text-gray-600'
+                          onClick={() => updateThemeSetting('light')}
+                          className={`p-2 rounded-lg transition-colors ${
+                            theme === 'light' 
+                              ? 'bg-racing-500 text-white' 
+                              : 'bg-gray-200 dark:bg-dark-tertiary text-gray-600 dark:text-dark-secondary'
                           }`}
                         >
                           <Sun className="w-5 h-5" />
                         </button>
                         <button
-                          onClick={() => setSettings(prev => ({ ...prev, theme: 'dark' }))}
-                          className={`p-2 rounded-lg ${
-                            settings.theme === 'dark' 
-                              ? 'bg-blue-600 text-white' 
-                              : 'bg-gray-200 text-gray-600'
+                          onClick={() => updateThemeSetting('dark')}
+                          className={`p-2 rounded-lg transition-colors ${
+                            theme === 'dark' 
+                              ? 'bg-racing-500 text-white' 
+                              : 'bg-gray-200 dark:bg-dark-tertiary text-gray-600 dark:text-dark-secondary'
                           }`}
                         >
                           <Moon className="w-5 h-5" />
@@ -204,26 +366,22 @@ const Configuration: React.FC = () => {
 
               {/* Language */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Idioma</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-dark mb-4">{t('language.title')}</h3>
                 <div className="space-y-4">
-                  <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="border border-gray-200 dark:border-dark rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Globe className="w-6 h-6 text-green-600" />
+                        <Globe className="w-6 h-6 text-racing-500" />
                         <div>
-                          <h4 className="font-medium text-gray-900">Idioma de la aplicación</h4>
-                          <p className="text-sm text-gray-600">Selecciona tu idioma preferido</p>
+                          <h4 className="font-medium text-gray-900 dark:text-dark">{t('language.description')}</h4>
+                          <p className="text-sm text-gray-600 dark:text-dark-secondary">{t('language.description')}</p>
                         </div>
                       </div>
-                      <select
-                        value={settings.language}
-                        onChange={(e) => setSettings(prev => ({ ...prev, language: e.target.value }))}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="es">Español</option>
-                        <option value="en">English</option>
-                        <option value="pt">Português</option>
-                      </select>
+                      <LanguageSelector 
+                        onChange={updateLanguageSetting}
+                        className="px-3 py-2 border border-gray-300 dark:border-dark rounded-lg focus:ring-2 focus:ring-racing-500 focus:border-transparent bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark"
+                        showLabel={false}
+                      />
                     </div>
                   </div>
                 </div>
@@ -231,15 +389,15 @@ const Configuration: React.FC = () => {
 
               {/* Notifications */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Notificaciones</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-dark mb-4">{t('notifications.title')}</h3>
                 <div className="space-y-4">
-                  <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="border border-gray-200 dark:border-dark rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Bell className="w-6 h-6 text-yellow-600" />
+                        <Bell className="w-6 h-6 text-racing-500" />
                         <div>
-                          <h4 className="font-medium text-gray-900">Notificaciones por Email</h4>
-                          <p className="text-sm text-gray-600">Recibe notificaciones importantes por email</p>
+                          <h4 className="font-medium text-gray-900 dark:text-dark">{t('notifications.email')}</h4>
+                          <p className="text-sm text-gray-600 dark:text-dark-secondary">{t('notifications.email.description')}</p>
                         </div>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -249,39 +407,52 @@ const Configuration: React.FC = () => {
                           onChange={(e) => updateNotificationSetting('email', e.target.checked)}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <div className="w-11 h-6 bg-gray-200 dark:bg-dark-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-racing-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-racing-500"></div>
                       </label>
                     </div>
                   </div>
 
-                  <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="border border-gray-200 dark:border-dark rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Bell className="w-6 h-6 text-orange-600" />
+                        <Smartphone className="w-6 h-6 text-racing-500" />
                         <div>
-                          <h4 className="font-medium text-gray-900">Notificaciones Push</h4>
-                          <p className="text-sm text-gray-600">Notificaciones en tiempo real</p>
+                          <h4 className="font-medium text-gray-900 dark:text-dark">{t('notifications.push')}</h4>
+                          <p className="text-sm text-gray-600 dark:text-dark-secondary">{t('notifications.push.description')}</p>
+                          {!pushStatus.supported && (
+                            <p className="text-xs text-red-500 mt-1">No soportado en este navegador</p>
+                          )}
+                          {pushStatus.permission === 'denied' && (
+                            <p className="text-xs text-red-500 mt-1">Permisos denegados</p>
+                          )}
                         </div>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={settings.notifications.push}
-                          onChange={(e) => updateNotificationSetting('push', e.target.checked)}
+                          checked={pushStatus.subscribed}
+                          onChange={(e) => handlePushNotificationToggle(e.target.checked)}
+                          disabled={!pushStatus.supported || pushStatus.permission === 'denied'}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <div className={`w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-racing-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${
+                          !pushStatus.supported || pushStatus.permission === 'denied'
+                            ? 'bg-gray-300 cursor-not-allowed'
+                            : pushStatus.subscribed
+                            ? 'bg-racing-500'
+                            : 'bg-gray-200 dark:bg-dark-tertiary'
+                        }`}></div>
                       </label>
                     </div>
                   </div>
 
-                  <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="border border-gray-200 dark:border-dark rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Bell className="w-6 h-6 text-red-600" />
+                        <Bell className="w-6 h-6 text-alert-600" />
                         <div>
-                          <h4 className="font-medium text-gray-900">Notificaciones SMS</h4>
-                          <p className="text-sm text-gray-600">Mensajes de texto importantes</p>
+                          <h4 className="font-medium text-gray-900 dark:text-dark">{t('notifications.sms')}</h4>
+                          <p className="text-sm text-gray-600 dark:text-dark-secondary">{t('notifications.sms.description')}</p>
                         </div>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -291,7 +462,7 @@ const Configuration: React.FC = () => {
                           onChange={(e) => updateNotificationSetting('sms', e.target.checked)}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <div className="w-11 h-6 bg-gray-200 dark:bg-dark-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-racing-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-racing-500"></div>
                       </label>
                     </div>
                   </div>
@@ -300,36 +471,36 @@ const Configuration: React.FC = () => {
 
               {/* Privacy */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Privacidad</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-dark mb-4">{t('privacy.title')}</h3>
                 <div className="space-y-4">
-                  <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="border border-gray-200 dark:border-dark rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Eye className="w-6 h-6 text-purple-600" />
+                        <Eye className="w-6 h-6 text-racing-500" />
                         <div>
-                          <h4 className="font-medium text-gray-900">Visibilidad del Perfil</h4>
-                          <p className="text-sm text-gray-600">Quién puede ver tu perfil</p>
+                          <h4 className="font-medium text-gray-900 dark:text-dark">{t('privacy.profile.visibility')}</h4>
+                          <p className="text-sm text-gray-600 dark:text-dark-secondary">{t('privacy.profile.visibility.description')}</p>
                         </div>
                       </div>
                       <select
                         value={settings.privacy.profileVisibility}
                         onChange={(e) => updatePrivacySetting('profileVisibility', e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="px-3 py-2 border border-gray-300 dark:border-dark rounded-lg focus:ring-2 focus:ring-racing-500 focus:border-transparent bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark"
                       >
-                        <option value="public">Público</option>
-                        <option value="friends">Solo amigos</option>
-                        <option value="private">Privado</option>
+                        <option value="public">{t('privacy.profile.public')}</option>
+                        <option value="friends">{t('privacy.profile.friends')}</option>
+                        <option value="private">{t('privacy.profile.private')}</option>
                       </select>
                     </div>
                   </div>
 
-                  <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="border border-gray-200 dark:border-dark rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Eye className="w-6 h-6 text-blue-600" />
+                        <Eye className="w-6 h-6 text-racing-500" />
                         <div>
-                          <h4 className="font-medium text-gray-900">Mostrar Email</h4>
-                          <p className="text-sm text-gray-600">Permitir que otros vean tu email</p>
+                          <h4 className="font-medium text-gray-900 dark:text-dark">{t('privacy.show.email')}</h4>
+                          <p className="text-sm text-gray-600 dark:text-dark-secondary">{t('privacy.show.email.description')}</p>
                         </div>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -339,18 +510,18 @@ const Configuration: React.FC = () => {
                           onChange={(e) => updatePrivacySetting('showEmail', e.target.checked)}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <div className="w-11 h-6 bg-gray-200 dark:bg-dark-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-racing-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-racing-500"></div>
                       </label>
                     </div>
                   </div>
 
-                  <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="border border-gray-200 dark:border-dark rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Eye className="w-6 h-6 text-green-600" />
+                        <Eye className="w-6 h-6 text-racing-500" />
                         <div>
-                          <h4 className="font-medium text-gray-900">Mostrar Teléfono</h4>
-                          <p className="text-sm text-gray-600">Permitir que otros vean tu teléfono</p>
+                          <h4 className="font-medium text-gray-900 dark:text-dark">{t('privacy.show.phone')}</h4>
+                          <p className="text-sm text-gray-600 dark:text-dark-secondary">{t('privacy.show.phone.description')}</p>
                         </div>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -360,7 +531,7 @@ const Configuration: React.FC = () => {
                           onChange={(e) => updatePrivacySetting('showPhone', e.target.checked)}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <div className="w-11 h-6 bg-gray-200 dark:bg-dark-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-racing-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-racing-500"></div>
                       </label>
                     </div>
                   </div>
@@ -371,18 +542,18 @@ const Configuration: React.FC = () => {
         </div>
 
         {/* Activity History Section */}
-        <div className="mt-8 bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="mt-8 bg-white dark:bg-dark-secondary shadow rounded-lg">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-dark">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Activity className="w-5 h-5 text-gray-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Historial de Actividades</h3>
+                <Activity className="w-5 h-5 text-gray-600 dark:text-dark-secondary" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-dark">{t('activity.title')}</h3>
               </div>
               <button
                 onClick={() => setShowActivityHistory(!showActivityHistory)}
-                className="text-sm text-blue-600 hover:text-blue-700"
+                className="text-sm text-racing-600 hover:text-racing-700 dark:text-racing-400 dark:hover:text-racing-300"
               >
-                {showActivityHistory ? 'Ocultar' : 'Ver historial'}
+                {showActivityHistory ? t('activity.hide') : t('activity.show')}
               </button>
             </div>
           </div>

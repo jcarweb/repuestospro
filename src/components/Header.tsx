@@ -3,7 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguageChange } from '../hooks/useLanguageChange';
 import AuthModal from './AuthModal';
+import Logo from './Logo';
+import LanguageSelector from './LanguageSelector';
 import { 
   ShoppingCart, 
   User, 
@@ -13,7 +17,6 @@ import {
   Menu,
   X,
   Search,
-  Package,
   Heart
 } from 'lucide-react';
 
@@ -21,6 +24,8 @@ const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { getItemCount } = useCart();
   const { getFavoritesCount } = useFavorites();
+  const { t } = useLanguage();
+  const { forceUpdate } = useLanguageChange();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -81,36 +86,53 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
+    <header className="bg-white dark:bg-[#333333] shadow-sm border-b border-gray-200 dark:border-[#555555]">
+      {/* TEST DIV - Should be visible */}
+      <div style={{backgroundColor: 'red', color: 'white', padding: '10px', textAlign: 'center', fontSize: '20px'}}>
+        🚨 TEST HEADER - Si ves esto, el Header funciona 🚨
+      </div>
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <Package className="w-8 h-8 text-[#FFC300]" />
-              <span className="text-xl font-bold text-[#333333]">PiezasYA</span>
+            <Link to="/" className="flex items-center space-x-3">
+              <Logo className="h-10 w-auto" />
             </Link>
+          </div>
+
+          {/* CENTER - Language Selector */}
+          <div className="flex items-center justify-center flex-1">
+            {/* TEST BUTTON - Should be visible in center */}
+            <div style={{backgroundColor: 'red', padding: '5px', borderRadius: '5px'}}>
+              <button 
+                onClick={() => alert('¡Botón de prueba funciona!')}
+                style={{backgroundColor: 'yellow', color: 'black', padding: '8px', border: '2px solid black', borderRadius: '5px'}}
+              >
+                🌐 IDIOMA
+              </button>
+            </div>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
               to="/categories" 
-              className="text-[#333333] hover:text-[#FFC300] transition-colors"
+              className="text-[#333333] dark:text-white hover:text-[#FFC300] transition-colors"
             >
-              Categorías
+              {t('nav.categories')}
             </Link>
             <Link 
               to="/nearby-products" 
-              className="text-[#333333] hover:text-[#FFC300] transition-colors"
+              className="text-[#333333] dark:text-white hover:text-[#FFC300] transition-colors"
             >
-              Repuestos Cercanos
+              {t('common.nearbyProducts')}
             </Link>
             <Link 
               to="/" 
-              className="text-[#333333] hover:text-[#FFC300] transition-colors"
+              className="text-[#333333] dark:text-white hover:text-[#FFC300] transition-colors"
             >
-              Inicio
+              {t('nav.home')}
             </Link>
           </nav>
 
@@ -121,13 +143,13 @@ const Header: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Buscar repuestos..."
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                placeholder={t('common.search')}
+                className="pl-10 pr-4 py-2 border border-gray-300 dark:border-[#555555] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64 bg-white dark:bg-[#444444] text-gray-900 dark:text-white"
               />
             </div>
 
             {/* Favorites */}
-            <Link to="/favorites" className="relative p-2 text-[#333333] hover:text-[#FFC300] transition-colors">
+            <Link to="/favorites" className="relative p-2 text-[#333333] dark:text-white hover:text-[#FFC300] transition-colors">
               <Heart className="w-6 h-6" />
               {favoritesCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-[#E63946] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -137,7 +159,7 @@ const Header: React.FC = () => {
             </Link>
 
             {/* Cart */}
-            <Link to="/cart" className="relative p-2 text-[#333333] hover:text-[#FFC300] transition-colors">
+            <Link to="/cart" className="relative p-2 text-[#333333] dark:text-white hover:text-[#FFC300] transition-colors">
               <ShoppingCart className="w-6 h-6" />
               {cartItemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-[#E63946] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -151,48 +173,48 @@ const Header: React.FC = () => {
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-2 p-2 text-[#333333] hover:text-[#FFC300] transition-colors rounded-lg hover:bg-gray-50"
+                  className="flex items-center space-x-2 p-2 text-[#333333] dark:text-white hover:text-[#FFC300] transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#444444]"
                 >
-                  <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-gray-600" />
+                  <div className="w-8 h-8 bg-gray-200 dark:bg-[#555555] rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4 text-gray-600 dark:text-gray-200" />
                   </div>
-                  <span className="hidden sm:block text-sm font-medium">
-                    {user?.name || 'Usuario'}
+                  <span className="hidden sm:block text-sm font-medium text-[#333333] dark:text-white">
+                    {user?.name || t('common.user')}
                   </span>
                 </button>
 
                 {/* Dropdown Menu */}
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#333333] rounded-lg shadow-lg border border-gray-200 dark:border-[#555555] py-2 z-50">
                     <button
                       onClick={() => handleMenuClick('/profile')}
-                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 w-full text-left"
+                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-[#444444] w-full text-left"
                     >
                       <User className="w-4 h-4" />
-                      <span>Perfil</span>
+                      <span>{t('common.profile')}</span>
                     </button>
                     <button
                       onClick={() => handleMenuClick('/security')}
-                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 w-full text-left"
+                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-[#444444] w-full text-left"
                     >
                       <Shield className="w-4 h-4" />
-                      <span>Seguridad</span>
+                      <span>{t('common.security')}</span>
                     </button>
                     <button
                       onClick={() => handleMenuClick('/configuration')}
-                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 w-full text-left"
+                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-[#444444] w-full text-left"
                     >
                       <Settings className="w-4 h-4" />
-                      <span>Configuración</span>
+                      <span>{t('common.settings')}</span>
                     </button>
                     
-                    <hr className="my-2" />
+                    <hr className="my-2 border-gray-200 dark:border-[#555555]" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 w-full text-left"
+                      className="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-left"
                     >
                       <LogOut className="w-4 h-4" />
-                      <span>Cerrar Sesión</span>
+                      <span>{t('common.logout')}</span>
                     </button>
                   </div>
                 )}
@@ -201,15 +223,15 @@ const Header: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => handleAuthClick('login')}
-                  className="text-[#333333] hover:text-[#FFC300] transition-colors"
+                  className="text-[#333333] dark:text-white hover:text-[#FFC300] transition-colors"
                 >
-                  Iniciar Sesión
+                  {t('common.login')}
                 </button>
                 <button
                   onClick={() => handleAuthClick('register')}
                   className="bg-[#FFC300] text-[#333333] px-4 py-2 rounded-lg hover:bg-[#E6B800] transition-colors font-semibold"
                 >
-                  Registrarse
+                  {t('common.register')}
                 </button>
               </div>
             )}
@@ -217,63 +239,63 @@ const Header: React.FC = () => {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors"
+              className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
-            <div className="space-y-2">
-              <Link
-                to="/categories"
-                className="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Categorías
-              </Link>
-              <Link
-                to="/"
-                className="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Inicio
-              </Link>
-              {isAuthenticated && (
-                <>
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Perfil
-                  </Link>
-                  <Link
-                    to="/security"
-                    className="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Seguridad
-                  </Link>
-                  <Link
-                    to="/configuration"
-                    className="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Configuración
-                  </Link>
-                  
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg"
-                  >
-                    Cerrar Sesión
-                  </button>
-                </>
-              )}
+                 {/* Mobile Navigation */}
+         {isMenuOpen && (
+           <div className="md:hidden border-t border-gray-200 dark:border-[#555555] py-4">
+             <div className="space-y-2">
+                                <Link
+                   to="/categories"
+                   className="block px-4 py-2 text-gray-600 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-[#444444] rounded-lg"
+                   onClick={() => setIsMenuOpen(false)}
+                 >
+                   {t('common.categories')}
+                 </Link>
+                 <Link
+                   to="/"
+                   className="block px-4 py-2 text-gray-600 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-[#444444] rounded-lg"
+                   onClick={() => setIsMenuOpen(false)}
+                 >
+                   {t('common.home')}
+                 </Link>
+                             {isAuthenticated && (
+                 <>
+                   <Link
+                     to="/profile"
+                     className="block px-4 py-2 text-gray-600 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-[#444444] rounded-lg"
+                     onClick={() => setIsMenuOpen(false)}
+                   >
+                     {t('common.profile')}
+                   </Link>
+                   <Link
+                     to="/security"
+                     className="block px-4 py-2 text-gray-600 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-[#444444] rounded-lg"
+                     onClick={() => setIsMenuOpen(false)}
+                   >
+                     {t('common.security')}
+                   </Link>
+                   <Link
+                     to="/configuration"
+                     className="block px-4 py-2 text-gray-600 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-[#444444] rounded-lg"
+                     onClick={() => setIsMenuOpen(false)}
+                   >
+                     {t('common.settings')}
+                   </Link>
+                   
+                   <button
+                     onClick={handleLogout}
+                     className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                   >
+                     {t('common.logout')}
+                   </button>
+                 </>
+               )}
             </div>
           </div>
         )}

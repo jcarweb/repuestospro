@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Upload, X, Save, Edit } from 'lucide-react';
 
 interface RewardFormProps {
@@ -24,6 +25,7 @@ const RewardForm: React.FC<RewardFormProps> = ({
   onCancel, 
   isLoading = false 
 }) => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: reward?.name || '',
     description: reward?.description || '',
@@ -40,11 +42,11 @@ const RewardForm: React.FC<RewardFormProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const categories = [
-    { value: 'tools', label: 'Herramientas' },
-    { value: 'electronics', label: 'Electrónicos' },
-    { value: 'accessories', label: 'Accesorios' },
-    { value: 'gift_cards', label: 'Tarjetas de Regalo' },
-    { value: 'discounts', label: 'Descuentos' }
+    { value: 'tools', label: t('rewardForm.categories.tools') },
+    { value: 'electronics', label: t('rewardForm.categories.electronics') },
+    { value: 'accessories', label: t('rewardForm.categories.accessories') },
+    { value: 'gift_cards', label: t('rewardForm.categories.giftCards') },
+    { value: 'discounts', label: t('rewardForm.categories.discounts') }
   ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -92,7 +94,7 @@ const RewardForm: React.FC<RewardFormProps> = ({
         {/* Nombre del premio */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Nombre del Premio *
+            {t('rewardForm.name')}
           </label>
           <input
             type="text"
@@ -100,15 +102,15 @@ const RewardForm: React.FC<RewardFormProps> = ({
             value={formData.name}
             onChange={handleInputChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Ej: Gorra con logo, Descuento 20%"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
+            placeholder={t('rewardForm.namePlaceholder')}
           />
         </div>
 
         {/* Descripción */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Descripción *
+            {t('rewardForm.description')}
           </label>
           <textarea
             name="description"
@@ -116,15 +118,15 @@ const RewardForm: React.FC<RewardFormProps> = ({
             onChange={handleInputChange}
             required
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Describe el premio y sus beneficios"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
+            placeholder={t('rewardForm.descriptionPlaceholder')}
           />
         </div>
 
         {/* Imagen */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Imagen del Premio
+            {t('rewardForm.image')}
           </label>
           <div className="space-y-4">
             {imagePreview && (
@@ -157,7 +159,7 @@ const RewardForm: React.FC<RewardFormProps> = ({
                 className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
               >
                 <Upload className="w-4 h-4" />
-                <span>Subir Imagen</span>
+                <span>{t('rewardForm.uploadImage')}</span>
               </button>
             </div>
           </div>
@@ -166,7 +168,7 @@ const RewardForm: React.FC<RewardFormProps> = ({
         {/* Puntos requeridos */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Puntos Requeridos *
+            {t('rewardForm.pointsRequired')}
           </label>
           <input
             type="number"
@@ -175,7 +177,7 @@ const RewardForm: React.FC<RewardFormProps> = ({
             onChange={handleInputChange}
             required
             min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
             placeholder="0"
           />
         </div>
@@ -183,7 +185,7 @@ const RewardForm: React.FC<RewardFormProps> = ({
         {/* Monto en efectivo (opcional) */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Monto en Efectivo (Opcional)
+            {t('rewardForm.cashRequired')}
           </label>
           <input
             type="number"
@@ -192,25 +194,25 @@ const RewardForm: React.FC<RewardFormProps> = ({
             onChange={handleInputChange}
             min="0"
             step="0.01"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
             placeholder="0.00"
           />
           <p className="text-sm text-gray-500 mt-1">
-            Para premios mixtos (ej: gorra + $5)
+            {t('rewardForm.mixedRewardsHelp')}
           </p>
         </div>
 
         {/* Categoría */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Categoría *
+            {t('rewardForm.category')}
           </label>
           <select
             name="category"
             value={formData.category}
             onChange={handleInputChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
           >
             {categories.map(category => (
               <option key={category.value} value={category.value}>
@@ -223,7 +225,7 @@ const RewardForm: React.FC<RewardFormProps> = ({
         {/* Stock */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Stock Disponible *
+            {t('rewardForm.stock')}
           </label>
           <input
             type="number"
@@ -232,7 +234,7 @@ const RewardForm: React.FC<RewardFormProps> = ({
             onChange={handleInputChange}
             required
             min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
             placeholder="0"
           />
         </div>
@@ -245,11 +247,11 @@ const RewardForm: React.FC<RewardFormProps> = ({
             name="isActive"
             checked={formData.isActive}
             onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-[#FFC300] focus:ring-[#FFC300] border-gray-300 rounded"
           />
-          <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
-            Premio activo y disponible para canje
-          </label>
+                      <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+              {t('rewardForm.isActive')}
+            </label>
         </div>
 
         {/* Botones */}
@@ -257,21 +259,21 @@ const RewardForm: React.FC<RewardFormProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
           >
-            Cancelar
+            {t('rewardForm.buttons.cancel')}
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="flex items-center space-x-2 px-4 py-2 bg-[#FFC300] text-white rounded-md hover:bg-[#E6B000] disabled:opacity-50"
           >
             {isLoading ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 {reward ? <Edit className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-                <span>{reward ? 'Actualizar' : 'Crear'} Premio</span>
+                <span>{reward ? t('rewardForm.buttons.update') : t('rewardForm.buttons.save')}</span>
               </>
             )}
           </button>

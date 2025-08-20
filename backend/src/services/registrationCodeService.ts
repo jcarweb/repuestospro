@@ -298,4 +298,104 @@ export class RegistrationCodeService {
       throw error;
     }
   }
-} 
+
+  // Limpiar códigos expirados
+  static async cleanExpiredCodes(adminId: string): Promise<{ deletedCount: number }> {
+    try {
+      const admin = await User.findById(adminId);
+      if (!admin || admin.role !== 'admin') {
+        throw new Error('Solo los administradores pueden limpiar códigos expirados');
+      }
+
+      // Actualizar códigos expirados a estado 'expired'
+      const updateResult = await RegistrationCode.updateMany(
+        {
+          createdBy: adminId,
+          status: 'pending',
+          expiresAt: { $lt: new Date() }
+        },
+        {
+          $set: { status: 'expired' }
+        }
+      );
+
+      return {
+        deletedCount: updateResult.modifiedCount
+      };
+    } catch (error) {
+      console.error('Error limpiando códigos expirados:', error);
+      throw error;
+    }
+  }
+
+  // Obtener todos los códigos de registro (solo admin)
+  static async getAllRegistrationCodes(adminId: string): Promise<IRegistrationCode[]> {
+    try {
+      const admin = await User.findById(adminId);
+      if (!admin || admin.role !== 'admin') {
+        throw new Error('Solo los administradores pueden ver todos los códigos');
+      }
+
+      const codes = await RegistrationCode.find({ createdBy: adminId })
+        .populate('createdBy', 'name email')
+        .populate('usedBy', 'name email')
+        .sort({ createdAt: -1 });
+
+      return codes;
+    } catch (error) {
+      console.error('Error obteniendo todos los códigos:', error);
+      throw error;
+    }
+  }
+
+  // Iniciar registro con código
+  static async startRegistration(code: string): Promise<IRegistrationCode | null> {
+    try {
+      const registrationCode = await RegistrationCode.findOne({
+        code: code.toUpperCase(),
+        status: 'pending',
+        expiresAt: { $gt: new Date() }
+      });
+
+      if (!registrationCode) {
+        return null;
+      }
+
+      // Marcar que se inició el registro
+      registrationCode.registrationStartedAt = new Date();
+      await registrationCode.save();
+
+      return registrationCode;
+    } catch (error) {
+      console.error('Error iniciando registro:', error);
+      throw error;
+    }
+  }
+
+  // Completar registro con código
+  static async completeRegistration(userId: string, code: string): Promise<boolean> {
+    try {
+      const registrationCode = await RegistrationCode.findOne({
+        code: code.toUpperCase(),
+        status: 'pending',
+        expiresAt: { $gt: new Date() }
+      });
+
+      if (!registrationCode) {
+        return false;
+      }
+
+      // Marcar como usado
+      registrationCode.status = 'used';
+      registrationCode.usedAt = new Date();
+      registrationCode.usedBy = new mongoose.Types.ObjectId(userId);
+      registrationCode.registrationCompletedAt = new Date();
+      await registrationCode.save();
+
+      return true;
+    } catch (error) {
+      console.error('Error completando registro:', error);
+      throw error;
+    }
+  }
+}

@@ -48,6 +48,10 @@ export const config = {
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
+
+  // Configuración de VAPID para notificaciones push
+  VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY || '',
+  VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY || '',
 };
 
 export default config;

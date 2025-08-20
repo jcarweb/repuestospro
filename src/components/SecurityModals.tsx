@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Lock, Shield, Smartphone, Mail, Eye, EyeOff, Key, Fingerprint, QrCode, Download, Smartphone as PhoneIcon } from 'lucide-react';
 import QRCode from 'qrcode';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // ===== MODAL PARA CONFIGURAR PIN =====
 interface PinSetupModalProps {
@@ -11,6 +12,7 @@ interface PinSetupModalProps {
 }
 
 export const PinSetupModal: React.FC<PinSetupModalProps> = ({ isOpen, onClose, onSubmit, hasPin }) => {
+  const { t } = useLanguage();
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -23,17 +25,17 @@ export const PinSetupModal: React.FC<PinSetupModalProps> = ({ isOpen, onClose, o
     e.preventDefault();
     
     if (pin.length !== 4) {
-      setError('El PIN debe tener exactamente 4 dígitos');
+      setError(t('securityModals.pin.pinMustBe4Digits'));
       return;
     }
     
     if (pin !== confirmPin) {
-      setError('Los PINs no coinciden');
+      setError(t('securityModals.pin.pinMismatch'));
       return;
     }
     
     if (!currentPassword) {
-      setError('Debes ingresar tu contraseña actual');
+      setError(t('securityModals.pin.currentPasswordRequired'));
       return;
     }
 
@@ -41,12 +43,12 @@ export const PinSetupModal: React.FC<PinSetupModalProps> = ({ isOpen, onClose, o
       setIsLoading(true);
       setError(null);
       await onSubmit({ pin, currentPassword });
-      setSuccess(hasPin ? 'PIN actualizado correctamente' : 'PIN configurado correctamente');
+      setSuccess(hasPin ? t('securityModals.pin.pinUpdated') : t('securityModals.pin.pinConfigured'));
       setTimeout(() => {
         handleClose();
       }, 2000);
     } catch (error: any) {
-      setError(error.message || 'Error al configurar el PIN');
+      setError(error.message || t('securityModals.pin.errorConfiguring'));
     } finally {
       setIsLoading(false);
     }
@@ -72,7 +74,7 @@ export const PinSetupModal: React.FC<PinSetupModalProps> = ({ isOpen, onClose, o
               <Key className="h-5 w-5 text-blue-600" />
             </div>
             <h2 className="text-lg font-semibold text-gray-900">
-              {hasPin ? 'Actualizar PIN' : 'Configurar PIN'}
+              {hasPin ? t('securityModals.pin.updateTitle') : t('securityModals.pin.title')}
             </h2>
           </div>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
@@ -101,7 +103,7 @@ export const PinSetupModal: React.FC<PinSetupModalProps> = ({ isOpen, onClose, o
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Contraseña actual
+              {t('securityModals.pin.currentPassword')}
             </label>
             <div className="relative">
               <input
@@ -109,7 +111,7 @@ export const PinSetupModal: React.FC<PinSetupModalProps> = ({ isOpen, onClose, o
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Ingresa tu contraseña actual"
+                placeholder={t('securityModals.pin.currentPasswordPlaceholder')}
                 required
               />
               <button
@@ -124,7 +126,7 @@ export const PinSetupModal: React.FC<PinSetupModalProps> = ({ isOpen, onClose, o
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nuevo PIN (4 dígitos)
+              {t('securityModals.pin.newPin')}
             </label>
             <input
               type="password"
@@ -135,12 +137,12 @@ export const PinSetupModal: React.FC<PinSetupModalProps> = ({ isOpen, onClose, o
               maxLength={4}
               required
             />
-            <p className="text-xs text-gray-500 mt-1">Ingresa exactamente 4 dígitos numéricos</p>
+            <p className="text-xs text-gray-500 mt-1">{t('securityModals.pin.exactly4Digits')}</p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Confirmar PIN
+              {t('securityModals.pin.confirmPin')}
             </label>
             <input
               type="password"
@@ -157,12 +159,12 @@ export const PinSetupModal: React.FC<PinSetupModalProps> = ({ isOpen, onClose, o
             <div className="flex items-start gap-2">
               <div className="h-2 w-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
               <div className="text-sm text-blue-700">
-                <p className="font-medium mb-1">Información del PIN:</p>
+                <p className="font-medium mb-1">{t('securityModals.pin.pinInfo')}</p>
                 <ul className="text-xs space-y-1">
-                  <li>• El PIN debe tener exactamente 4 dígitos</li>
-                  <li>• Solo se permiten números del 0 al 9</li>
-                  <li>• Se usará para acceso rápido a la aplicación</li>
-                  <li>• Mantén tu PIN en un lugar seguro</li>
+                  <li>• {t('securityModals.pin.pinRules')}</li>
+                  <li>• {t('securityModals.pin.pinRules2')}</li>
+                  <li>• {t('securityModals.pin.pinRules3')}</li>
+                  <li>• {t('securityModals.pin.pinRules4')}</li>
                 </ul>
               </div>
             </div>
@@ -174,14 +176,14 @@ export const PinSetupModal: React.FC<PinSetupModalProps> = ({ isOpen, onClose, o
             onClick={handleClose}
             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            Cancelar
+            {t('button.cancel')}
           </button>
           <button
             onClick={handleSubmit}
             disabled={isLoading || !pin || !confirmPin || !currentPassword || pin.length !== 4}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Guardando...' : (hasPin ? 'Actualizar PIN' : 'Configurar PIN')}
+            {isLoading ? t('securityModals.pin.saving') : (hasPin ? t('securityModals.pin.updatePin') : t('securityModals.pin.setupPin'))}
           </button>
         </div>
       </div>
@@ -198,6 +200,7 @@ interface FingerprintModalProps {
 }
 
 export const FingerprintModal: React.FC<FingerprintModalProps> = ({ isOpen, onClose, onSubmit, isEnabled }) => {
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -207,12 +210,12 @@ export const FingerprintModal: React.FC<FingerprintModalProps> = ({ isOpen, onCl
       setIsLoading(true);
       setError(null);
       await onSubmit({ enabled: !isEnabled });
-      setSuccess(isEnabled ? 'Huella digital desactivada' : 'Huella digital activada');
+      setSuccess(isEnabled ? t('securityModals.fingerprint.deactivated') : t('securityModals.fingerprint.activated'));
       setTimeout(() => {
         handleClose();
       }, 2000);
     } catch (error: any) {
-      setError(error.message || 'Error al configurar la huella digital');
+      setError(error.message || t('securityModals.fingerprint.errorConfiguring'));
     } finally {
       setIsLoading(false);
     }
@@ -235,7 +238,7 @@ export const FingerprintModal: React.FC<FingerprintModalProps> = ({ isOpen, onCl
               <Fingerprint className="h-5 w-5 text-purple-600" />
             </div>
             <h2 className="text-lg font-semibold text-gray-900">
-              {isEnabled ? 'Desactivar Huella Digital' : 'Activar Huella Digital'}
+              {isEnabled ? t('securityModals.fingerprint.deactivateTitle') : t('securityModals.fingerprint.activateTitle')}
             </h2>
           </div>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
@@ -267,12 +270,12 @@ export const FingerprintModal: React.FC<FingerprintModalProps> = ({ isOpen, onCl
               <Fingerprint className="h-8 w-8 text-purple-600" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {isEnabled ? '¿Desactivar huella digital?' : '¿Activar huella digital?'}
+              {isEnabled ? t('securityModals.fingerprint.deactivateQuestion') : t('securityModals.fingerprint.activateQuestion')}
             </h3>
             <p className="text-gray-600 mb-6">
               {isEnabled 
-                ? 'Tu huella digital será removida del dispositivo. Podrás volver a configurarla más tarde.'
-                : 'Podrás usar tu huella digital para acceder rápidamente a la aplicación.'
+                ? t('securityModals.fingerprint.deactivateDescription')
+                : t('securityModals.fingerprint.activateDescription')
               }
             </p>
           </div>
@@ -281,12 +284,12 @@ export const FingerprintModal: React.FC<FingerprintModalProps> = ({ isOpen, onCl
             <div className="flex items-start gap-2">
               <div className="h-2 w-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
               <div className="text-sm text-purple-700">
-                <p className="font-medium mb-1">Información:</p>
+                <p className="font-medium mb-1">{t('securityModals.fingerprint.information')}</p>
                 <ul className="text-xs space-y-1">
-                  <li>• Solo funciona en dispositivos con sensor de huella</li>
-                  <li>• Los datos se almacenan de forma segura en tu dispositivo</li>
-                  <li>• Puedes desactivarla en cualquier momento</li>
-                  <li>• Siempre tendrás acceso con tu contraseña</li>
+                  <li>• {t('securityModals.fingerprint.info1')}</li>
+                  <li>• {t('securityModals.fingerprint.info2')}</li>
+                  <li>• {t('securityModals.fingerprint.info3')}</li>
+                  <li>• {t('securityModals.fingerprint.info4')}</li>
                 </ul>
               </div>
             </div>
@@ -298,7 +301,7 @@ export const FingerprintModal: React.FC<FingerprintModalProps> = ({ isOpen, onCl
             onClick={handleClose}
             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            Cancelar
+            {t('button.cancel')}
           </button>
           <button
             onClick={handleToggle}
@@ -309,7 +312,7 @@ export const FingerprintModal: React.FC<FingerprintModalProps> = ({ isOpen, onCl
                 : 'bg-purple-600 hover:bg-purple-700 focus:ring-purple-500'
             }`}
           >
-            {isLoading ? 'Procesando...' : (isEnabled ? 'Desactivar' : 'Activar')}
+            {isLoading ? t('securityModals.fingerprint.processing') : (isEnabled ? t('securityModals.fingerprint.deactivate') : t('securityModals.fingerprint.activate'))}
           </button>
         </div>
       </div>
@@ -328,6 +331,7 @@ interface TwoFactorModalProps {
 }
 
 export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose, onSubmit, onComplete, isEnabled, userEmail }) => {
+  const { t } = useLanguage();
   const [step, setStep] = useState<'confirm' | 'setup' | 'verify'>('confirm');
   const [verificationCode, setVerificationCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -371,7 +375,7 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
 
   const handleVerify = async () => {
     if (verificationCode.length !== 6) {
-      setError('El código debe tener 6 dígitos');
+      setError(t('securityModals.2fa.codeMustBe6Digits'));
       return;
     }
 
@@ -379,7 +383,7 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
       setIsLoading(true);
       setError(null);
       await onSubmit({ enabled: true, code: verificationCode });
-      setSuccess('Autenticación de dos factores activada correctamente');
+      setSuccess(t('securityModals.2fa.activatedSuccessfully'));
       
       // Llamar a onComplete si está disponible
       if (onComplete) {
@@ -390,7 +394,7 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
         handleClose();
       }, 2000);
     } catch (error: any) {
-      setError(error.message || 'Código inválido');
+      setError(error.message || t('securityModals.2fa.invalidCode'));
     } finally {
       setIsLoading(false);
     }
@@ -401,12 +405,12 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
       setIsLoading(true);
       setError(null);
       await onSubmit({ enabled: false });
-      setSuccess('Autenticación de dos factores desactivada');
+      setSuccess(t('securityModals.2fa.deactivatedSuccessfully'));
       setTimeout(() => {
         handleClose();
       }, 2000);
     } catch (error: any) {
-      setError(error.message || 'Error al desactivar 2FA');
+      setError(error.message || t('securityModals.2fa.errorDeactivating'));
     } finally {
       setIsLoading(false);
     }
@@ -445,7 +449,7 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose,
               <Shield className="h-5 w-5 text-orange-600" />
             </div>
             <h2 className="text-lg font-semibold text-gray-900">
-              Autenticación de Dos Factores
+              {t('securityModals.2fa.title')}
             </h2>
           </div>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
@@ -649,6 +653,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
   email, 
   isVerified 
 }) => {
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);

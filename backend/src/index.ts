@@ -26,6 +26,7 @@ import adminRoutes from './routes/adminRoutes';
 import storeRoutes from './routes/storeRoutes';
 import activityRoutes from './routes/activityRoutes';
 import profileRoutes from './routes/profileRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 
 const app = express();
 
@@ -135,6 +136,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api', storeRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Middleware para manejar rutas no encontradas
 app.use('*', (req, res) => {

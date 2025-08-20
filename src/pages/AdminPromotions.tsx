@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import PromotionForm from '../components/PromotionForm';
 import { 
   Gift, 
@@ -100,6 +101,7 @@ interface PromotionStats {
 
 const AdminPromotions: React.FC = () => {
   const { user, token } = useAuth();
+  const { t } = useLanguage();
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [stores, setStores] = useState<Store[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -261,13 +263,13 @@ const AdminPromotions: React.FC = () => {
         setShowCreateModal(false);
         fetchPromotions();
         fetchStats();
-        alert('Promoción creada exitosamente');
+        alert(t('adminPromotions.messages.promotionCreated'));
       } else {
-        alert(data.message || 'Error creando promoción');
+        alert(data.message || t('adminPromotions.errors.creatingPromotion'));
       }
     } catch (error) {
       console.error('Error creando promoción:', error);
-      alert('Error de conexión');
+      alert(t('adminPromotions.errors.connection'));
     }
   };
 
@@ -292,13 +294,13 @@ const AdminPromotions: React.FC = () => {
         setSelectedPromotion(null);
         fetchPromotions();
         fetchStats();
-        alert('Promoción actualizada exitosamente');
+        alert(t('adminPromotions.messages.promotionUpdated'));
       } else {
-        alert(data.message || 'Error actualizando promoción');
+        alert(data.message || t('adminPromotions.errors.updatingPromotion'));
       }
     } catch (error) {
       console.error('Error actualizando promoción:', error);
-      alert('Error de conexión');
+      alert(t('adminPromotions.errors.connection'));
     }
   };
 
@@ -321,19 +323,19 @@ const AdminPromotions: React.FC = () => {
       if (data.success) {
         fetchPromotions();
         fetchStats();
-        alert('Estado de promoción actualizado exitosamente');
+        alert(t('adminPromotions.messages.statusUpdated'));
       } else {
-        alert(data.message || 'Error actualizando estado de promoción');
+        alert(data.message || t('adminPromotions.errors.updatingStatus'));
       }
     } catch (error) {
       console.error('Error cambiando estado de promoción:', error);
-      alert('Error de conexión');
+      alert(t('adminPromotions.errors.connection'));
     }
   };
 
   // Eliminar promoción
   const handleDeletePromotion = async (promotionId: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar esta promoción? Esta acción no se puede deshacer.')) {
+    if (!confirm(t('adminPromotions.confirm.delete'))) {
       return;
     }
 
@@ -350,13 +352,13 @@ const AdminPromotions: React.FC = () => {
       if (data.success) {
         fetchPromotions();
         fetchStats();
-        alert('Promoción eliminada exitosamente');
+        alert(t('adminPromotions.messages.promotionDeleted'));
       } else {
-        alert(data.message || 'Error eliminando promoción');
+        alert(data.message || t('adminPromotions.errors.deletingPromotion'));
       }
     } catch (error) {
       console.error('Error eliminando promoción:', error);
-      alert('Error de conexión');
+      alert(t('adminPromotions.errors.connection'));
     }
   };
 
@@ -380,10 +382,10 @@ const AdminPromotions: React.FC = () => {
   // Obtener texto de tipo de promoción
   const getPromotionTypeText = (type: string) => {
     switch (type) {
-      case 'percentage': return 'Porcentaje';
-      case 'fixed': return 'Monto Fijo';
-      case 'buy_x_get_y': return 'Compra X Obtén Y';
-      case 'custom': return 'Personalizada';
+      case 'percentage': return t('adminPromotions.promotionTypes.percentage');
+      case 'fixed': return t('adminPromotions.promotionTypes.fixed');
+      case 'buy_x_get_y': return t('adminPromotions.promotionTypes.buyXGetY');
+      case 'custom': return t('adminPromotions.promotionTypes.custom');
       default: return type;
     }
   };
@@ -400,7 +402,7 @@ const AdminPromotions: React.FC = () => {
   // Obtener el estado de visualización de la promoción
   const getPromotionStatus = (promotion: Promotion) => {
     if (!promotion.isActive) {
-      return { text: 'Inactiva', class: 'bg-red-100 text-red-800' };
+      return { text: t('adminPromotions.status.inactive'), class: 'bg-red-100 text-red-800' };
     }
     
     const now = new Date();
@@ -408,11 +410,11 @@ const AdminPromotions: React.FC = () => {
     const endDate = new Date(promotion.endDate);
     
     if (now < startDate) {
-      return { text: 'Pendiente', class: 'bg-yellow-100 text-yellow-800' };
+      return { text: t('adminPromotions.status.pending'), class: 'bg-yellow-100 text-yellow-800' };
     } else if (now > endDate) {
-      return { text: 'Expirada', class: 'bg-gray-100 text-gray-800' };
+      return { text: t('adminPromotions.status.expired'), class: 'bg-gray-100 text-gray-800' };
     } else {
-      return { text: 'Vigente', class: 'bg-green-100 text-green-800' };
+      return { text: t('adminPromotions.status.vigent'), class: 'bg-green-100 text-green-800' };
     }
   };
 
@@ -421,8 +423,8 @@ const AdminPromotions: React.FC = () => {
       <div className="p-4">
         <div className="text-center py-12">
           <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Acceso Denegado</h2>
-          <p className="text-gray-600">No tienes permisos para acceder a esta página.</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('adminPromotions.accessDenied.title')}</h2>
+          <p className="text-gray-600">{t('adminPromotions.accessDenied.message')}</p>
         </div>
       </div>
     );
@@ -431,8 +433,8 @@ const AdminPromotions: React.FC = () => {
   return (
     <div className="p-4">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Gestión de Promociones</h1>
-        <p className="text-gray-600 mt-2">Administra las promociones y ofertas especiales</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('adminPromotions.title')}</h1>
+        <p className="text-gray-600 mt-2">{t('adminPromotions.subtitle')}</p>
       </div>
 
       {/* Estadísticas */}
@@ -440,9 +442,9 @@ const AdminPromotions: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <div className="bg-white p-4 rounded-lg shadow">
             <div className="flex items-center">
-              <Gift className="w-8 h-8 text-blue-600" />
+                             <Gift className="w-8 h-8 text-[#FFC300]" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Total</p>
+                <p className="text-sm font-medium text-gray-600">{t('adminPromotions.stats.total')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.totalPromotions}</p>
               </div>
             </div>
@@ -451,7 +453,7 @@ const AdminPromotions: React.FC = () => {
             <div className="flex items-center">
               <CheckCircle className="w-8 h-8 text-green-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Activas</p>
+                <p className="text-sm font-medium text-gray-600">{t('adminPromotions.stats.active')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.activePromotions}</p>
               </div>
             </div>
@@ -460,7 +462,7 @@ const AdminPromotions: React.FC = () => {
             <div className="flex items-center">
               <XCircle className="w-8 h-8 text-red-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Inactivas</p>
+                <p className="text-sm font-medium text-gray-600">{t('adminPromotions.stats.inactive')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.inactivePromotions}</p>
               </div>
             </div>
@@ -469,7 +471,7 @@ const AdminPromotions: React.FC = () => {
             <div className="flex items-center">
               <Clock className="w-8 h-8 text-orange-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Por Expirar</p>
+                <p className="text-sm font-medium text-gray-600">{t('adminPromotions.stats.expiringSoon')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.expiringSoon}</p>
               </div>
             </div>
@@ -478,7 +480,7 @@ const AdminPromotions: React.FC = () => {
             <div className="flex items-center">
               <Store className="w-8 h-8 text-purple-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Tiendas</p>
+                <p className="text-sm font-medium text-gray-600">{t('adminPromotions.stats.stores')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stores.length}</p>
               </div>
             </div>
@@ -492,20 +494,20 @@ const AdminPromotions: React.FC = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Buscar promociones..."
+            placeholder={t('adminPromotions.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
           />
         </div>
         
         {user.role === 'admin' && (
-          <select
-            value={selectedStore}
-            onChange={(e) => setSelectedStore(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">Todas las tiendas</option>
+                  <select
+          value={selectedStore}
+          onChange={(e) => setSelectedStore(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
+        >
+            <option value="all">{t('adminPromotions.allStores')}</option>
             {stores.map(store => (
               <option key={store._id} value={store._id}>{store.name}</option>
             ))}
@@ -515,31 +517,31 @@ const AdminPromotions: React.FC = () => {
         <select
           value={selectedType}
           onChange={(e) => setSelectedType(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
         >
-          <option value="all">Todos los tipos</option>
-          <option value="percentage">Porcentaje</option>
-          <option value="fixed">Monto Fijo</option>
-          <option value="buy_x_get_y">Compra X Obtén Y</option>
-          <option value="custom">Personalizada</option>
+          <option value="all">{t('adminPromotions.allTypes')}</option>
+          <option value="percentage">{t('adminPromotions.promotionTypes.percentage')}</option>
+          <option value="fixed">{t('adminPromotions.promotionTypes.fixed')}</option>
+          <option value="buy_x_get_y">{t('adminPromotions.promotionTypes.buyXGetY')}</option>
+          <option value="custom">{t('adminPromotions.promotionTypes.custom')}</option>
         </select>
         
         <select
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
         >
-          <option value="all">Todos los estados</option>
-          <option value="active">Activas</option>
-          <option value="inactive">Inactivas</option>
+          <option value="all">{t('adminPromotions.allStatuses')}</option>
+          <option value="active">{t('adminPromotions.status.active')}</option>
+          <option value="inactive">{t('adminPromotions.status.inactive')}</option>
         </select>
         
         <button 
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 bg-[#FFC300] text-white px-4 py-2 rounded-lg hover:bg-[#E6B000] transition-colors"
         >
           <Plus className="w-5 h-5" />
-          Nueva Promoción
+          {t('adminPromotions.newPromotion')}
         </button>
       </div>
 
@@ -547,14 +549,14 @@ const AdminPromotions: React.FC = () => {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {loading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Cargando promociones...</p>
+                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FFC300] mx-auto"></div>
+            <p className="mt-2 text-gray-600">{t('adminPromotions.loading')}</p>
           </div>
         ) : promotions.length === 0 ? (
           <div className="p-8 text-center">
             <Gift className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No se encontraron promociones</p>
-            <p className="text-sm text-gray-500 mt-2">Crea tu primera promoción para empezar</p>
+            <p className="text-gray-600">{t('adminPromotions.noPromotions')}</p>
+            <p className="text-sm text-gray-500 mt-2">{t('adminPromotions.createFirst')}</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
@@ -575,7 +577,7 @@ const AdminPromotions: React.FC = () => {
                             {promotion.store.name}
                           </span>
                           <span className="text-xs text-gray-400">
-                            {promotion.products.length} productos
+                            {promotion.products.length} {t('adminPromotions.products')}
                           </span>
                         </div>
                       </div>
@@ -596,7 +598,7 @@ const AdminPromotions: React.FC = () => {
                       <button 
                         onClick={() => handleViewPromotion(promotion)}
                         className="text-blue-600 hover:text-blue-900 p-1 rounded"
-                        title="Ver detalles"
+                        title={t('adminPromotions.actions.viewDetails')}
                       >
                         <Eye className="w-4 h-4" />
                       </button>
@@ -606,7 +608,7 @@ const AdminPromotions: React.FC = () => {
                           setShowEditModal(true);
                         }}
                         className="text-green-600 hover:text-green-900 p-1 rounded"
-                        title="Editar"
+                        title={t('adminPromotions.actions.edit')}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
@@ -617,14 +619,14 @@ const AdminPromotions: React.FC = () => {
                             ? 'text-orange-600 hover:text-orange-900' 
                             : 'text-green-600 hover:text-green-900'
                         }`}
-                        title={promotion.isActive ? 'Desactivar' : 'Activar'}
+                        title={promotion.isActive ? t('adminPromotions.actions.deactivate') : t('adminPromotions.actions.activate')}
                       >
                         {promotion.isActive ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                       </button>
                       <button 
                         onClick={() => handleDeletePromotion(promotion._id)}
                         className="text-red-600 hover:text-red-900 p-1 rounded"
-                        title="Eliminar"
+                        title={t('adminPromotions.actions.delete')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -664,10 +666,10 @@ const AdminPromotions: React.FC = () => {
 
       {/* Modal para ver detalles de promoción */}
       {showViewModal && selectedPromotion && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Detalles de la Promoción</h2>
+              <h2 className="text-2xl font-bold text-[#FFC300]">{t('adminPromotions.modals.view.title')}</h2>
               <button
                 onClick={() => {
                   setShowViewModal(false);
@@ -682,71 +684,71 @@ const AdminPromotions: React.FC = () => {
             <div className="space-y-6">
               {/* Información básica */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Información General</h3>
+                <h3 className="text-lg font-semibold mb-3 text-[#FFC300]">{t('adminPromotions.modals.view.generalInfo')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                    <p className="text-gray-900">{selectedPromotion.name}</p>
+                                          <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.name')}</label>
+                      <p className="text-gray-900">{selectedPromotion.name}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Tipo</label>
-                    <div className="flex items-center space-x-2">
-                      {getPromotionTypeIcon(selectedPromotion.type)}
-                      <span>{getPromotionTypeText(selectedPromotion.type)}</span>
-                    </div>
+                                          <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.type')}</label>
+                      <div className="flex items-center space-x-2">
+                        {getPromotionTypeIcon(selectedPromotion.type)}
+                        <span className="text-gray-900">{getPromotionTypeText(selectedPromotion.type)}</span>
+                      </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Estado</label>
+                                          <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.status')}</label>
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                       selectedPromotion.isActive
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {selectedPromotion.isActive ? 'Activa' : 'Inactiva'}
+                      {selectedPromotion.isActive ? t('adminPromotions.status.active') : t('adminPromotions.status.inactive')}
                     </span>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Tienda</label>
-                    <p className="text-gray-900">{selectedPromotion.store.name}</p>
+                                          <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.store')}</label>
+                      <p className="text-gray-900">{selectedPromotion.store.name}</p>
                   </div>
                 </div>
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700">Descripción</label>
-                  <p className="text-gray-900">{selectedPromotion.description}</p>
+                                      <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.description')}</label>
+                    <p className="text-gray-900">{selectedPromotion.description}</p>
                 </div>
               </div>
 
               {/* Configuración de descuento */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Configuración de Descuento</h3>
+                <h3 className="text-lg font-semibold mb-3 text-[#FFC300]">{t('adminPromotions.modals.view.discountConfig')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {selectedPromotion.type === 'percentage' && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Porcentaje de Descuento</label>
+                                              <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.discountPercentage')}</label>
                       <p className="text-gray-900">{selectedPromotion.discountPercentage}%</p>
                     </div>
                   )}
                   {selectedPromotion.type === 'fixed' && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Monto de Descuento</label>
+                                              <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.discountAmount')}</label>
                       <p className="text-gray-900">${selectedPromotion.discountAmount}</p>
                     </div>
                   )}
                   {selectedPromotion.type === 'buy_x_get_y' && (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Compra</label>
-                        <p className="text-gray-900">{selectedPromotion.buyQuantity} unidades</p>
+                        <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.buyQuantity')}</label>
+                        <p className="text-gray-900">{selectedPromotion.buyQuantity} {t('adminPromotions.modals.view.units')}</p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Obtén</label>
-                        <p className="text-gray-900">{selectedPromotion.getQuantity} unidades</p>
+                        <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.getQuantity')}</label>
+                        <p className="text-gray-900">{selectedPromotion.getQuantity} {t('adminPromotions.modals.view.units')}</p>
                       </div>
                     </>
                   )}
                   {selectedPromotion.type === 'custom' && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Texto Personalizado</label>
+                                              <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.customText')}</label>
                       <p className="text-gray-900">{selectedPromotion.customText}</p>
                     </div>
                   )}
@@ -755,18 +757,18 @@ const AdminPromotions: React.FC = () => {
 
               {/* Fechas */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Fechas de Vigencia</h3>
+                <h3 className="text-lg font-semibold mb-3 text-[#FFC300]">{t('adminPromotions.modals.view.dates')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Fecha de Inicio</label>
+                                          <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.startDate')}</label>
                     <p className="text-gray-900">
-                      {new Date(selectedPromotion.startDate).toLocaleDateString()} a las {selectedPromotion.startTime}
+                      {new Date(selectedPromotion.startDate).toLocaleDateString()} {t('adminPromotions.modals.view.at')} {selectedPromotion.startTime}
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Fecha de Fin</label>
+                                          <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.endDate')}</label>
                     <p className="text-gray-900">
-                      {new Date(selectedPromotion.endDate).toLocaleDateString()} a las {selectedPromotion.endTime}
+                      {new Date(selectedPromotion.endDate).toLocaleDateString()} {t('adminPromotions.modals.view.at')} {selectedPromotion.endTime}
                     </p>
                   </div>
                 </div>
@@ -774,7 +776,7 @@ const AdminPromotions: React.FC = () => {
 
               {/* Productos */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Productos ({selectedPromotion.products.length})</h3>
+                <h3 className="text-lg font-semibold mb-3">{t('adminPromotions.modals.view.products')} ({selectedPromotion.products.length})</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {selectedPromotion.products.map((product) => (
                     <div key={product._id} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
@@ -790,42 +792,42 @@ const AdminPromotions: React.FC = () => {
 
               {/* Configuración visual */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Configuración Visual</h3>
+                <h3 className="text-lg font-semibold mb-3">{t('adminPromotions.modals.view.visualConfig')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Texto del Cintillo</label>
+                                          <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.ribbonText')}</label>
                     <p className="text-gray-900">{selectedPromotion.ribbonText}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Posición del Cintillo</label>
+                                          <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.ribbonPosition')}</label>
                     <p className="text-gray-900">{selectedPromotion.ribbonPosition}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Mostrar Precio Original</label>
-                    <p className="text-gray-900">{selectedPromotion.showOriginalPrice ? 'Sí' : 'No'}</p>
+                                          <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.showOriginalPrice')}</label>
+                      <p className="text-gray-900">{selectedPromotion.showOriginalPrice ? t('adminPromotions.modals.view.yes') : t('adminPromotions.modals.view.no')}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Mostrar Monto de Descuento</label>
-                    <p className="text-gray-900">{selectedPromotion.showDiscountAmount ? 'Sí' : 'No'}</p>
+                                          <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.showDiscountAmount')}</label>
+                      <p className="text-gray-900">{selectedPromotion.showDiscountAmount ? t('adminPromotions.modals.view.yes') : t('adminPromotions.modals.view.no')}</p>
                   </div>
                 </div>
               </div>
 
               {/* Información adicional */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Información Adicional</h3>
+                <h3 className="text-lg font-semibold mb-3">{t('adminPromotions.modals.view.additionalInfo')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Creado por</label>
+                                          <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.createdBy')}</label>
                     <p className="text-gray-900">{selectedPromotion.createdBy.name}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Fecha de Creación</label>
+                                          <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.createdAt')}</label>
                     <p className="text-gray-900">{new Date(selectedPromotion.createdAt).toLocaleDateString()}</p>
                   </div>
                   {selectedPromotion.maxUses && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Límite de Usos</label>
+                      <label className="block text-sm font-medium text-gray-700">{t('adminPromotions.modals.view.usageLimit')}</label>
                       <p className="text-gray-900">{selectedPromotion.currentUses} / {selectedPromotion.maxUses}</p>
                     </div>
                   )}
@@ -839,9 +841,9 @@ const AdminPromotions: React.FC = () => {
                   setShowViewModal(false);
                   setSelectedPromotion(null);
                 }}
-                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
               >
-                Cerrar
+                {t('adminPromotions.modals.view.close')}
               </button>
             </div>
           </div>

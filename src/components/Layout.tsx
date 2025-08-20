@@ -20,7 +20,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const shouldUseSidebar = isAdminOrStoreManager;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-[#333333]">
       {/* Header siempre se renderiza, pero con contenido adaptado */}
       <Header />
 

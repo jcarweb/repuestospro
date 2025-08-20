@@ -14,6 +14,13 @@ export interface UserProfile {
   emailNotifications: boolean;
   pushNotifications: boolean;
   marketingEmails: boolean;
+  theme: 'light' | 'dark';
+  language: 'es' | 'en' | 'pt';
+  profileVisibility: 'public' | 'friends' | 'private';
+  showEmail: boolean;
+  showPhone: boolean;
+  pushEnabled: boolean;
+  pushToken?: string;
   points: number;
   loyaltyLevel: 'bronze' | 'silver' | 'gold' | 'platinum';
   location?: {
@@ -65,22 +72,47 @@ export interface NotificationSettings {
 }
 
 export interface PrivacySettings {
-  profileVisibility: string;
+  profileVisibility: 'public' | 'friends' | 'private';
   showEmail: boolean;
   showPhone: boolean;
 }
 
 export interface PreferencesData {
-  theme: string;
-  language: string;
+  theme: 'light' | 'dark';
+  language: 'es' | 'en' | 'pt';
+}
+
+export interface PushNotificationSettings {
+  pushEnabled: boolean;
+  pushToken?: string;
 }
 
 class ProfileService {
+  // Cache para evitar múltiples llamadas simultáneas
+  private profileCache: { data: UserProfile | null; timestamp: number } = {
+    data: null,
+    timestamp: 0
+  };
+
   // Obtener perfil del usuario
   async getProfile(): Promise<UserProfile> {
     try {
+      // Verificar cache (5 segundos)
+      const now = Date.now();
+      if (this.profileCache.data && (now - this.profileCache.timestamp) < 5000) {
+        return this.profileCache.data;
+      }
+
       const response = await api.get('/profile');
-      return response.data.data;
+      const profileData = response.data.data;
+      
+      // Actualizar cache
+      this.profileCache = {
+        data: profileData,
+        timestamp: now
+      };
+      
+      return profileData;
     } catch (error: any) {
       console.error('Error fetching profile:', error);
       
@@ -206,6 +238,17 @@ class ProfileService {
       return response.data;
     } catch (error) {
       console.error('Error updating preferences:', error);
+      throw error;
+    }
+  }
+
+  // Actualizar configuraciones de notificaciones push
+  async updatePushNotifications(data: PushNotificationSettings): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await api.put('/profile/push-notifications', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating push notifications:', error);
       throw error;
     }
   }

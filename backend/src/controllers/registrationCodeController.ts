@@ -271,4 +271,126 @@ export class RegistrationCodeController {
       });
     }
   }
-} 
+
+  // Limpiar códigos expirados (solo admin)
+  static async cleanExpiredCodes(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user._id;
+
+      const result = await RegistrationCodeService.cleanExpiredCodes(userId.toString());
+
+      res.json({
+        success: true,
+        message: `${result.deletedCount} códigos expirados han sido marcados como expirados`,
+        data: result
+      });
+    } catch (error) {
+      console.error('Error limpiando códigos expirados:', error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Obtener todos los códigos de registro (solo admin)
+  static async getAllCodes(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user._id;
+
+      const codes = await RegistrationCodeService.getAllRegistrationCodes(userId.toString());
+
+      res.json({
+        success: true,
+        message: 'Códigos de registro obtenidos exitosamente',
+        data: codes
+      });
+    } catch (error) {
+      console.error('Error obteniendo todos los códigos:', error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Iniciar registro con código (público)
+  static async startRegistration(req: Request, res: Response): Promise<void> {
+    try {
+      const { code } = req.body;
+
+      if (!code) {
+        res.status(400).json({
+          success: false,
+          message: 'Código de registro requerido'
+        });
+        return;
+      }
+
+      const registrationCode = await RegistrationCodeService.startRegistration(code);
+
+      if (!registrationCode) {
+        res.status(404).json({
+          success: false,
+          message: 'Código de registro no encontrado o expirado'
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        message: 'Registro iniciado exitosamente',
+        data: {
+          code: registrationCode.code,
+          email: registrationCode.email,
+          role: registrationCode.role,
+          expiresAt: registrationCode.expiresAt,
+          status: registrationCode.status
+        }
+      });
+    } catch (error) {
+      console.error('Error iniciando registro:', error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Completar registro con código (requiere autenticación)
+  static async completeRegistration(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user._id;
+      const { code } = req.body;
+
+      if (!code) {
+        res.status(400).json({
+          success: false,
+          message: 'Código de registro requerido'
+        });
+        return;
+      }
+
+      const success = await RegistrationCodeService.completeRegistration(userId.toString(), code);
+
+      if (!success) {
+        res.status(404).json({
+          success: false,
+          message: 'Código de registro no encontrado o expirado'
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        message: 'Registro completado exitosamente'
+      });
+    } catch (error) {
+      console.error('Error completando registro:', error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Error interno del servidor'
+      });
+    }
+  }
+}

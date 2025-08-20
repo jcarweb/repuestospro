@@ -46,6 +46,19 @@ export interface IUser extends Document {
   pushNotifications: boolean;
   marketingEmails: boolean;
   
+  // Configuraciones de preferencias
+  theme: 'light' | 'dark';
+  language: 'es' | 'en' | 'pt';
+  
+  // Configuraciones de privacidad
+  profileVisibility: 'public' | 'friends' | 'private';
+  showEmail: boolean;
+  showPhone: boolean;
+  
+  // Configuraciones de notificaciones push
+  pushToken?: string;
+  pushEnabled: boolean;
+  
   // Campos específicos para Delivery
   deliveryStatus?: 'available' | 'unavailable' | 'busy' | 'on_route' | 'returning_to_store';
   autoStatusMode: boolean; // true = automático, false = manual
@@ -243,6 +256,42 @@ const userSchema = new Schema<IUser>({
   marketingEmails: {
     type: Boolean,
     default: false
+  },
+  
+  // Configuraciones de preferencias
+  theme: {
+    type: String,
+    enum: ['light', 'dark'],
+    default: 'light'
+  },
+  language: {
+    type: String,
+    enum: ['es', 'en', 'pt'],
+    default: 'es'
+  },
+  
+  // Configuraciones de privacidad
+  profileVisibility: {
+    type: String,
+    enum: ['public', 'friends', 'private'],
+    default: 'public'
+  },
+  showEmail: {
+    type: Boolean,
+    default: false
+  },
+  showPhone: {
+    type: Boolean,
+    default: false
+  },
+  
+  // Configuraciones de notificaciones push
+  pushToken: {
+    type: String
+  },
+  pushEnabled: {
+    type: Boolean,
+    default: true
   },
   
   // Campos específicos para Delivery

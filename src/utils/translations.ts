@@ -1,0 +1,7875 @@
+export type Language = 'es' | 'en' | 'pt';
+
+export interface Translations {
+  [key: string]: {
+    [key in Language]: string;
+  };
+}
+
+export const translations: Translations = {
+  // ===== NAVEGACIÓN PRINCIPAL =====
+  'nav.home': {
+    es: 'Inicio',
+    en: 'Home',
+    pt: 'Início'
+  },
+  'nav.categories': {
+    es: 'Categorías',
+    en: 'Categories',
+    pt: 'Categorias'
+  },
+  'nav.products': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'nav.cart': {
+    es: 'Carrito',
+    en: 'Cart',
+    pt: 'Carrinho'
+  },
+  'nav.favorites': {
+    es: 'Favoritos',
+    en: 'Favorites',
+    pt: 'Favoritos'
+  },
+  'nav.profile': {
+    es: 'Perfil',
+    en: 'Profile',
+    pt: 'Perfil'
+  },
+  'nav.settings': {
+    es: 'Configuración',
+    en: 'Settings',
+    pt: 'Configurações'
+  },
+  'nav.security': {
+    es: 'Seguridad',
+    en: 'Security',
+    pt: 'Segurança'
+  },
+  'nav.loyalty': {
+    es: 'Fidelización',
+    en: 'Loyalty',
+    pt: 'Fidelização'
+  },
+  'nav.orders': {
+    es: 'Pedidos',
+    en: 'Orders',
+    pt: 'Pedidos'
+  },
+  'nav.notifications': {
+    es: 'Notificaciones',
+    en: 'Notifications',
+    pt: 'Notificações'
+  },
+  'nav.logout': {
+    es: 'Cerrar Sesión',
+    en: 'Logout',
+    pt: 'Sair'
+  },
+
+  // ===== PANEL DE ADMINISTRACIÓN =====
+  'admin.dashboard': {
+    es: 'Panel de Control',
+    en: 'Dashboard',
+    pt: 'Painel de Controle'
+  },
+  'admin.users': {
+    es: 'Usuarios',
+    en: 'Users',
+    pt: 'Usuários'
+  },
+  'admin.stores': {
+    es: 'Tiendas',
+    en: 'Stores',
+    pt: 'Lojas'
+  },
+  'admin.products': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'admin.categories': {
+    es: 'Categorías',
+    en: 'Categories',
+    pt: 'Categorias'
+  },
+  'admin.subcategories': {
+    es: 'Subcategorías',
+    en: 'Subcategories',
+    pt: 'Subcategorias'
+  },
+  'admin.promotions': {
+    es: 'Promociones',
+    en: 'Promotions',
+    pt: 'Promoções'
+  },
+  'admin.advertisements': {
+    es: 'Anuncios',
+    en: 'Advertisements',
+    pt: 'Anúncios'
+  },
+  'admin.sales': {
+    es: 'Ventas',
+    en: 'Sales',
+    pt: 'Vendas'
+  },
+  'admin.loyalty': {
+    es: 'Fidelización',
+    en: 'Loyalty',
+    pt: 'Fidelização'
+  },
+  'admin.analytics': {
+    es: 'Analíticas',
+    en: 'Analytics',
+    pt: 'Analytics'
+  },
+  'admin.registrationCodes': {
+    es: 'Códigos de Registro',
+    en: 'Registration Codes',
+    pt: 'Códigos de Registro'
+  },
+  'admin.searchConfig': {
+    es: 'Configuración de Búsqueda',
+    en: 'Search Configuration',
+    pt: 'Configuração de Busca'
+  },
+  'admin.generateProducts': {
+    es: 'Generar Productos',
+    en: 'Generate Products',
+    pt: 'Gerar Produtos'
+  },
+
+  // ===== PANEL DE GESTOR DE TIENDA =====
+  'store.dashboard': {
+    es: 'Panel de Tienda',
+    en: 'Store Dashboard',
+    pt: 'Painel da Loja'
+  },
+  'store.products': {
+    es: 'Mis Productos',
+    en: 'My Products',
+    pt: 'Meus Produtos'
+  },
+  'store.promotions': {
+    es: 'Mis Promociones',
+    en: 'My Promotions',
+    pt: 'Minhas Promoções'
+  },
+  'store.sales': {
+    es: 'Mis Ventas',
+    en: 'My Sales',
+    pt: 'Minhas Vendas'
+  },
+  'store.orders': {
+    es: 'Mis Pedidos',
+    en: 'My Orders',
+    pt: 'Meus Pedidos'
+  },
+  'store.delivery': {
+    es: 'Entrega',
+    en: 'Delivery',
+    pt: 'Entrega'
+  },
+  'store.analytics': {
+    es: 'Analíticas',
+    en: 'Analytics',
+    pt: 'Analytics'
+  },
+  'store.messages': {
+    es: 'Mensajes',
+    en: 'Messages',
+    pt: 'Mensagens'
+  },
+  'store.reviews': {
+    es: 'Reseñas',
+    en: 'Reviews',
+    pt: 'Avaliações'
+  },
+  'store.settings': {
+    es: 'Configuración',
+    en: 'Settings',
+    pt: 'Configurações'
+  },
+
+  // ===== PANEL DE DELIVERY =====
+  'delivery.dashboard': {
+    es: 'Panel de Entrega',
+    en: 'Delivery Dashboard',
+    pt: 'Painel de Entrega'
+  },
+  'delivery.orders': {
+    es: 'Pedidos',
+    en: 'Orders',
+    pt: 'Pedidos'
+  },
+  'delivery.map': {
+    es: 'Mapa',
+    en: 'Map',
+    pt: 'Mapa'
+  },
+  'delivery.report': {
+    es: 'Reporte',
+    en: 'Report',
+    pt: 'Relatório'
+  },
+  'delivery.ratings': {
+    es: 'Calificaciones',
+    en: 'Ratings',
+    pt: 'Avaliações'
+  },
+  'delivery.schedule': {
+    es: 'Horario',
+    en: 'Schedule',
+    pt: 'Horário'
+  },
+  'delivery.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'delivery.profile': {
+    es: 'Perfil',
+    en: 'Profile',
+    pt: 'Perfil'
+  },
+
+  // ===== BOTONES COMUNES =====
+  'button.save': {
+    es: 'Guardar',
+    en: 'Save',
+    pt: 'Salvar'
+  },
+  'button.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'button.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'button.delete': {
+    es: 'Eliminar',
+    en: 'Delete',
+    pt: 'Excluir'
+  },
+  'button.add': {
+    es: 'Agregar',
+    en: 'Add',
+    pt: 'Adicionar'
+  },
+  'button.create': {
+    es: 'Crear',
+    en: 'Create',
+    pt: 'Criar'
+  },
+  'button.update': {
+    es: 'Actualizar',
+    en: 'Update',
+    pt: 'Atualizar'
+  },
+  'button.search': {
+    es: 'Buscar',
+    en: 'Search',
+    pt: 'Buscar'
+  },
+  'button.filter': {
+    es: 'Filtrar',
+    en: 'Filter',
+    pt: 'Filtrar'
+  },
+  'button.clear': {
+    es: 'Limpiar',
+    en: 'Clear',
+    pt: 'Limpar'
+  },
+  'button.back': {
+    es: 'Volver',
+    en: 'Back',
+    pt: 'Voltar'
+  },
+  'button.next': {
+    es: 'Siguiente',
+    en: 'Next',
+    pt: 'Próximo'
+  },
+  'button.previous': {
+    es: 'Anterior',
+    en: 'Previous',
+    pt: 'Anterior'
+  },
+  'button.submit': {
+    es: 'Enviar',
+    en: 'Submit',
+    pt: 'Enviar'
+  },
+  'button.confirm': {
+    es: 'Confirmar',
+    en: 'Confirm',
+    pt: 'Confirmar'
+  },
+  'button.approve': {
+    es: 'Aprobar',
+    en: 'Approve',
+    pt: 'Aprovar'
+  },
+  'button.reject': {
+    es: 'Rechazar',
+    en: 'Reject',
+    pt: 'Rejeitar'
+  },
+  'button.enable': {
+    es: 'Habilitar',
+    en: 'Enable',
+    pt: 'Habilitar'
+  },
+  'button.disable': {
+    es: 'Deshabilitar',
+    en: 'Disable',
+    pt: 'Desabilitar'
+  },
+  'button.view': {
+    es: 'Ver',
+    en: 'View',
+    pt: 'Ver'
+  },
+  'button.download': {
+    es: 'Descargar',
+    en: 'Download',
+    pt: 'Baixar'
+  },
+  'button.upload': {
+    es: 'Subir',
+    en: 'Upload',
+    pt: 'Enviar'
+  },
+  'button.export': {
+    es: 'Exportar',
+    en: 'Export',
+    pt: 'Exportar'
+  },
+  'button.import': {
+    es: 'Importar',
+    en: 'Import',
+    pt: 'Importar'
+  },
+
+  // ===== ESTADOS Y MENSAJES =====
+  'status.loading': {
+    es: 'Cargando...',
+    en: 'Loading...',
+    pt: 'Carregando...'
+  },
+  'status.success': {
+    es: 'Éxito',
+    en: 'Success',
+    pt: 'Sucesso'
+  },
+  'status.error': {
+    es: 'Error',
+    en: 'Error',
+    pt: 'Erro'
+  },
+  'status.warning': {
+    es: 'Advertencia',
+    en: 'Warning',
+    pt: 'Aviso'
+  },
+  'status.info': {
+    es: 'Información',
+    en: 'Information',
+    pt: 'Informação'
+  },
+  'status.enabled': {
+    es: 'Habilitado',
+    en: 'Enabled',
+    pt: 'Habilitado'
+  },
+  'status.disabled': {
+    es: 'Deshabilitado',
+    en: 'Disabled',
+    pt: 'Desabilitado'
+  },
+  'status.active': {
+    es: 'Activo',
+    en: 'Active',
+    pt: 'Ativo'
+  },
+  'status.inactive': {
+    es: 'Inactivo',
+    en: 'Inactive',
+    pt: 'Inativo'
+  },
+  'status.pending': {
+    es: 'Pendiente',
+    en: 'Pending',
+    pt: 'Pendente'
+  },
+  'status.completed': {
+    es: 'Completado',
+    en: 'Completed',
+    pt: 'Concluído'
+  },
+  'status.cancelled': {
+    es: 'Cancelado',
+    en: 'Cancelled',
+    pt: 'Cancelado'
+  },
+
+  // ===== MENSAJES DE ÉXITO =====
+  'message.success.saved': {
+    es: 'Guardado exitosamente',
+    en: 'Saved successfully',
+    pt: 'Salvo com sucesso'
+  },
+  'message.success.updated': {
+    es: 'Actualizado exitosamente',
+    en: 'Updated successfully',
+    pt: 'Atualizado com sucesso'
+  },
+  'message.success.deleted': {
+    es: 'Eliminado exitosamente',
+    en: 'Deleted successfully',
+    pt: 'Excluído com sucesso'
+  },
+  'message.success.created': {
+    es: 'Creado exitosamente',
+    en: 'Created successfully',
+    pt: 'Criado com sucesso'
+  },
+  'message.success.uploaded': {
+    es: 'Subido exitosamente',
+    en: 'Uploaded successfully',
+    pt: 'Enviado com sucesso'
+  },
+  'message.success.imported': {
+    es: 'Importado exitosamente',
+    en: 'Imported successfully',
+    pt: 'Importado com sucesso'
+  },
+  'message.success.exported': {
+    es: 'Exportado exitosamente',
+    en: 'Exported successfully',
+    pt: 'Exportado com sucesso'
+  },
+
+  // ===== MENSAJES DE ERROR =====
+  'message.error.general': {
+    es: 'Ha ocurrido un error',
+    en: 'An error has occurred',
+    pt: 'Ocorreu um erro'
+  },
+  'message.error.network': {
+    es: 'Error de conexión',
+    en: 'Connection error',
+    pt: 'Erro de conexão'
+  },
+  'message.error.validation': {
+    es: 'Error de validación',
+    en: 'Validation error',
+    pt: 'Erro de validação'
+  },
+  'message.error.unauthorized': {
+    es: 'No autorizado',
+    en: 'Unauthorized',
+    pt: 'Não autorizado'
+  },
+  'message.error.forbidden': {
+    es: 'Acceso denegado',
+    en: 'Access denied',
+    pt: 'Acesso negado'
+  },
+  'message.error.notFound': {
+    es: 'No encontrado',
+    en: 'Not found',
+    pt: 'Não encontrado'
+  },
+  'message.error.server': {
+    es: 'Error del servidor',
+    en: 'Server error',
+    pt: 'Erro do servidor'
+  },
+
+  // ===== FORMULARIOS =====
+  'form.required': {
+    es: 'Campo requerido',
+    en: 'Required field',
+    pt: 'Campo obrigatório'
+  },
+  'form.invalid': {
+    es: 'Campo inválido',
+    en: 'Invalid field',
+    pt: 'Campo inválido'
+  },
+  'form.email.invalid': {
+    es: 'Email inválido',
+    en: 'Invalid email',
+    pt: 'Email inválido'
+  },
+  'form.password.weak': {
+    es: 'Contraseña débil',
+    en: 'Weak password',
+    pt: 'Senha fraca'
+  },
+  'form.password.mismatch': {
+    es: 'Las contraseñas no coinciden',
+    en: 'Passwords do not match',
+    pt: 'As senhas não coincidem'
+  },
+  'form.file.tooLarge': {
+    es: 'Archivo demasiado grande',
+    en: 'File too large',
+    pt: 'Arquivo muito grande'
+  },
+  'form.file.invalidType': {
+    es: 'Tipo de archivo inválido',
+    en: 'Invalid file type',
+    pt: 'Tipo de arquivo inválido'
+  },
+
+  // ===== CAMPOS DE FORMULARIO =====
+  'field.name': {
+    es: 'Nombre',
+    en: 'Name',
+    pt: 'Nome'
+  },
+  'field.email': {
+    es: 'Email',
+    en: 'Email',
+    pt: 'Email'
+  },
+  'field.password': {
+    es: 'Contraseña',
+    en: 'Password',
+    pt: 'Senha'
+  },
+  'field.confirmPassword': {
+    es: 'Confirmar Contraseña',
+    en: 'Confirm Password',
+    pt: 'Confirmar Senha'
+  },
+  'field.phone': {
+    es: 'Teléfono',
+    en: 'Phone',
+    pt: 'Telefone'
+  },
+  'field.address': {
+    es: 'Dirección',
+    en: 'Address',
+    pt: 'Endereço'
+  },
+  'field.city': {
+    es: 'Ciudad',
+    en: 'City',
+    pt: 'Cidade'
+  },
+  'field.state': {
+    es: 'Estado',
+    en: 'State',
+    pt: 'Estado'
+  },
+  'field.country': {
+    es: 'País',
+    en: 'Country',
+    pt: 'País'
+  },
+  'field.zipCode': {
+    es: 'Código Postal',
+    en: 'Zip Code',
+    pt: 'Código Postal'
+  },
+  'field.description': {
+    es: 'Descripción',
+    en: 'Description',
+    pt: 'Descrição'
+  },
+  'field.price': {
+    es: 'Precio',
+    en: 'Price',
+    pt: 'Preço'
+  },
+  'field.quantity': {
+    es: 'Cantidad',
+    en: 'Quantity',
+    pt: 'Quantidade'
+  },
+  'field.category': {
+    es: 'Categoría',
+    en: 'Category',
+    pt: 'Categoria'
+  },
+  'field.subcategory': {
+    es: 'Subcategoría',
+    en: 'Subcategory',
+    pt: 'Subcategoria'
+  },
+  'field.brand': {
+    es: 'Marca',
+    en: 'Brand',
+    pt: 'Marca'
+  },
+  'field.image': {
+    es: 'Imagen',
+    en: 'Image',
+    pt: 'Imagem'
+  },
+  'field.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'field.date': {
+    es: 'Fecha',
+    en: 'Date',
+    pt: 'Data'
+  },
+  'field.time': {
+    es: 'Hora',
+    en: 'Time',
+    pt: 'Hora'
+  },
+  'field.notes': {
+    es: 'Notas',
+    en: 'Notes',
+    pt: 'Notas'
+  },
+
+  // ===== TABLAS Y LISTAS =====
+  'table.noData': {
+    es: 'No hay datos disponibles',
+    en: 'No data available',
+    pt: 'Nenhum dado disponível'
+  },
+  'table.loading': {
+    es: 'Cargando datos...',
+    en: 'Loading data...',
+    pt: 'Carregando dados...'
+  },
+  'table.actions': {
+    es: 'Acciones',
+    en: 'Actions',
+    pt: 'Ações'
+  },
+  'table.selectAll': {
+    es: 'Seleccionar Todo',
+    en: 'Select All',
+    pt: 'Selecionar Tudo'
+  },
+  'table.selected': {
+    es: 'seleccionado(s)',
+    en: 'selected',
+    pt: 'selecionado(s)'
+  },
+  'table.rowsPerPage': {
+    es: 'Filas por página',
+    en: 'Rows per page',
+    pt: 'Linhas por página'
+  },
+  'table.of': {
+    es: 'de',
+    en: 'of',
+    pt: 'de'
+  },
+  'table.previous': {
+    es: 'Anterior',
+    en: 'Previous',
+    pt: 'Anterior'
+  },
+  'table.next': {
+    es: 'Siguiente',
+    en: 'Next',
+    pt: 'Próximo'
+  },
+
+  // ===== MODALES Y DIÁLOGOS =====
+  'modal.confirm': {
+    es: 'Confirmar',
+    en: 'Confirm',
+    pt: 'Confirmar'
+  },
+  'modal.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'modal.close': {
+    es: 'Cerrar',
+    en: 'Close',
+    pt: 'Fechar'
+  },
+  'modal.delete.title': {
+    es: 'Confirmar Eliminación',
+    en: 'Confirm Deletion',
+    pt: 'Confirmar Exclusão'
+  },
+  'modal.delete.message': {
+    es: '¿Está seguro de que desea eliminar este elemento? Esta acción no se puede deshacer.',
+    en: 'Are you sure you want to delete this item? This action cannot be undone.',
+    pt: 'Tem certeza de que deseja excluir este item? Esta ação não pode ser desfeita.'
+  },
+  'modal.unsaved.title': {
+    es: 'Cambios Sin Guardar',
+    en: 'Unsaved Changes',
+    pt: 'Alterações Não Salvas'
+  },
+  'modal.unsaved.message': {
+    es: 'Tiene cambios sin guardar. ¿Desea salir sin guardar?',
+    en: 'You have unsaved changes. Do you want to leave without saving?',
+    pt: 'Você tem alterações não salvas. Deseja sair sem salvar?'
+  },
+
+  // ===== CONFIGURACIÓN =====
+  'configuration.title': {
+    es: 'Configuración',
+    en: 'Configuration',
+    pt: 'Configuração'
+  },
+  'configuration.subtitle': {
+    es: 'Personaliza tu experiencia',
+    en: 'Customize your experience',
+    pt: 'Personalize sua experiência'
+  },
+  'configuration.loading': {
+    es: 'Cargando configuración...',
+    en: 'Loading configuration...',
+    pt: 'Carregando configuração...'
+  },
+
+  // Apariencia
+  'appearance.title': {
+    es: 'Apariencia',
+    en: 'Appearance',
+    pt: 'Aparência'
+  },
+  'appearance.theme': {
+    es: 'Tema',
+    en: 'Theme',
+    pt: 'Tema'
+  },
+  'appearance.theme.description': {
+    es: 'Elige entre tema claro u oscuro',
+    en: 'Choose between light or dark theme',
+    pt: 'Escolha entre tema claro ou escuro'
+  },
+  'appearance.light': {
+    es: 'Claro',
+    en: 'Light',
+    pt: 'Claro'
+  },
+  'appearance.dark': {
+    es: 'Oscuro',
+    en: 'Dark',
+    pt: 'Escuro'
+  },
+
+  // Idioma
+  'language.title': {
+    es: 'Idioma',
+    en: 'Language',
+    pt: 'Idioma'
+  },
+  'language.description': {
+    es: 'Selecciona tu idioma preferido',
+    en: 'Select your preferred language',
+    pt: 'Selecione seu idioma preferido'
+  },
+  'language.es': {
+    es: 'Español',
+    en: 'Spanish',
+    pt: 'Espanhol'
+  },
+  'language.en': {
+    es: 'Inglés',
+    en: 'English',
+    pt: 'Inglês'
+  },
+  'language.pt': {
+    es: 'Portugués',
+    en: 'Portuguese',
+    pt: 'Português'
+  },
+
+  // Notificaciones
+  'notifications.title': {
+    es: 'Notificaciones',
+    en: 'Notifications',
+    pt: 'Notificações'
+  },
+  'notifications.email': {
+    es: 'Notificaciones por Email',
+    en: 'Email Notifications',
+    pt: 'Notificações por Email'
+  },
+  'notifications.email.description': {
+    es: 'Recibe notificaciones importantes por email',
+    en: 'Receive important notifications by email',
+    pt: 'Receba notificações importantes por email'
+  },
+  'notifications.push': {
+    es: 'Notificaciones Push',
+    en: 'Push Notifications',
+    pt: 'Notificações Push'
+  },
+  'notifications.push.description': {
+    es: 'Notificaciones en tiempo real',
+    en: 'Real-time notifications',
+    pt: 'Notificações em tempo real'
+  },
+  'notifications.sms': {
+    es: 'Notificaciones SMS',
+    en: 'SMS Notifications',
+    pt: 'Notificações SMS'
+  },
+  'notifications.sms.description': {
+    es: 'Mensajes de texto importantes',
+    en: 'Important text messages',
+    pt: 'Mensagens de texto importantes'
+  },
+  'notifications.push.setup': {
+    es: 'Configurar Notificaciones Push',
+    en: 'Setup Push Notifications',
+    pt: 'Configurar Notificações Push'
+  },
+  'notifications.push.setup.description': {
+    es: 'Habilita las notificaciones push para recibir alertas en tiempo real',
+    en: 'Enable push notifications to receive real-time alerts',
+    pt: 'Ative as notificações push para receber alertas em tempo real'
+  },
+  'notifications.push.permission.required': {
+    es: 'Se requieren permisos de notificación',
+    en: 'Notification permissions required',
+    pt: 'Permissões de notificação necessárias'
+  },
+  'notifications.push.permission.denied': {
+    es: 'Permisos de notificación denegados',
+    en: 'Notification permissions denied',
+    pt: 'Permissões de notificação negadas'
+  },
+  'notifications.push.subscribed': {
+    es: 'Suscrito a notificaciones push',
+    en: 'Subscribed to push notifications',
+    pt: 'Inscrito em notificações push'
+  },
+  'notifications.push.unsubscribed': {
+    es: 'Desuscrito de notificaciones push',
+    en: 'Unsubscribed from push notifications',
+    pt: 'Cancelado inscrição em notificações push'
+  },
+
+  // Privacidad
+  'privacy.title': {
+    es: 'Privacidad',
+    en: 'Privacy',
+    pt: 'Privacidade'
+  },
+  'privacy.profile.visibility': {
+    es: 'Visibilidad del Perfil',
+    en: 'Profile Visibility',
+    pt: 'Visibilidade do Perfil'
+  },
+  'privacy.profile.visibility.description': {
+    es: 'Quién puede ver tu perfil',
+    en: 'Who can see your profile',
+    pt: 'Quem pode ver seu perfil'
+  },
+  'privacy.profile.public': {
+    es: 'Público',
+    en: 'Public',
+    pt: 'Público'
+  },
+  'privacy.profile.friends': {
+    es: 'Solo amigos',
+    en: 'Friends only',
+    pt: 'Apenas amigos'
+  },
+  'privacy.profile.private': {
+    es: 'Privado',
+    en: 'Private',
+    pt: 'Privado'
+  },
+  'privacy.show.email': {
+    es: 'Mostrar Email',
+    en: 'Show Email',
+    pt: 'Mostrar Email'
+  },
+  'privacy.show.email.description': {
+    es: 'Permitir que otros vean tu email',
+    en: 'Allow others to see your email',
+    pt: 'Permitir que outros vejam seu email'
+  },
+  'privacy.show.phone': {
+    es: 'Mostrar Teléfono',
+    en: 'Show Phone',
+    pt: 'Mostrar Telefone'
+  },
+  'privacy.show.phone.description': {
+    es: 'Permitir que otros vean tu teléfono',
+    en: 'Allow others to see your phone',
+    pt: 'Permitir que outros vejam seu telefone'
+  },
+
+  // Actividad
+  'activity.title': {
+    es: 'Historial de Actividades',
+    en: 'Activity History',
+    pt: 'Histórico de Atividades'
+  },
+  'activity.show': {
+    es: 'Ver historial',
+    en: 'Show history',
+    pt: 'Ver histórico'
+  },
+  'activity.hide': {
+    es: 'Ocultar',
+    en: 'Hide',
+    pt: 'Ocultar'
+  },
+
+  // ===== MENSAJES DE ÉXITO Y ERROR =====
+  'message.success': {
+    es: 'Configuración actualizada correctamente',
+    en: 'Configuration updated successfully',
+    pt: 'Configuração atualizada com sucesso'
+  },
+  'message.error': {
+    es: 'Error al actualizar la configuración',
+    en: 'Error updating configuration',
+    pt: 'Erro ao atualizar configuração'
+  },
+  'message.notifications.updated': {
+    es: 'Configuraciones de notificaciones actualizadas correctamente',
+    en: 'Notification settings updated successfully',
+    pt: 'Configurações de notificação atualizadas com sucesso'
+  },
+  'message.privacy.updated': {
+    es: 'Configuraciones de privacidad actualizadas correctamente',
+    en: 'Privacy settings updated successfully',
+    pt: 'Configurações de privacidade atualizadas com sucesso'
+  },
+  'message.preferences.updated': {
+    es: 'Preferencias actualizadas correctamente',
+    en: 'Preferences updated successfully',
+    pt: 'Preferências atualizadas com sucesso'
+  },
+
+  // ===== ANALYTICS DE PUBLICIDAD =====
+  'analytics.title': {
+    es: 'Analytics de Publicidad',
+    en: 'Advertisement Analytics',
+    pt: 'Analytics de Publicidade'
+  },
+  'analytics.period.hourly': {
+    es: 'Por Hora',
+    en: 'Hourly',
+    pt: 'Por Hora'
+  },
+  'analytics.period.daily': {
+    es: 'Por Día',
+    en: 'Daily',
+    pt: 'Por Dia'
+  },
+  'analytics.period.weekly': {
+    es: 'Por Semana',
+    en: 'Weekly',
+    pt: 'Por Semana'
+  },
+  'analytics.metrics.impressions': {
+    es: 'Impresiones',
+    en: 'Impressions',
+    pt: 'Impressões'
+  },
+  'analytics.metrics.clicks': {
+    es: 'Clicks',
+    en: 'Clicks',
+    pt: 'Cliques'
+  },
+  'analytics.metrics.ctr': {
+    es: 'CTR',
+    en: 'CTR',
+    pt: 'CTR'
+  },
+  'analytics.metrics.revenue': {
+    es: 'Ingresos',
+    en: 'Revenue',
+    pt: 'Receita'
+  },
+  'analytics.metrics.conversions': {
+    es: 'Conversiones',
+    en: 'Conversions',
+    pt: 'Conversões'
+  },
+  'analytics.metrics.cpm': {
+    es: 'CPM (Costo por 1000 impresiones)',
+    en: 'CPM (Cost per 1000 impressions)',
+    pt: 'CPM (Custo por 1000 impressões)'
+  },
+  'analytics.metrics.cpc': {
+    es: 'CPC (Costo por click)',
+    en: 'CPC (Cost per click)',
+    pt: 'CPC (Custo por clique)'
+  },
+  'analytics.comparison.vsPrevious': {
+    es: 'vs período anterior',
+    en: 'vs previous period',
+    pt: 'vs período anterior'
+  },
+  'analytics.sections.temporalPerformance': {
+    es: 'Rendimiento Temporal',
+    en: 'Temporal Performance',
+    pt: 'Desempenho Temporal'
+  },
+  'analytics.sections.devices': {
+    es: 'Dispositivos',
+    en: 'Devices',
+    pt: 'Dispositivos'
+  },
+  'analytics.sections.locationPerformance': {
+    es: 'Rendimiento por Ubicación',
+    en: 'Location Performance',
+    pt: 'Desempenho por Localização'
+  },
+  'analytics.sections.audienceSegments': {
+    es: 'Segmentos de Audiencia',
+    en: 'Audience Segments',
+    pt: 'Segmentos de Audiência'
+  },
+  'analytics.sections.additionalMetrics': {
+    es: 'Métricas Adicionales',
+    en: 'Additional Metrics',
+    pt: 'Métricas Adicionais'
+  },
+  'analytics.devices.android': {
+    es: 'Android',
+    en: 'Android',
+    pt: 'Android'
+  },
+  'analytics.devices.ios': {
+    es: 'iOS',
+    en: 'iOS',
+    pt: 'iOS'
+  },
+  'analytics.devices.web': {
+    es: 'Web',
+    en: 'Web',
+    pt: 'Web'
+  },
+  'analytics.audience.newUsers': {
+    es: 'Nuevos usuarios',
+    en: 'New users',
+    pt: 'Novos usuários'
+  },
+  'analytics.audience.recurringUsers': {
+    es: 'Usuarios recurrentes',
+    en: 'Recurring users',
+    pt: 'Usuários recorrentes'
+  },
+  'analytics.audience.premiumUsers': {
+    es: 'Usuarios premium',
+    en: 'Premium users',
+    pt: 'Usuários premium'
+  },
+  'analytics.locations.others': {
+    es: 'Otros',
+    en: 'Others',
+    pt: 'Outros'
+  },
+  'analytics.noData': {
+    es: 'No hay datos de analytics disponibles',
+    en: 'No analytics data available',
+    pt: 'Nenhum dado de analytics disponível'
+  },
+  'analytics.units.impressions': {
+    es: 'imp.',
+    en: 'imp.',
+    pt: 'imp.'
+  },
+  'analytics.units.clicks': {
+    es: 'clicks',
+    en: 'clicks',
+    pt: 'cliques'
+  },
+
+  // ===== HEADER Y NAVEGACIÓN =====
+  'common.search': {
+    es: 'Buscar repuestos...',
+    en: 'Search parts...',
+    pt: 'Buscar peças...'
+  },
+  'common.profile': {
+    es: 'Perfil',
+    en: 'Profile',
+    pt: 'Perfil'
+  },
+  'common.security': {
+    es: 'Seguridad',
+    en: 'Security',
+    pt: 'Segurança'
+  },
+  'common.settings': {
+    es: 'Configuración',
+    en: 'Settings',
+    pt: 'Configurações'
+  },
+  'common.logout': {
+    es: 'Cerrar Sesión',
+    en: 'Logout',
+    pt: 'Sair'
+  },
+  'common.login': {
+    es: 'Iniciar Sesión',
+    en: 'Login',
+    pt: 'Entrar'
+  },
+  'common.register': {
+    es: 'Registrarse',
+    en: 'Register',
+    pt: 'Registrar'
+  },
+  'common.nearbyProducts': {
+    es: 'Repuestos Cercanos',
+    en: 'Nearby Parts',
+    pt: 'Peças Próximas'
+  },
+  'common.categories': {
+    es: 'Categorías',
+    en: 'Categories',
+    pt: 'Categorias'
+  },
+  'common.home': {
+    es: 'Inicio',
+    en: 'Home',
+    pt: 'Início'
+  },
+  'common.user': {
+    es: 'Usuario',
+    en: 'User',
+    pt: 'Usuário'
+  },
+  'common.hide': {
+    es: 'Ocultar',
+    en: 'Hide',
+    pt: 'Ocultar'
+  },
+
+  // ===== FOOTER =====
+  'footer.tagline': {
+    es: 'El repuesto que buscas, al instante. Tu tienda de confianza para repuestos de vehículos con la mejor calidad y servicio.',
+    en: 'The part you need, instantly. Your trusted store for vehicle parts with the best quality and service.',
+    pt: 'A peça que você precisa, instantaneamente. Sua loja de confiança para peças de veículos com a melhor qualidade e serviço.'
+  },
+  'footer.quickLinks': {
+    es: 'Enlaces Rápidos',
+    en: 'Quick Links',
+    pt: 'Links Rápidos'
+  },
+  'footer.autoParts': {
+    es: 'Repuestos Autos',
+    en: 'Auto Parts',
+    pt: 'Peças de Carros'
+  },
+  'footer.motorcycleParts': {
+    es: 'Repuestos Motos',
+    en: 'Motorcycle Parts',
+    pt: 'Peças de Motos'
+  },
+  'footer.truckParts': {
+    es: 'Repuestos Camiones',
+    en: 'Truck Parts',
+    pt: 'Peças de Caminhões'
+  },
+  'footer.offers': {
+    es: 'Ofertas',
+    en: 'Offers',
+    pt: 'Ofertas'
+  },
+  'footer.contact': {
+    es: 'Contacto',
+    en: 'Contact',
+    pt: 'Contato'
+  },
+  'footer.copyright': {
+    es: '© 2024 PiezasYA. Todos los derechos reservados.',
+    en: '© 2024 PiezasYA. All rights reserved.',
+    pt: '© 2024 PiezasYA. Todos os direitos reservados.'
+  },
+  'footer.privacy': {
+    es: 'Política de Privacidad',
+    en: 'Privacy Policy',
+    pt: 'Política de Privacidade'
+  },
+  'footer.terms': {
+    es: 'Términos de Servicio',
+    en: 'Terms of Service',
+    pt: 'Termos de Serviço'
+  },
+  'footer.shipping': {
+    es: 'Política de Envío',
+    en: 'Shipping Policy',
+    pt: 'Política de Envio'
+  },
+
+  // ===== SIDEBAR Y NAVEGACIÓN =====
+  'sidebar.roles.admin': {
+    es: 'Administrador',
+    en: 'Administrator',
+    pt: 'Administrador'
+  },
+  'sidebar.roles.storeManager': {
+    es: 'Gestor de Tienda',
+    en: 'Store Manager',
+    pt: 'Gerente de Loja'
+  },
+  'sidebar.roles.delivery': {
+    es: 'Delivery',
+    en: 'Delivery',
+    pt: 'Entrega'
+  },
+  'sidebar.roles.client': {
+    es: 'Cliente',
+    en: 'Client',
+    pt: 'Cliente'
+  },
+  'sidebar.admin.title': {
+    es: 'Panel de Administración',
+    en: 'Administration Panel',
+    pt: 'Painel de Administração'
+  },
+  'sidebar.admin.dashboard': {
+    es: 'Dashboard',
+    en: 'Dashboard',
+    pt: 'Painel'
+  },
+  'sidebar.admin.users': {
+    es: 'Usuarios',
+    en: 'Users',
+    pt: 'Usuários'
+  },
+  'sidebar.admin.stores': {
+    es: 'Tiendas',
+    en: 'Stores',
+    pt: 'Lojas'
+  },
+  'sidebar.admin.subcategories': {
+    es: 'Subcategorías',
+    en: 'Subcategories',
+    pt: 'Subcategorias'
+  },
+  'sidebar.admin.advertisements': {
+    es: 'Publicidad',
+    en: 'Advertisements',
+    pt: 'Publicidade'
+  },
+  'sidebar.admin.products': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'sidebar.admin.categories': {
+    es: 'Categorías',
+    en: 'Categories',
+    pt: 'Categorias'
+  },
+  'sidebar.admin.promotions': {
+    es: 'Promociones',
+    en: 'Promotions',
+    pt: 'Promoções'
+  },
+  'sidebar.admin.sales': {
+    es: 'Ventas',
+    en: 'Sales',
+    pt: 'Vendas'
+  },
+  'sidebar.admin.loyalty': {
+    es: 'Fidelización',
+    en: 'Loyalty',
+    pt: 'Fidelização'
+  },
+  'sidebar.admin.analytics': {
+    es: 'Analytics',
+    en: 'Analytics',
+    pt: 'Analytics'
+  },
+  'sidebar.admin.registrationCodes': {
+    es: 'Códigos de Registro',
+    en: 'Registration Codes',
+    pt: 'Códigos de Registro'
+  },
+  'sidebar.admin.searchConfig': {
+    es: 'Configuración de Búsqueda',
+    en: 'Search Configuration',
+    pt: 'Configuração de Busca'
+  },
+  'sidebar.admin.generateProducts': {
+    es: 'Generar Productos',
+    en: 'Generate Products',
+    pt: 'Gerar Produtos'
+  },
+  'sidebar.admin.globalSettings': {
+    es: 'Configuración Global',
+    en: 'Global Settings',
+    pt: 'Configurações Globais'
+  },
+  'sidebar.storeManager.dashboard': {
+    es: 'Dashboard',
+    en: 'Dashboard',
+    pt: 'Painel'
+  },
+  'sidebar.storeManager.products': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'sidebar.storeManager.promotions': {
+    es: 'Promociones',
+    en: 'Promotions',
+    pt: 'Promoções'
+  },
+  'sidebar.storeManager.sales': {
+    es: 'Ventas',
+    en: 'Sales',
+    pt: 'Vendas'
+  },
+  'sidebar.storeManager.orders': {
+    es: 'Pedidos',
+    en: 'Orders',
+    pt: 'Pedidos'
+  },
+  'sidebar.storeManager.delivery': {
+    es: 'Delivery',
+    en: 'Delivery',
+    pt: 'Entrega'
+  },
+  'sidebar.storeManager.analytics': {
+    es: 'Analytics',
+    en: 'Analytics',
+    pt: 'Analytics'
+  },
+  'sidebar.storeManager.messages': {
+    es: 'Mensajes',
+    en: 'Messages',
+    pt: 'Mensagens'
+  },
+  'sidebar.storeManager.reviews': {
+    es: 'Reseñas',
+    en: 'Reviews',
+    pt: 'Avaliações'
+  },
+  'sidebar.storeManager.settings': {
+    es: 'Configuración',
+    en: 'Settings',
+    pt: 'Configurações'
+  },
+  'sidebar.delivery.dashboard': {
+    es: 'Dashboard',
+    en: 'Dashboard',
+    pt: 'Painel'
+  },
+  'sidebar.delivery.assignedOrders': {
+    es: 'Pedidos Asignados',
+    en: 'Assigned Orders',
+    pt: 'Pedidos Atribuídos'
+  },
+  'sidebar.delivery.routeMap': {
+    es: 'Mapa de Rutas',
+    en: 'Route Map',
+    pt: 'Mapa de Rotas'
+  },
+  'sidebar.delivery.deliveryReport': {
+    es: 'Reportar Entrega',
+    en: 'Delivery Report',
+    pt: 'Relatório de Entrega'
+  },
+  'sidebar.delivery.ratings': {
+    es: 'Calificaciones',
+    en: 'Ratings',
+    pt: 'Avaliações'
+  },
+  'sidebar.delivery.workSchedule': {
+    es: 'Horario de Trabajo',
+    en: 'Work Schedule',
+    pt: 'Horário de Trabalho'
+  },
+  'sidebar.delivery.availabilityStatus': {
+    es: 'Estado de Disponibilidad',
+    en: 'Availability Status',
+    pt: 'Status de Disponibilidade'
+  },
+  'sidebar.delivery.profile': {
+    es: 'Perfil',
+    en: 'Profile',
+    pt: 'Perfil'
+  },
+  'sidebar.client.home': {
+    es: 'Inicio',
+    en: 'Home',
+    pt: 'Início'
+  },
+  'sidebar.client.products': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'sidebar.client.categories': {
+    es: 'Categorías',
+    en: 'Categories',
+    pt: 'Categorias'
+  },
+  'sidebar.client.cart': {
+    es: 'Carrito',
+    en: 'Cart',
+    pt: 'Carrinho'
+  },
+  'sidebar.client.favorites': {
+    es: 'Favoritos',
+    en: 'Favorites',
+    pt: 'Favoritos'
+  },
+  'sidebar.client.loyalty': {
+    es: 'Fidelización',
+    en: 'Loyalty',
+    pt: 'Fidelização'
+  },
+  'sidebar.client.myOrders': {
+    es: 'Mis Pedidos',
+    en: 'My Orders',
+    pt: 'Meus Pedidos'
+  },
+  'sidebar.client.profile': {
+    es: 'Perfil',
+    en: 'Profile',
+    pt: 'Perfil'
+  },
+  'sidebar.client.security': {
+    es: 'Seguridad',
+    en: 'Security',
+    pt: 'Segurança'
+  },
+  'sidebar.client.notifications': {
+    es: 'Notificaciones',
+    en: 'Notifications',
+    pt: 'Notificações'
+  },
+
+  // ===== ADMIN DASHBOARD =====
+  'adminDashboard.title': {
+    es: 'Panel de Administración',
+    en: 'Administration Panel',
+    pt: 'Painel de Administração'
+  },
+  'adminDashboard.welcome': {
+    es: 'Bienvenido',
+    en: 'Welcome',
+    pt: 'Bem-vindo'
+  },
+  'adminDashboard.stats.users': {
+    es: 'Usuarios',
+    en: 'Users',
+    pt: 'Usuários'
+  },
+  'adminDashboard.stats.products': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'adminDashboard.stats.sales': {
+    es: 'Ventas',
+    en: 'Sales',
+    pt: 'Vendas'
+  },
+  'adminDashboard.stats.orders': {
+    es: 'Órdenes',
+    en: 'Orders',
+    pt: 'Pedidos'
+  },
+  'adminDashboard.quickActions.title': {
+    es: 'Acciones Rápidas',
+    en: 'Quick Actions',
+    pt: 'Ações Rápidas'
+  },
+  'adminDashboard.quickActions.manageUsers': {
+    es: 'Gestionar Usuarios',
+    en: 'Manage Users',
+    pt: 'Gerenciar Usuários'
+  },
+  'adminDashboard.quickActions.manageProducts': {
+    es: 'Gestionar Productos',
+    en: 'Manage Products',
+    pt: 'Gerenciar Produtos'
+  },
+  'adminDashboard.quickActions.settings': {
+    es: 'Configuración',
+    en: 'Settings',
+    pt: 'Configurações'
+  },
+  'adminDashboard.recentActivity.title': {
+    es: 'Actividad Reciente',
+    en: 'Recent Activity',
+    pt: 'Atividade Recente'
+  },
+  'adminDashboard.recentActivity.newUser': {
+    es: 'Nuevo usuario registrado',
+    en: 'New user registered',
+    pt: 'Novo usuário registrado'
+  },
+  'adminDashboard.recentActivity.productAdded': {
+    es: 'Producto agregado',
+    en: 'Product added',
+    pt: 'Produto adicionado'
+  },
+  'adminDashboard.recentActivity.orderCompleted': {
+    es: 'Orden completada',
+    en: 'Order completed',
+    pt: 'Pedido concluído'
+  },
+  'adminDashboard.recentActivity.ago': {
+    es: 'Hace',
+    en: 'Ago',
+    pt: 'Atrás'
+  },
+  'adminDashboard.recentActivity.minutes': {
+    es: 'minutos',
+    en: 'minutes',
+    pt: 'minutos'
+  },
+  'adminDashboard.recentActivity.hour': {
+    es: 'hora',
+    en: 'hour',
+    pt: 'hora'
+  },
+  'adminDashboard.stats.title': {
+    es: 'Estadísticas',
+    en: 'Statistics',
+    pt: 'Estatísticas'
+  },
+  'adminDashboard.stats.monthlySales': {
+    es: 'Ventas del mes',
+    en: 'Monthly sales',
+    pt: 'Vendas do mês'
+  },
+  'adminDashboard.stats.activeUsers': {
+    es: 'Usuarios activos',
+    en: 'Active users',
+    pt: 'Usuários ativos'
+  },
+  'adminDashboard.stats.productsSold': {
+    es: 'Productos vendidos',
+    en: 'Products sold',
+    pt: 'Produtos vendidos'
+  },
+
+  // ===== HOME PAGE =====
+  'home.hero.tagline': {
+    es: 'El repuesto que buscas, al instante',
+    en: 'The part you need, instantly',
+    pt: 'A peça que você precisa, instantaneamente'
+  },
+  'home.search.placeholder': {
+    es: 'Buscar repuestos, marcas, códigos...',
+    en: 'Search parts, brands, codes...',
+    pt: 'Buscar peças, marcas, códigos...'
+  },
+  'home.actions.viewCategories': {
+    es: 'Ver Categorías',
+    en: 'View Categories',
+    pt: 'Ver Categorias'
+  },
+  'home.actions.specialOffers': {
+    es: 'Ofertas Especiales',
+    en: 'Special Offers',
+    pt: 'Ofertas Especiais'
+  },
+  'home.features.title': {
+    es: '¿Por qué elegir PiezasYA?',
+    en: 'Why choose PiezasYA?',
+    pt: 'Por que escolher PiezasYA?'
+  },
+  'home.features.subtitle': {
+    es: 'La mejor plataforma para encontrar repuestos de calidad',
+    en: 'The best platform to find quality parts',
+    pt: 'A melhor plataforma para encontrar peças de qualidade'
+  },
+  'home.features.catalog.title': {
+    es: 'Amplio Catálogo',
+    en: 'Wide Catalog',
+    pt: 'Amplo Catálogo'
+  },
+  'home.features.catalog.description': {
+    es: 'Más de 10,000 productos de las mejores marcas',
+    en: 'More than 10,000 products from the best brands',
+    pt: 'Mais de 10.000 produtos das melhores marcas'
+  },
+  'home.features.shipping.title': {
+    es: 'Envío Rápido',
+    en: 'Fast Shipping',
+    pt: 'Envio Rápido'
+  },
+  'home.features.shipping.description': {
+    es: 'Entrega en 24-48 horas en toda Colombia',
+    en: 'Delivery in 24-48 hours throughout Colombia',
+    pt: 'Entrega em 24-48 horas em toda a Colômbia'
+  },
+  'home.features.warranty.title': {
+    es: 'Garantía Total',
+    en: 'Total Warranty',
+    pt: 'Garantia Total'
+  },
+  'home.features.warranty.description': {
+    es: 'Todos nuestros productos tienen garantía',
+    en: 'All our products have warranty',
+    pt: 'Todos os nossos produtos têm garantia'
+  },
+  'home.cta.title': {
+    es: '¿Listo para encontrar tu repuesto?',
+    en: 'Ready to find your part?',
+    pt: 'Pronto para encontrar sua peça?'
+  },
+  'home.cta.subtitle': {
+    es: 'Únete a miles de clientes satisfechos',
+    en: 'Join thousands of satisfied customers',
+    pt: 'Junte-se a milhares de clientes satisfeitos'
+  },
+  'home.cta.exploreCategories': {
+    es: 'Explorar Categorías',
+    en: 'Explore Categories',
+    pt: 'Explorar Categorias'
+  },
+
+  // ===== ADMIN USERS =====
+  'adminUsers.title': {
+    es: 'Gestión de Usuarios',
+    en: 'User Management',
+    pt: 'Gerenciamento de Usuários'
+  },
+  'adminUsers.subtitle': {
+    es: 'Administra los usuarios del sistema',
+    en: 'Manage system users',
+    pt: 'Gerencie os usuários do sistema'
+  },
+  'adminUsers.addUser': {
+    es: 'Agregar Usuario',
+    en: 'Add User',
+    pt: 'Adicionar Usuário'
+  },
+  'adminUsers.searchPlaceholder': {
+    es: 'Buscar usuarios...',
+    en: 'Search users...',
+    pt: 'Buscar usuários...'
+  },
+  'adminUsers.filters.allRoles': {
+    es: 'Todos los roles',
+    en: 'All roles',
+    pt: 'Todos os papéis'
+  },
+  'adminUsers.filters.allStatuses': {
+    es: 'Todos los estados',
+    en: 'All statuses',
+    pt: 'Todos os status'
+  },
+  'adminUsers.filters.active': {
+    es: 'Activo',
+    en: 'Active',
+    pt: 'Ativo'
+  },
+  'adminUsers.filters.inactive': {
+    es: 'Inactivo',
+    en: 'Inactive',
+    pt: 'Inativo'
+  },
+  'adminUsers.filters.pending': {
+    es: 'Pendiente',
+    en: 'Pending',
+    pt: 'Pendente'
+  },
+  'adminUsers.table.title': {
+    es: 'Usuarios',
+    en: 'Users',
+    pt: 'Usuários'
+  },
+  'adminUsers.table.headers.user': {
+    es: 'Usuario',
+    en: 'User',
+    pt: 'Usuário'
+  },
+  'adminUsers.table.headers.email': {
+    es: 'Email',
+    en: 'Email',
+    pt: 'Email'
+  },
+  'adminUsers.table.headers.role': {
+    es: 'Rol',
+    en: 'Role',
+    pt: 'Papel'
+  },
+  'adminUsers.table.headers.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'adminUsers.table.headers.registrationDate': {
+    es: 'Fecha de Registro',
+    en: 'Registration Date',
+    pt: 'Data de Registro'
+  },
+  'adminUsers.table.headers.actions': {
+    es: 'Acciones',
+    en: 'Actions',
+    pt: 'Ações'
+  },
+  'adminUsers.roles.admin': {
+    es: 'Administrador',
+    en: 'Administrator',
+    pt: 'Administrador'
+  },
+  'adminUsers.roles.client': {
+    es: 'Cliente',
+    en: 'Client',
+    pt: 'Cliente'
+  },
+  'adminUsers.roles.delivery': {
+    es: 'Repartidor',
+    en: 'Delivery',
+    pt: 'Entregador'
+  },
+  'adminUsers.roles.storeManager': {
+    es: 'Gestor de Tienda',
+    en: 'Store Manager',
+    pt: 'Gerente de Loja'
+  },
+  'adminUsers.status.active': {
+    es: 'Activo',
+    en: 'Active',
+    pt: 'Ativo'
+  },
+  'adminUsers.status.inactive': {
+    es: 'Inactivo',
+    en: 'Inactive',
+    pt: 'Inativo'
+  },
+  'adminUsers.status.pending': {
+    es: 'Pendiente',
+    en: 'Pending',
+    pt: 'Pendente'
+  },
+  'adminUsers.actions.view': {
+    es: 'Ver detalles',
+    en: 'View details',
+    pt: 'Ver detalhes'
+  },
+  'adminUsers.actions.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'adminUsers.actions.resetPassword': {
+    es: 'Resetear contraseña',
+    en: 'Reset password',
+    pt: 'Redefinir senha'
+  },
+  'adminUsers.actions.deactivate': {
+    es: 'Desactivar',
+    en: 'Deactivate',
+    pt: 'Desativar'
+  },
+  'adminUsers.modals.create.title': {
+    es: 'Crear Usuario',
+    en: 'Create User',
+    pt: 'Criar Usuário'
+  },
+  'adminUsers.modals.edit.title': {
+    es: 'Editar Usuario',
+    en: 'Edit User',
+    pt: 'Editar Usuário'
+  },
+  'adminUsers.modals.view.title': {
+    es: 'Detalles del Usuario',
+    en: 'User Details',
+    pt: 'Detalhes do Usuário'
+  },
+  'adminUsers.form.fullName': {
+    es: 'Nombre completo',
+    en: 'Full name',
+    pt: 'Nome completo'
+  },
+  'adminUsers.form.email': {
+    es: 'Email',
+    en: 'Email',
+    pt: 'Email'
+  },
+  'adminUsers.form.phone': {
+    es: 'Teléfono',
+    en: 'Phone',
+    pt: 'Telefone'
+  },
+  'adminUsers.form.role': {
+    es: 'Rol',
+    en: 'Role',
+    pt: 'Papel'
+  },
+  'adminUsers.form.roleNote': {
+    es: 'Los usuarios con roles especiales se crean mediante códigos de referidos',
+    en: 'Users with special roles are created through referral codes',
+    pt: 'Usuários com papéis especiais são criados através de códigos de referência'
+  },
+  'adminUsers.form.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'adminUsers.form.create': {
+    es: 'Crear Usuario',
+    en: 'Create User',
+    pt: 'Criar Usuário'
+  },
+  'adminUsers.form.save': {
+    es: 'Guardar Cambios',
+    en: 'Save Changes',
+    pt: 'Salvar Alterações'
+  },
+  'adminUsers.form.close': {
+    es: 'Cerrar',
+    en: 'Close',
+    pt: 'Fechar'
+  },
+  'adminUsers.details.phone': {
+    es: 'Teléfono',
+    en: 'Phone',
+    pt: 'Telefone'
+  },
+  'adminUsers.details.role': {
+    es: 'Rol',
+    en: 'Role',
+    pt: 'Papel'
+  },
+  'adminUsers.details.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'adminUsers.details.emailVerified': {
+    es: 'Email Verificado',
+    en: 'Email Verified',
+    pt: 'Email Verificado'
+  },
+  'adminUsers.details.registrationDate': {
+    es: 'Fecha de Registro',
+    en: 'Registration Date',
+    pt: 'Data de Registro'
+  },
+  'adminUsers.details.notSpecified': {
+    es: 'No especificado',
+    en: 'Not specified',
+    pt: 'Não especificado'
+  },
+  'adminUsers.details.yes': {
+    es: 'Sí',
+    en: 'Yes',
+    pt: 'Sim'
+  },
+  'adminUsers.details.no': {
+    es: 'No',
+    en: 'No',
+    pt: 'Não'
+  },
+  'adminUsers.details.na': {
+    es: 'N/A',
+    en: 'N/A',
+    pt: 'N/A'
+  },
+  'adminUsers.confirmations.deactivate': {
+    es: '¿Estás seguro de que deseas desactivar este usuario? El usuario no podrá acceder al sistema.',
+    en: 'Are you sure you want to deactivate this user? The user will not be able to access the system.',
+    pt: 'Tem certeza de que deseja desativar este usuário? O usuário não poderá acessar o sistema.'
+  },
+  'adminUsers.confirmations.resetPassword': {
+    es: '¿Estás seguro de que deseas resetear la contraseña de {userName}? Se enviará un email con una contraseña temporal.',
+    en: 'Are you sure you want to reset the password for {userName}? An email will be sent with a temporary password.',
+    pt: 'Tem certeza de que deseja redefinir a senha de {userName}? Um email será enviado com uma senha temporária.'
+  },
+  'adminUsers.messages.userCreated': {
+    es: 'Usuario creado exitosamente',
+    en: 'User created successfully',
+    pt: 'Usuário criado com sucesso'
+  },
+  'adminUsers.messages.userUpdated': {
+    es: 'Usuario actualizado exitosamente',
+    en: 'User updated successfully',
+    pt: 'Usuário atualizado com sucesso'
+  },
+  'adminUsers.messages.userDeactivated': {
+    es: 'Usuario desactivado correctamente',
+    en: 'User deactivated successfully',
+    pt: 'Usuário desativado com sucesso'
+  },
+  'adminUsers.messages.passwordReset': {
+    es: 'Contraseña reseteada exitosamente. Se ha enviado un email al usuario con la contraseña temporal.',
+    en: 'Password reset successfully. An email has been sent to the user with the temporary password.',
+    pt: 'Senha redefinida com sucesso. Um email foi enviado ao usuário com a senha temporária.'
+  },
+  'adminUsers.errors.loadUsers': {
+    es: 'Error al cargar usuarios',
+    en: 'Error loading users',
+    pt: 'Erro ao carregar usuários'
+  },
+  'adminUsers.errors.createUser': {
+    es: 'Error al crear usuario',
+    en: 'Error creating user',
+    pt: 'Erro ao criar usuário'
+  },
+  'adminUsers.errors.updateUser': {
+    es: 'Error al actualizar usuario',
+    en: 'Error updating user',
+    pt: 'Erro ao atualizar usuário'
+  },
+  'adminUsers.errors.deactivateUser': {
+    es: 'Error al desactivar usuario',
+    en: 'Error deactivating user',
+    pt: 'Erro ao desativar usuário'
+  },
+  'adminUsers.errors.resetPassword': {
+    es: 'Error al resetear contraseña',
+    en: 'Error resetting password',
+    pt: 'Erro ao redefinir senha'
+  },
+  'adminUsers.errors.noToken': {
+    es: 'No hay token de autenticación',
+    en: 'No authentication token',
+    pt: 'Sem token de autenticação'
+  },
+
+  // ===== ADMIN STORES =====
+  'adminStores.title': {
+    es: 'Gestión de Tiendas',
+    en: 'Store Management',
+    pt: 'Gerenciamento de Lojas'
+  },
+  'adminStores.subtitle': {
+    es: 'Administra las tiendas del sistema',
+    en: 'Manage system stores',
+    pt: 'Gerencie as lojas do sistema'
+  },
+  'adminStores.createStore': {
+    es: 'Crear Tienda',
+    en: 'Create Store',
+    pt: 'Criar Loja'
+  },
+  'adminStores.searchPlaceholder': {
+    es: 'Buscar tiendas...',
+    en: 'Search stores...',
+    pt: 'Buscar lojas...'
+  },
+  'adminStores.filters.allCities': {
+    es: 'Todas las ciudades',
+    en: 'All cities',
+    pt: 'Todas as cidades'
+  },
+  'adminStores.filters.allStates': {
+    es: 'Todos los estados',
+    en: 'All states',
+    pt: 'Todos os estados'
+  },
+  'adminStores.filters.allStatuses': {
+    es: 'Todos los estados',
+    en: 'All statuses',
+    pt: 'Todos os status'
+  },
+  'adminStores.filters.active': {
+    es: 'Activas',
+    en: 'Active',
+    pt: 'Ativas'
+  },
+  'adminStores.filters.inactive': {
+    es: 'Inactivas',
+    en: 'Inactive',
+    pt: 'Inativas'
+  },
+  'adminStores.stats.total': {
+    es: 'Total',
+    en: 'Total',
+    pt: 'Total'
+  },
+  'adminStores.stats.active': {
+    es: 'Activas',
+    en: 'Active',
+    pt: 'Ativas'
+  },
+  'adminStores.stats.inactive': {
+    es: 'Inactivas',
+    en: 'Inactive',
+    pt: 'Inativas'
+  },
+  'adminStores.stats.cities': {
+    es: 'Ciudades',
+    en: 'Cities',
+    pt: 'Cidades'
+  },
+  'adminStores.table.headers.store': {
+    es: 'Tienda',
+    en: 'Store',
+    pt: 'Loja'
+  },
+  'adminStores.table.headers.location': {
+    es: 'Ubicación',
+    en: 'Location',
+    pt: 'Localização'
+  },
+  'adminStores.table.headers.contact': {
+    es: 'Contacto',
+    en: 'Contact',
+    pt: 'Contato'
+  },
+  'adminStores.table.headers.owner': {
+    es: 'Propietario',
+    en: 'Owner',
+    pt: 'Proprietário'
+  },
+  'adminStores.table.headers.managers': {
+    es: 'Managers',
+    en: 'Managers',
+    pt: 'Gerentes'
+  },
+  'adminStores.table.headers.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'adminStores.table.headers.actions': {
+    es: 'Acciones',
+    en: 'Actions',
+    pt: 'Ações'
+  },
+  'adminStores.table.loading': {
+    es: 'Cargando tiendas...',
+    en: 'Loading stores...',
+    pt: 'Carregando lojas...'
+  },
+  'adminStores.table.noData': {
+    es: 'No se encontraron tiendas',
+    en: 'No stores found',
+    pt: 'Nenhuma loja encontrada'
+  },
+  'adminStores.table.managersCount': {
+    es: 'managers',
+    en: 'managers',
+    pt: 'gerentes'
+  },
+  'adminStores.status.active': {
+    es: 'Activa',
+    en: 'Active',
+    pt: 'Ativa'
+  },
+  'adminStores.status.inactive': {
+    es: 'Inactiva',
+    en: 'Inactive',
+    pt: 'Inativa'
+  },
+  'adminStores.actions.view': {
+    es: 'Ver detalles',
+    en: 'View details',
+    pt: 'Ver detalhes'
+  },
+  'adminStores.actions.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'adminStores.actions.manageManagers': {
+    es: 'Gestionar managers',
+    en: 'Manage managers',
+    pt: 'Gerenciar gerentes'
+  },
+  'adminStores.actions.deactivate': {
+    es: 'Desactivar',
+    en: 'Deactivate',
+    pt: 'Desativar'
+  },
+  'adminStores.pagination.showing': {
+    es: 'Mostrando',
+    en: 'Showing',
+    pt: 'Mostrando'
+  },
+  'adminStores.pagination.to': {
+    es: 'a',
+    en: 'to',
+    pt: 'a'
+  },
+  'adminStores.pagination.of': {
+    es: 'de',
+    en: 'of',
+    pt: 'de'
+  },
+  'adminStores.pagination.results': {
+    es: 'resultados',
+    en: 'results',
+    pt: 'resultados'
+  },
+  'adminStores.pagination.previous': {
+    es: 'Anterior',
+    en: 'Previous',
+    pt: 'Anterior'
+  },
+  'adminStores.pagination.next': {
+    es: 'Siguiente',
+    en: 'Next',
+    pt: 'Próximo'
+  },
+  'adminStores.modals.create.title': {
+    es: 'Crear Nueva Tienda',
+    en: 'Create New Store',
+    pt: 'Criar Nova Loja'
+  },
+  'adminStores.modals.edit.title': {
+    es: 'Editar Tienda',
+    en: 'Edit Store',
+    pt: 'Editar Loja'
+  },
+  'adminStores.modals.view.title': {
+    es: 'Detalles de la Tienda',
+    en: 'Store Details',
+    pt: 'Detalhes da Loja'
+  },
+  'adminStores.modals.managers.title': {
+    es: 'Gestionar Managers',
+    en: 'Manage Managers',
+    pt: 'Gerenciar Gerentes'
+  },
+  'adminStores.form.storeName': {
+    es: 'Nombre de la tienda *',
+    en: 'Store name *',
+    pt: 'Nome da loja *'
+  },
+  'adminStores.form.storeNamePlaceholder': {
+    es: 'Nombre de la tienda',
+    en: 'Store name',
+    pt: 'Nome da loja'
+  },
+  'adminStores.form.email': {
+    es: 'Email *',
+    en: 'Email *',
+    pt: 'Email *'
+  },
+  'adminStores.form.description': {
+    es: 'Descripción *',
+    en: 'Description *',
+    pt: 'Descrição *'
+  },
+  'adminStores.form.descriptionPlaceholder': {
+    es: 'Descripción',
+    en: 'Description',
+    pt: 'Descrição'
+  },
+  'adminStores.form.location': {
+    es: 'Ubicación de la Tienda *',
+    en: 'Store Location *',
+    pt: 'Localização da Loja *'
+  },
+  'adminStores.form.locationSelected': {
+    es: 'Ubicación seleccionada:',
+    en: 'Selected location:',
+    pt: 'Localização selecionada:'
+  },
+  'adminStores.form.address': {
+    es: 'Dirección *',
+    en: 'Address *',
+    pt: 'Endereço *'
+  },
+  'adminStores.form.addressPlaceholder': {
+    es: 'Dirección',
+    en: 'Address',
+    pt: 'Endereço'
+  },
+  'adminStores.form.city': {
+    es: 'Ciudad *',
+    en: 'City *',
+    pt: 'Cidade *'
+  },
+  'adminStores.form.cityPlaceholder': {
+    es: 'Ciudad',
+    en: 'City',
+    pt: 'Cidade'
+  },
+  'adminStores.form.state': {
+    es: 'Estado *',
+    en: 'State *',
+    pt: 'Estado *'
+  },
+  'adminStores.form.statePlaceholder': {
+    es: 'Estado',
+    en: 'State',
+    pt: 'Estado'
+  },
+  'adminStores.form.zipCode': {
+    es: 'Código Postal *',
+    en: 'Zip Code *',
+    pt: 'Código Postal *'
+  },
+  'adminStores.form.zipCodePlaceholder': {
+    es: 'Código Postal',
+    en: 'Zip Code',
+    pt: 'Código Postal'
+  },
+  'adminStores.form.phone': {
+    es: 'Teléfono *',
+    en: 'Phone *',
+    pt: 'Telefone *'
+  },
+  'adminStores.form.phonePlaceholder': {
+    es: 'Teléfono',
+    en: 'Phone',
+    pt: 'Telefone'
+  },
+  'adminStores.form.website': {
+    es: 'Sitio web (opcional)',
+    en: 'Website (optional)',
+    pt: 'Site web (opcional)'
+  },
+  'adminStores.form.websitePlaceholder': {
+    es: 'Sitio web (opcional)',
+    en: 'Website (optional)',
+    pt: 'Site web (opcional)'
+  },
+  'adminStores.form.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'adminStores.form.create': {
+    es: 'Crear',
+    en: 'Create',
+    pt: 'Criar'
+  },
+  'adminStores.form.update': {
+    es: 'Actualizar',
+    en: 'Update',
+    pt: 'Atualizar'
+  },
+  'adminStores.form.close': {
+    es: 'Cerrar',
+    en: 'Close',
+    pt: 'Fechar'
+  },
+  'adminStores.details.name': {
+    es: 'Nombre:',
+    en: 'Name:',
+    pt: 'Nome:'
+  },
+  'adminStores.details.description': {
+    es: 'Descripción:',
+    en: 'Description:',
+    pt: 'Descrição:'
+  },
+  'adminStores.details.noDescription': {
+    es: 'Sin descripción',
+    en: 'No description',
+    pt: 'Sem descrição'
+  },
+  'adminStores.details.address': {
+    es: 'Dirección:',
+    en: 'Address:',
+    pt: 'Endereço:'
+  },
+  'adminStores.details.contact': {
+    es: 'Contacto:',
+    en: 'Contact:',
+    pt: 'Contato:'
+  },
+  'adminStores.details.owner': {
+    es: 'Propietario:',
+    en: 'Owner:',
+    pt: 'Proprietário:'
+  },
+  'adminStores.details.managers': {
+    es: 'Managers:',
+    en: 'Managers:',
+    pt: 'Gerentes:'
+  },
+  'adminStores.details.status': {
+    es: 'Estado:',
+    en: 'Status:',
+    pt: 'Status:'
+  },
+  'adminStores.details.settings': {
+    es: 'Configuración:',
+    en: 'Settings:',
+    pt: 'Configurações:'
+  },
+  'adminStores.details.currency': {
+    es: 'Moneda:',
+    en: 'Currency:',
+    pt: 'Moeda:'
+  },
+  'adminStores.details.taxRate': {
+    es: 'IVA:',
+    en: 'Tax Rate:',
+    pt: 'IVA:'
+  },
+  'adminStores.details.deliveryRadius': {
+    es: 'Radio de entrega:',
+    en: 'Delivery radius:',
+    pt: 'Raio de entrega:'
+  },
+  'adminStores.details.km': {
+    es: 'km',
+    en: 'km',
+    pt: 'km'
+  },
+  'adminStores.managers.addManager': {
+    es: 'Agregar Manager',
+    en: 'Add Manager',
+    pt: 'Adicionar Gerente'
+  },
+  'adminStores.managers.userEmail': {
+    es: 'Email del usuario',
+    en: 'User email',
+    pt: 'Email do usuário'
+  },
+  'adminStores.managers.add': {
+    es: 'Agregar',
+    en: 'Add',
+    pt: 'Adicionar'
+  },
+  'adminStores.managers.currentManagers': {
+    es: 'Managers Actuales',
+    en: 'Current Managers',
+    pt: 'Gerentes Atuais'
+  },
+  'adminStores.managers.noManagers': {
+    es: 'No hay managers asignados',
+    en: 'No managers assigned',
+    pt: 'Nenhum gerente atribuído'
+  },
+  'adminStores.managers.remove': {
+    es: 'Remover manager',
+    en: 'Remove manager',
+    pt: 'Remover gerente'
+  },
+  'adminStores.confirmations.deactivate': {
+    es: '¿Estás seguro de que deseas desactivar esta tienda?',
+    en: 'Are you sure you want to deactivate this store?',
+    pt: 'Tem certeza de que deseja desativar esta loja?'
+  },
+  'adminStores.confirmations.removeManager': {
+    es: '¿Estás seguro de que deseas remover este manager?',
+    en: 'Are you sure you want to remove this manager?',
+    pt: 'Tem certeza de que deseja remover este gerente?'
+  },
+  'adminStores.messages.storeCreated': {
+    es: 'Tienda creada exitosamente',
+    en: 'Store created successfully',
+    pt: 'Loja criada com sucesso'
+  },
+  'adminStores.messages.storeUpdated': {
+    es: 'Tienda actualizada exitosamente',
+    en: 'Store updated successfully',
+    pt: 'Loja atualizada com sucesso'
+  },
+  'adminStores.messages.storeDeactivated': {
+    es: 'Tienda desactivada exitosamente',
+    en: 'Store deactivated successfully',
+    pt: 'Loja desativada com sucesso'
+  },
+  'adminStores.messages.managerAdded': {
+    es: 'Manager agregado exitosamente',
+    en: 'Manager added successfully',
+    pt: 'Gerente adicionado com sucesso'
+  },
+  'adminStores.messages.managerRemoved': {
+    es: 'Manager removido exitosamente',
+    en: 'Manager removed successfully',
+    pt: 'Gerente removido com sucesso'
+  },
+  'adminStores.errors.loadStores': {
+    es: 'Error al cargar tiendas',
+    en: 'Error loading stores',
+    pt: 'Erro ao carregar lojas'
+  },
+  'adminStores.errors.createStore': {
+    es: 'Error al crear tienda',
+    en: 'Error creating store',
+    pt: 'Erro ao criar loja'
+  },
+  'adminStores.errors.updateStore': {
+    es: 'Error al actualizar tienda',
+    en: 'Error updating store',
+    pt: 'Erro ao atualizar loja'
+  },
+  'adminStores.errors.deactivateStore': {
+    es: 'Error al desactivar tienda',
+    en: 'Error deactivating store',
+    pt: 'Erro ao desativar loja'
+  },
+  'adminStores.errors.addManager': {
+    es: 'Error al agregar manager',
+    en: 'Error adding manager',
+    pt: 'Erro ao adicionar gerente'
+  },
+  'adminStores.errors.removeManager': {
+    es: 'Error al remover manager',
+    en: 'Error removing manager',
+    pt: 'Erro ao remover gerente'
+  },
+  'adminStores.errors.connection': {
+    es: 'Error de conexión',
+    en: 'Connection error',
+    pt: 'Erro de conexão'
+  },
+  'adminStores.errors.locationRequired': {
+    es: 'Por favor selecciona la ubicación de la tienda en el mapa',
+    en: 'Please select the store location on the map',
+    pt: 'Por favor selecione a localização da loja no mapa'
+  },
+  'adminStores.errors.requiredFields': {
+    es: 'Los campos nombre, dirección, ciudad, estado, código postal, teléfono y email son obligatorios',
+    en: 'The fields name, address, city, state, zip code, phone and email are required',
+    pt: 'Os campos nome, endereço, cidade, estado, código postal, telefone e email são obrigatórios'
+  },
+  'adminStores.access.denied': {
+    es: 'Acceso Denegado',
+    en: 'Access Denied',
+    pt: 'Acesso Negado'
+  },
+  'adminStores.access.noPermissions': {
+    es: 'No tienes permisos para acceder a esta página.',
+    en: 'You do not have permissions to access this page.',
+    pt: 'Você não tem permissões para acessar esta página.'
+  },
+
+  // ===== ADMIN PRODUCTS =====
+  'adminProducts.title': {
+    es: 'Gestión de Productos',
+    en: 'Product Management',
+    pt: 'Gerenciamento de Produtos'
+  },
+  'adminProducts.subtitle': {
+    es: 'Administra el catálogo de productos',
+    en: 'Manage the product catalog',
+    pt: 'Gerencie o catálogo de produtos'
+  },
+  'adminProducts.createProduct': {
+    es: 'Agregar Producto',
+    en: 'Add Product',
+    pt: 'Adicionar Produto'
+  },
+  'adminProducts.importCSV': {
+    es: 'Importar CSV',
+    en: 'Import CSV',
+    pt: 'Importar CSV'
+  },
+  'adminProducts.searchPlaceholder': {
+    es: 'Buscar productos...',
+    en: 'Search products...',
+    pt: 'Buscar produtos...'
+  },
+  'adminProducts.allCategories': {
+    es: 'Todas las categorías',
+    en: 'All categories',
+    pt: 'Todas as categorias'
+  },
+  'adminProducts.allStores': {
+    es: 'Todas las tiendas',
+    en: 'All stores',
+    pt: 'Todas as lojas'
+  },
+  'adminProducts.allStatuses': {
+    es: 'Todos los estados',
+    en: 'All statuses',
+    pt: 'Todos os status'
+  },
+  'adminProducts.active': {
+    es: 'Activos',
+    en: 'Active',
+    pt: 'Ativos'
+  },
+  'adminProducts.inactive': {
+    es: 'Inactivos',
+    en: 'Inactive',
+    pt: 'Inativos'
+  },
+  'adminProducts.stats.total': {
+    es: 'Total',
+    en: 'Total',
+    pt: 'Total'
+  },
+  'adminProducts.stats.active': {
+    es: 'Activos',
+    en: 'Active',
+    pt: 'Ativos'
+  },
+  'adminProducts.stats.featured': {
+    es: 'Destacados',
+    en: 'Featured',
+    pt: 'Destaques'
+  },
+  'adminProducts.stats.lowStock': {
+    es: 'Stock Bajo',
+    en: 'Low Stock',
+    pt: 'Estoque Baixo'
+  },
+  'adminProducts.stats.outOfStock': {
+    es: 'Sin Stock',
+    en: 'Out of Stock',
+    pt: 'Sem Estoque'
+  },
+  'adminProducts.table.product': {
+    es: 'Producto',
+    en: 'Product',
+    pt: 'Produto'
+  },
+  'adminProducts.table.store': {
+    es: 'Tienda',
+    en: 'Store',
+    pt: 'Loja'
+  },
+  'adminProducts.table.category': {
+    es: 'Categoría',
+    en: 'Category',
+    pt: 'Categoria'
+  },
+  'adminProducts.table.sku': {
+    es: 'SKU',
+    en: 'SKU',
+    pt: 'SKU'
+  },
+  'adminProducts.table.price': {
+    es: 'Precio',
+    en: 'Price',
+    pt: 'Preço'
+  },
+  'adminProducts.table.stock': {
+    es: 'Stock',
+    en: 'Stock',
+    pt: 'Estoque'
+  },
+  'adminProducts.table.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'adminProducts.table.actions': {
+    es: 'Acciones',
+    en: 'Actions',
+    pt: 'Ações'
+  },
+  'adminProducts.loading': {
+    es: 'Cargando productos...',
+    en: 'Loading products...',
+    pt: 'Carregando produtos...'
+  },
+  'adminProducts.noProducts': {
+    es: 'No se encontraron productos',
+    en: 'No products found',
+    pt: 'Nenhum produto encontrado'
+  },
+  'adminProducts.status.active': {
+    es: 'Activo',
+    en: 'Active',
+    pt: 'Ativo'
+  },
+  'adminProducts.status.inactive': {
+    es: 'Inactivo',
+    en: 'Inactive',
+    pt: 'Inativo'
+  },
+  'adminProducts.actions.viewDetails': {
+    es: 'Ver detalles',
+    en: 'View details',
+    pt: 'Ver detalhes'
+  },
+  'adminProducts.actions.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'adminProducts.actions.deactivate': {
+    es: 'Desactivar',
+    en: 'Deactivate',
+    pt: 'Desativar'
+  },
+  'adminProducts.pagination.showing': {
+    es: 'Mostrando {{start}} a {{end}} de {{total}} resultados',
+    en: 'Showing {{start}} to {{end}} of {{total}} results',
+    pt: 'Mostrando {{start}} a {{end}} de {{total}} resultados'
+  },
+  'adminProducts.pagination.to': {
+    es: 'a',
+    en: 'to',
+    pt: 'a'
+  },
+  'adminProducts.pagination.of': {
+    es: 'de',
+    en: 'of',
+    pt: 'de'
+  },
+  'adminProducts.pagination.results': {
+    es: 'resultados',
+    en: 'results',
+    pt: 'resultados'
+  },
+  'adminProducts.pagination.previous': {
+    es: 'Anterior',
+    en: 'Previous',
+    pt: 'Anterior'
+  },
+  'adminProducts.pagination.next': {
+    es: 'Siguiente',
+    en: 'Next',
+    pt: 'Próximo'
+  },
+  'adminProducts.modals.create.title': {
+    es: 'Crear Nuevo Producto',
+    en: 'Create New Product',
+    pt: 'Criar Novo Produto'
+  },
+  'adminProducts.modals.edit.title': {
+    es: 'Editar Producto',
+    en: 'Edit Product',
+    pt: 'Editar Produto'
+  },
+  'adminProducts.modals.view.title': {
+    es: 'Detalles del Producto',
+    en: 'Product Details',
+    pt: 'Detalhes do Produto'
+  },
+  'adminProducts.modals.import.title': {
+    es: 'Importar Productos desde CSV',
+    en: 'Import Products from CSV',
+    pt: 'Importar Produtos do CSV'
+  },
+  'adminProducts.modals.selectStore': {
+    es: 'Seleccionar tienda',
+    en: 'Select store',
+    pt: 'Selecionar loja'
+  },
+  'adminProducts.modals.productName': {
+    es: 'Nombre del producto',
+    en: 'Product name',
+    pt: 'Nome do produto'
+  },
+  'adminProducts.modals.description': {
+    es: 'Descripción',
+    en: 'Description',
+    pt: 'Descrição'
+  },
+  'adminProducts.modals.price': {
+    es: 'Precio',
+    en: 'Price',
+    pt: 'Preço'
+  },
+  'adminProducts.modals.category': {
+    es: 'Categoría',
+    en: 'Category',
+    pt: 'Categoria'
+  },
+  'adminProducts.modals.sku': {
+    es: 'SKU',
+    en: 'SKU',
+    pt: 'SKU'
+  },
+  'adminProducts.modals.stock': {
+    es: 'Stock',
+    en: 'Stock',
+    pt: 'Estoque'
+  },
+  'adminProducts.modals.featured': {
+    es: 'Producto destacado',
+    en: 'Featured product',
+    pt: 'Produto em destaque'
+  },
+  'adminProducts.modals.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'adminProducts.modals.create': {
+    es: 'Crear',
+    en: 'Create',
+    pt: 'Criar'
+  },
+  'adminProducts.modals.update': {
+    es: 'Actualizar',
+    en: 'Update',
+    pt: 'Atualizar'
+  },
+  'adminProducts.modals.close': {
+    es: 'Cerrar',
+    en: 'Close',
+    pt: 'Fechar'
+  },
+  'adminProducts.modals.clickToSelect': {
+    es: 'Haz clic para seleccionar archivo CSV',
+    en: 'Click to select CSV file',
+    pt: 'Clique para selecionar arquivo CSV'
+  },
+  'adminProducts.modals.requiredFormat': {
+    es: 'Formato requerido:',
+    en: 'Required format:',
+    pt: 'Formato obrigatório:'
+  },
+  'adminProducts.modals.importing': {
+    es: 'Importando...',
+    en: 'Importing...',
+    pt: 'Importando...'
+  },
+  'adminProducts.modals.import': {
+    es: 'Importar',
+    en: 'Import',
+    pt: 'Importar'
+  },
+  'adminProducts.modals.importCompleted': {
+    es: 'Importación completada:',
+    en: 'Import completed:',
+    pt: 'Importação concluída:'
+  },
+  'adminProducts.modals.successful': {
+    es: 'exitosos',
+    en: 'successful',
+    pt: 'bem-sucedidos'
+  },
+  'adminProducts.modals.errors': {
+    es: 'errores',
+    en: 'errors',
+    pt: 'erros'
+  },
+  'adminProducts.messages.productCreated': {
+    es: 'Producto creado exitosamente',
+    en: 'Product created successfully',
+    pt: 'Produto criado com sucesso'
+  },
+  'adminProducts.messages.productUpdated': {
+    es: 'Producto actualizado exitosamente',
+    en: 'Product updated successfully',
+    pt: 'Produto atualizado com sucesso'
+  },
+  'adminProducts.messages.productDeactivated': {
+    es: 'Producto desactivado exitosamente',
+    en: 'Product deactivated successfully',
+    pt: 'Produto desativado com sucesso'
+  },
+  'adminProducts.messages.importSuccess': {
+    es: 'Importación completada.',
+    en: 'Import completed.',
+    pt: 'Importação concluída.'
+  },
+  'adminProducts.errors.connection': {
+    es: 'Error de conexión',
+    en: 'Connection error',
+    pt: 'Erro de conexão'
+  },
+  'adminProducts.errors.creatingProduct': {
+    es: 'Error creando producto',
+    en: 'Error creating product',
+    pt: 'Erro ao criar produto'
+  },
+  'adminProducts.errors.updatingProduct': {
+    es: 'Error actualizando producto',
+    en: 'Error updating product',
+    pt: 'Erro ao atualizar produto'
+  },
+  'adminProducts.errors.deactivatingProduct': {
+    es: 'Error desactivando producto',
+    en: 'Error deactivating product',
+    pt: 'Erro ao desativar produto'
+  },
+  'adminProducts.errors.importingProducts': {
+    es: 'Error importando productos',
+    en: 'Error importing products',
+    pt: 'Erro ao importar produtos'
+  },
+  'adminProducts.errors.selectCSV': {
+    es: 'Por favor selecciona un archivo CSV',
+    en: 'Please select a CSV file',
+    pt: 'Por favor selecione um arquivo CSV'
+  },
+  'adminProducts.errors.selectStore': {
+    es: 'Por favor selecciona una tienda',
+    en: 'Please select a store',
+    pt: 'Por favor selecione uma loja'
+  },
+  'adminProducts.confirm.delete': {
+    es: '¿Estás seguro de que deseas desactivar este producto?',
+    en: 'Are you sure you want to deactivate this product?',
+    pt: 'Tem certeza de que deseja desativar este produto?'
+  },
+  'adminProducts.access.noPermissions': {
+    es: 'No tienes permisos para acceder a esta página.',
+    en: 'You do not have permissions to access this page.',
+    pt: 'Você não tem permissões para acessar esta página.'
+  },
+
+  // ===== ADMIN CATEGORIES =====
+  'adminCategories.title': {
+    es: 'Gestión de Categorías',
+    en: 'Category Management',
+    pt: 'Gerenciamento de Categorias'
+  },
+  'adminCategories.subtitle': {
+    es: 'Organiza los productos por categorías y subcategorías',
+    en: 'Organize products by categories and subcategories',
+    pt: 'Organize produtos por categorias e subcategorias'
+  },
+  'adminCategories.newCategory': {
+    es: 'Nueva Categoría',
+    en: 'New Category',
+    pt: 'Nova Categoria'
+  },
+  'adminCategories.searchPlaceholder': {
+    es: 'Buscar categorías...',
+    en: 'Search categories...',
+    pt: 'Buscar categorias...'
+  },
+  'adminCategories.allStatuses': {
+    es: 'Todos los estados',
+    en: 'All statuses',
+    pt: 'Todos os status'
+  },
+  'adminCategories.active': {
+    es: 'Activas',
+    en: 'Active',
+    pt: 'Ativas'
+  },
+  'adminCategories.inactive': {
+    es: 'Inactivas',
+    en: 'Inactive',
+    pt: 'Inativas'
+  },
+  'adminCategories.stats.total': {
+    es: 'Total',
+    en: 'Total',
+    pt: 'Total'
+  },
+  'adminCategories.stats.active': {
+    es: 'Activas',
+    en: 'Active',
+    pt: 'Ativas'
+  },
+  'adminCategories.stats.inactive': {
+    es: 'Inactivas',
+    en: 'Inactive',
+    pt: 'Inativas'
+  },
+  'adminCategories.stats.withProducts': {
+    es: 'Con Productos',
+    en: 'With Products',
+    pt: 'Com Produtos'
+  },
+  'adminCategories.order': {
+    es: 'Orden',
+    en: 'Order',
+    pt: 'Ordem'
+  },
+  'adminCategories.products': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'adminCategories.status.active': {
+    es: 'Activa',
+    en: 'Active',
+    pt: 'Ativa'
+  },
+  'adminCategories.status.inactive': {
+    es: 'Inactiva',
+    en: 'Inactive',
+    pt: 'Inativa'
+  },
+  'adminCategories.actions.viewDetails': {
+    es: 'Ver detalles',
+    en: 'View details',
+    pt: 'Ver detalhes'
+  },
+  'adminCategories.actions.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'adminCategories.actions.activate': {
+    es: 'Activar',
+    en: 'Activate',
+    pt: 'Ativar'
+  },
+  'adminCategories.actions.deactivate': {
+    es: 'Desactivar',
+    en: 'Deactivate',
+    pt: 'Desativar'
+  },
+  'adminCategories.actions.delete': {
+    es: 'Eliminar',
+    en: 'Delete',
+    pt: 'Excluir'
+  },
+  'adminCategories.loading': {
+    es: 'Cargando categorías...',
+    en: 'Loading categories...',
+    pt: 'Carregando categorias...'
+  },
+  'adminCategories.noCategories': {
+    es: 'No se encontraron categorías',
+    en: 'No categories found',
+    pt: 'Nenhuma categoria encontrada'
+  },
+  'adminCategories.createFirst': {
+    es: 'Crea tu primera categoría para empezar',
+    en: 'Create your first category to get started',
+    pt: 'Crie sua primeira categoria para começar'
+  },
+  'adminCategories.modals.create.title': {
+    es: 'Crear Nueva Categoría',
+    en: 'Create New Category',
+    pt: 'Criar Nova Categoria'
+  },
+  'adminCategories.modals.edit.title': {
+    es: 'Editar Categoría',
+    en: 'Edit Category',
+    pt: 'Editar Categoria'
+  },
+  'adminCategories.modals.view.title': {
+    es: 'Detalles de la Categoría',
+    en: 'Category Details',
+    pt: 'Detalhes da Categoria'
+  },
+  'adminCategories.modals.name': {
+    es: 'Nombre',
+    en: 'Name',
+    pt: 'Nome'
+  },
+  'adminCategories.modals.namePlaceholder': {
+    es: 'Nombre de la categoría',
+    en: 'Category name',
+    pt: 'Nome da categoria'
+  },
+  'adminCategories.modals.description': {
+    es: 'Descripción',
+    en: 'Description',
+    pt: 'Descrição'
+  },
+  'adminCategories.modals.descriptionPlaceholder': {
+    es: 'Descripción de la categoría',
+    en: 'Category description',
+    pt: 'Descrição da categoria'
+  },
+  'adminCategories.modals.imageUrl': {
+    es: 'URL de imagen (opcional)',
+    en: 'Image URL (optional)',
+    pt: 'URL da imagem (opcional)'
+  },
+  'adminCategories.modals.imagePlaceholder': {
+    es: 'https://ejemplo.com/imagen.jpg',
+    en: 'https://example.com/image.jpg',
+    pt: 'https://exemplo.com/imagem.jpg'
+  },
+  'adminCategories.modals.parentCategory': {
+    es: 'Categoría padre (opcional)',
+    en: 'Parent category (optional)',
+    pt: 'Categoria pai (opcional)'
+  },
+  'adminCategories.modals.noParent': {
+    es: 'Sin categoría padre',
+    en: 'No parent category',
+    pt: 'Sem categoria pai'
+  },
+  'adminCategories.modals.order': {
+    es: 'Orden',
+    en: 'Order',
+    pt: 'Ordem'
+  },
+  'adminCategories.modals.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'adminCategories.modals.create': {
+    es: 'Crear',
+    en: 'Create',
+    pt: 'Criar'
+  },
+  'adminCategories.modals.update': {
+    es: 'Actualizar',
+    en: 'Update',
+    pt: 'Atualizar'
+  },
+  'adminCategories.modals.close': {
+    es: 'Cerrar',
+    en: 'Close',
+    pt: 'Fechar'
+  },
+  'adminCategories.modals.parentCategoryName': {
+    es: 'Categoría padre:',
+    en: 'Parent category:',
+    pt: 'Categoria pai:'
+  },
+  'adminCategories.modals.created': {
+    es: 'Creada:',
+    en: 'Created:',
+    pt: 'Criada:'
+  },
+  'adminCategories.messages.categoryCreated': {
+    es: 'Categoría creada exitosamente',
+    en: 'Category created successfully',
+    pt: 'Categoria criada com sucesso'
+  },
+  'adminCategories.messages.categoryUpdated': {
+    es: 'Categoría actualizada exitosamente',
+    en: 'Category updated successfully',
+    pt: 'Categoria atualizada com sucesso'
+  },
+  'adminCategories.messages.categoryDeleted': {
+    es: 'Categoría eliminada exitosamente',
+    en: 'Category deleted successfully',
+    pt: 'Categoria excluída com sucesso'
+  },
+  'adminCategories.messages.statusUpdated': {
+    es: 'Estado de categoría actualizado exitosamente',
+    en: 'Category status updated successfully',
+    pt: 'Status da categoria atualizado com sucesso'
+  },
+  'adminCategories.errors.connection': {
+    es: 'Error de conexión',
+    en: 'Connection error',
+    pt: 'Erro de conexão'
+  },
+  'adminCategories.errors.creatingCategory': {
+    es: 'Error creando categoría',
+    en: 'Error creating category',
+    pt: 'Erro ao criar categoria'
+  },
+  'adminCategories.errors.updatingCategory': {
+    es: 'Error actualizando categoría',
+    en: 'Error updating category',
+    pt: 'Erro ao atualizar categoria'
+  },
+  'adminCategories.errors.deletingCategory': {
+    es: 'Error eliminando categoría',
+    en: 'Error deleting category',
+    pt: 'Erro ao excluir categoria'
+  },
+  'adminCategories.errors.updatingStatus': {
+    es: 'Error actualizando estado',
+    en: 'Error updating status',
+    pt: 'Erro ao atualizar status'
+  },
+  'adminCategories.errors.requiredFields': {
+    es: 'Los campos nombre y descripción son obligatorios',
+    en: 'Name and description fields are required',
+    pt: 'Os campos nome e descrição são obrigatórios'
+  },
+  'adminCategories.confirm.delete': {
+    es: '¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer.',
+    en: 'Are you sure you want to delete this category? This action cannot be undone.',
+    pt: 'Tem certeza de que deseja excluir esta categoria? Esta ação não pode ser desfeita.'
+  },
+  'adminCategories.access.noPermissions': {
+    es: 'No tienes permisos para acceder a esta página.',
+    en: 'You do not have permissions to access this page.',
+    pt: 'Você não tem permissões para acessar esta página.'
+  },
+  'adminCategories.newCategoryButton': {
+    es: 'Nueva Categoría',
+    en: 'New Category',
+    pt: 'Nova Categoria'
+  },
+  'adminCategories.statusFilter.all': {
+    es: 'Todos los estados',
+    en: 'All statuses',
+    pt: 'Todos os status'
+  },
+  'adminCategories.statusFilter.active': {
+    es: 'Activas',
+    en: 'Active',
+    pt: 'Ativas'
+  },
+  'adminCategories.statusFilter.inactive': {
+    es: 'Inactivas',
+    en: 'Inactive',
+    pt: 'Inativas'
+  },
+  'adminCategories.categoryList.order': {
+    es: 'Orden',
+    en: 'Order',
+    pt: 'Ordem'
+  },
+  'adminCategories.categoryList.products': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'adminCategories.categoryList.active': {
+    es: 'Activa',
+    en: 'Active',
+    pt: 'Ativa'
+  },
+  'adminCategories.categoryList.inactive': {
+    es: 'Inactiva',
+    en: 'Inactive',
+    pt: 'Inativa'
+  },
+  'adminCategories.categoryList.viewDetails': {
+    es: 'Ver detalles',
+    en: 'View details',
+    pt: 'Ver detalhes'
+  },
+  'adminCategories.categoryList.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'adminCategories.categoryList.activate': {
+    es: 'Activar',
+    en: 'Activate',
+    pt: 'Ativar'
+  },
+  'adminCategories.categoryList.deactivate': {
+    es: 'Desactivar',
+    en: 'Deactivate',
+    pt: 'Desativar'
+  },
+  'adminCategories.categoryList.delete': {
+    es: 'Eliminar',
+    en: 'Delete',
+    pt: 'Excluir'
+  },
+  'adminCategories.loadingCategories': {
+    es: 'Cargando categorías...',
+    en: 'Loading categories...',
+    pt: 'Carregando categorias...'
+  },
+  'adminCategories.noCategoriesFound': {
+    es: 'No se encontraron categorías',
+    en: 'No categories found',
+    pt: 'Nenhuma categoria encontrada'
+  },
+  'adminCategories.createFirstCategory': {
+    es: 'Crea tu primera categoría para empezar',
+    en: 'Create your first category to get started',
+    pt: 'Crie sua primeira categoria para começar'
+  },
+  'adminCategories.delete.confirm': {
+    es: '¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer.',
+    en: 'Are you sure you want to delete this category? This action cannot be undone.',
+    pt: 'Tem certeza de que deseja excluir esta categoria? Esta ação não pode ser desfeita.'
+  },
+  'adminCategories.accessDenied.title': {
+    es: 'Acceso Denegado',
+    en: 'Access Denied',
+    pt: 'Acesso Negado'
+  },
+  'adminCategories.accessDenied.message': {
+    es: 'No tienes permisos para acceder a esta página.',
+    en: 'You do not have permissions to access this page.',
+    pt: 'Você não tem permissões para acessar esta página.'
+  },
+  'adminCategories.createModal.title': {
+    es: 'Crear Nueva Categoría',
+    en: 'Create New Category',
+    pt: 'Criar Nova Categoria'
+  },
+  'adminCategories.createModal.name': {
+    es: 'Nombre',
+    en: 'Name',
+    pt: 'Nome'
+  },
+  'adminCategories.createModal.namePlaceholder': {
+    es: 'Nombre de la categoría',
+    en: 'Category name',
+    pt: 'Nome da categoria'
+  },
+  'adminCategories.createModal.description': {
+    es: 'Descripción',
+    en: 'Description',
+    pt: 'Descrição'
+  },
+  'adminCategories.createModal.descriptionPlaceholder': {
+    es: 'Descripción de la categoría',
+    en: 'Category description',
+    pt: 'Descrição da categoria'
+  },
+  'adminCategories.createModal.imageUrlOptional': {
+    es: 'URL de imagen (opcional)',
+    en: 'Image URL (optional)',
+    pt: 'URL da imagem (opcional)'
+  },
+  'adminCategories.createModal.imageUrlPlaceholder': {
+    es: 'https://ejemplo.com/imagen.jpg',
+    en: 'https://example.com/image.jpg',
+    pt: 'https://exemplo.com/imagem.jpg'
+  },
+  'adminCategories.createModal.parentCategoryOptional': {
+    es: 'Categoría padre (opcional)',
+    en: 'Parent category (optional)',
+    pt: 'Categoria pai (opcional)'
+  },
+  'adminCategories.createModal.noParentCategory': {
+    es: 'Sin categoría padre',
+    en: 'No parent category',
+    pt: 'Sem categoria pai'
+  },
+  'adminCategories.createModal.order': {
+    es: 'Orden',
+    en: 'Order',
+    pt: 'Ordem'
+  },
+  'adminCategories.createModal.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'adminCategories.createModal.create': {
+    es: 'Crear',
+    en: 'Create',
+    pt: 'Criar'
+  },
+  'adminCategories.editModal.title': {
+    es: 'Editar Categoría',
+    en: 'Edit Category',
+    pt: 'Editar Categoria'
+  },
+  'adminCategories.editModal.name': {
+    es: 'Nombre',
+    en: 'Name',
+    pt: 'Nome'
+  },
+  'adminCategories.editModal.namePlaceholder': {
+    es: 'Nombre de la categoría',
+    en: 'Category name',
+    pt: 'Nome da categoria'
+  },
+  'adminCategories.editModal.description': {
+    es: 'Descripción',
+    en: 'Description',
+    pt: 'Descrição'
+  },
+  'adminCategories.editModal.descriptionPlaceholder': {
+    es: 'Descripción de la categoría',
+    en: 'Category description',
+    pt: 'Descrição da categoria'
+  },
+  'adminCategories.editModal.imageUrlOptional': {
+    es: 'URL de imagen (opcional)',
+    en: 'Image URL (optional)',
+    pt: 'URL da imagem (opcional)'
+  },
+  'adminCategories.editModal.imageUrlPlaceholder': {
+    es: 'https://ejemplo.com/imagen.jpg',
+    en: 'https://example.com/image.jpg',
+    pt: 'https://exemplo.com/imagem.jpg'
+  },
+  'adminCategories.editModal.parentCategoryOptional': {
+    es: 'Categoría padre (opcional)',
+    en: 'Parent category (optional)',
+    pt: 'Categoria pai (opcional)'
+  },
+  'adminCategories.editModal.noParentCategory': {
+    es: 'Sin categoría padre',
+    en: 'No parent category',
+    pt: 'Sem categoria pai'
+  },
+  'adminCategories.editModal.order': {
+    es: 'Orden',
+    en: 'Order',
+    pt: 'Ordem'
+  },
+  'adminCategories.editModal.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'adminCategories.editModal.update': {
+    es: 'Actualizar',
+    en: 'Update',
+    pt: 'Atualizar'
+  },
+  'adminCategories.viewModal.title': {
+    es: 'Detalles de la Categoría',
+    en: 'Category Details',
+    pt: 'Detalhes da Categoria'
+  },
+  'adminCategories.viewModal.name': {
+    es: 'Nombre',
+    en: 'Name',
+    pt: 'Nome'
+  },
+  'adminCategories.viewModal.description': {
+    es: 'Descripción',
+    en: 'Description',
+    pt: 'Descrição'
+  },
+  'adminCategories.viewModal.image': {
+    es: 'Imagen',
+    en: 'Image',
+    pt: 'Imagem'
+  },
+  'adminCategories.viewModal.parentCategory': {
+    es: 'Categoría padre',
+    en: 'Parent category',
+    pt: 'Categoria pai'
+  },
+  'adminCategories.viewModal.noParentCategory': {
+    es: 'Sin categoría padre',
+    en: 'No parent category',
+    pt: 'Sem categoria pai'
+  },
+  'adminCategories.viewModal.order': {
+    es: 'Orden',
+    en: 'Order',
+    pt: 'Ordem'
+  },
+  'adminCategories.viewModal.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'adminCategories.viewModal.active': {
+    es: 'Activa',
+    en: 'Active',
+    pt: 'Ativa'
+  },
+  'adminCategories.viewModal.inactive': {
+    es: 'Inactiva',
+    en: 'Inactive',
+    pt: 'Inativa'
+  },
+  'adminCategories.viewModal.products': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'adminCategories.viewModal.createdAt': {
+    es: 'Creada',
+    en: 'Created',
+    pt: 'Criada'
+  },
+  'adminCategories.viewModal.close': {
+    es: 'Cerrar',
+    en: 'Close',
+    pt: 'Fechar'
+  },
+  'adminCategories.errors.createError': {
+    es: 'Error al crear la categoría',
+    en: 'Error creating category',
+    pt: 'Erro ao criar categoria'
+  },
+  'adminCategories.errors.updateError': {
+    es: 'Error al actualizar la categoría',
+    en: 'Error updating category',
+    pt: 'Erro ao atualizar categoria'
+  },
+  'adminCategories.errors.deleteError': {
+    es: 'Error al eliminar la categoría',
+    en: 'Error deleting category',
+    pt: 'Erro ao excluir categoria'
+  },
+  'adminCategories.errors.statusUpdateError': {
+    es: 'Error al actualizar el estado',
+    en: 'Error updating status',
+    pt: 'Erro ao atualizar status'
+  },
+
+  // ===== ADMIN SUBCATEGORIES =====
+  'adminSubcategories.title': {
+    es: 'Gestión de Subcategorías',
+    en: 'Subcategory Management',
+    pt: 'Gerenciamento de Subcategorias'
+  },
+  'adminSubcategories.subtitle': {
+    es: 'Organiza los productos por subcategorías específicas',
+    en: 'Organize products by specific subcategories',
+    pt: 'Organize produtos por subcategorias específicas'
+  },
+  'adminSubcategories.newSubcategory': {
+    es: 'Nueva Subcategoría',
+    en: 'New Subcategory',
+    pt: 'Nova Subcategoria'
+  },
+  'adminSubcategories.searchPlaceholder': {
+    es: 'Buscar subcategorías...',
+    en: 'Search subcategories...',
+    pt: 'Buscar subcategorias...'
+  },
+  'adminSubcategories.allCategories': {
+    es: 'Todas las categorías',
+    en: 'All categories',
+    pt: 'Todas as categorias'
+  },
+  'adminSubcategories.allTypes': {
+    es: 'Todos los tipos',
+    en: 'All types',
+    pt: 'Todos os tipos'
+  },
+  'adminSubcategories.allStatuses': {
+    es: 'Todos los estados',
+    en: 'All statuses',
+    pt: 'Todos os status'
+  },
+  'adminSubcategories.active': {
+    es: 'Activas',
+    en: 'Active',
+    pt: 'Ativas'
+  },
+  'adminSubcategories.inactive': {
+    es: 'Inactivas',
+    en: 'Inactive',
+    pt: 'Inativas'
+  },
+  'adminSubcategories.vehicleTypes.car': {
+    es: 'Automóviles',
+    en: 'Automobiles',
+    pt: 'Automóveis'
+  },
+  'adminSubcategories.vehicleTypes.motorcycle': {
+    es: 'Motocicletas',
+    en: 'Motorcycles',
+    pt: 'Motocicletas'
+  },
+  'adminSubcategories.vehicleTypes.truck': {
+    es: 'Camiones',
+    en: 'Trucks',
+    pt: 'Caminhões'
+  },
+  'adminSubcategories.vehicleTypes.bus': {
+    es: 'Autobuses',
+    en: 'Buses',
+    pt: 'Ônibus'
+  },
+  'adminSubcategories.stats.total': {
+    es: 'Total',
+    en: 'Total',
+    pt: 'Total'
+  },
+  'adminSubcategories.stats.active': {
+    es: 'Activas',
+    en: 'Active',
+    pt: 'Ativas'
+  },
+  'adminSubcategories.stats.inactive': {
+    es: 'Inactivas',
+    en: 'Inactive',
+    pt: 'Inativas'
+  },
+  'adminSubcategories.stats.withProducts': {
+    es: 'Con Productos',
+    en: 'With Products',
+    pt: 'Com Produtos'
+  },
+  'adminSubcategories.stats.automobiles': {
+    es: 'Automóviles',
+    en: 'Automobiles',
+    pt: 'Automóveis'
+  },
+  'adminSubcategories.stats.motorcycles': {
+    es: 'Motocicletas',
+    en: 'Motorcycles',
+    pt: 'Motocicletas'
+  },
+  'adminSubcategories.subcategories': {
+    es: 'Subcategorías',
+    en: 'Subcategories',
+    pt: 'Subcategorias'
+  },
+  'adminSubcategories.status.active': {
+    es: 'Activa',
+    en: 'Active',
+    pt: 'Ativa'
+  },
+  'adminSubcategories.status.inactive': {
+    es: 'Inactiva',
+    en: 'Inactive',
+    pt: 'Inativa'
+  },
+  'adminSubcategories.actions.viewDetails': {
+    es: 'Ver detalles',
+    en: 'View details',
+    pt: 'Ver detalhes'
+  },
+  'adminSubcategories.actions.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'adminSubcategories.actions.activate': {
+    es: 'Activar',
+    en: 'Activate',
+    pt: 'Ativar'
+  },
+  'adminSubcategories.actions.deactivate': {
+    es: 'Desactivar',
+    en: 'Deactivate',
+    pt: 'Desativar'
+  },
+  'adminSubcategories.actions.delete': {
+    es: 'Eliminar',
+    en: 'Delete',
+    pt: 'Excluir'
+  },
+  'adminSubcategories.loading': {
+    es: 'Cargando subcategorías...',
+    en: 'Loading subcategories...',
+    pt: 'Carregando subcategorias...'
+  },
+  'adminSubcategories.noSubcategories': {
+    es: 'No se encontraron subcategorías',
+    en: 'No subcategories found',
+    pt: 'Nenhuma subcategoria encontrada'
+  },
+  'adminSubcategories.createFirst': {
+    es: 'Crea tu primera subcategoría para empezar',
+    en: 'Create your first subcategory to get started',
+    pt: 'Crie sua primeira subcategoria para começar'
+  },
+  'adminSubcategories.modals.create.title': {
+    es: 'Crear Nueva Subcategoría',
+    en: 'Create New Subcategory',
+    pt: 'Criar Nova Subcategoria'
+  },
+  'adminSubcategories.modals.edit.title': {
+    es: 'Editar Subcategoría',
+    en: 'Edit Subcategory',
+    pt: 'Editar Subcategoria'
+  },
+  'adminSubcategories.modals.view.title': {
+    es: 'Detalles de la Subcategoría',
+    en: 'Subcategory Details',
+    pt: 'Detalhes da Subcategoria'
+  },
+  'adminSubcategories.modals.name': {
+    es: 'Nombre',
+    en: 'Name',
+    pt: 'Nome'
+  },
+  'adminSubcategories.modals.namePlaceholder': {
+    es: 'Nombre de la subcategoría',
+    en: 'Subcategory name',
+    pt: 'Nome da subcategoria'
+  },
+  'adminSubcategories.modals.description': {
+    es: 'Descripción',
+    en: 'Description',
+    pt: 'Descrição'
+  },
+  'adminSubcategories.modals.descriptionPlaceholder': {
+    es: 'Descripción de la subcategoría',
+    en: 'Subcategory description',
+    pt: 'Descrição da subcategoria'
+  },
+  'adminSubcategories.modals.category': {
+    es: 'Categoría',
+    en: 'Category',
+    pt: 'Categoria'
+  },
+  'adminSubcategories.modals.selectCategory': {
+    es: 'Seleccionar categoría',
+    en: 'Select category',
+    pt: 'Selecionar categoria'
+  },
+  'adminSubcategories.modals.vehicleType': {
+    es: 'Tipo de Vehículo',
+    en: 'Vehicle Type',
+    pt: 'Tipo de Veículo'
+  },
+  'adminSubcategories.modals.car': {
+    es: 'Automóvil',
+    en: 'Automobile',
+    pt: 'Automóvel'
+  },
+  'adminSubcategories.modals.motorcycle': {
+    es: 'Motocicleta',
+    en: 'Motorcycle',
+    pt: 'Motocicleta'
+  },
+  'adminSubcategories.modals.truck': {
+    es: 'Camión',
+    en: 'Truck',
+    pt: 'Caminhão'
+  },
+  'adminSubcategories.modals.bus': {
+    es: 'Autobús',
+    en: 'Bus',
+    pt: 'Ônibus'
+  },
+  'adminSubcategories.modals.imageUrl': {
+    es: 'URL de imagen (opcional)',
+    en: 'Image URL (optional)',
+    pt: 'URL da imagem (opcional)'
+  },
+  'adminSubcategories.modals.imagePlaceholder': {
+    es: 'https://ejemplo.com/imagen.jpg',
+    en: 'https://example.com/image.jpg',
+    pt: 'https://exemplo.com/imagem.jpg'
+  },
+  'adminSubcategories.modals.order': {
+    es: 'Orden',
+    en: 'Order',
+    pt: 'Ordem'
+  },
+  'adminSubcategories.modals.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'adminSubcategories.modals.create': {
+    es: 'Crear',
+    en: 'Create',
+    pt: 'Criar'
+  },
+  'adminSubcategories.modals.update': {
+    es: 'Actualizar',
+    en: 'Update',
+    pt: 'Atualizar'
+  },
+  'adminSubcategories.modals.close': {
+    es: 'Cerrar',
+    en: 'Close',
+    pt: 'Fechar'
+  },
+  'adminSubcategories.modals.noDescription': {
+    es: 'Sin descripción',
+    en: 'No description',
+    pt: 'Sem descrição'
+  },
+  'adminSubcategories.modals.vehicleTypeLabel': {
+    es: 'Tipo de Vehículo:',
+    en: 'Vehicle Type:',
+    pt: 'Tipo de Veículo:'
+  },
+  'adminSubcategories.modals.created': {
+    es: 'Creada:',
+    en: 'Created:',
+    pt: 'Criada:'
+  },
+  'adminSubcategories.messages.subcategoryCreated': {
+    es: 'Subcategoría creada exitosamente',
+    en: 'Subcategory created successfully',
+    pt: 'Subcategoria criada com sucesso'
+  },
+  'adminSubcategories.messages.subcategoryUpdated': {
+    es: 'Subcategoría actualizada exitosamente',
+    en: 'Subcategory updated successfully',
+    pt: 'Subcategoria atualizada com sucesso'
+  },
+  'adminSubcategories.messages.subcategoryDeleted': {
+    es: 'Subcategoría eliminada exitosamente',
+    en: 'Subcategory deleted successfully',
+    pt: 'Subcategoria excluída com sucesso'
+  },
+  'adminSubcategories.messages.statusUpdated': {
+    es: 'Estado de subcategoría actualizado exitosamente',
+    en: 'Subcategory status updated successfully',
+    pt: 'Status da subcategoria atualizado com sucesso'
+  },
+  'adminSubcategories.errors.connection': {
+    es: 'Error de conexión',
+    en: 'Connection error',
+    pt: 'Erro de conexão'
+  },
+  'adminSubcategories.errors.creatingSubcategory': {
+    es: 'Error creando subcategoría',
+    en: 'Error creating subcategory',
+    pt: 'Erro ao criar subcategoria'
+  },
+  'adminSubcategories.errors.updatingSubcategory': {
+    es: 'Error actualizando subcategoría',
+    en: 'Error updating subcategory',
+    pt: 'Erro ao atualizar subcategoria'
+  },
+  'adminSubcategories.errors.deletingSubcategory': {
+    es: 'Error eliminando subcategoría',
+    en: 'Error deleting subcategory',
+    pt: 'Erro ao excluir subcategoria'
+  },
+  'adminSubcategories.errors.updatingStatus': {
+    es: 'Error actualizando estado',
+    en: 'Error updating status',
+    pt: 'Erro ao atualizar status'
+  },
+  'adminSubcategories.errors.requiredFields': {
+    es: 'Los campos nombre y categoría son obligatorios',
+    en: 'Name and category fields are required',
+    pt: 'Os campos nome e categoria são obrigatórios'
+  },
+  'adminSubcategories.confirm.delete': {
+    es: '¿Estás seguro de que deseas eliminar esta subcategoría? Esta acción no se puede deshacer.',
+    en: 'Are you sure you want to delete this subcategory? This action cannot be undone.',
+    pt: 'Tem certeza de que deseja excluir esta subcategoria? Esta ação não pode ser desfeita.'
+  },
+  'adminSubcategories.access.noPermissions': {
+    es: 'No tienes permisos para acceder a esta página.',
+    en: 'You do not have permissions to access this page.',
+    pt: 'Você não tem permissões para acessar esta página.'
+  },
+  'adminSubcategories.order': {
+    es: 'Orden',
+    en: 'Order',
+    pt: 'Ordem'
+  },
+  'adminSubcategories.products': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'adminSubcategories.accessDenied.title': {
+    es: 'Acceso Denegado',
+    en: 'Access Denied',
+    pt: 'Acesso Negado'
+  },
+
+  // ===== ADMIN PROMOTIONS =====
+  'adminPromotions.title': {
+    es: 'Gestión de Promociones',
+    en: 'Promotions Management',
+    pt: 'Gerenciamento de Promoções'
+  },
+  'adminPromotions.subtitle': {
+    es: 'Administra las promociones y ofertas especiales',
+    en: 'Manage promotions and special offers',
+    pt: 'Gerencie promoções e ofertas especiais'
+  },
+  'adminPromotions.stats.total': {
+    es: 'Total',
+    en: 'Total',
+    pt: 'Total'
+  },
+  'adminPromotions.stats.active': {
+    es: 'Activas',
+    en: 'Active',
+    pt: 'Ativas'
+  },
+  'adminPromotions.stats.inactive': {
+    es: 'Inactivas',
+    en: 'Inactive',
+    pt: 'Inativas'
+  },
+  'adminPromotions.stats.expiringSoon': {
+    es: 'Por Expirar',
+    en: 'Expiring Soon',
+    pt: 'Expirando em Breve'
+  },
+  'adminPromotions.stats.stores': {
+    es: 'Tiendas',
+    en: 'Stores',
+    pt: 'Lojas'
+  },
+  'adminPromotions.searchPlaceholder': {
+    es: 'Buscar promociones...',
+    en: 'Search promotions...',
+    pt: 'Buscar promoções...'
+  },
+  'adminPromotions.allStores': {
+    es: 'Todas las tiendas',
+    en: 'All stores',
+    pt: 'Todas as lojas'
+  },
+  'adminPromotions.allTypes': {
+    es: 'Todos los tipos',
+    en: 'All types',
+    pt: 'Todos os tipos'
+  },
+  'adminPromotions.allStatuses': {
+    es: 'Todos los estados',
+    en: 'All statuses',
+    pt: 'Todos os status'
+  },
+  'adminPromotions.promotionTypes.percentage': {
+    es: 'Porcentaje',
+    en: 'Percentage',
+    pt: 'Porcentagem'
+  },
+  'adminPromotions.promotionTypes.fixed': {
+    es: 'Monto Fijo',
+    en: 'Fixed Amount',
+    pt: 'Valor Fixo'
+  },
+  'adminPromotions.promotionTypes.buyXGetY': {
+    es: 'Compra X Obtén Y',
+    en: 'Buy X Get Y',
+    pt: 'Compre X Ganhe Y'
+  },
+  'adminPromotions.promotionTypes.custom': {
+    es: 'Personalizada',
+    en: 'Custom',
+    pt: 'Personalizada'
+  },
+  'adminPromotions.status.active': {
+    es: 'Activas',
+    en: 'Active',
+    pt: 'Ativas'
+  },
+  'adminPromotions.status.inactive': {
+    es: 'Inactivas',
+    en: 'Inactive',
+    pt: 'Inativas'
+  },
+  'adminPromotions.newPromotion': {
+    es: 'Nueva Promoción',
+    en: 'New Promotion',
+    pt: 'Nova Promoção'
+  },
+  'adminPromotions.loading': {
+    es: 'Cargando promociones...',
+    en: 'Loading promotions...',
+    pt: 'Carregando promoções...'
+  },
+  'adminPromotions.noPromotions': {
+    es: 'No se encontraron promociones',
+    en: 'No promotions found',
+    pt: 'Nenhuma promoção encontrada'
+  },
+  'adminPromotions.createFirst': {
+    es: 'Crea tu primera promoción para empezar',
+    en: 'Create your first promotion to get started',
+    pt: 'Crie sua primeira promoção para começar'
+  },
+  'adminPromotions.products': {
+    es: 'productos',
+    en: 'products',
+    pt: 'produtos'
+  },
+  'adminPromotions.status.pending': {
+    es: 'Pendiente',
+    en: 'Pending',
+    pt: 'Pendente'
+  },
+  'adminPromotions.status.expired': {
+    es: 'Expirada',
+    en: 'Expired',
+    pt: 'Expirada'
+  },
+  'adminPromotions.status.vigent': {
+    es: 'Vigente',
+    en: 'Active',
+    pt: 'Vigente'
+  },
+  'adminPromotions.actions.viewDetails': {
+    es: 'Ver detalles',
+    en: 'View details',
+    pt: 'Ver detalhes'
+  },
+  'adminPromotions.actions.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'adminPromotions.actions.activate': {
+    es: 'Activar',
+    en: 'Activate',
+    pt: 'Ativar'
+  },
+  'adminPromotions.actions.deactivate': {
+    es: 'Desactivar',
+    en: 'Deactivate',
+    pt: 'Desativar'
+  },
+  'adminPromotions.actions.delete': {
+    es: 'Eliminar',
+    en: 'Delete',
+    pt: 'Excluir'
+  },
+  'adminPromotions.modals.view.title': {
+    es: 'Detalles de la Promoción',
+    en: 'Promotion Details',
+    pt: 'Detalhes da Promoção'
+  },
+  'adminPromotions.modals.view.generalInfo': {
+    es: 'Información General',
+    en: 'General Information',
+    pt: 'Informações Gerais'
+  },
+  'adminPromotions.modals.view.name': {
+    es: 'Nombre',
+    en: 'Name',
+    pt: 'Nome'
+  },
+  'adminPromotions.modals.view.type': {
+    es: 'Tipo',
+    en: 'Type',
+    pt: 'Tipo'
+  },
+  'adminPromotions.modals.view.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'adminPromotions.modals.view.store': {
+    es: 'Tienda',
+    en: 'Store',
+    pt: 'Loja'
+  },
+  'adminPromotions.modals.view.description': {
+    es: 'Descripción',
+    en: 'Description',
+    pt: 'Descrição'
+  },
+  'adminPromotions.modals.view.discountConfig': {
+    es: 'Configuración de Descuento',
+    en: 'Discount Configuration',
+    pt: 'Configuração de Desconto'
+  },
+  'adminPromotions.modals.view.discountPercentage': {
+    es: 'Porcentaje de Descuento',
+    en: 'Discount Percentage',
+    pt: 'Percentual de Desconto'
+  },
+  'adminPromotions.modals.view.discountAmount': {
+    es: 'Monto de Descuento',
+    en: 'Discount Amount',
+    pt: 'Valor do Desconto'
+  },
+  'adminPromotions.modals.view.buyQuantity': {
+    es: 'Compra',
+    en: 'Buy',
+    pt: 'Compre'
+  },
+  'adminPromotions.modals.view.getQuantity': {
+    es: 'Obtén',
+    en: 'Get',
+    pt: 'Ganhe'
+  },
+  'adminPromotions.modals.view.customText': {
+    es: 'Texto Personalizado',
+    en: 'Custom Text',
+    pt: 'Texto Personalizado'
+  },
+  'adminPromotions.modals.view.dates': {
+    es: 'Fechas de Vigencia',
+    en: 'Validity Dates',
+    pt: 'Datas de Validade'
+  },
+  'adminPromotions.modals.view.startDate': {
+    es: 'Fecha de Inicio',
+    en: 'Start Date',
+    pt: 'Data de Início'
+  },
+  'adminPromotions.modals.view.endDate': {
+    es: 'Fecha de Fin',
+    en: 'End Date',
+    pt: 'Data de Fim'
+  },
+  'adminPromotions.modals.view.products': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'adminPromotions.modals.view.visualConfig': {
+    es: 'Configuración Visual',
+    en: 'Visual Configuration',
+    pt: 'Configuração Visual'
+  },
+  'adminPromotions.modals.view.ribbonText': {
+    es: 'Texto del Cintillo',
+    en: 'Ribbon Text',
+    pt: 'Texto da Fita'
+  },
+  'adminPromotions.modals.view.ribbonPosition': {
+    es: 'Posición del Cintillo',
+    en: 'Ribbon Position',
+    pt: 'Posição da Fita'
+  },
+  'adminPromotions.modals.view.showOriginalPrice': {
+    es: 'Mostrar Precio Original',
+    en: 'Show Original Price',
+    pt: 'Mostrar Preço Original'
+  },
+  'adminPromotions.modals.view.showDiscountAmount': {
+    es: 'Mostrar Monto de Descuento',
+    en: 'Show Discount Amount',
+    pt: 'Mostrar Valor do Desconto'
+  },
+  'adminPromotions.modals.view.additionalInfo': {
+    es: 'Información Adicional',
+    en: 'Additional Information',
+    pt: 'Informações Adicionais'
+  },
+  'adminPromotions.modals.view.createdBy': {
+    es: 'Creado por',
+    en: 'Created by',
+    pt: 'Criado por'
+  },
+  'adminPromotions.modals.view.createdAt': {
+    es: 'Fecha de Creación',
+    en: 'Creation Date',
+    pt: 'Data de Criação'
+  },
+  'adminPromotions.modals.view.usageLimit': {
+    es: 'Límite de Usos',
+    en: 'Usage Limit',
+    pt: 'Limite de Usos'
+  },
+  'adminPromotions.modals.view.close': {
+    es: 'Cerrar',
+    en: 'Close',
+    pt: 'Fechar'
+  },
+  'adminPromotions.modals.view.yes': {
+    es: 'Sí',
+    en: 'Yes',
+    pt: 'Sim'
+  },
+  'adminPromotions.modals.view.no': {
+    es: 'No',
+    en: 'No',
+    pt: 'Não'
+  },
+  'adminPromotions.messages.promotionCreated': {
+    es: 'Promoción creada exitosamente',
+    en: 'Promotion created successfully',
+    pt: 'Promoção criada com sucesso'
+  },
+  'adminPromotions.messages.promotionUpdated': {
+    es: 'Promoción actualizada exitosamente',
+    en: 'Promotion updated successfully',
+    pt: 'Promoção atualizada com sucesso'
+  },
+  'adminPromotions.messages.promotionDeleted': {
+    es: 'Promoción eliminada exitosamente',
+    en: 'Promotion deleted successfully',
+    pt: 'Promoção excluída com sucesso'
+  },
+  'adminPromotions.messages.statusUpdated': {
+    es: 'Estado de promoción actualizado exitosamente',
+    en: 'Promotion status updated successfully',
+    pt: 'Status da promoção atualizado com sucesso'
+  },
+  'adminPromotions.errors.connection': {
+    es: 'Error de conexión',
+    en: 'Connection error',
+    pt: 'Erro de conexão'
+  },
+  'adminPromotions.errors.creatingPromotion': {
+    es: 'Error creando promoción',
+    en: 'Error creating promotion',
+    pt: 'Erro ao criar promoção'
+  },
+  'adminPromotions.errors.updatingPromotion': {
+    es: 'Error actualizando promoción',
+    en: 'Error updating promotion',
+    pt: 'Erro ao atualizar promoção'
+  },
+  'adminPromotions.errors.deletingPromotion': {
+    es: 'Error eliminando promoción',
+    en: 'Error deleting promotion',
+    pt: 'Erro ao excluir promoção'
+  },
+  'adminPromotions.errors.updatingStatus': {
+    es: 'Error actualizando estado',
+    en: 'Error updating status',
+    pt: 'Erro ao atualizar status'
+  },
+  'adminPromotions.confirm.delete': {
+    es: '¿Estás seguro de que quieres eliminar esta promoción? Esta acción no se puede deshacer.',
+    en: 'Are you sure you want to delete this promotion? This action cannot be undone.',
+    pt: 'Tem certeza de que deseja excluir esta promoção? Esta ação não pode ser desfeita.'
+  },
+  'adminPromotions.accessDenied.title': {
+    es: 'Acceso Denegado',
+    en: 'Access Denied',
+    pt: 'Acesso Negado'
+  },
+  'adminPromotions.accessDenied.message': {
+    es: 'No tienes permisos para acceder a esta página.',
+    en: 'You do not have permissions to access this page.',
+    pt: 'Você não tem permissões para acessar esta página.'
+  },
+  'adminPromotions.modals.view.units': {
+    es: 'unidades',
+    en: 'units',
+    pt: 'unidades'
+  },
+  'adminPromotions.modals.view.at': {
+    es: 'a las',
+    en: 'at',
+    pt: 'às'
+  },
+  'promotionForm.title.create': {
+    es: 'Crear Nueva Promoción',
+    en: 'Create New Promotion',
+    pt: 'Criar Nova Promoção'
+  },
+  'promotionForm.title.edit': {
+    es: 'Editar Promoción',
+    en: 'Edit Promotion',
+    pt: 'Editar Promoção'
+  },
+  'promotionForm.name': {
+    es: 'Nombre de la Promoción *',
+    en: 'Promotion Name *',
+    pt: 'Nome da Promoção *'
+  },
+  'promotionForm.namePlaceholder': {
+    es: 'Ej: Descuento de Verano',
+    en: 'Ex: Summer Discount',
+    pt: 'Ex: Desconto de Verão'
+  },
+  'promotionForm.type': {
+    es: 'Tipo de Promoción *',
+    en: 'Promotion Type *',
+    pt: 'Tipo de Promoção *'
+  },
+  'promotionForm.types.percentage': {
+    es: 'Porcentaje',
+    en: 'Percentage',
+    pt: 'Porcentagem'
+  },
+  'promotionForm.types.fixed': {
+    es: 'Monto Fijo',
+    en: 'Fixed Amount',
+    pt: 'Valor Fixo'
+  },
+  'promotionForm.types.buyXGetY': {
+    es: 'Compra X Obtén Y',
+    en: 'Buy X Get Y',
+    pt: 'Compre X Ganhe Y'
+  },
+  'promotionForm.types.custom': {
+    es: 'Personalizado',
+    en: 'Custom',
+    pt: 'Personalizado'
+  },
+  'promotionForm.store': {
+    es: 'Tienda *',
+    en: 'Store *',
+    pt: 'Loja *'
+  },
+  'promotionForm.selectStore': {
+    es: 'Seleccionar tienda',
+    en: 'Select store',
+    pt: 'Selecionar loja'
+  },
+  'promotionForm.assignedStore': {
+    es: 'Tienda asignada:',
+    en: 'Assigned store:',
+    pt: 'Loja atribuída:'
+  },
+  'promotionForm.assignedStoreMessage': {
+    es: 'La promoción se creará automáticamente para tu tienda',
+    en: 'The promotion will be created automatically for your store',
+    pt: 'A promoção será criada automaticamente para sua loja'
+  },
+  'promotionForm.description': {
+    es: 'Descripción *',
+    en: 'Description *',
+    pt: 'Descrição *'
+  },
+  'promotionForm.descriptionPlaceholder': {
+    es: 'Describe la promoción...',
+    en: 'Describe the promotion...',
+    pt: 'Descreva a promoção...'
+  },
+  'promotionForm.discountPercentage': {
+    es: 'Porcentaje de Descuento *',
+    en: 'Discount Percentage *',
+    pt: 'Percentual de Desconto *'
+  },
+  'promotionForm.discountAmount': {
+    es: 'Monto de Descuento *',
+    en: 'Discount Amount *',
+    pt: 'Valor do Desconto *'
+  },
+  'promotionForm.buyQuantity': {
+    es: 'Cantidad a Comprar *',
+    en: 'Buy Quantity *',
+    pt: 'Quantidade para Comprar *'
+  },
+  'promotionForm.getQuantity': {
+    es: 'Cantidad a Obtener *',
+    en: 'Get Quantity *',
+    pt: 'Quantidade para Ganhar *'
+  },
+  'promotionForm.customText': {
+    es: 'Texto Personalizado *',
+    en: 'Custom Text *',
+    pt: 'Texto Personalizado *'
+  },
+  'promotionForm.startDate': {
+    es: 'Fecha de Inicio *',
+    en: 'Start Date *',
+    pt: 'Data de Início *'
+  },
+  'promotionForm.startTime': {
+    es: 'Hora de Inicio',
+    en: 'Start Time',
+    pt: 'Hora de Início'
+  },
+  'promotionForm.endDate': {
+    es: 'Fecha de Fin *',
+    en: 'End Date *',
+    pt: 'Data de Fim *'
+  },
+  'promotionForm.endTime': {
+    es: 'Hora de Fin',
+    en: 'End Time',
+    pt: 'Hora de Fim'
+  },
+  'promotionForm.timeTip': {
+    es: 'Consejo: Si no especificas una hora, la promoción se activará a las 00:00 del día de inicio y terminará a las 23:59 del día de fin.',
+    en: 'Tip: If you don\'t specify a time, the promotion will activate at 00:00 on the start day and end at 23:59 on the end day.',
+    pt: 'Dica: Se você não especificar uma hora, a promoção será ativada às 00:00 no dia de início e terminará às 23:59 no dia de fim.'
+  },
+  'promotionForm.products': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'promotionForm.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'promotionForm.create': {
+    es: 'Crear Promoción',
+    en: 'Create Promotion',
+    pt: 'Criar Promoção'
+  },
+  'promotionForm.update': {
+    es: 'Actualizar Promoción',
+    en: 'Update Promotion',
+    pt: 'Atualizar Promoção'
+  },
+  'promotionForm.saving': {
+    es: 'Guardando...',
+    en: 'Saving...',
+    pt: 'Salvando...'
+  },
+  'promotionForm.selectStoreFirst': {
+    es: 'Selecciona una tienda',
+    en: 'Select a store',
+    pt: 'Selecione uma loja'
+  },
+  'promotionForm.selectStoreFirstMessage': {
+    es: 'para ver los productos disponibles',
+    en: 'to see available products',
+    pt: 'para ver produtos disponíveis'
+  },
+  'promotionForm.selectedProducts': {
+    es: 'Productos Seleccionados',
+    en: 'Selected Products',
+    pt: 'Produtos Selecionados'
+  },
+  'promotionForm.showOriginalPrice': {
+    es: 'Mostrar precio original tachado',
+    en: 'Show original price crossed out',
+    pt: 'Mostrar preço original riscado'
+  },
+  'promotionForm.showDiscountAmount': {
+    es: 'Mostrar monto de descuento',
+    en: 'Show discount amount',
+    pt: 'Mostrar valor do desconto'
+  },
+  'promotionForm.additionalConfig': {
+    es: 'Configuración Adicional',
+    en: 'Additional Configuration',
+    pt: 'Configuração Adicional'
+  },
+  'promotionForm.usageLimit': {
+    es: 'Límite de Usos (Opcional)',
+    en: 'Usage Limit (Optional)',
+    pt: 'Limite de Usos (Opcional)'
+  },
+  'promotionForm.noLimit': {
+    es: 'Sin límite',
+    en: 'No limit',
+    pt: 'Sem limite'
+  },
+  'promotionForm.activePromotion': {
+    es: 'Promoción activa',
+    en: 'Active promotion',
+    pt: 'Promoção ativa'
+  },
+  'promotionForm.searchProducts': {
+    es: 'Buscar Productos',
+    en: 'Search Products',
+    pt: 'Buscar Produtos'
+  },
+  'promotionForm.searchProductsPlaceholder': {
+    es: 'Buscar por nombre o categoría...',
+    en: 'Search by name or category...',
+    pt: 'Buscar por nome ou categoria...'
+  },
+  'promotionForm.noProductsAvailable': {
+    es: 'No hay productos disponibles en esta tienda',
+    en: 'No products available in this store',
+    pt: 'Nenhum produto disponível nesta loja'
+  },
+  'promotionForm.visualConfig': {
+    es: 'Configuración Visual',
+    en: 'Visual Configuration',
+    pt: 'Configuração Visual'
+  },
+  'promotionForm.ribbonText': {
+    es: 'Texto del Cintillo',
+    en: 'Ribbon Text',
+    pt: 'Texto da Fita'
+  },
+  'promotionForm.ribbonPosition': {
+    es: 'Posición del Cintillo',
+    en: 'Ribbon Position',
+    pt: 'Posição da Fita'
+  },
+  'promotionForm.ribbonPositions.topLeft': {
+    es: 'Superior Izquierda',
+    en: 'Top Left',
+    pt: 'Superior Esquerda'
+  },
+  'promotionForm.ribbonPositions.topRight': {
+    es: 'Superior Derecha',
+    en: 'Top Right',
+    pt: 'Superior Direita'
+  },
+  'promotionForm.ribbonPositions.bottomLeft': {
+    es: 'Inferior Izquierda',
+    en: 'Bottom Left',
+    pt: 'Inferior Esquerda'
+  },
+  'promotionForm.ribbonPositions.bottomRight': {
+    es: 'Inferior Derecha',
+    en: 'Bottom Right',
+    pt: 'Inferior Direita'
+  },
+  'promotionForm.datesAndTimes': {
+    es: 'Fechas y Horas de Vigencia',
+    en: 'Validity Dates and Times',
+    pt: 'Datas e Horas de Validade'
+  },
+  'promotionForm.tip': {
+    es: 'Consejo:',
+    en: 'Tip:',
+    pt: 'Dica:'
+  },
+  'promotionForm.customTextPlaceholder': {
+    es: 'Ej: ¡Oferta Especial!',
+    en: 'Ex: Special Offer!',
+    pt: 'Ex: Oferta Especial!'
+  },
+  // ===== ADMIN ADVERTISEMENTS =====
+  'adminAdvertisements.title': {
+    es: 'Gestión de Publicidad',
+    en: 'Advertisement Management',
+    pt: 'Gestão de Publicidade'
+  },
+  'adminAdvertisements.subtitle': {
+    es: 'Administra las campañas publicitarias de la plataforma',
+    en: 'Manage platform advertising campaigns',
+    pt: 'Gerencie campanhas publicitárias da plataforma'
+  },
+  'adminAdvertisements.stats.total': {
+    es: 'Total',
+    en: 'Total',
+    pt: 'Total'
+  },
+  'adminAdvertisements.stats.active': {
+    es: 'Activas',
+    en: 'Active',
+    pt: 'Ativas'
+  },
+  'adminAdvertisements.stats.draft': {
+    es: 'Borradores',
+    en: 'Drafts',
+    pt: 'Rascunhos'
+  },
+  'adminAdvertisements.stats.pending': {
+    es: 'Pendientes',
+    en: 'Pending',
+    pt: 'Pendentes'
+  },
+  'adminAdvertisements.searchPlaceholder': {
+    es: 'Buscar publicidad...',
+    en: 'Search advertisements...',
+    pt: 'Buscar publicidades...'
+  },
+  'adminAdvertisements.filterAll': {
+    es: 'Todos los estados',
+    en: 'All statuses',
+    pt: 'Todos os status'
+  },
+  'adminAdvertisements.filterActive': {
+    es: 'Activas',
+    en: 'Active',
+    pt: 'Ativas'
+  },
+  'adminAdvertisements.filterDraft': {
+    es: 'Borradores',
+    en: 'Drafts',
+    pt: 'Rascunhos'
+  },
+  'adminAdvertisements.filterPending': {
+    es: 'Pendientes',
+    en: 'Pending',
+    pt: 'Pendentes'
+  },
+  'adminAdvertisements.newAdvertisement': {
+    es: 'Nueva Publicidad',
+    en: 'New Advertisement',
+    pt: 'Nova Publicidade'
+  },
+  'adminAdvertisements.loading': {
+    es: 'Cargando publicidades...',
+    en: 'Loading advertisements...',
+    pt: 'Carregando publicidades...'
+  },
+  'adminAdvertisements.noAdvertisements': {
+    es: 'No hay publicidades disponibles',
+    en: 'No advertisements available',
+    pt: 'Nenhuma publicidade disponível'
+  },
+  'adminAdvertisements.viewDetails': {
+    es: 'Ver detalles',
+    en: 'View details',
+    pt: 'Ver detalhes'
+  },
+  'adminAdvertisements.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'adminAdvertisements.delete': {
+    es: 'Eliminar',
+    en: 'Delete',
+    pt: 'Excluir'
+  },
+  'adminAdvertisements.confirmDelete': {
+    es: '¿Estás seguro de que quieres eliminar esta publicidad?',
+    en: 'Are you sure you want to delete this advertisement?',
+    pt: 'Tem certeza de que deseja excluir esta publicidade?'
+  },
+  'adminAdvertisements.deleteSuccess': {
+    es: 'Publicidad eliminada exitosamente',
+    en: 'Advertisement deleted successfully',
+    pt: 'Publicidade excluída com sucesso'
+  },
+  'adminAdvertisements.deleteError': {
+    es: 'Error al eliminar la publicidad',
+    en: 'Error deleting advertisement',
+    pt: 'Erro ao excluir publicidade'
+  },
+  'adminAdvertisements.accessDenied': {
+    es: 'Acceso denegado. No tienes permisos para gestionar publicidad.',
+    en: 'Access denied. You do not have permissions to manage advertisements.',
+    pt: 'Acesso negado. Você não tem permissões para gerenciar publicidades.'
+  },
+  // ===== ADVERTISEMENT FORM =====
+  'advertisementForm.title.create': {
+    es: 'Nueva Publicidad',
+    en: 'New Advertisement',
+    pt: 'Nova Publicidade'
+  },
+  'advertisementForm.title.edit': {
+    es: 'Editar Publicidad',
+    en: 'Edit Advertisement',
+    pt: 'Editar Publicidade'
+  },
+  'advertisementForm.tabs.basic': {
+    es: 'Información Básica',
+    en: 'Basic Information',
+    pt: 'Informações Básicas'
+  },
+  'advertisementForm.tabs.targeting': {
+    es: 'Segmentación',
+    en: 'Targeting',
+    pt: 'Segmentação'
+  },
+  'advertisementForm.tabs.schedule': {
+    es: 'Programación',
+    en: 'Schedule',
+    pt: 'Programação'
+  },
+  'advertisementForm.tabs.display': {
+    es: 'Configuración',
+    en: 'Configuration',
+    pt: 'Configuração'
+  },
+  'advertisementForm.basic.title': {
+    es: 'Título *',
+    en: 'Title *',
+    pt: 'Título *'
+  },
+  'advertisementForm.basic.store': {
+    es: 'Tienda *',
+    en: 'Store *',
+    pt: 'Loja *'
+  },
+  'advertisementForm.basic.selectStore': {
+    es: 'Seleccionar tienda',
+    en: 'Select store',
+    pt: 'Selecionar loja'
+  },
+  'advertisementForm.basic.description': {
+    es: 'Descripción *',
+    en: 'Description *',
+    pt: 'Descrição *'
+  },
+  'advertisementForm.basic.content': {
+    es: 'Contenido *',
+    en: 'Content *',
+    pt: 'Conteúdo *'
+  },
+  'advertisementForm.basic.contentPlaceholder': {
+    es: 'Contenido completo de la publicidad...',
+    en: 'Complete advertisement content...',
+    pt: 'Conteúdo completo da publicidade...'
+  },
+  'advertisementForm.basic.imageUrl': {
+    es: 'URL de Imagen',
+    en: 'Image URL',
+    pt: 'URL da Imagem'
+  },
+  'advertisementForm.basic.videoUrl': {
+    es: 'URL de Video',
+    en: 'Video URL',
+    pt: 'URL do Vídeo'
+  },
+  'advertisementForm.basic.navigationUrl': {
+    es: 'URL de Navegación',
+    en: 'Navigation URL',
+    pt: 'URL de Navegação'
+  },
+  'advertisementForm.basic.navigationUrlHelp': {
+    es: 'URL a la que navegará el cliente cuando haga clic en la publicidad',
+    en: 'URL to which the customer will navigate when clicking on the advertisement',
+    pt: 'URL para a qual o cliente navegará ao clicar na publicidade'
+  },
+  'advertisementForm.basic.displayType': {
+    es: 'Tipo de Display *',
+    en: 'Display Type *',
+    pt: 'Tipo de Exibição *'
+  },
+  'advertisementForm.basic.targetPlatform': {
+    es: 'Plataforma Objetivo *',
+    en: 'Target Platform *',
+    pt: 'Plataforma Alvo *'
+  },
+  'advertisementForm.displayTypes.fullscreen': {
+    es: 'Pantalla Completa',
+    en: 'Full Screen',
+    pt: 'Tela Cheia'
+  },
+  'advertisementForm.displayTypes.footer': {
+    es: 'Pie de Página',
+    en: 'Footer',
+    pt: 'Rodapé'
+  },
+  'advertisementForm.displayTypes.midScreen': {
+    es: 'Mitad de Pantalla',
+    en: 'Mid Screen',
+    pt: 'Meia Tela'
+  },
+  'advertisementForm.displayTypes.searchCard': {
+    es: 'Card de Búsqueda',
+    en: 'Search Card',
+    pt: 'Card de Busca'
+  },
+  'advertisementForm.platforms.android': {
+    es: 'Android',
+    en: 'Android',
+    pt: 'Android'
+  },
+  'advertisementForm.platforms.ios': {
+    es: 'iOS',
+    en: 'iOS',
+    pt: 'iOS'
+  },
+  'advertisementForm.platforms.both': {
+    es: 'Ambas',
+    en: 'Both',
+    pt: 'Ambas'
+  },
+  'advertisementForm.targeting.userRoles': {
+    es: 'Roles de Usuario',
+    en: 'User Roles',
+    pt: 'Funções do Usuário'
+  },
+  'advertisementForm.targeting.loyaltyLevels': {
+    es: 'Niveles de Fidelización',
+    en: 'Loyalty Levels',
+    pt: 'Níveis de Fidelidade'
+  },
+  'advertisementForm.targeting.deviceTypes': {
+    es: 'Tipos de Dispositivo',
+    en: 'Device Types',
+    pt: 'Tipos de Dispositivo'
+  },
+  'advertisementForm.targeting.operatingSystems': {
+    es: 'Sistemas Operativos',
+    en: 'Operating Systems',
+    pt: 'Sistemas Operacionais'
+  },
+  'advertisementForm.targeting.locations': {
+    es: 'Ubicaciones',
+    en: 'Locations',
+    pt: 'Localizações'
+  },
+  'advertisementForm.targeting.interests': {
+    es: 'Intereses',
+    en: 'Interests',
+    pt: 'Interesses'
+  },
+  'advertisementForm.schedule.startDate': {
+    es: 'Fecha de Inicio *',
+    en: 'Start Date *',
+    pt: 'Data de Início *'
+  },
+  'advertisementForm.schedule.endDate': {
+    es: 'Fecha de Fin *',
+    en: 'End Date *',
+    pt: 'Data de Fim *'
+  },
+  'advertisementForm.schedule.startTime': {
+    es: 'Hora de Inicio *',
+    en: 'Start Time *',
+    pt: 'Hora de Início *'
+  },
+  'advertisementForm.schedule.endTime': {
+    es: 'Hora de Fin *',
+    en: 'End Time *',
+    pt: 'Hora de Fim *'
+  },
+  'advertisementForm.schedule.daysOfWeek': {
+    es: 'Días de la Semana',
+    en: 'Days of the Week',
+    pt: 'Dias da Semana'
+  },
+  'advertisementForm.schedule.daysOfWeekHelp': {
+    es: 'Si no seleccionas ningún día, la publicidad se mostrará todos los días',
+    en: 'If you do not select any day, the advertisement will be shown every day',
+    pt: 'Se você não selecionar nenhum dia, a publicidade será exibida todos os dias'
+  },
+  'advertisementForm.schedule.timeSlots': {
+    es: 'Slots de Tiempo Específicos',
+    en: 'Specific Time Slots',
+    pt: 'Slots de Tempo Específicos'
+  },
+  'advertisementForm.schedule.addSlot': {
+    es: '+ Agregar Slot',
+    en: '+ Add Slot',
+    pt: '+ Adicionar Slot'
+  },
+  'advertisementForm.schedule.timeSlotsHelp': {
+    es: 'Si no agregas slots específicos, se usará el horario general',
+    en: 'If you do not add specific slots, the general schedule will be used',
+    pt: 'Se você não adicionar slots específicos, o horário geral será usado'
+  },
+  'advertisementForm.schedule.to': {
+    es: 'a',
+    en: 'to',
+    pt: 'a'
+  },
+  'advertisementForm.display.maxImpressions': {
+    es: 'Impresiones Máximas',
+    en: 'Maximum Impressions',
+    pt: 'Impressões Máximas'
+  },
+  'advertisementForm.display.maxImpressionsHelp': {
+    es: '0 = sin límite de impresiones',
+    en: '0 = no impression limit',
+    pt: '0 = sem limite de impressões'
+  },
+  'advertisementForm.display.maxClicks': {
+    es: 'Clicks Máximos',
+    en: 'Maximum Clicks',
+    pt: 'Cliques Máximos'
+  },
+  'advertisementForm.display.maxClicksHelp': {
+    es: '0 = sin límite de clicks',
+    en: '0 = no click limit',
+    pt: '0 = sem limite de cliques'
+  },
+  'advertisementForm.display.frequency': {
+    es: 'Frecuencia por Usuario',
+    en: 'Frequency per User',
+    pt: 'Frequência por Usuário'
+  },
+  'advertisementForm.display.frequencyHelp': {
+    es: 'Número de veces que se mostrará por usuario',
+    en: 'Number of times it will be shown per user',
+    pt: 'Número de vezes que será exibido por usuário'
+  },
+  'advertisementForm.display.priority': {
+    es: 'Prioridad',
+    en: 'Priority',
+    pt: 'Prioridade'
+  },
+  'advertisementForm.display.priorityHelp': {
+    es: '1 = más baja, 10 = más alta',
+    en: '1 = lowest, 10 = highest',
+    pt: '1 = mais baixa, 10 = mais alta'
+  },
+  'advertisementForm.display.activateImmediately': {
+    es: 'Activar publicidad inmediatamente',
+    en: 'Activate advertisement immediately',
+    pt: 'Ativar publicidade imediatamente'
+  },
+  'advertisementForm.display.activateImmediatelyHelp': {
+    es: 'Si no está marcado, la publicidad se creará como borrador',
+    en: 'If not checked, the advertisement will be created as a draft',
+    pt: 'Se não estiver marcado, a publicidade será criada como rascunho'
+  },
+  'advertisementForm.buttons.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'advertisementForm.buttons.saving': {
+    es: 'Guardando...',
+    en: 'Saving...',
+    pt: 'Salvando...'
+  },
+  'advertisementForm.buttons.update': {
+    es: 'Actualizar',
+    en: 'Update',
+    pt: 'Atualizar'
+  },
+  'advertisementForm.buttons.create': {
+    es: 'Crear',
+    en: 'Create',
+    pt: 'Criar'
+  },
+  'advertisementForm.daysOfWeek.sunday': {
+    es: 'Domingo',
+    en: 'Sunday',
+    pt: 'Domingo'
+  },
+  'advertisementForm.daysOfWeek.monday': {
+    es: 'Lunes',
+    en: 'Monday',
+    pt: 'Segunda-feira'
+  },
+  'advertisementForm.daysOfWeek.tuesday': {
+    es: 'Martes',
+    en: 'Tuesday',
+    pt: 'Terça-feira'
+  },
+  'advertisementForm.daysOfWeek.wednesday': {
+    es: 'Miércoles',
+    en: 'Wednesday',
+    pt: 'Quarta-feira'
+  },
+  'advertisementForm.daysOfWeek.thursday': {
+    es: 'Jueves',
+    en: 'Thursday',
+    pt: 'Quinta-feira'
+  },
+  'advertisementForm.daysOfWeek.friday': {
+    es: 'Viernes',
+    en: 'Friday',
+    pt: 'Sexta-feira'
+  },
+  'advertisementForm.daysOfWeek.saturday': {
+    es: 'Sábado',
+    en: 'Saturday',
+    pt: 'Sábado'
+  },
+  // ===== ADMIN SALES =====
+  'adminSales.title': {
+    es: 'Gestión de Ventas',
+    en: 'Sales Management',
+    pt: 'Gestão de Vendas'
+  },
+  'adminSales.subtitle': {
+    es: 'Monitorea y gestiona las ventas del negocio',
+    en: 'Monitor and manage business sales',
+    pt: 'Monitore e gerencie as vendas do negócio'
+  },
+  'adminSales.stats.todaySales': {
+    es: 'Ventas Hoy',
+    en: 'Today Sales',
+    pt: 'Vendas Hoje'
+  },
+  'adminSales.stats.monthlySales': {
+    es: 'Ventas del Mes',
+    en: 'Monthly Sales',
+    pt: 'Vendas do Mês'
+  },
+  'adminSales.stats.pendingOrders': {
+    es: 'Órdenes Pendientes',
+    en: 'Pending Orders',
+    pt: 'Pedidos Pendentes'
+  },
+  'adminSales.stats.activeCustomers': {
+    es: 'Clientes Activos',
+    en: 'Active Customers',
+    pt: 'Clientes Ativos'
+  },
+  'adminSales.salesHistory.title': {
+    es: 'Historial de Ventas',
+    en: 'Sales History',
+    pt: 'Histórico de Vendas'
+  },
+  'adminSales.salesHistory.comingSoon': {
+    es: 'Esta funcionalidad estará disponible próximamente',
+    en: 'This functionality will be available soon',
+    pt: 'Esta funcionalidade estará disponível em breve'
+  },
+  'adminSales.salesHistory.description': {
+    es: 'Aquí podrás ver el historial completo de ventas y gestionar órdenes',
+    en: 'Here you will be able to see the complete sales history and manage orders',
+    pt: 'Aqui você poderá ver o histórico completo de vendas e gerenciar pedidos'
+  },
+  // ===== SIDEBAR DESCRIPTIONS =====
+  'sidebar.admin.sales.description': {
+    es: 'Reportes de ventas globales',
+    en: 'Global sales reports',
+    pt: 'Relatórios de vendas globais'
+  },
+  'sidebar.storeManager.sales.description': {
+    es: 'Reportes de ventas de la tienda',
+    en: 'Store sales reports',
+    pt: 'Relatórios de vendas da loja'
+  },
+  // ===== STORE MANAGER SALES =====
+  'storeManagerSales.title': {
+    es: 'Reportes de Ventas',
+    en: 'Sales Reports',
+    pt: 'Relatórios de Vendas'
+  },
+  'storeManagerSales.subtitle': {
+    es: 'Analiza el rendimiento de ventas de tu tienda',
+    en: 'Analyze your store sales performance',
+    pt: 'Analise o desempenho de vendas da sua loja'
+  },
+  'storeManagerSales.development': {
+    es: 'Funcionalidad en desarrollo',
+    en: 'Feature in development',
+    pt: 'Funcionalidade em desenvolvimento'
+  },
+
+  // ===== STORE MANAGER DASHBOARD =====
+  'storeManagerDashboard.title': {
+    es: 'Dashboard de Gestión de Tienda',
+    en: 'Store Management Dashboard',
+    pt: 'Dashboard de Gerenciamento da Loja'
+  },
+  'storeManagerDashboard.welcome': {
+    es: 'Bienvenido',
+    en: 'Welcome',
+    pt: 'Bem-vindo'
+  },
+  'storeManagerDashboard.stats.products': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'storeManagerDashboard.stats.activePromotions': {
+    es: 'Promociones Activas',
+    en: 'Active Promotions',
+    pt: 'Promoções Ativas'
+  },
+  'storeManagerDashboard.stats.pendingOrders': {
+    es: 'Pedidos Pendientes',
+    en: 'Pending Orders',
+    pt: 'Pedidos Pendentes'
+  },
+  'storeManagerDashboard.stats.monthlySales': {
+    es: 'Ventas del Mes',
+    en: 'Monthly Sales',
+    pt: 'Vendas do Mês'
+  },
+  'storeManagerDashboard.stats.averageRating': {
+    es: 'Calificación Promedio',
+    en: 'Average Rating',
+    pt: 'Avaliação Média'
+  },
+  'storeManagerDashboard.stats.monthlyGrowth': {
+    es: 'Crecimiento Mensual',
+    en: 'Monthly Growth',
+    pt: 'Crescimento Mensal'
+  },
+  'storeManagerDashboard.stats.conversionRate': {
+    es: 'Tasa de Conversión',
+    en: 'Conversion Rate',
+    pt: 'Taxa de Conversão'
+  },
+  'storeManagerDashboard.quickActions.title': {
+    es: 'Acciones Rápidas',
+    en: 'Quick Actions',
+    pt: 'Ações Rápidas'
+  },
+  'storeManagerDashboard.quickActions.addProduct': {
+    es: 'Agregar Producto',
+    en: 'Add Product',
+    pt: 'Adicionar Produto'
+  },
+  'storeManagerDashboard.quickActions.createPromotion': {
+    es: 'Crear Promoción',
+    en: 'Create Promotion',
+    pt: 'Criar Promoção'
+  },
+  'storeManagerDashboard.quickActions.viewOrders': {
+    es: 'Ver Pedidos',
+    en: 'View Orders',
+    pt: 'Ver Pedidos'
+  },
+  'storeManagerDashboard.quickActions.messages': {
+    es: 'Mensajes',
+    en: 'Messages',
+    pt: 'Mensagens'
+  },
+  'storeManagerDashboard.recentOrders.title': {
+    es: 'Pedidos Recientes',
+    en: 'Recent Orders',
+    pt: 'Pedidos Recentes'
+  },
+  'storeManagerDashboard.recentOrders.id': {
+    es: 'ID',
+    en: 'ID',
+    pt: 'ID'
+  },
+  'storeManagerDashboard.recentOrders.customer': {
+    es: 'Cliente',
+    en: 'Customer',
+    pt: 'Cliente'
+  },
+  'storeManagerDashboard.recentOrders.amount': {
+    es: 'Monto',
+    en: 'Amount',
+    pt: 'Valor'
+  },
+  'storeManagerDashboard.recentOrders.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'storeManagerDashboard.recentOrders.date': {
+    es: 'Fecha',
+    en: 'Date',
+    pt: 'Data'
+  },
+  'storeManagerDashboard.recentOrders.statuses.pending': {
+    es: 'Pendiente',
+    en: 'Pending',
+    pt: 'Pendente'
+  },
+  'storeManagerDashboard.recentOrders.statuses.inProcess': {
+    es: 'En proceso',
+    en: 'In Process',
+    pt: 'Em Processo'
+  },
+  'storeManagerDashboard.recentOrders.statuses.delivered': {
+    es: 'Entregado',
+    en: 'Delivered',
+    pt: 'Entregue'
+  },
+
+  // ===== ADMIN LOYALTY =====
+  'adminLoyalty.title': {
+    es: 'Gestión de Fidelización',
+    en: 'Loyalty Management',
+    pt: 'Gerenciamento de Fidelização'
+  },
+  'adminLoyalty.subtitle': {
+    es: 'Administra el programa de lealtad de clientes',
+    en: 'Manage the customer loyalty program',
+    pt: 'Gerencie o programa de fidelidade de clientes'
+  },
+  'adminLoyalty.tabs.overview': {
+    es: 'Resumen',
+    en: 'Overview',
+    pt: 'Visão Geral'
+  },
+  'adminLoyalty.tabs.rewards': {
+    es: 'Premios',
+    en: 'Rewards',
+    pt: 'Prêmios'
+  },
+  'adminLoyalty.tabs.redemptions': {
+    es: 'Canjes',
+    en: 'Redemptions',
+    pt: 'Resgates'
+  },
+  'adminLoyalty.tabs.policies': {
+    es: 'Políticas',
+    en: 'Policies',
+    pt: 'Políticas'
+  },
+  'adminLoyalty.stats.activeCustomers': {
+    es: 'Clientes Activos',
+    en: 'Active Customers',
+    pt: 'Clientes Ativos'
+  },
+  'adminLoyalty.stats.pointsAwarded': {
+    es: 'Puntos Otorgados',
+    en: 'Points Awarded',
+    pt: 'Pontos Concedidos'
+  },
+  'adminLoyalty.stats.rewardsRedeemed': {
+    es: 'Premios Canjeados',
+    en: 'Rewards Redeemed',
+    pt: 'Prêmios Resgatados'
+  },
+  'adminLoyalty.stats.averageRating': {
+    es: 'Valoración Promedio',
+    en: 'Average Rating',
+    pt: 'Avaliação Média'
+  },
+  'adminLoyalty.overview.activeRewards': {
+    es: 'Premios Activos',
+    en: 'Active Rewards',
+    pt: 'Prêmios Ativos'
+  },
+  'adminLoyalty.overview.recentRedemptions': {
+    es: 'Canjes Recientes',
+    en: 'Recent Redemptions',
+    pt: 'Resgates Recentes'
+  },
+  'adminLoyalty.overview.active': {
+    es: 'Activo',
+    en: 'Active',
+    pt: 'Ativo'
+  },
+  'adminLoyalty.overview.inactive': {
+    es: 'Inactivo',
+    en: 'Inactive',
+    pt: 'Inativo'
+  },
+  'adminLoyalty.rewards.title': {
+    es: 'Gestión de Premios',
+    en: 'Rewards Management',
+    pt: 'Gerenciamento de Prêmios'
+  },
+  'adminLoyalty.rewards.newReward': {
+    es: 'Nuevo Premio',
+    en: 'New Reward',
+    pt: 'Novo Prêmio'
+  },
+  'adminLoyalty.rewards.editReward': {
+    es: 'Editar Premio',
+    en: 'Edit Reward',
+    pt: 'Editar Prêmio'
+  },
+  'adminLoyalty.rewards.createNewReward': {
+    es: 'Crear Nuevo Premio',
+    en: 'Create New Reward',
+    pt: 'Criar Novo Prêmio'
+  },
+  'adminLoyalty.rewards.table.reward': {
+    es: 'Premio',
+    en: 'Reward',
+    pt: 'Prêmio'
+  },
+  'adminLoyalty.rewards.table.points': {
+    es: 'Puntos',
+    en: 'Points',
+    pt: 'Pontos'
+  },
+  'adminLoyalty.rewards.table.stock': {
+    es: 'Stock',
+    en: 'Stock',
+    pt: 'Estoque'
+  },
+  'adminLoyalty.rewards.table.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'adminLoyalty.rewards.table.actions': {
+    es: 'Acciones',
+    en: 'Actions',
+    pt: 'Ações'
+  },
+  'adminLoyalty.rewards.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'adminLoyalty.redemptions.title': {
+    es: 'Gestión de Canjes',
+    en: 'Redemption Management',
+    pt: 'Gerenciamento de Resgates'
+  },
+  'adminLoyalty.policies.title': {
+    es: 'Políticas de Puntos',
+    en: 'Points Policies',
+    pt: 'Políticas de Pontos'
+  },
+  'adminLoyalty.policies.subtitle': {
+    es: 'Configura cuántos puntos se otorgan por cada acción de los clientes',
+    en: 'Configure how many points are awarded for each customer action',
+    pt: 'Configure quantos pontos são concedidos para cada ação do cliente'
+  },
+  'adminLoyalty.policies.currentPolicies': {
+    es: 'Políticas Actuales',
+    en: 'Current Policies',
+    pt: 'Políticas Atuais'
+  },
+  'adminLoyalty.policies.noPolicies': {
+    es: 'No hay políticas configuradas',
+    en: 'No policies configured',
+    pt: 'Nenhuma política configurada'
+  },
+  'adminLoyalty.policies.points': {
+    es: 'Puntos',
+    en: 'Points',
+    pt: 'Pontos'
+  },
+  'adminLoyalty.policies.activePolicy': {
+    es: 'Política activa',
+    en: 'Active policy',
+    pt: 'Política ativa'
+  },
+  'adminLoyalty.policies.addNewPolicy': {
+    es: 'Agregar Nueva Política',
+    en: 'Add New Policy',
+    pt: 'Adicionar Nova Política'
+  },
+  'adminLoyalty.policies.action': {
+    es: 'Acción',
+    en: 'Action',
+    pt: 'Ação'
+  },
+  'adminLoyalty.policies.selectAction': {
+    es: 'Seleccionar acción',
+    en: 'Select action',
+    pt: 'Selecionar ação'
+  },
+  'adminLoyalty.policies.description': {
+    es: 'Descripción',
+    en: 'Description',
+    pt: 'Descrição'
+  },
+  'adminLoyalty.policies.descriptionPlaceholder': {
+    es: 'Describe la política de puntos...',
+    en: 'Describe the points policy...',
+    pt: 'Descreva a política de pontos...'
+  },
+  'adminLoyalty.policies.addPolicy': {
+    es: 'Agregar Política',
+    en: 'Add Policy',
+    pt: 'Adicionar Política'
+  },
+  'adminLoyalty.policies.info.title': {
+    es: 'Información sobre las políticas',
+    en: 'Information about policies',
+    pt: 'Informações sobre as políticas'
+  },
+  'adminLoyalty.policies.info.purchase': {
+    es: 'Compra: Puntos por cada compra realizada (ej: 1 punto por cada $1)',
+    en: 'Purchase: Points for each purchase made (e.g., 1 point per $1)',
+    pt: 'Compra: Pontos para cada compra realizada (ex: 1 ponto por $1)'
+  },
+  'adminLoyalty.policies.info.review': {
+    es: 'Reseña: Puntos por enviar una reseña de producto',
+    en: 'Review: Points for submitting a product review',
+    pt: 'Avaliação: Pontos por enviar uma avaliação de produto'
+  },
+  'adminLoyalty.policies.info.referral': {
+    es: 'Referido: Puntos por referir a un nuevo cliente que se registre',
+    en: 'Referral: Points for referring a new customer who registers',
+    pt: 'Indicação: Pontos por indicar um novo cliente que se registre'
+  },
+  'adminLoyalty.policies.info.share': {
+    es: 'Compartir: Puntos por compartir productos en redes sociales',
+    en: 'Share: Points for sharing products on social media',
+    pt: 'Compartilhar: Pontos por compartilhar produtos nas redes sociais'
+  },
+  'adminLoyalty.policies.info.redemption': {
+    es: 'Canje: Puntos por canjear un premio (puede ser negativo)',
+    en: 'Redemption: Points for redeeming a reward (can be negative)',
+    pt: 'Resgate: Pontos por resgatar um prêmio (pode ser negativo)'
+  },
+  'adminLoyalty.policies.savePolicies': {
+    es: 'Guardar Políticas',
+    en: 'Save Policies',
+    pt: 'Salvar Políticas'
+  },
+  'adminLoyalty.policies.actions.purchase': {
+    es: 'Compra',
+    en: 'Purchase',
+    pt: 'Compra'
+  },
+  'adminLoyalty.policies.actions.purchaseDesc': {
+    es: 'Puntos por cada compra realizada',
+    en: 'Points for each purchase made',
+    pt: 'Pontos para cada compra realizada'
+  },
+  'adminLoyalty.policies.actions.review': {
+    es: 'Reseña',
+    en: 'Review',
+    pt: 'Avaliação'
+  },
+  'adminLoyalty.policies.actions.reviewDesc': {
+    es: 'Puntos por enviar una reseña de producto',
+    en: 'Points for submitting a product review',
+    pt: 'Pontos por enviar uma avaliação de produto'
+  },
+  'adminLoyalty.policies.actions.referral': {
+    es: 'Referido',
+    en: 'Referral',
+    pt: 'Indicação'
+  },
+  'adminLoyalty.policies.actions.referralDesc': {
+    es: 'Puntos por referir a un nuevo cliente',
+    en: 'Points for referring a new customer',
+    pt: 'Pontos por indicar um novo cliente'
+  },
+  'adminLoyalty.policies.actions.share': {
+    es: 'Compartir',
+    en: 'Share',
+    pt: 'Compartilhar'
+  },
+  'adminLoyalty.policies.actions.shareDesc': {
+    es: 'Puntos por compartir en redes sociales',
+    en: 'Points for sharing on social media',
+    pt: 'Pontos por compartilhar nas redes sociais'
+  },
+  'adminLoyalty.policies.actions.redemption': {
+    es: 'Canje',
+    en: 'Redemption',
+    pt: 'Resgate'
+  },
+  'adminLoyalty.policies.actions.redemptionDesc': {
+    es: 'Puntos por canjear un premio',
+    en: 'Points for redeeming a reward',
+    pt: 'Pontos por resgatar um prêmio'
+  },
+  'adminLoyalty.messages.rewardCreated': {
+    es: 'Premio creado exitosamente',
+    en: 'Reward created successfully',
+    pt: 'Prêmio criado com sucesso'
+  },
+  'adminLoyalty.messages.rewardUpdated': {
+    es: 'Premio actualizado exitosamente',
+    en: 'Reward updated successfully',
+    pt: 'Prêmio atualizado com sucesso'
+  },
+  'adminLoyalty.messages.statusUpdated': {
+    es: '✅ Premio marcado como entregado exitosamente',
+    en: '✅ Reward marked as delivered successfully',
+    pt: '✅ Prêmio marcado como entregue com sucesso'
+  },
+  'adminLoyalty.messages.error.noToken': {
+    es: 'Error: No hay token de autenticación. Por favor, inicia sesión nuevamente.',
+    en: 'Error: No authentication token. Please log in again.',
+    pt: 'Erro: Sem token de autenticação. Por favor, faça login novamente.'
+  },
+  'adminLoyalty.messages.error.createReward': {
+    es: 'Error al crear premio',
+    en: 'Error creating reward',
+    pt: 'Erro ao criar prêmio'
+  },
+  'adminLoyalty.messages.error.updateReward': {
+    es: 'Error al actualizar premio',
+    en: 'Error updating reward',
+    pt: 'Erro ao atualizar prêmio'
+  },
+  'adminLoyalty.messages.error.updateStatus': {
+    es: 'Error al actualizar estado',
+    en: 'Error updating status',
+    pt: 'Erro ao atualizar status'
+  },
+  'adminLoyalty.messages.error.connection': {
+    es: 'Error al crear premio. Verifica la conexión.',
+    en: 'Error creating reward. Check connection.',
+    pt: 'Erro ao criar prêmio. Verifique a conexão.'
+  },
+  'adminLoyalty.messages.error.unknown': {
+    es: 'Error desconocido',
+    en: 'Unknown error',
+    pt: 'Erro desconhecido'
+  },
+
+  // ===== REWARD FORM =====
+  'rewardForm.name': {
+    es: 'Nombre del Premio *',
+    en: 'Reward Name *',
+    pt: 'Nome do Prêmio *'
+  },
+  'rewardForm.namePlaceholder': {
+    es: 'Ej: Gorra con logo, Descuento 20%',
+    en: 'E.g., Cap with logo, 20% discount',
+    pt: 'Ex: Boné com logo, Desconto 20%'
+  },
+  'rewardForm.description': {
+    es: 'Descripción *',
+    en: 'Description *',
+    pt: 'Descrição *'
+  },
+  'rewardForm.descriptionPlaceholder': {
+    es: 'Describe el premio...',
+    en: 'Describe the reward...',
+    pt: 'Descreva o prêmio...'
+  },
+  'rewardForm.image': {
+    es: 'Imagen del Premio',
+    en: 'Reward Image',
+    pt: 'Imagem do Prêmio'
+  },
+  'rewardForm.uploadImage': {
+    es: 'Subir Imagen',
+    en: 'Upload Image',
+    pt: 'Enviar Imagem'
+  },
+  'rewardForm.removeImage': {
+    es: 'Eliminar',
+    en: 'Remove',
+    pt: 'Remover'
+  },
+  'rewardForm.pointsRequired': {
+    es: 'Puntos Requeridos *',
+    en: 'Points Required *',
+    pt: 'Pontos Necessários *'
+  },
+  'rewardForm.cashRequired': {
+    es: 'Dinero Requerido',
+    en: 'Cash Required',
+    pt: 'Dinheiro Necessário'
+  },
+  'rewardForm.category': {
+    es: 'Categoría *',
+    en: 'Category *',
+    pt: 'Categoria *'
+  },
+  'rewardForm.stock': {
+    es: 'Stock Disponible *',
+    en: 'Available Stock *',
+    pt: 'Estoque Disponível *'
+  },
+  'rewardForm.isActive': {
+    es: 'Premio Activo',
+    en: 'Active Reward',
+    pt: 'Prêmio Ativo'
+  },
+  'rewardForm.categories.tools': {
+    es: 'Herramientas',
+    en: 'Tools',
+    pt: 'Ferramentas'
+  },
+  'rewardForm.categories.electronics': {
+    es: 'Electrónicos',
+    en: 'Electronics',
+    pt: 'Eletrônicos'
+  },
+  'rewardForm.categories.accessories': {
+    es: 'Accesorios',
+    en: 'Accessories',
+    pt: 'Acessórios'
+  },
+  'rewardForm.categories.giftCards': {
+    es: 'Tarjetas de Regalo',
+    en: 'Gift Cards',
+    pt: 'Cartões Presente'
+  },
+  'rewardForm.categories.discounts': {
+    es: 'Descuentos',
+    en: 'Discounts',
+    pt: 'Descontos'
+  },
+  'rewardForm.buttons.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'rewardForm.buttons.save': {
+    es: 'Guardar',
+    en: 'Save',
+    pt: 'Salvar'
+  },
+  'rewardForm.buttons.update': {
+    es: 'Actualizar',
+    en: 'Update',
+    pt: 'Atualizar'
+  },
+  'rewardForm.mixedRewardsHelp': {
+    es: 'Para premios mixtos (ej: gorra + $5)',
+    en: 'For mixed rewards (e.g., cap + $5)',
+    pt: 'Para prêmios mistos (ex: boné + $5)'
+  },
+
+  // ===== REDEMPTION MANAGEMENT =====
+  'redemptionManagement.stats.total': {
+    es: 'Total',
+    en: 'Total',
+    pt: 'Total'
+  },
+  'redemptionManagement.stats.pending': {
+    es: 'Pendientes',
+    en: 'Pending',
+    pt: 'Pendentes'
+  },
+  'redemptionManagement.stats.delivered': {
+    es: 'Entregados',
+    en: 'Delivered',
+    pt: 'Entregues'
+  },
+  'redemptionManagement.loading': {
+    es: 'Cargando canjes...',
+    en: 'Loading redemptions...',
+    pt: 'Carregando resgates...'
+  },
+  'redemptionManagement.searchPlaceholder': {
+    es: 'Buscar por cliente, premio...',
+    en: 'Search by customer, reward...',
+    pt: 'Buscar por cliente, prêmio...'
+  },
+  'redemptionManagement.filterAll': {
+    es: 'Todos los estados',
+    en: 'All statuses',
+    pt: 'Todos os status'
+  },
+  'redemptionManagement.filterPending': {
+    es: 'Pendiente',
+    en: 'Pending',
+    pt: 'Pendente'
+  },
+  'redemptionManagement.filterApproved': {
+    es: 'Aprobado',
+    en: 'Approved',
+    pt: 'Aprovado'
+  },
+  'redemptionManagement.filterRejected': {
+    es: 'Rechazado',
+    en: 'Rejected',
+    pt: 'Rejeitado'
+  },
+  'redemptionManagement.filterShipped': {
+    es: 'Enviado',
+    en: 'Shipped',
+    pt: 'Enviado'
+  },
+  'redemptionManagement.filterDelivered': {
+    es: 'Entregado',
+    en: 'Delivered',
+    pt: 'Entregue'
+  },
+  'redemptionManagement.filterDeliveredOnly': {
+    es: 'Solo Entregados',
+    en: 'Delivered Only',
+    pt: 'Apenas Entregues'
+  },
+  'redemptionManagement.table.customer': {
+    es: 'Cliente',
+    en: 'Customer',
+    pt: 'Cliente'
+  },
+  'redemptionManagement.table.reward': {
+    es: 'Premio',
+    en: 'Reward',
+    pt: 'Prêmio'
+  },
+  'redemptionManagement.table.points': {
+    es: 'Puntos',
+    en: 'Points',
+    pt: 'Pontos'
+  },
+  'redemptionManagement.table.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'redemptionManagement.table.date': {
+    es: 'Fecha',
+    en: 'Date',
+    pt: 'Data'
+  },
+  'redemptionManagement.table.actions': {
+    es: 'Acciones',
+    en: 'Actions',
+    pt: 'Ações'
+  },
+  'redemptionManagement.actions.view': {
+    es: 'Ver',
+    en: 'View',
+    pt: 'Ver'
+  },
+  'redemptionManagement.actions.approve': {
+    es: 'Aprobar',
+    en: 'Approve',
+    pt: 'Aprovar'
+  },
+  'redemptionManagement.actions.reject': {
+    es: 'Rechazar',
+    en: 'Reject',
+    pt: 'Rejeitar'
+  },
+  'redemptionManagement.actions.ship': {
+    es: 'Enviar',
+    en: 'Ship',
+    pt: 'Enviar'
+  },
+  'redemptionManagement.actions.deliver': {
+    es: 'Entregar',
+    en: 'Deliver',
+    pt: 'Entregar'
+  },
+  'redemptionManagement.modal.title': {
+    es: 'Detalles del Canje',
+    en: 'Redemption Details',
+    pt: 'Detalhes do Resgate'
+  },
+  'redemptionManagement.modal.customer': {
+    es: 'Cliente',
+    en: 'Customer',
+    pt: 'Cliente'
+  },
+  'redemptionManagement.modal.reward': {
+    es: 'Premio',
+    en: 'Reward',
+    pt: 'Prêmio'
+  },
+  'redemptionManagement.modal.pointsSpent': {
+    es: 'Puntos Gastados',
+    en: 'Points Spent',
+    pt: 'Pontos Gastos'
+  },
+  'redemptionManagement.modal.points': {
+    es: 'puntos',
+    en: 'points',
+    pt: 'pontos'
+  },
+  'redemptionManagement.modal.cashSpent': {
+    es: 'Dinero Gastado',
+    en: 'Cash Spent',
+    pt: 'Dinheiro Gasto'
+  },
+  'redemptionManagement.modal.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'redemptionManagement.modal.date': {
+    es: 'Fecha',
+    en: 'Date',
+    pt: 'Data'
+  },
+  'redemptionManagement.modal.shippingAddress': {
+    es: 'Dirección de Envío',
+    en: 'Shipping Address',
+    pt: 'Endereço de Envio'
+  },
+  'redemptionManagement.modal.trackingNumber': {
+    es: 'Número de Seguimiento',
+    en: 'Tracking Number',
+    pt: 'Número de Rastreamento'
+  },
+  'redemptionManagement.modal.notes': {
+    es: 'Notas',
+    en: 'Notes',
+    pt: 'Notas'
+  },
+  'redemptionManagement.modal.notesPlaceholder': {
+    es: 'Agregar notas sobre el canje...',
+    en: 'Add notes about the redemption...',
+    pt: 'Adicionar notas sobre o resgate...'
+  },
+  'redemptionManagement.modal.updateTracking': {
+    es: 'Actualizar Seguimiento',
+    en: 'Update Tracking',
+    pt: 'Atualizar Rastreamento'
+  },
+  'redemptionManagement.modal.close': {
+    es: 'Cerrar',
+    en: 'Close',
+    pt: 'Fechar'
+  },
+  'redemptionManagement.modal.actions': {
+    es: 'Acciones',
+    en: 'Actions',
+    pt: 'Ações'
+  },
+  'redemptionManagement.modal.changeStatus': {
+    es: 'Cambiar Estado',
+    en: 'Change Status',
+    pt: 'Alterar Status'
+  },
+  'redemptionManagement.modal.markAsDelivered': {
+    es: 'Marcar como Entregado',
+    en: 'Mark as Delivered',
+    pt: 'Marcar como Entregue'
+  },
+  'redemptionManagement.modal.markAsDeliveredDesc': {
+    es: 'Confirma que el premio ha sido entregado al cliente',
+    en: 'Confirm that the reward has been delivered to the customer',
+    pt: 'Confirme que o prêmio foi entregue ao cliente'
+  },
+  'redemptionManagement.modal.confirmDelivered': {
+    es: '¿Estás seguro de que quieres marcar este premio como entregado?',
+    en: 'Are you sure you want to mark this reward as delivered?',
+    pt: 'Tem certeza de que deseja marcar este prêmio como entregue?'
+  },
+  'redemptionManagement.modal.trackingNumberPlaceholder': {
+    es: 'Ingrese número de tracking',
+    en: 'Enter tracking number',
+    pt: 'Digite o número de rastreamento'
+  },
+  'redemptionManagement.modal.add': {
+    es: 'Agregar',
+    en: 'Add',
+    pt: 'Adicionar'
+  },
+  'redemptionManagement.modal.notesOptional': {
+    es: 'Notas (opcional)',
+    en: 'Notes (optional)',
+    pt: 'Notas (opcional)'
+  },
+  'redemptionManagement.modal.addressNotSpecified': {
+    es: 'No especificada',
+    en: 'Not specified',
+    pt: 'Não especificada'
+  },
+
+  // ===== LOYALTY DASHBOARD =====
+  'loyaltyDashboard.stats.totalUsers': {
+    es: 'Usuarios Totales',
+    en: 'Total Users',
+    pt: 'Usuários Totais'
+  },
+  'loyaltyDashboard.stats.thisMonth': {
+    es: 'este mes',
+    en: 'this month',
+    pt: 'este mês'
+  },
+  'loyaltyDashboard.stats.totalPoints': {
+    es: 'Puntos Totales',
+    en: 'Total Points',
+    pt: 'Pontos Totais'
+  },
+  'loyaltyDashboard.stats.issued': {
+    es: 'emitidos',
+    en: 'issued',
+    pt: 'emitidos'
+  },
+  'loyaltyDashboard.stats.redeemed': {
+    es: 'canjeados',
+    en: 'redeemed',
+    pt: 'resgatados'
+  },
+  'loyaltyDashboard.stats.activeRewards': {
+    es: 'Premios Activos',
+    en: 'Active Rewards',
+    pt: 'Prêmios Ativos'
+  },
+  'loyaltyDashboard.stats.ofTotal': {
+    es: 'de',
+    en: 'of',
+    pt: 'de'
+  },
+  'loyaltyDashboard.stats.total': {
+    es: 'total',
+    en: 'total',
+    pt: 'total'
+  },
+  'loyaltyDashboard.stats.completedRedemptions': {
+    es: 'Canjes Completados',
+    en: 'Completed Redemptions',
+    pt: 'Resgates Concluídos'
+  },
+  'loyaltyDashboard.stats.pending': {
+    es: 'pendientes',
+    en: 'pending',
+    pt: 'pendentes'
+  },
+  'loyaltyDashboard.sections.popularRewards': {
+    es: 'Premios Más Populares',
+    en: 'Most Popular Rewards',
+    pt: 'Prêmios Mais Populares'
+  },
+  'loyaltyDashboard.sections.recentActivity': {
+    es: 'Actividad Reciente',
+    en: 'Recent Activity',
+    pt: 'Atividade Recente'
+  },
+  'loyaltyDashboard.rewards.points': {
+    es: 'puntos',
+    en: 'points',
+    pt: 'pontos'
+  },
+  'loyaltyDashboard.rewards.redemptions': {
+    es: 'canjes',
+    en: 'redemptions',
+    pt: 'resgates'
+  },
+  'loyaltyDashboard.activity.purchase': {
+    es: 'Compra realizada por',
+    en: 'Purchase made by',
+    pt: 'Compra realizada por'
+  },
+  'loyaltyDashboard.activity.review': {
+    es: 'Reseña enviada por',
+    en: 'Review sent by',
+    pt: 'Avaliação enviada por'
+  },
+  'loyaltyDashboard.activity.referral': {
+    es: 'Nuevo cliente referido por',
+    en: 'New client referred by',
+    pt: 'Novo cliente indicado por'
+  },
+  'loyaltyDashboard.activity.redemption': {
+    es: 'Premio canjeado por',
+    en: 'Reward redeemed by',
+    pt: 'Prêmio resgatado por'
+  },
+  'loyaltyDashboard.stats.averageRating': {
+    es: 'Valoración Promedio',
+    en: 'Average Rating',
+    pt: 'Avaliação Média'
+  },
+  'loyaltyDashboard.stats.reviews': {
+    es: 'reseñas',
+    en: 'reviews',
+    pt: 'avaliações'
+  },
+  'loyaltyDashboard.stats.activeUsers': {
+    es: 'Usuarios Activos',
+    en: 'Active Users',
+    pt: 'Usuários Ativos'
+  },
+  'loyaltyDashboard.stats.ofTotalUsers': {
+    es: '% del total',
+    en: '% of total',
+    pt: '% do total'
+  },
+  'loyaltyDashboard.stats.conversionRate': {
+    es: 'Tasa de Conversión',
+    en: 'Conversion Rate',
+    pt: 'Taxa de Conversão'
+  },
+  'loyaltyDashboard.stats.usersWhoRedeemed': {
+    es: 'usuarios que canjearon',
+    en: 'users who redeemed',
+    pt: 'usuários que resgataram'
+  },
+
+  // ===== GOOGLE ANALYTICS =====
+  'adminAnalytics.title': {
+    es: 'Configuración de Google Analytics',
+    en: 'Google Analytics Configuration',
+    pt: 'Configuração do Google Analytics'
+  },
+  'adminAnalytics.subtitle': {
+    es: 'Configura Google Analytics para rastrear el comportamiento de los usuarios en tu aplicación.',
+    en: 'Configure Google Analytics to track user behavior in your application.',
+    pt: 'Configure o Google Analytics para rastrear o comportamento dos usuários em sua aplicação.'
+  },
+  'adminAnalytics.accessDenied': {
+    es: 'Acceso Denegado',
+    en: 'Access Denied',
+    pt: 'Acesso Negado'
+  },
+  'adminAnalytics.accessDeniedMessage': {
+    es: 'Solo los administradores pueden acceder a esta página.',
+    en: 'Only administrators can access this page.',
+    pt: 'Apenas administradores podem acessar esta página.'
+  },
+  'adminAnalytics.loading': {
+    es: 'Cargando configuración...',
+    en: 'Loading configuration...',
+    pt: 'Carregando configuração...'
+  },
+  'adminAnalytics.currentStatus': {
+    es: 'Estado Actual',
+    en: 'Current Status',
+    pt: 'Status Atual'
+  },
+  'adminAnalytics.configured': {
+    es: 'Configurado',
+    en: 'Configured',
+    pt: 'Configurado'
+  },
+  'adminAnalytics.notConfigured': {
+    es: 'No Configurado',
+    en: 'Not Configured',
+    pt: 'Não Configurado'
+  },
+  'adminAnalytics.disable': {
+    es: 'Deshabilitar',
+    en: 'Disable',
+    pt: 'Desabilitar'
+  },
+  'adminAnalytics.enable': {
+    es: 'Habilitar',
+    en: 'Enable',
+    pt: 'Habilitar'
+  },
+  'adminAnalytics.measurementId': {
+    es: 'Measurement ID:',
+    en: 'Measurement ID:',
+    pt: 'ID de Medição:'
+  },
+  'adminAnalytics.propertyId': {
+    es: 'Property ID:',
+    en: 'Property ID:',
+    pt: 'ID da Propriedade:'
+  },
+  'adminAnalytics.lastConfiguration': {
+    es: 'Última configuración:',
+    en: 'Last configuration:',
+    pt: 'Última configuração:'
+  },
+  'adminAnalytics.configuration': {
+    es: 'Configuración',
+    en: 'Configuration',
+    pt: 'Configuração'
+  },
+  'adminAnalytics.measurementIdLabel': {
+    es: 'Measurement ID (G-XXXXXXXXXX)',
+    en: 'Measurement ID (G-XXXXXXXXXX)',
+    pt: 'ID de Medição (G-XXXXXXXXXX)'
+  },
+  'adminAnalytics.measurementIdPlaceholder': {
+    es: 'G-XXXXXXXXXX',
+    en: 'G-XXXXXXXXXX',
+    pt: 'G-XXXXXXXXXX'
+  },
+  'adminAnalytics.measurementIdHelp': {
+    es: 'Encuentra esto en tu cuenta de Google Analytics',
+    en: 'Find this in your Google Analytics account',
+    pt: 'Encontre isso na sua conta do Google Analytics'
+  },
+  'adminAnalytics.propertyIdLabel': {
+    es: 'Property ID',
+    en: 'Property ID',
+    pt: 'ID da Propriedade'
+  },
+  'adminAnalytics.propertyIdPlaceholder': {
+    es: '123456789',
+    en: '123456789',
+    pt: '123456789'
+  },
+  'adminAnalytics.customEvents': {
+    es: 'Eventos Personalizados',
+    en: 'Custom Events',
+    pt: 'Eventos Personalizados'
+  },
+  'adminAnalytics.customDimensions': {
+    es: 'Dimensiones Personalizadas',
+    en: 'Custom Dimensions',
+    pt: 'Dimensões Personalizadas'
+  },
+  'adminAnalytics.customMetrics': {
+    es: 'Métricas Personalizadas',
+    en: 'Custom Metrics',
+    pt: 'Métricas Personalizadas'
+  },
+  'adminAnalytics.trackingCode': {
+    es: 'Código de Seguimiento',
+    en: 'Tracking Code',
+    pt: 'Código de Rastreamento'
+  },
+  'adminAnalytics.trackingCodeHelp': {
+    es: 'Este código debe ser incluido en el <head> de tu aplicación',
+    en: 'This code must be included in the <head> of your application',
+    pt: 'Este código deve ser incluído no <head> da sua aplicação'
+  },
+  'adminAnalytics.saveConfiguration': {
+    es: 'Guardar Configuración',
+    en: 'Save Configuration',
+    pt: 'Salvar Configuração'
+  },
+  'adminAnalytics.saving': {
+    es: 'Guardando...',
+    en: 'Saving...',
+    pt: 'Salvando...'
+  },
+  'adminAnalytics.configurationSaved': {
+    es: 'Configuración guardada exitosamente',
+    en: 'Configuration saved successfully',
+    pt: 'Configuração salva com sucesso'
+  },
+  'adminAnalytics.errorLoading': {
+    es: 'Error cargando configuración',
+    en: 'Error loading configuration',
+    pt: 'Erro ao carregar configuração'
+  },
+  'adminAnalytics.errorSaving': {
+    es: 'Error guardando configuración',
+    en: 'Error saving configuration',
+    pt: 'Erro ao salvar configuração'
+  },
+  'adminAnalytics.connectionError': {
+    es: 'Error de conexión',
+    en: 'Connection error',
+    pt: 'Erro de conexão'
+  },
+  'adminAnalytics.analyticsEnabled': {
+    es: 'Google Analytics habilitado exitosamente',
+    en: 'Google Analytics enabled successfully',
+    pt: 'Google Analytics habilitado com sucesso'
+  },
+  'adminAnalytics.analyticsDisabled': {
+    es: 'Google Analytics deshabilitado exitosamente',
+    en: 'Google Analytics disabled successfully',
+    pt: 'Google Analytics desabilitado com sucesso'
+  },
+  'adminAnalytics.errorChangingStatus': {
+    es: 'Error cambiando estado',
+    en: 'Error changing status',
+    pt: 'Erro ao alterar status'
+  },
+  // Eventos personalizados
+  'adminAnalytics.events.userRegistration': {
+    es: 'Registro de Usuario',
+    en: 'User Registration',
+    pt: 'Registro de Usuário'
+  },
+  'adminAnalytics.events.userLogin': {
+    es: 'Inicio de Sesión',
+    en: 'User Login',
+    pt: 'Login do Usuário'
+  },
+  'adminAnalytics.events.purchase': {
+    es: 'Compra',
+    en: 'Purchase',
+    pt: 'Compra'
+  },
+  'adminAnalytics.events.review': {
+    es: 'Reseña',
+    en: 'Review',
+    pt: 'Avaliação'
+  },
+  'adminAnalytics.events.referral': {
+    es: 'Referido',
+    en: 'Referral',
+    pt: 'Indicação'
+  },
+  'adminAnalytics.events.rewardRedemption': {
+    es: 'Canje de Premio',
+    en: 'Reward Redemption',
+    pt: 'Resgate de Prêmio'
+  },
+  'adminAnalytics.events.locationUpdate': {
+    es: 'Actualización de Ubicación',
+    en: 'Location Update',
+    pt: 'Atualização de Localização'
+  },
+  // Dimensiones personalizadas
+  'adminAnalytics.dimensions.userId': {
+    es: 'ID de Usuario',
+    en: 'User ID',
+    pt: 'ID do Usuário'
+  },
+  'adminAnalytics.dimensions.userRole': {
+    es: 'Rol de Usuario',
+    en: 'User Role',
+    pt: 'Função do Usuário'
+  },
+  'adminAnalytics.dimensions.loyaltyLevel': {
+    es: 'Nivel de Fidelización',
+    en: 'Loyalty Level',
+    pt: 'Nível de Fidelização'
+  },
+  'adminAnalytics.dimensions.locationEnabled': {
+    es: 'Ubicación Habilitada',
+    en: 'Location Enabled',
+    pt: 'Localização Habilitada'
+  },
+  // Métricas personalizadas
+  'adminAnalytics.metrics.pointsEarned': {
+    es: 'Puntos Ganados',
+    en: 'Points Earned',
+    pt: 'Pontos Ganhos'
+  },
+  'adminAnalytics.metrics.totalSpent': {
+    es: 'Total Gastado',
+    en: 'Total Spent',
+    pt: 'Total Gasto'
+  },
+  'adminAnalytics.metrics.referralCount': {
+    es: 'Conteo de Referidos',
+    en: 'Referral Count',
+    pt: 'Contagem de Indicações'
+  },
+
+  // ===== REGISTRATION CODES =====
+  'adminRegistrationCodes.title': {
+    es: 'Códigos de Registro',
+    en: 'Registration Codes',
+    pt: 'Códigos de Registro'
+  },
+  'adminRegistrationCodes.subtitle': {
+    es: 'Gestiona los códigos de registro para administradores, gestores de tienda y delivery.',
+    en: 'Manage registration codes for administrators, store managers and delivery.',
+    pt: 'Gerencie códigos de registro para administradores, gerentes de loja e entrega.'
+  },
+  'adminRegistrationCodes.accessDenied': {
+    es: 'Acceso Denegado',
+    en: 'Access Denied',
+    pt: 'Acesso Negado'
+  },
+  'adminRegistrationCodes.accessDeniedMessage': {
+    es: 'Solo los administradores pueden acceder a esta página.',
+    en: 'Only administrators can access this page.',
+    pt: 'Apenas administradores podem acessar esta página.'
+  },
+  'adminRegistrationCodes.currentRole': {
+    es: 'Tu rol actual:',
+    en: 'Your current role:',
+    pt: 'Seu papel atual:'
+  },
+  'adminRegistrationCodes.loadingUser': {
+    es: 'Cargando usuario...',
+    en: 'Loading user...',
+    pt: 'Carregando usuário...'
+  },
+  'adminRegistrationCodes.loadingCodes': {
+    es: 'Cargando códigos de registro...',
+    en: 'Loading registration codes...',
+    pt: 'Carregando códigos de registro...'
+  },
+  'adminRegistrationCodes.cleanExpired': {
+    es: 'Limpiar Expirados',
+    en: 'Clean Expired',
+    pt: 'Limpar Expirados'
+  },
+  'adminRegistrationCodes.createCode': {
+    es: 'Crear Código',
+    en: 'Create Code',
+    pt: 'Criar Código'
+  },
+  'adminRegistrationCodes.reload': {
+    es: 'Recargar',
+    en: 'Reload',
+    pt: 'Recarregar'
+  },
+  'adminRegistrationCodes.stats.total': {
+    es: 'Total',
+    en: 'Total',
+    pt: 'Total'
+  },
+  'adminRegistrationCodes.stats.pending': {
+    es: 'Pendientes',
+    en: 'Pending',
+    pt: 'Pendentes'
+  },
+  'adminRegistrationCodes.stats.used': {
+    es: 'Usados',
+    en: 'Used',
+    pt: 'Usados'
+  },
+  'adminRegistrationCodes.stats.expired': {
+    es: 'Expirados',
+    en: 'Expired',
+    pt: 'Expirados'
+  },
+  'adminRegistrationCodes.stats.revoked': {
+    es: 'Revocados',
+    en: 'Revoked',
+    pt: 'Revogados'
+  },
+  'adminRegistrationCodes.table.title': {
+    es: 'Códigos de Registro',
+    en: 'Registration Codes',
+    pt: 'Códigos de Registro'
+  },
+  'adminRegistrationCodes.table.code': {
+    es: 'Código',
+    en: 'Code',
+    pt: 'Código'
+  },
+  'adminRegistrationCodes.table.email': {
+    es: 'Email',
+    en: 'Email',
+    pt: 'Email'
+  },
+  'adminRegistrationCodes.table.role': {
+    es: 'Rol',
+    en: 'Role',
+    pt: 'Função'
+  },
+  'adminRegistrationCodes.table.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'adminRegistrationCodes.table.expires': {
+    es: 'Expira',
+    en: 'Expires',
+    pt: 'Expira'
+  },
+  'adminRegistrationCodes.table.usedBy': {
+    es: 'Usado Por',
+    en: 'Used By',
+    pt: 'Usado Por'
+  },
+  'adminRegistrationCodes.table.actions': {
+    es: 'Acciones',
+    en: 'Actions',
+    pt: 'Ações'
+  },
+  'adminRegistrationCodes.status.pending': {
+    es: 'Pendiente',
+    en: 'Pending',
+    pt: 'Pendente'
+  },
+  'adminRegistrationCodes.status.used': {
+    es: 'Usado',
+    en: 'Used',
+    pt: 'Usado'
+  },
+  'adminRegistrationCodes.status.expired': {
+    es: 'Expirado',
+    en: 'Expired',
+    pt: 'Expirado'
+  },
+  'adminRegistrationCodes.status.revoked': {
+    es: 'Revocado',
+    en: 'Revoked',
+    pt: 'Revogado'
+  },
+  'adminRegistrationCodes.roles.admin': {
+    es: 'Administrador',
+    en: 'Administrator',
+    pt: 'Administrador'
+  },
+  'adminRegistrationCodes.roles.storeManager': {
+    es: 'Gestor de Tienda',
+    en: 'Store Manager',
+    pt: 'Gerente de Loja'
+  },
+  'adminRegistrationCodes.roles.delivery': {
+    es: 'Delivery',
+    en: 'Delivery',
+    pt: 'Entrega'
+  },
+  'adminRegistrationCodes.notUsed': {
+    es: 'No usado',
+    en: 'Not used',
+    pt: 'Não usado'
+  },
+  'adminRegistrationCodes.modal.title': {
+    es: 'Crear Código de Registro',
+    en: 'Create Registration Code',
+    pt: 'Criar Código de Registro'
+  },
+  'adminRegistrationCodes.modal.email': {
+    es: 'Email',
+    en: 'Email',
+    pt: 'Email'
+  },
+  'adminRegistrationCodes.modal.role': {
+    es: 'Rol',
+    en: 'Role',
+    pt: 'Função'
+  },
+  'adminRegistrationCodes.modal.expirationDays': {
+    es: 'Días de Expiración',
+    en: 'Expiration Days',
+    pt: 'Dias de Expiração'
+  },
+  'adminRegistrationCodes.modal.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'adminRegistrationCodes.modal.creating': {
+    es: 'Creando...',
+    en: 'Creating...',
+    pt: 'Criando...'
+  },
+  'adminRegistrationCodes.modal.createCode': {
+    es: 'Crear Código',
+    en: 'Create Code',
+    pt: 'Criar Código'
+  },
+  'adminRegistrationCodes.confirmRevoke': {
+    es: '¿Estás seguro de que quieres revocar este código?',
+    en: 'Are you sure you want to revoke this code?',
+    pt: 'Tem certeza de que deseja revogar este código?'
+  },
+  'adminRegistrationCodes.errorLoadingCodes': {
+    es: 'Error cargando códigos',
+    en: 'Error loading codes',
+    pt: 'Erro ao carregar códigos'
+  },
+  'adminRegistrationCodes.errorCreatingCode': {
+    es: 'Error creando código',
+    en: 'Error creating code',
+    pt: 'Erro ao criar código'
+  },
+  'adminRegistrationCodes.errorRevokingCode': {
+    es: 'Error revocando código',
+    en: 'Error revoking code',
+    pt: 'Erro ao revogar código'
+  },
+  'adminRegistrationCodes.errorCleaningCodes': {
+    es: 'Error limpiando códigos',
+    en: 'Error cleaning codes',
+    pt: 'Erro ao limpar códigos'
+  },
+  'adminRegistrationCodes.connectionError': {
+    es: 'Error de conexión',
+    en: 'Connection error',
+    pt: 'Erro de conexão'
+  },
+  'adminRegistrationCodes.codeCreated': {
+    es: 'Código creado exitosamente',
+    en: 'Code created successfully',
+    pt: 'Código criado com sucesso'
+  },
+  'adminRegistrationCodes.codeRevoked': {
+    es: 'Código revocado exitosamente',
+    en: 'Code revoked successfully',
+    pt: 'Código revogado com sucesso'
+  },
+  // Register with Code
+  'registerWithCode.title': {
+    es: 'Registro con Código',
+    en: 'Register with Code',
+    pt: 'Registro com Código'
+  },
+  'registerWithCode.subtitle': {
+    es: 'Completa tu registro usando el código proporcionado',
+    en: 'Complete your registration using the provided code',
+    pt: 'Complete seu registro usando o código fornecido'
+  },
+  'registerWithCode.registrationCode': {
+    es: 'Código de Registro',
+    en: 'Registration Code',
+    pt: 'Código de Registro'
+  },
+  'registerWithCode.enterCode': {
+    es: 'Ingresa el código',
+    en: 'Enter the code',
+    pt: 'Digite o código'
+  },
+  'registerWithCode.verify': {
+    es: 'Verificar',
+    en: 'Verify',
+    pt: 'Verificar'
+  },
+  'registerWithCode.noCodeMessage': {
+    es: '¿No tienes un código? Contacta con la administración.',
+    en: "Don't have a code? Contact administration.",
+    pt: 'Não tem um código? Entre em contato com a administração.'
+  },
+  'registerWithCode.codeValid': {
+    es: 'Código Válido',
+    en: 'Valid Code',
+    pt: 'Código Válido'
+  },
+  'registerWithCode.expires': {
+    es: 'Expira:',
+    en: 'Expires:',
+    pt: 'Expira:'
+  },
+  'registerWithCode.roleDescriptions.admin': {
+    es: 'Acceso completo al sistema de administración',
+    en: 'Full access to the administration system',
+    pt: 'Acesso completo ao sistema de administração'
+  },
+  'registerWithCode.roleDescriptions.storeManager': {
+    es: 'Gestión de inventario y ventas de la tienda',
+    en: 'Inventory and store sales management',
+    pt: 'Gerenciamento de inventário e vendas da loja'
+  },
+  'registerWithCode.roleDescriptions.delivery': {
+    es: 'Gestión de entregas y logística',
+    en: 'Delivery and logistics management',
+    pt: 'Gerenciamento de entregas e logística'
+  },
+  'registerWithCode.roleDescriptions.user': {
+    es: 'Acceso básico al sistema',
+    en: 'Basic system access',
+    pt: 'Acesso básico ao sistema'
+  },
+  'registerWithCode.fullName': {
+    es: 'Nombre Completo',
+    en: 'Full Name',
+    pt: 'Nome Completo'
+  },
+  'registerWithCode.phone': {
+    es: 'Teléfono',
+    en: 'Phone',
+    pt: 'Telefone'
+  },
+  'registerWithCode.password': {
+    es: 'Contraseña',
+    en: 'Password',
+    pt: 'Senha'
+  },
+  'registerWithCode.confirmPassword': {
+    es: 'Confirmar Contraseña',
+    en: 'Confirm Password',
+    pt: 'Confirmar Senha'
+  },
+  'registerWithCode.emailCannotChange': {
+    es: 'El email no se puede cambiar',
+    en: 'Email cannot be changed',
+    pt: 'O email não pode ser alterado'
+  },
+  'registerWithCode.completeRegistration': {
+    es: 'Completar Registro',
+    en: 'Complete Registration',
+    pt: 'Completar Registro'
+  },
+  'registerWithCode.registering': {
+    es: 'Registrando...',
+    en: 'Registering...',
+    pt: 'Registrando...'
+  },
+  'registerWithCode.useAnotherCode': {
+    es: 'Usar otro código',
+    en: 'Use another code',
+    pt: 'Usar outro código'
+  },
+  'registerWithCode.errorInvalidCode': {
+    es: 'Código inválido o expirado',
+    en: 'Invalid or expired code',
+    pt: 'Código inválido ou expirado'
+  },
+  'registerWithCode.errorVerifyingCode': {
+    es: 'Error verificando código',
+    en: 'Error verifying code',
+    pt: 'Erro ao verificar código'
+  },
+  'registerWithCode.errorStartingRegistration': {
+    es: 'Error iniciando registro',
+    en: 'Error starting registration',
+    pt: 'Erro ao iniciar registro'
+  },
+  'registerWithCode.errorCompletingRegistration': {
+    es: 'Error completando registro',
+    en: 'Error completing registration',
+    pt: 'Erro ao completar registro'
+  },
+  'registerWithCode.errorRegisteringUser': {
+    es: 'Error registrando usuario',
+    en: 'Error registering user',
+    pt: 'Erro ao registrar usuário'
+  },
+  'registerWithCode.passwordsDoNotMatch': {
+    es: 'Las contraseñas no coinciden',
+    en: 'Passwords do not match',
+    pt: 'As senhas não coincidem'
+  },
+  'registerWithCode.pleaseEnterCode': {
+    es: 'Por favor ingresa un código de registro',
+    en: 'Please enter a registration code',
+    pt: 'Por favor, digite um código de registro'
+  },
+  // ===== SEARCH CONFIGURATION =====
+  'adminSearchConfig.title': {
+    es: 'Configuración de Búsqueda',
+    en: 'Search Configuration',
+    pt: 'Configuração de Busca'
+  },
+  'adminSearchConfig.subtitle': {
+    es: 'Configura los parámetros del sistema de búsqueda inteligente similar a Algolia',
+    en: 'Configure the parameters of the intelligent search system similar to Algolia',
+    pt: 'Configure os parâmetros do sistema de busca inteligente similar ao Algolia'
+  },
+  'adminSearchConfig.accessDenied': {
+    es: 'Acceso Denegado',
+    en: 'Access Denied',
+    pt: 'Acesso Negado'
+  },
+  'adminSearchConfig.accessDeniedMessage': {
+    es: 'Solo los administradores pueden acceder a esta página.',
+    en: 'Only administrators can access this page.',
+    pt: 'Apenas administradores podem acessar esta página.'
+  },
+  'adminSearchConfig.errorLoading': {
+    es: 'Error cargando configuración',
+    en: 'Error loading configuration',
+    pt: 'Erro ao carregar configuração'
+  },
+  'adminSearchConfig.errorSaving': {
+    es: 'Error guardando configuración',
+    en: 'Error saving configuration',
+    pt: 'Erro ao salvar configuração'
+  },
+  'adminSearchConfig.configurationSaved': {
+    es: 'Configuración guardada exitosamente',
+    en: 'Configuration saved successfully',
+    pt: 'Configuração salva com sucesso'
+  },
+  'adminSearchConfig.errorLoadingConfig': {
+    es: 'No se pudo cargar la configuración de búsqueda.',
+    en: 'Could not load search configuration.',
+    pt: 'Não foi possível carregar a configuração de busca.'
+  },
+  'adminSearchConfig.semanticSearch': {
+    es: 'Búsqueda Semántica',
+    en: 'Semantic Search',
+    pt: 'Busca Semântica'
+  },
+  'adminSearchConfig.enableSemanticSearch': {
+    es: 'Habilitar búsqueda semántica',
+    en: 'Enable semantic search',
+    pt: 'Habilitar busca semântica'
+  },
+  'adminSearchConfig.semanticThreshold': {
+    es: 'Umbral semántico (0-1)',
+    en: 'Semantic threshold (0-1)',
+    pt: 'Limiar semântico (0-1)'
+  },
+  'adminSearchConfig.errorCorrection': {
+    es: 'Corrección de Errores',
+    en: 'Error Correction',
+    pt: 'Correção de Erros'
+  },
+  'adminSearchConfig.enableErrorCorrection': {
+    es: 'Habilitar corrección de errores',
+    en: 'Enable error correction',
+    pt: 'Habilitar correção de erros'
+  },
+  'adminSearchConfig.maxEditDistance': {
+    es: 'Distancia máxima de edición',
+    en: 'Maximum edit distance',
+    pt: 'Distância máxima de edição'
+  },
+  'adminSearchConfig.minWordLength': {
+    es: 'Longitud mínima de palabra',
+    en: 'Minimum word length',
+    pt: 'Comprimento mínimo da palavra'
+  },
+  'adminSearchConfig.searchFields': {
+    es: 'Campos de Búsqueda',
+    en: 'Search Fields',
+    pt: 'Campos de Busca'
+  },
+  'adminSearchConfig.searchableFields': {
+    es: 'Campos buscables (separados por comas)',
+    en: 'Searchable fields (comma separated)',
+    pt: 'Campos pesquisáveis (separados por vírgulas)'
+  },
+  'adminSearchConfig.fieldWeights': {
+    es: 'Peso de campos (JSON)',
+    en: 'Field weights (JSON)',
+    pt: 'Pesos dos campos (JSON)'
+  },
+  'adminSearchConfig.resultsAndFilters': {
+    es: 'Resultados y Filtros',
+    en: 'Results and Filters',
+    pt: 'Resultados e Filtros'
+  },
+  'adminSearchConfig.maxResults': {
+    es: 'Máximo de resultados',
+    en: 'Maximum results',
+    pt: 'Máximo de resultados'
+  },
+  'adminSearchConfig.minRelevanceScore': {
+    es: 'Puntuación mínima de relevancia (0-1)',
+    en: 'Minimum relevance score (0-1)',
+    pt: 'Pontuação mínima de relevância (0-1)'
+  },
+  'adminSearchConfig.synonymGroups': {
+    es: 'Grupos de Sinónimos',
+    en: 'Synonym Groups',
+    pt: 'Grupos de Sinônimos'
+  },
+  'adminSearchConfig.enableSynonyms': {
+    es: 'Habilitar sinónimos',
+    en: 'Enable synonyms',
+    pt: 'Habilitar sinônimos'
+  },
+  'adminSearchConfig.words': {
+    es: 'Palabras (separadas por comas)',
+    en: 'Words (comma separated)',
+    pt: 'Palavras (separadas por vírgulas)'
+  },
+  'adminSearchConfig.weight': {
+    es: 'Peso',
+    en: 'Weight',
+    pt: 'Peso'
+  },
+  'adminSearchConfig.remove': {
+    es: 'Eliminar',
+    en: 'Remove',
+    pt: 'Remover'
+  },
+  'adminSearchConfig.addSynonymGroup': {
+    es: 'Agregar Grupo de Sinónimos',
+    en: 'Add Synonym Group',
+    pt: 'Adicionar Grupo de Sinônimos'
+  },
+  'adminSearchConfig.autocomplete': {
+    es: 'Autocompletado',
+    en: 'Autocomplete',
+    pt: 'Autocompletar'
+  },
+  'adminSearchConfig.minLengthForAutocomplete': {
+    es: 'Longitud mínima para autocompletado',
+    en: 'Minimum length for autocomplete',
+    pt: 'Comprimento mínimo para autocompletar'
+  },
+  'adminSearchConfig.maxSuggestions': {
+    es: 'Máximo de sugerencias',
+    en: 'Maximum suggestions',
+    pt: 'Máximo de sugestões'
+  },
+  'adminSearchConfig.queryAnalysis': {
+    es: 'Análisis de Consultas',
+    en: 'Query Analysis',
+    pt: 'Análise de Consultas'
+  },
+  'adminSearchConfig.enableQueryAnalysis': {
+    es: 'Habilitar análisis de consultas',
+    en: 'Enable query analysis',
+    pt: 'Habilitar análise de consultas'
+  },
+  'adminSearchConfig.intentRecognition': {
+    es: 'Reconocimiento de intención',
+    en: 'Intent recognition',
+    pt: 'Reconhecimento de intenção'
+  },
+  'adminSearchConfig.saveConfiguration': {
+    es: 'Guardar Configuración',
+    en: 'Save Configuration',
+    pt: 'Salvar Configuração'
+  },
+  'adminSearchConfig.saving': {
+    es: 'Guardando...',
+    en: 'Saving...',
+    pt: 'Salvando...'
+  },
+  // ===== PRODUCT GENERATION FOR QA =====
+  'adminGenerateProducts.title': {
+    es: 'Generar Datos de Prueba',
+    en: 'Generate Test Data',
+    pt: 'Gerar Dados de Teste'
+  },
+  'adminGenerateProducts.subtitle': {
+    es: 'Genera tiendas y productos de prueba para probar el sistema multi-tienda',
+    en: 'Generate test stores and products to test the multi-store system',
+    pt: 'Gere lojas e produtos de teste para testar o sistema multi-loja'
+  },
+  'adminGenerateProducts.accessDenied': {
+    es: 'Acceso Denegado',
+    en: 'Access Denied',
+    pt: 'Acesso Negado'
+  },
+  'adminGenerateProducts.accessDeniedMessage': {
+    es: 'Solo los administradores pueden acceder a esta página.',
+    en: 'Only administrators can access this page.',
+    pt: 'Apenas administradores podem acessar esta página.'
+  },
+  'adminGenerateProducts.generateStores': {
+    es: 'Generar Tiendas',
+    en: 'Generate Stores',
+    pt: 'Gerar Lojas'
+  },
+  'adminGenerateProducts.generateProducts': {
+    es: 'Generar Productos',
+    en: 'Generate Products',
+    pt: 'Gerar Produtos'
+  },
+  'adminGenerateProducts.storesGenerated': {
+    es: 'Generadas {count} tiendas de prueba exitosamente',
+    en: 'Generated {count} test stores successfully',
+    pt: 'Geradas {count} lojas de teste com sucesso'
+  },
+  'adminGenerateProducts.productsGenerated': {
+    es: 'Generados {count} productos de prueba exitosamente para la tienda seleccionada',
+    en: 'Generated {count} test products successfully for the selected store',
+    pt: 'Gerados {count} produtos de teste com sucesso para a loja selecionada'
+  },
+  'adminGenerateProducts.errorGeneratingStores': {
+    es: 'Error generando tiendas',
+    en: 'Error generating stores',
+    pt: 'Erro ao gerar lojas'
+  },
+  'adminGenerateProducts.errorGeneratingProducts': {
+    es: 'Error generando productos',
+    en: 'Error generating products',
+    pt: 'Erro ao gerar produtos'
+  },
+  'adminGenerateProducts.connectionErrorStores': {
+    es: 'Error de conexión al generar tiendas',
+    en: 'Connection error while generating stores',
+    pt: 'Erro de conexão ao gerar lojas'
+  },
+  'adminGenerateProducts.connectionErrorProducts': {
+    es: 'Error de conexión al generar productos',
+    en: 'Connection error while generating products',
+    pt: 'Erro de conexão ao gerar produtos'
+  },
+  'adminGenerateProducts.selectStoreRequired': {
+    es: 'Debes seleccionar una tienda para generar productos',
+    en: 'You must select a store to generate products',
+    pt: 'Você deve selecionar uma loja para gerar produtos'
+  },
+  'adminGenerateProducts.whatWillBeGenerated': {
+    es: '¿Qué se generará?',
+    en: 'What will be generated?',
+    pt: 'O que será gerado?'
+  },
+  'adminGenerateProducts.storesList': {
+    es: '• 5 tiendas de prueba',
+    en: '• 5 test stores',
+    pt: '• 5 lojas de teste'
+  },
+  'adminGenerateProducts.storesList2': {
+    es: '• Diferentes ciudades de Venezuela',
+    en: '• Different cities in Venezuela',
+    pt: '• Diferentes cidades da Venezuela'
+  },
+  'adminGenerateProducts.storesList3': {
+    es: '• Propietarios y managers asignados',
+    en: '• Assigned owners and managers',
+    pt: '• Proprietários e gerentes designados'
+  },
+  'adminGenerateProducts.storesList4': {
+    es: '• Configuración completa de negocio',
+    en: '• Complete business configuration',
+    pt: '• Configuração completa do negócio'
+  },
+  'adminGenerateProducts.storesList5': {
+    es: '• Horarios de atención',
+    en: '• Business hours',
+    pt: '• Horários de funcionamento'
+  },
+  'adminGenerateProducts.storesList6': {
+    es: '• Coordenadas GPS realistas',
+    en: '• Realistic GPS coordinates',
+    pt: '• Coordenadas GPS realistas'
+  },
+  'adminGenerateProducts.productsList': {
+    es: '• 150 productos de prueba',
+    en: '• 150 test products',
+    pt: '• 150 produtos de teste'
+  },
+  'adminGenerateProducts.productsList2': {
+    es: '• 15 marcas diferentes',
+    en: '• 15 different brands',
+    pt: '• 15 marcas diferentes'
+  },
+  'adminGenerateProducts.productsList3': {
+    es: '• 11 categorías principales',
+    en: '• 11 main categories',
+    pt: '• 11 categorias principais'
+  },
+  'adminGenerateProducts.productsList4': {
+    es: '• Múltiples subcategorías',
+    en: '• Multiple subcategories',
+    pt: '• Múltiplas subcategorias'
+  },
+  'adminGenerateProducts.productsList5': {
+    es: '• SKUs únicos por tienda',
+    en: '• Unique SKUs per store',
+    pt: '• SKUs únicos por loja'
+  },
+  'adminGenerateProducts.productsList6': {
+    es: '• Precios variados ($10 - $510)',
+    en: '• Varied prices ($10 - $510)',
+    pt: '• Preços variados ($10 - $510)'
+  },
+  'adminGenerateProducts.productsList7': {
+    es: '• Stock aleatorio (1-50 unidades)',
+    en: '• Random stock (1-50 units)',
+    pt: '• Estoque aleatório (1-50 unidades)'
+  },
+  'adminGenerateProducts.productsList8': {
+    es: '• Productos destacados (20%)',
+    en: '• Featured products (20%)',
+    pt: '• Produtos em destaque (20%)'
+  },
+  'adminGenerateProducts.generate5Stores': {
+    es: 'Generar 5 Tiendas de Prueba',
+    en: 'Generate 5 Test Stores',
+    pt: 'Gerar 5 Lojas de Teste'
+  },
+  'adminGenerateProducts.generate150Products': {
+    es: 'Generar 150 Productos',
+    en: 'Generate 150 Products',
+    pt: 'Gerar 150 Produtos'
+  },
+  'adminGenerateProducts.generatingStores': {
+    es: 'Generando tiendas...',
+    en: 'Generating stores...',
+    pt: 'Gerando lojas...'
+  },
+  'adminGenerateProducts.generatingProducts': {
+    es: 'Generando productos...',
+    en: 'Generating products...',
+    pt: 'Gerando produtos...'
+  },
+  'adminGenerateProducts.warningCreateStores': {
+    es: '⚠️ Esta acción creará nuevas tiendas de prueba',
+    en: '⚠️ This action will create new test stores',
+    pt: '⚠️ Esta ação criará novas lojas de teste'
+  },
+  'adminGenerateProducts.warningStoreProducts': {
+    es: '⚠️ Los productos se generarán para la tienda seleccionada',
+    en: '⚠️ Products will be generated for the selected store',
+    pt: '⚠️ Os produtos serão gerados para a loja selecionada'
+  },
+  'adminGenerateProducts.selectStore': {
+    es: 'Seleccionar Tienda:',
+    en: 'Select Store:',
+    pt: 'Selecionar Loja:'
+  },
+  'adminGenerateProducts.selectStoreOption': {
+    es: 'Seleccionar una tienda',
+    en: 'Select a store',
+    pt: 'Selecionar uma loja'
+  },
+  'adminGenerateProducts.noStoresAvailable': {
+    es: 'No hay tiendas disponibles. Genera tiendas primero.',
+    en: 'No stores available. Generate stores first.',
+    pt: 'Não há lojas disponíveis. Gere lojas primeiro.'
+  },
+  'adminGenerateProducts.statistics': {
+    es: 'Estadísticas',
+    en: 'Statistics',
+    pt: 'Estatísticas'
+  },
+  'adminGenerateProducts.update': {
+    es: 'Actualizar',
+    en: 'Update',
+    pt: 'Atualizar'
+  },
+  'adminGenerateProducts.totalProducts': {
+    es: 'Total Productos',
+    en: 'Total Products',
+    pt: 'Total de Produtos'
+  },
+  'adminGenerateProducts.categories': {
+    es: 'Categorías',
+    en: 'Categories',
+    pt: 'Categorias'
+  },
+  'adminGenerateProducts.brands': {
+    es: 'Marcas',
+    en: 'Brands',
+    pt: 'Marcas'
+  },
+  'adminGenerateProducts.featured': {
+    es: 'Destacados',
+    en: 'Featured',
+    pt: 'Em Destaque'
+  },
+  'adminGenerateProducts.byCategory': {
+    es: 'Por Categoría:',
+    en: 'By Category:',
+    pt: 'Por Categoria:'
+  },
+  'adminGenerateProducts.noStatisticsAvailable': {
+    es: 'No hay estadísticas disponibles',
+    en: 'No statistics available',
+    pt: 'Não há estatísticas disponíveis'
+  },
+  'adminGenerateProducts.loadStatistics': {
+    es: 'Cargar Estadísticas',
+    en: 'Load Statistics',
+    pt: 'Carregar Estatísticas'
+  },
+  'adminGenerateProducts.recentlyGeneratedStores': {
+    es: 'Tiendas Generadas Recientemente',
+    en: 'Recently Generated Stores',
+    pt: 'Lojas Geradas Recentemente'
+  },
+  'adminGenerateProducts.new': {
+    es: 'Nueva',
+    en: 'New',
+    pt: 'Nova'
+  },
+  'adminGenerateProducts.systemTestInfo': {
+    es: 'Información del Sistema de Prueba',
+    en: 'Test System Information',
+    pt: 'Informações do Sistema de Teste'
+  },
+  'adminGenerateProducts.generatedStores': {
+    es: 'Tiendas Generadas:',
+    en: 'Generated Stores:',
+    pt: 'Lojas Geradas:'
+  },
+  'adminGenerateProducts.includedCategories': {
+    es: 'Categorías Incluidas:',
+    en: 'Included Categories:',
+    pt: 'Categorias Incluídas:'
+  },
+  'adminGenerateProducts.includedBrands': {
+    es: 'Marcas Incluidas:',
+    en: 'Included Brands:',
+    pt: 'Marcas Incluídas:'
+  },
+  'adminGenerateProducts.usageInstructions': {
+    es: 'Instrucciones de Uso',
+    en: 'Usage Instructions',
+    pt: 'Instruções de Uso'
+  },
+  'adminGenerateProducts.recommendedFlow': {
+    es: 'Flujo Recomendado:',
+    en: 'Recommended Flow:',
+    pt: 'Fluxo Recomendado:'
+  },
+  'adminGenerateProducts.flowStep1': {
+    es: '1. Generar Tiendas: Crea las tiendas de prueba primero',
+    en: '1. Generate Stores: Create test stores first',
+    pt: '1. Gerar Lojas: Crie as lojas de teste primeiro'
+  },
+  'adminGenerateProducts.flowStep2': {
+    es: '2. Seleccionar Tienda: Elige una tienda del dropdown',
+    en: '2. Select Store: Choose a store from the dropdown',
+    pt: '2. Selecionar Loja: Escolha uma loja do dropdown'
+  },
+  'adminGenerateProducts.flowStep3': {
+    es: '3. Generar Productos: Crea productos para esa tienda',
+    en: '3. Generate Products: Create products for that store',
+    pt: '3. Gerar Produtos: Crie produtos para essa loja'
+  },
+  'adminGenerateProducts.flowStep4': {
+    es: '4. Repetir: Puedes generar productos para otras tiendas',
+    en: '4. Repeat: You can generate products for other stores',
+    pt: '4. Repetir: Você pode gerar produtos para outras lojas'
+  },
+  'adminGenerateProducts.flowStep5': {
+    es: '5. Gestionar: Los gestores pueden acceder con sus credenciales',
+    en: '5. Manage: Managers can access with their credentials',
+    pt: '5. Gerenciar: Gerentes podem acessar com suas credenciais'
+  },
+  'adminGenerateProducts.systemFeatures': {
+    es: 'Características del Sistema:',
+    en: 'System Features:',
+    pt: 'Características do Sistema:'
+  },
+  'adminGenerateProducts.feature1': {
+    es: '• SKUs únicos por tienda: Mismo SKU en diferentes tiendas',
+    en: '• Unique SKUs per store: Same SKU in different stores',
+    pt: '• SKUs únicos por loja: Mesmo SKU em lojas diferentes'
+  },
+  'adminGenerateProducts.feature2': {
+    es: '• Gestores asignados: Usuarios con rol store_manager',
+    en: '• Assigned managers: Users with store_manager role',
+    pt: '• Gerentes designados: Usuários com papel store_manager'
+  },
+  'adminGenerateProducts.feature3': {
+    es: '• Configuración completa: Horarios, impuestos, entrega',
+    en: '• Complete configuration: Hours, taxes, delivery',
+    pt: '• Configuração completa: Horários, impostos, entrega'
+  },
+  'adminGenerateProducts.feature4': {
+    es: '• Geolocalización: Coordenadas GPS realistas',
+    en: '• Geolocation: Realistic GPS coordinates',
+    pt: '• Geolocalização: Coordenadas GPS realistas'
+  },
+  'adminGenerateProducts.feature5': {
+    es: '• Estadísticas por tienda: Filtros automáticos',
+    en: '• Statistics per store: Automatic filters',
+    pt: '• Estatísticas por loja: Filtros automáticos'
+  },
+  'adminGenerateProducts.feature6': {
+    es: '• Credenciales de gestores: manager1@test.com - password123',
+    en: '• Manager credentials: manager1@test.com - password123',
+    pt: '• Credenciais de gerentes: manager1@test.com - password123'
+  },
+  'adminGenerateProducts.managerCredentials': {
+    es: 'Credenciales de Gestores Generados',
+    en: 'Generated Manager Credentials',
+    pt: 'Credenciais de Gerentes Geradas'
+  },
+  'adminGenerateProducts.credentialsDescription': {
+    es: 'Se han creado automáticamente gestores para las tiendas. Puedes usar estas credenciales para acceder como gestor:',
+    en: 'Managers have been automatically created for the stores. You can use these credentials to access as a manager:',
+    pt: 'Gerentes foram criados automaticamente para as lojas. Você pode usar essas credenciais para acessar como gerente:'
+  },
+  'adminGenerateProducts.manager': {
+    es: 'Manager',
+    en: 'Manager',
+    pt: 'Gerente'
+  },
+  'adminGenerateProducts.email': {
+    es: 'Email:',
+    en: 'Email:',
+    pt: 'Email:'
+  },
+  'adminGenerateProducts.password': {
+    es: 'Contraseña:',
+    en: 'Password:',
+    pt: 'Senha:'
+  },
+  'adminGenerateProducts.role': {
+    es: 'Rol:',
+    en: 'Role:',
+    pt: 'Papel:'
+  },
+  'adminGenerateProducts.storeManager': {
+    es: 'store_manager',
+    en: 'store_manager',
+    pt: 'store_manager'
+  },
+  'adminGenerateProducts.credentialsNote': {
+    es: 'Nota: Estos gestores pueden acceder al panel de gestión de tiendas y administrar productos, pedidos y configuraciones específicas de su tienda asignada.',
+    en: 'Note: These managers can access the store management panel and manage products, orders and specific configurations of their assigned store.',
+    pt: 'Nota: Esses gerentes podem acessar o painel de gerenciamento de lojas e gerenciar produtos, pedidos e configurações específicas de sua loja designada.'
+  },
+  // ===== HEADER MENU =====
+  'header.admin': {
+    es: 'Administrador',
+    en: 'Administrator',
+    pt: 'Administrador'
+  },
+  'header.logout': {
+    es: 'Cerrar Sesión',
+    en: 'Logout',
+    pt: 'Sair'
+  },
+  // ===== PROFILE PAGE =====
+  'profile.title': {
+    es: 'Mi Perfil',
+    en: 'My Profile',
+    pt: 'Meu Perfil'
+  },
+  'profile.loading': {
+    es: 'Cargando perfil...',
+    en: 'Loading profile...',
+    pt: 'Carregando perfil...'
+  },
+  'profile.errorLoading': {
+    es: 'Error al cargar el perfil',
+    en: 'Error loading profile',
+    pt: 'Erro ao carregar perfil'
+  },
+  'profile.errorUpdating': {
+    es: 'Error al actualizar el perfil',
+    en: 'Error updating profile',
+    pt: 'Erro ao atualizar perfil'
+  },
+  'profile.errorSavingLocation': {
+    es: 'Error al guardar la ubicación',
+    en: 'Error saving location',
+    pt: 'Erro ao salvar localização'
+  },
+  'profile.savedLocation': {
+    es: 'Ubicación guardada',
+    en: 'Saved location',
+    pt: 'Localização salva'
+  },
+  'profile.personalInfo': {
+    es: 'Información Personal',
+    en: 'Personal Information',
+    pt: 'Informações Pessoais'
+  },
+  'profile.name': {
+    es: 'Nombre',
+    en: 'Name',
+    pt: 'Nome'
+  },
+  'profile.email': {
+    es: 'Correo Electrónico',
+    en: 'Email',
+    pt: 'Email'
+  },
+  'profile.phone': {
+    es: 'Teléfono',
+    en: 'Phone',
+    pt: 'Telefone'
+  },
+  'profile.address': {
+    es: 'Dirección',
+    en: 'Address',
+    pt: 'Endereço'
+  },
+  'profile.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'profile.save': {
+    es: 'Guardar',
+    en: 'Save',
+    pt: 'Salvar'
+  },
+  'profile.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'profile.location': {
+    es: 'Ubicación',
+    en: 'Location',
+    pt: 'Localização'
+  },
+  'profile.activityHistory': {
+    es: 'Historial de Actividad',
+    en: 'Activity History',
+    pt: 'Histórico de Atividade'
+  },
+  'profile.viewActivity': {
+    es: 'Ver Actividad',
+    en: 'View Activity',
+    pt: 'Ver Atividade'
+  },
+  'profile.viewLocation': {
+    es: 'Ver Ubicación',
+    en: 'View Location',
+    pt: 'Ver Localização'
+  },
+  'profile.configureLocation': {
+    es: 'Configurar ubicación',
+    en: 'Configure location',
+    pt: 'Configurar localização'
+  },
+  'profile.configuredLocation': {
+    es: 'Ubicación configurada',
+    en: 'Configured location',
+    pt: 'Localização configurada'
+  },
+  'profile.coordinates': {
+    es: 'Coordenadas',
+    en: 'Coordinates',
+    pt: 'Coordenadas'
+  },
+  'profile.noLocationConfigured': {
+    es: 'No hay ubicación configurada',
+    en: 'No location configured',
+    pt: 'Nenhuma localização configurada'
+  },
+  'profile.locationDescription': {
+    es: 'Configura tu ubicación para mejorar la experiencia de búsqueda de productos cercanos.',
+    en: 'Configure your location to improve the experience of searching for nearby products.',
+    pt: 'Configure sua localização para melhorar a experiência de busca por produtos próximos.'
+  },
+  'profile.viewHistory': {
+    es: 'Ver historial',
+    en: 'View history',
+    pt: 'Ver histórico'
+  },
+  'profile.locationUpdated': {
+    es: 'Ubicación actualizada correctamente',
+    en: 'Location updated successfully',
+    pt: 'Localização atualizada com sucesso'
+  },
+  // ===== SECURITY PAGE =====
+  'security.title': {
+    es: 'Configuración de Seguridad',
+    en: 'Security Settings',
+    pt: 'Configurações de Segurança'
+  },
+  'security.subtitle': {
+    es: 'Gestiona la seguridad de tu cuenta y protege tu información personal',
+    en: 'Manage your account security and protect your personal information',
+    pt: 'Gerencie a segurança da sua conta e proteja suas informações pessoais'
+  },
+  'security.errorLoading': {
+    es: 'Error al cargar el perfil',
+    en: 'Error loading profile',
+    pt: 'Erro ao carregar perfil'
+  },
+  'security.errorChangingPassword': {
+    es: 'Error al cambiar contraseña',
+    en: 'Error changing password',
+    pt: 'Erro ao alterar senha'
+  },
+  'security.errorSettingPin': {
+    es: 'Error al configurar PIN',
+    en: 'Error setting PIN',
+    pt: 'Erro ao configurar PIN'
+  },
+  'security.errorSettingFingerprint': {
+    es: 'Error al configurar huella digital',
+    en: 'Error setting fingerprint',
+    pt: 'Erro ao configurar impressão digital'
+  },
+  'security.errorSetting2FA': {
+    es: 'Error al configurar 2FA',
+    en: 'Error setting 2FA',
+    pt: 'Erro ao configurar 2FA'
+  },
+  'security.errorSendingEmail': {
+    es: 'Error al enviar email de verificación',
+    en: 'Error sending verification email',
+    pt: 'Erro ao enviar email de verificação'
+  },
+  'security.passwordChanged': {
+    es: 'Contraseña cambiada correctamente',
+    en: 'Password changed successfully',
+    pt: 'Senha alterada com sucesso'
+  },
+  'security.pinConfigured': {
+    es: 'PIN configurado correctamente',
+    en: 'PIN configured successfully',
+    pt: 'PIN configurado com sucesso'
+  },
+  'security.fingerprintConfigured': {
+    es: 'Huella digital configurada correctamente',
+    en: 'Fingerprint configured successfully',
+    pt: 'Impressão digital configurada com sucesso'
+  },
+  'security.2FAConfigured': {
+    es: '2FA configurado correctamente',
+    en: '2FA configured successfully',
+    pt: '2FA configurado com sucesso'
+  },
+  'security.emailSent': {
+    es: 'Email de verificación enviado',
+    en: 'Verification email sent',
+    pt: 'Email de verificação enviado'
+  },
+  'security.password': {
+    es: 'Contraseña',
+    en: 'Password',
+    pt: 'Senha'
+  },
+  'security.pin': {
+    es: 'PIN',
+    en: 'PIN',
+    pt: 'PIN'
+  },
+  'security.fingerprint': {
+    es: 'Huella Digital',
+    en: 'Fingerprint',
+    pt: 'Impressão Digital'
+  },
+  'security.twoFactor': {
+    es: 'Autenticación de Dos Factores',
+    en: 'Two-Factor Authentication',
+    pt: 'Autenticação de Dois Fatores'
+  },
+  'security.emailVerification': {
+    es: 'Verificación de Email',
+    en: 'Email Verification',
+    pt: 'Verificação de Email'
+  },
+  'security.changePassword': {
+    es: 'Cambiar Contraseña',
+    en: 'Change Password',
+    pt: 'Alterar Senha'
+  },
+  'security.setupPin': {
+    es: 'Configurar PIN',
+    en: 'Setup PIN',
+    pt: 'Configurar PIN'
+  },
+  'security.setupFingerprint': {
+    es: 'Configurar Huella Digital',
+    en: 'Setup Fingerprint',
+    pt: 'Configurar Impressão Digital'
+  },
+  'security.setup2FA': {
+    es: 'Configurar 2FA',
+    en: 'Setup 2FA',
+    pt: 'Configurar 2FA'
+  },
+  'security.verifyEmail': {
+    es: 'Verificar Email',
+    en: 'Verify Email',
+    pt: 'Verificar Email'
+  },
+  'security.enabled': {
+    es: 'Habilitado',
+    en: 'Enabled',
+    pt: 'Habilitado'
+  },
+  'security.disabled': {
+    es: 'Deshabilitado',
+    en: 'Disabled',
+    pt: 'Desabilitado'
+  },
+  'security.configure': {
+    es: 'Configurar',
+    en: 'Configure',
+    pt: 'Configurar'
+  },
+  'security.manage': {
+    es: 'Gestionar',
+    en: 'Manage',
+    pt: 'Gerenciar'
+  },
+  'security.currentPassword': {
+    es: 'Contraseña Actual',
+    en: 'Current Password',
+    pt: 'Senha Atual'
+  },
+  'security.newPassword': {
+    es: 'Nueva Contraseña',
+    en: 'New Password',
+    pt: 'Nova Senha'
+  },
+  'security.confirmPassword': {
+    es: 'Confirmar Contraseña',
+    en: 'Confirm Password',
+    pt: 'Confirmar Senha'
+  },
+  'security.pinCode': {
+    es: 'Código PIN',
+    en: 'PIN Code',
+    pt: 'Código PIN'
+  },
+  'security.confirmPin': {
+    es: 'Confirmar PIN',
+    en: 'Confirm PIN',
+    pt: 'Confirmar PIN'
+  },
+  'security.securityTips': {
+    es: 'Consejos de Seguridad',
+    en: 'Security Tips',
+    pt: 'Dicas de Segurança'
+  },
+  'security.strongPassword': {
+    es: 'Usa una contraseña fuerte con al menos 8 caracteres',
+    en: 'Use a strong password with at least 8 characters',
+    pt: 'Use uma senha forte com pelo menos 8 caracteres'
+  },
+  'security.uniquePin': {
+    es: 'Usa un PIN único que no uses en otros servicios',
+    en: 'Use a unique PIN that you don\'t use in other services',
+    pt: 'Use um PIN único que você não usa em outros serviços'
+  },
+  'security.secureDevice': {
+    es: 'Asegúrate de que tu dispositivo esté seguro',
+    en: 'Make sure your device is secure',
+    pt: 'Certifique-se de que seu dispositivo esteja seguro'
+  },
+  'security.securityOptions': {
+    es: 'Opciones de Seguridad',
+    en: 'Security Options',
+    pt: 'Opções de Segurança'
+  },
+  'security.changePasswordDescription': {
+    es: 'Cambia tu contraseña de acceso',
+    en: 'Change your access password',
+    pt: 'Altere sua senha de acesso'
+  },
+  'security.pinDescription': {
+    es: 'PIN configurado',
+    en: 'PIN configured',
+    pt: 'PIN configurado'
+  },
+  'security.pinNotConfigured': {
+    es: 'PIN no configurado',
+    en: 'PIN not configured',
+    pt: 'PIN não configurado'
+  },
+  'security.configured': {
+    es: 'Configurado',
+    en: 'Configured',
+    pt: 'Configurado'
+  },
+  'security.notConfigured': {
+    es: 'No configurado',
+    en: 'Not configured',
+    pt: 'Não configurado'
+  },
+  'security.emailVerified': {
+    es: 'Email verificado',
+    en: 'Email verified',
+    pt: 'Email verificado'
+  },
+  'security.emailNotVerified': {
+    es: 'Email no verificado',
+    en: 'Email not verified',
+    pt: 'Email não verificado'
+  },
+  'security.verified': {
+    es: 'Verificado',
+    en: 'Verified',
+    pt: 'Verificado'
+  },
+  'security.pending': {
+    es: 'Pendiente',
+    en: 'Pending',
+    pt: 'Pendente'
+  },
+  'security.view': {
+    es: 'Ver',
+    en: 'View',
+    pt: 'Ver'
+  },
+  'security.fingerprintConfigured': {
+    es: 'Huella configurada',
+    en: 'Fingerprint configured',
+    pt: 'Impressão digital configurada'
+  },
+  'security.fingerprintNotConfigured': {
+    es: 'Huella no configurada',
+    en: 'Fingerprint not configured',
+    pt: 'Impressão digital não configurada'
+  },
+  'security.active': {
+    es: 'Activada',
+    en: 'Active',
+    pt: 'Ativa'
+  },
+  'security.inactive': {
+    es: 'Inactiva',
+    en: 'Inactive',
+    pt: 'Inativa'
+  },
+  'security.activate': {
+    es: 'Activar',
+    en: 'Activate',
+    pt: 'Ativar'
+  },
+  'security.deactivate': {
+    es: 'Desactivar',
+    en: 'Deactivate',
+    pt: 'Desativar'
+  },
+  'security.2FAEnabled': {
+    es: '2FA activada',
+    en: '2FA enabled',
+    pt: '2FA ativada'
+  },
+  'security.2FANotEnabled': {
+    es: '2FA no activada',
+    en: '2FA not enabled',
+    pt: '2FA não ativada'
+  },
+  'security.emailSentSuccess': {
+    es: 'Email de verificación enviado correctamente',
+    en: 'Verification email sent successfully',
+    pt: 'Email de verificação enviado com sucesso'
+  },
+  'security.2FAEnabledSuccess': {
+    es: 'Autenticación de dos factores activada correctamente',
+    en: 'Two-factor authentication enabled successfully',
+    pt: 'Autenticação de dois fatores ativada com sucesso'
+  },
+  'security.2FADisabledSuccess': {
+    es: 'Autenticación de dos factores desactivada correctamente',
+    en: 'Two-factor authentication disabled successfully',
+    pt: 'Autenticação de dois fatores desativada com sucesso'
+  },
+
+  // ===== SECURITY MODALS =====
+  'securityModals.pin.title': {
+    es: 'Configurar PIN',
+    en: 'Setup PIN',
+    pt: 'Configurar PIN'
+  },
+  'securityModals.pin.updateTitle': {
+    es: 'Actualizar PIN',
+    en: 'Update PIN',
+    pt: 'Atualizar PIN'
+  },
+  'securityModals.pin.currentPassword': {
+    es: 'Contraseña actual',
+    en: 'Current password',
+    pt: 'Senha atual'
+  },
+  'securityModals.pin.currentPasswordPlaceholder': {
+    es: 'Ingresa tu contraseña actual',
+    en: 'Enter your current password',
+    pt: 'Digite sua senha atual'
+  },
+  'securityModals.pin.newPin': {
+    es: 'Nuevo PIN (4 dígitos)',
+    en: 'New PIN (4 digits)',
+    pt: 'Novo PIN (4 dígitos)'
+  },
+  'securityModals.pin.confirmPin': {
+    es: 'Confirmar PIN',
+    en: 'Confirm PIN',
+    pt: 'Confirmar PIN'
+  },
+  'securityModals.pin.pinInfo': {
+    es: 'Información del PIN:',
+    en: 'PIN Information:',
+    pt: 'Informações do PIN:'
+  },
+  'securityModals.pin.pinRules': {
+    es: '• El PIN debe tener exactamente 4 dígitos',
+    en: '• The PIN must have exactly 4 digits',
+    pt: '• O PIN deve ter exatamente 4 dígitos'
+  },
+  'securityModals.pin.pinRules2': {
+    es: '• Solo se permiten números del 0 al 9',
+    en: '• Only numbers from 0 to 9 are allowed',
+    pt: '• Apenas números de 0 a 9 são permitidos'
+  },
+  'securityModals.pin.pinRules3': {
+    es: '• Se usará para acceso rápido a la aplicación',
+    en: '• It will be used for quick access to the application',
+    pt: '• Será usado para acesso rápido à aplicação'
+  },
+  'securityModals.pin.pinRules4': {
+    es: '• Mantén tu PIN en un lugar seguro',
+    en: '• Keep your PIN in a safe place',
+    pt: 'Mantenha seu PIN em um local seguro'
+  },
+  'securityModals.pin.exactly4Digits': {
+    es: 'Ingresa exactamente 4 dígitos numéricos',
+    en: 'Enter exactly 4 numeric digits',
+    pt: 'Digite exatamente 4 dígitos numéricos'
+  },
+  'securityModals.pin.pinMismatch': {
+    es: 'Los PINs no coinciden',
+    en: 'PINs do not match',
+    pt: 'PINs não coincidem'
+  },
+  'securityModals.pin.currentPasswordRequired': {
+    es: 'Debes ingresar tu contraseña actual',
+    en: 'You must enter your current password',
+    pt: 'Você deve digitar sua senha atual'
+  },
+  'securityModals.pin.pinMustBe4Digits': {
+    es: 'El PIN debe tener exactamente 4 dígitos',
+    en: 'The PIN must have exactly 4 digits',
+    pt: 'O PIN deve ter exatamente 4 dígitos'
+  },
+  'securityModals.pin.pinUpdated': {
+    es: 'PIN actualizado correctamente',
+    en: 'PIN updated successfully',
+    pt: 'PIN atualizado com sucesso'
+  },
+  'securityModals.pin.pinConfigured': {
+    es: 'PIN configurado correctamente',
+    en: 'PIN configured successfully',
+    pt: 'PIN configurado com sucesso'
+  },
+  'securityModals.pin.errorConfiguring': {
+    es: 'Error al configurar el PIN',
+    en: 'Error configuring PIN',
+    pt: 'Erro ao configurar PIN'
+  },
+  'securityModals.pin.saving': {
+    es: 'Guardando...',
+    en: 'Saving...',
+    pt: 'Salvando...'
+  },
+  'securityModals.pin.updatePin': {
+    es: 'Actualizar PIN',
+    en: 'Update PIN',
+    pt: 'Atualizar PIN'
+  },
+  'securityModals.pin.setupPin': {
+    es: 'Configurar PIN',
+    en: 'Setup PIN',
+    pt: 'Configurar PIN'
+  },
+
+  // Fingerprint Modal
+  'securityModals.fingerprint.activateTitle': {
+    es: 'Activar Huella Digital',
+    en: 'Activate Fingerprint',
+    pt: 'Ativar Impressão Digital'
+  },
+  'securityModals.fingerprint.deactivateTitle': {
+    es: 'Desactivar Huella Digital',
+    en: 'Deactivate Fingerprint',
+    pt: 'Desativar Impressão Digital'
+  },
+  'securityModals.fingerprint.activateQuestion': {
+    es: '¿Activar huella digital?',
+    en: 'Activate fingerprint?',
+    pt: 'Ativar impressão digital?'
+  },
+  'securityModals.fingerprint.deactivateQuestion': {
+    es: '¿Desactivar huella digital?',
+    en: 'Deactivate fingerprint?',
+    pt: 'Desativar impressão digital?'
+  },
+  'securityModals.fingerprint.activateDescription': {
+    es: 'Podrás usar tu huella digital para acceder rápidamente a la aplicación.',
+    en: 'You will be able to use your fingerprint to quickly access the application.',
+    pt: 'Você poderá usar sua impressão digital para acessar rapidamente a aplicação.'
+  },
+  'securityModals.fingerprint.deactivateDescription': {
+    es: 'Tu huella digital será removida del dispositivo. Podrás volver a configurarla más tarde.',
+    en: 'Your fingerprint will be removed from the device. You can configure it again later.',
+    pt: 'Sua impressão digital será removida do dispositivo. Você pode configurá-la novamente mais tarde.'
+  },
+  'securityModals.fingerprint.information': {
+    es: 'Información:',
+    en: 'Information:',
+    pt: 'Informações:'
+  },
+  'securityModals.fingerprint.info1': {
+    es: '• Solo funciona en dispositivos con sensor de huella',
+    en: '• Only works on devices with fingerprint sensor',
+    pt: '• Só funciona em dispositivos com sensor de impressão digital'
+  },
+  'securityModals.fingerprint.info2': {
+    es: '• Los datos se almacenan de forma segura en tu dispositivo',
+    en: '• Data is stored securely on your device',
+    pt: '• Os dados são armazenados de forma segura no seu dispositivo'
+  },
+  'securityModals.fingerprint.info3': {
+    es: '• Puedes desactivarla en cualquier momento',
+    en: '• You can deactivate it at any time',
+    pt: '• Você pode desativá-la a qualquer momento'
+  },
+  'securityModals.fingerprint.info4': {
+    es: '• Siempre tendrás acceso con tu contraseña',
+    en: '• You will always have access with your password',
+    pt: '• Você sempre terá acesso com sua senha'
+  },
+  'securityModals.fingerprint.activated': {
+    es: 'Huella digital activada',
+    en: 'Fingerprint activated',
+    pt: 'Impressão digital ativada'
+  },
+  'securityModals.fingerprint.deactivated': {
+    es: 'Huella digital desactivada',
+    en: 'Fingerprint deactivated',
+    pt: 'Impressão digital desativada'
+  },
+  'securityModals.fingerprint.errorConfiguring': {
+    es: 'Error al configurar la huella digital',
+    en: 'Error configuring fingerprint',
+    pt: 'Erro ao configurar impressão digital'
+  },
+  'securityModals.fingerprint.processing': {
+    es: 'Procesando...',
+    en: 'Processing...',
+    pt: 'Processando...'
+  },
+  'securityModals.fingerprint.activate': {
+    es: 'Activar',
+    en: 'Activate',
+    pt: 'Ativar'
+  },
+  'securityModals.fingerprint.deactivate': {
+    es: 'Desactivar',
+    en: 'Deactivate',
+    pt: 'Desativar'
+  },
+
+  // Two Factor Modal
+  'securityModals.2fa.title': {
+    es: 'Autenticación de Dos Factores',
+    en: 'Two-Factor Authentication',
+    pt: 'Autenticação de Dois Fatores'
+  },
+  'securityModals.2fa.activateQuestion': {
+    es: '¿Activar 2FA?',
+    en: 'Activate 2FA?',
+    pt: 'Ativar 2FA?'
+  },
+  'securityModals.2fa.deactivateQuestion': {
+    es: '¿Desactivar 2FA?',
+    en: 'Deactivate 2FA?',
+    pt: 'Desativar 2FA?'
+  },
+  'securityModals.2fa.activateDescription': {
+    es: 'Añadirá una capa extra de seguridad a tu cuenta usando códigos de verificación.',
+    en: 'It will add an extra layer of security to your account using verification codes.',
+    pt: 'Adicionará uma camada extra de segurança à sua conta usando códigos de verificação.'
+  },
+  'securityModals.2fa.deactivateDescription': {
+    es: 'Tu cuenta volverá a usar solo contraseña para el acceso.',
+    en: 'Your account will return to using only password for access.',
+    pt: 'Sua conta voltará a usar apenas senha para acesso.'
+  },
+  'securityModals.2fa.setupGoogleAuthenticator': {
+    es: 'Configurar Google Authenticator',
+    en: 'Setup Google Authenticator',
+    pt: 'Configurar Google Authenticator'
+  },
+  'securityModals.2fa.scanQRDescription': {
+    es: 'Escanea este código QR con Google Authenticator o cualquier aplicación compatible',
+    en: 'Scan this QR code with Google Authenticator or any compatible app',
+    pt: 'Escaneie este código QR com Google Authenticator ou qualquer aplicativo compatível'
+  },
+  'securityModals.2fa.manualCode': {
+    es: 'Código manual (si no puedes escanear):',
+    en: 'Manual code (if you cannot scan):',
+    pt: 'Código manual (se não conseguir escanear):'
+  },
+  'securityModals.2fa.instructions': {
+    es: 'Instrucciones:',
+    en: 'Instructions:',
+    pt: 'Instruções:'
+  },
+  'securityModals.2fa.instruction1': {
+    es: 'Descarga Google Authenticator desde tu tienda de aplicaciones',
+    en: 'Download Google Authenticator from your app store',
+    pt: 'Baixe Google Authenticator da sua loja de aplicativos'
+  },
+  'securityModals.2fa.instruction2': {
+    es: 'Abre la aplicación y toca el botón "+"',
+    en: 'Open the app and tap the "+" button',
+    pt: 'Abra o aplicativo e toque no botão "+"'
+  },
+  'securityModals.2fa.instruction3': {
+    es: 'Selecciona "Escanear código QR"',
+    en: 'Select "Scan QR code"',
+    pt: 'Selecione "Escanear código QR"'
+  },
+  'securityModals.2fa.instruction4': {
+    es: 'Apunta la cámara al código QR de arriba',
+    en: 'Point the camera at the QR code above',
+    pt: 'Aponte a câmera para o código QR acima'
+  },
+  'securityModals.2fa.instruction5': {
+    es: 'O ingresa manualmente el código secreto',
+    en: 'Or enter the secret code manually',
+    pt: 'Ou digite o código secreto manualmente'
+  },
+  'securityModals.2fa.backupCodes': {
+    es: 'Códigos de respaldo:',
+    en: 'Backup codes:',
+    pt: 'Códigos de backup:'
+  },
+  'securityModals.2fa.backupCodesDescription': {
+    es: 'Guarda estos códigos en un lugar seguro. Te permitirán acceder si pierdes tu dispositivo.',
+    en: 'Save these codes in a safe place. They will allow you to access if you lose your device.',
+    pt: 'Salve estes códigos em um local seguro. Eles permitirão que você acesse se perder seu dispositivo.'
+  },
+  'securityModals.2fa.downloadCodes': {
+    es: 'Descargar códigos',
+    en: 'Download codes',
+    pt: 'Baixar códigos'
+  },
+  'securityModals.2fa.verifySetup': {
+    es: 'Verificar configuración',
+    en: 'Verify setup',
+    pt: 'Verificar configuração'
+  },
+  'securityModals.2fa.verifyDescription': {
+    es: 'Abre Google Authenticator y ingresa el código de 6 dígitos que aparece',
+    en: 'Open Google Authenticator and enter the 6-digit code that appears',
+    pt: 'Abra Google Authenticator e digite o código de 6 dígitos que aparece'
+  },
+  'securityModals.2fa.codeChangesEvery30': {
+    es: 'El código cambia cada 30 segundos',
+    en: 'The code changes every 30 seconds',
+    pt: 'O código muda a cada 30 segundos'
+  },
+  'securityModals.2fa.codeMustBe6Digits': {
+    es: 'El código debe tener 6 dígitos',
+    en: 'The code must have 6 digits',
+    pt: 'O código deve ter 6 dígitos'
+  },
+  'securityModals.2fa.invalidCode': {
+    es: 'Código inválido',
+    en: 'Invalid code',
+    pt: 'Código inválido'
+  },
+  'securityModals.2fa.activatedSuccessfully': {
+    es: 'Autenticación de dos factores activada correctamente',
+    en: 'Two-factor authentication activated successfully',
+    pt: 'Autenticação de dois fatores ativada com sucesso'
+  },
+  'securityModals.2fa.deactivatedSuccessfully': {
+    es: 'Autenticación de dos factores desactivada',
+    en: 'Two-factor authentication deactivated',
+    pt: 'Autenticação de dois fatores desativada'
+  },
+  'securityModals.2fa.errorActivating': {
+    es: 'Error al activar 2FA',
+    en: 'Error activating 2FA',
+    pt: 'Erro ao ativar 2FA'
+  },
+  'securityModals.2fa.errorDeactivating': {
+    es: 'Error al desactivar 2FA',
+    en: 'Error deactivating 2FA',
+    pt: 'Erro ao desativar 2FA'
+  },
+  'securityModals.2fa.processing': {
+    es: 'Procesando...',
+    en: 'Processing...',
+    pt: 'Processando...'
+  },
+  'securityModals.2fa.verifying': {
+    es: 'Verificando...',
+    en: 'Verifying...',
+    pt: 'Verificando...'
+  },
+  'securityModals.2fa.verifyAndActivate': {
+    es: 'Verificar y Activar',
+    en: 'Verify and Activate',
+    pt: 'Verificar e Ativar'
+  },
+
+  // Email Verification Modal
+  'securityModals.email.title': {
+    es: 'Verificación de Email',
+    en: 'Email Verification',
+    pt: 'Verificação de Email'
+  },
+  'securityModals.email.verified': {
+    es: 'Email Verificado',
+    en: 'Email Verified',
+    pt: 'Email Verificado'
+  },
+  'securityModals.email.verifiedDescription': {
+    es: 'Tu email está verificado y tu cuenta está completamente activa.',
+    en: 'Your email is verified and your account is fully active.',
+    pt: 'Seu email está verificado e sua conta está totalmente ativa.'
+  },
+  'securityModals.email.accountVerified': {
+    es: 'Cuenta verificada y segura',
+    en: 'Account verified and secure',
+    pt: 'Conta verificada e segura'
+  },
+  'securityModals.email.verifyEmail': {
+    es: 'Verificar Email',
+    en: 'Verify Email',
+    pt: 'Verificar Email'
+  },
+  'securityModals.email.verifyDescription': {
+    es: 'Necesitas verificar tu email para completar la configuración de tu cuenta.',
+    en: 'You need to verify your email to complete your account setup.',
+    pt: 'Você precisa verificar seu email para completar a configuração da sua conta.'
+  },
+  'securityModals.email.verificationSteps': {
+    es: 'Pasos para verificar:',
+    en: 'Steps to verify:',
+    pt: 'Passos para verificar:'
+  },
+  'securityModals.email.step1': {
+    es: '• Revisa tu bandeja de entrada',
+    en: '• Check your inbox',
+    pt: '• Verifique sua caixa de entrada'
+  },
+  'securityModals.email.step2': {
+    es: '• Busca el email de verificación',
+    en: '• Look for the verification email',
+    pt: '• Procure pelo email de verificação'
+  },
+  'securityModals.email.step3': {
+    es: '• Haz clic en el enlace de verificación',
+    en: '• Click on the verification link',
+    pt: '• Clique no link de verificação'
+  },
+  'securityModals.email.step4': {
+    es: '• Si no lo encuentras, revisa la carpeta de spam',
+    en: '• If you cannot find it, check the spam folder',
+    pt: '• Se não encontrar, verifique a pasta de spam'
+  },
+  'securityModals.email.emailSentSuccessfully': {
+    es: 'Email de verificación enviado correctamente',
+    en: 'Verification email sent successfully',
+    pt: 'Email de verificação enviado com sucesso'
+  },
+  'securityModals.email.errorSendingEmail': {
+    es: 'Error al enviar el email de verificación',
+    en: 'Error sending verification email',
+    pt: 'Erro ao enviar email de verificação'
+  },
+  'securityModals.email.sending': {
+    es: 'Enviando...',
+    en: 'Sending...',
+    pt: 'Enviando...'
+  },
+  'securityModals.email.resendEmail': {
+    es: 'Reenviar Email',
+    en: 'Resend Email',
+    pt: 'Reenviar Email'
+  },
+  'securityModals.email.close': {
+    es: 'Cerrar',
+    en: 'Close',
+    pt: 'Fechar'
+  },
+  // ===== SECURITY MODALS =====
+
+
+  'securityModal.passwordChangedSuccess': {
+    es: 'Contraseña cambiada exitosamente',
+    en: 'Password changed successfully',
+    pt: 'Senha alterada com sucesso'
+  },
+  'securityModal.errorChangingPassword': {
+    es: 'Error al cambiar la contraseña',
+    en: 'Error changing password',
+    pt: 'Erro ao alterar senha'
+  },
+  'securityModal.passwordRequirements': {
+    es: 'Requisitos de la contraseña',
+    en: 'Password requirements',
+    pt: 'Requisitos da senha'
+  },
+  'securityModal.minLength': {
+    es: 'Al menos 8 caracteres',
+    en: 'At least 8 characters',
+    pt: 'Pelo menos 8 caracteres'
+  },
+  'securityModal.uppercase': {
+    es: 'Al menos una mayúscula',
+    en: 'At least one uppercase',
+    pt: 'Pelo menos uma maiúscula'
+  },
+  'securityModal.lowercase': {
+    es: 'Al menos una minúscula',
+    en: 'At least one lowercase',
+    pt: 'Pelo menos uma minúscula'
+  },
+  'securityModal.number': {
+    es: 'Al menos un número',
+    en: 'At least one number',
+    pt: 'Pelo menos um número'
+  },
+  'securityModal.specialChar': {
+    es: 'Al menos un carácter especial',
+    en: 'At least one special character',
+    pt: 'Pelo menos um caractere especial'
+  },
+  'securityModal.passwordsMatch': {
+    es: 'Las contraseñas coinciden',
+    en: 'Passwords match',
+    pt: 'As senhas coincidem'
+  },
+  'securityModal.passwordsNotMatch': {
+    es: 'Las contraseñas no coinciden',
+    en: 'Passwords do not match',
+    pt: 'As senhas não coincidem'
+  },
+  'securityModal.change': {
+    es: 'Cambiar',
+    en: 'Change',
+    pt: 'Alterar'
+  },
+  'securityModal.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'redemptionManagement.noRedemptions': {
+    es: 'No se encontraron canjes',
+    en: 'No redemptions found',
+    pt: 'Nenhum resgate encontrado'
+  }
+};
+
+export class TranslationService {
+  private currentLanguage: Language = 'es';
+
+  constructor(language?: Language) {
+    if (language) {
+      this.currentLanguage = language;
+    }
+  }
+
+  setLanguage(language: Language): void {
+    this.currentLanguage = language;
+    // Guardar en localStorage para persistencia
+    localStorage.setItem('language', language);
+  }
+
+  getLanguage(): Language {
+    return this.currentLanguage;
+  }
+
+  t(key: string): string {
+    const translation = translations[key];
+    if (!translation) {
+      console.warn(`Translation key not found: ${key}`);
+      return key;
+    }
+    return translation[this.currentLanguage] || translation['es'] || key;
+  }
+
+  // Método para obtener traducción con parámetros
+  tWithParams(key: string, params: Record<string, string>): string {
+    let text = this.t(key);
+    Object.entries(params).forEach(([param, value]) => {
+      text = text.replace(new RegExp(`{{${param}}}`, 'g'), value);
+    });
+    return text;
+  }
+
+  // Obtener todas las traducciones para un idioma específico
+  getAllForLanguage(language: Language): Record<string, string> {
+    const result: Record<string, string> = {};
+    Object.entries(translations).forEach(([key, values]) => {
+      result[key] = values[language] || values['es'] || key;
+    });
+    return result;
+  }
+
+  // Obtener idioma del localStorage al inicializar
+  initializeLanguage(): void {
+    const savedLanguage = localStorage.getItem('language') as Language;
+    if (savedLanguage && ['es', 'en', 'pt'].includes(savedLanguage)) {
+      this.currentLanguage = savedLanguage;
+    }
+  }
+}
+
+// Instancia global del servicio de traducciones
+export const translationService = new TranslationService();
+
+// Inicializar con el idioma guardado
+translationService.initializeLanguage();
+
+// Hook personalizado para usar traducciones
+export const useTranslation = () => {
+  // Obtener el idioma actual del localStorage para sincronizar
+  const currentLanguage = localStorage.getItem('language') as Language || 'es';
+  translationService.setLanguage(currentLanguage);
+  
+  return {
+    t: translationService.t.bind(translationService),
+    tWithParams: translationService.tWithParams.bind(translationService),
+    setLanguage: translationService.setLanguage.bind(translationService),
+    getLanguage: translationService.getLanguage.bind(translationService)
+  };
+};

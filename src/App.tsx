@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
@@ -81,6 +83,8 @@ import DeliveryRoute from './components/DeliveryRoute';
 import ClientRoute from './components/ClientRoute';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+
+
 
 function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -235,6 +239,23 @@ function AppContent() {
         {/* Rutas normales con Header y Sidebar */}
         <Route path="/*" element={
           <div className="min-h-screen bg-gray-50">
+            {/* TEST DIV - Should be visible at the very top */}
+            <div style={{
+              backgroundColor: 'red', 
+              color: 'white', 
+              padding: '20px', 
+              textAlign: 'center', 
+              fontSize: '24px',
+              fontWeight: 'bold',
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 9999
+            }}>
+              🚨 TEST APP - Si ves esto, la aplicación funciona 🚨
+            </div>
+            
             <Header />
             
             <div className="flex">
@@ -464,19 +485,25 @@ function AppContent() {
           </div>
         } />
       </Routes>
+      
+             
     </Router>
   );
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <FavoritesProvider>
-          <AppContent />
-        </FavoritesProvider>
-      </CartProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <CartProvider>
+            <FavoritesProvider>
+              <AppContent />
+            </FavoritesProvider>
+          </CartProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </LanguageProvider>
   );
 }
 

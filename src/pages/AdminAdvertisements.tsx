@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import AdvertisementForm from '../components/AdvertisementForm';
 import { 
   Megaphone, 
@@ -143,6 +144,7 @@ interface AdvertisementStats {
 
 const AdminAdvertisements: React.FC = () => {
   const { user, token, hasRole } = useAuth();
+  const { t } = useLanguage();
   
   // Verificar si el usuario tiene permisos de admin
   if (!user || !hasRole('admin')) {
@@ -495,8 +497,8 @@ const AdminAdvertisements: React.FC = () => {
   return (
     <div className="p-4">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Gestión de Publicidad</h1>
-        <p className="text-gray-600 mt-2">Administra las publicidades internas y espacios publicitarios</p>
+                        <h1 className="text-3xl font-bold text-gray-900">{t('adminAdvertisements.title')}</h1>
+                  <p className="text-gray-600 mt-2">{t('adminAdvertisements.subtitle')}</p>
       </div>
 
       {/* Estadísticas */}
@@ -504,7 +506,7 @@ const AdminAdvertisements: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white p-4 rounded-lg shadow">
             <div className="flex items-center">
-              <Megaphone className="w-8 h-8 text-blue-600" />
+                             <Megaphone className="w-8 h-8 text-[#FFC300]" />
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-600">Total</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.overview.total}</p>
@@ -547,10 +549,10 @@ const AdminAdvertisements: React.FC = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Buscar publicidades..."
+                            placeholder={t('adminAdvertisements.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
           />
         </div>
         
@@ -570,7 +572,7 @@ const AdminAdvertisements: React.FC = () => {
           onChange={(e) => setSelectedStatus(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="all">Todos los estados</option>
+                          <option value="all">{t('adminAdvertisements.filterAll')}</option>
           <option value="draft">Borrador</option>
           <option value="pending">Pendiente</option>
           <option value="approved">Aprobada</option>
@@ -605,10 +607,10 @@ const AdminAdvertisements: React.FC = () => {
         
         <button 
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 bg-[#FFC300] text-white px-4 py-2 rounded-lg hover:bg-[#E6B000] transition-colors"
         >
           <Plus className="w-5 h-5" />
-          Nueva Publicidad
+          {t('adminAdvertisements.newAdvertisement')}
         </button>
       </div>
 
@@ -616,13 +618,13 @@ const AdminAdvertisements: React.FC = () => {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {loading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Cargando publicidades...</p>
+                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FFC300] mx-auto"></div>
+            <p className="mt-2 text-gray-600">{t('adminAdvertisements.loading')}</p>
           </div>
         ) : advertisements.length === 0 ? (
           <div className="p-8 text-center">
             <Megaphone className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No se encontraron publicidades</p>
+            <p className="text-gray-600">{t('adminAdvertisements.noAdvertisements')}</p>
             <p className="text-sm text-gray-500 mt-2">Crea tu primera publicidad para empezar</p>
           </div>
         ) : (

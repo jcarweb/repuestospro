@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Save, Plus, Trash2, ShoppingCart, Star, Share2, UserPlus, Gift } from 'lucide-react';
 
 interface PointsPolicy {
@@ -19,6 +20,7 @@ const PointsPolicyForm: React.FC<PointsPolicyFormProps> = ({
   onSave,
   isLoading = false
 }) => {
+  const { t } = useLanguage();
   const [currentPolicies, setCurrentPolicies] = useState<PointsPolicy[]>(policies);
   const [newPolicy, setNewPolicy] = useState<PointsPolicy>({
     action: '',
@@ -30,32 +32,32 @@ const PointsPolicyForm: React.FC<PointsPolicyFormProps> = ({
   const predefinedActions = [
     {
       value: 'purchase',
-      label: 'Compra',
-      description: 'Puntos por cada compra realizada',
+      label: t('adminLoyalty.policies.actions.purchase'),
+      description: t('adminLoyalty.policies.actions.purchaseDesc'),
       icon: ShoppingCart
     },
     {
       value: 'review',
-      label: 'Reseña',
-      description: 'Puntos por enviar una reseña de producto',
+      label: t('adminLoyalty.policies.actions.review'),
+      description: t('adminLoyalty.policies.actions.reviewDesc'),
       icon: Star
     },
     {
       value: 'referral',
-      label: 'Referido',
-      description: 'Puntos por referir a un nuevo cliente',
+      label: t('adminLoyalty.policies.actions.referral'),
+      description: t('adminLoyalty.policies.actions.referralDesc'),
       icon: UserPlus
     },
     {
       value: 'share',
-      label: 'Compartir',
-      description: 'Puntos por compartir en redes sociales',
+      label: t('adminLoyalty.policies.actions.share'),
+      description: t('adminLoyalty.policies.actions.shareDesc'),
       icon: Share2
     },
     {
       value: 'redemption',
-      label: 'Canje',
-      description: 'Puntos por canjear un premio',
+      label: t('adminLoyalty.policies.actions.redemption'),
+      description: t('adminLoyalty.policies.actions.redemptionDesc'),
       icon: Gift
     }
   ];
@@ -100,25 +102,25 @@ const PointsPolicyForm: React.FC<PointsPolicyFormProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Políticas de Puntos
+        <h2 className="text-2xl font-bold text-[#FFC300] mb-2">
+          {t('adminLoyalty.policies.title')}
         </h2>
-        <p className="text-gray-600">
-          Configura cuántos puntos se otorgan por cada acción de los clientes
+        <p className="text-gray-700">
+          {t('adminLoyalty.policies.subtitle')}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Políticas existentes */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Políticas Actuales
+          <h3 className="text-lg font-semibold text-[#FFC300] mb-4">
+            {t('adminLoyalty.policies.currentPolicies')}
           </h3>
           
           {currentPolicies.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Gift className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-              <p>No hay políticas configuradas</p>
+              <p>{t('adminLoyalty.policies.noPolicies')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -150,14 +152,14 @@ const PointsPolicyForm: React.FC<PointsPolicyFormProps> = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Puntos
+                          {t('adminLoyalty.policies.points')}
                         </label>
                         <input
                           type="number"
                           value={policy.points}
                           onChange={(e) => handlePolicyChange(index, 'points', Number(e.target.value))}
                           min="0"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                         />
                       </div>
                       <div className="flex items-center">
@@ -166,10 +168,10 @@ const PointsPolicyForm: React.FC<PointsPolicyFormProps> = ({
                           id={`active-${index}`}
                           checked={policy.isActive}
                           onChange={(e) => handlePolicyChange(index, 'isActive', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-[#FFC300] focus:ring-[#FFC300] border-gray-300 rounded"
                         />
-                        <label htmlFor={`active-${index}`} className="ml-2 block text-sm text-gray-900">
-                          Política activa
+                        <label htmlFor={`active-${index}`} className="ml-2 block text-sm text-gray-700">
+                          {t('adminLoyalty.policies.activePolicy')}
                         </label>
                       </div>
                     </div>
@@ -182,14 +184,14 @@ const PointsPolicyForm: React.FC<PointsPolicyFormProps> = ({
 
         {/* Agregar nueva política */}
         <div className="border-t pt-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Agregar Nueva Política
+          <h3 className="text-lg font-semibold text-[#FFC300] mb-4">
+            {t('adminLoyalty.policies.addNewPolicy')}
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Acción
+                {t('adminLoyalty.policies.action')}
               </label>
               <select
                 value={newPolicy.action}
@@ -202,9 +204,9 @@ const PointsPolicyForm: React.FC<PointsPolicyFormProps> = ({
                     description: actionConfig ? actionConfig.description : ''
                   }));
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
               >
-                <option value="">Seleccionar acción</option>
+                <option value="">{t('adminLoyalty.policies.selectAction')}</option>
                 {predefinedActions.map(action => (
                   <option key={action.value} value={action.value}>
                     {action.label}
@@ -215,14 +217,14 @@ const PointsPolicyForm: React.FC<PointsPolicyFormProps> = ({
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Puntos
+                {t('adminLoyalty.policies.points')}
               </label>
               <input
                 type="number"
                 value={newPolicy.points}
                 onChange={(e) => setNewPolicy(prev => ({ ...prev, points: Number(e.target.value) }))}
                 min="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                 placeholder="0"
               />
             </div>
@@ -230,14 +232,14 @@ const PointsPolicyForm: React.FC<PointsPolicyFormProps> = ({
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Descripción
+              {t('adminLoyalty.policies.description')}
             </label>
             <textarea
               value={newPolicy.description}
               onChange={(e) => setNewPolicy(prev => ({ ...prev, description: e.target.value }))}
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Describe la política de puntos..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
+              placeholder={t('adminLoyalty.policies.descriptionPlaceholder')}
             />
           </div>
 
@@ -245,22 +247,22 @@ const PointsPolicyForm: React.FC<PointsPolicyFormProps> = ({
             type="button"
             onClick={handleAddPolicy}
             disabled={!newPolicy.action || newPolicy.points <= 0 || !newPolicy.description}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+            className="flex items-center space-x-2 px-4 py-2 bg-[#FFC300] text-white rounded-md hover:bg-[#E6B000] disabled:opacity-50"
           >
             <Plus className="w-4 h-4" />
-            <span>Agregar Política</span>
+            <span>{t('adminLoyalty.policies.addPolicy')}</span>
           </button>
         </div>
 
         {/* Información adicional */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-medium text-blue-900 mb-2">Información sobre las políticas</h4>
+          <h4 className="font-medium text-blue-900 mb-2">{t('adminLoyalty.policies.info.title')}</h4>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>• <strong>Compra:</strong> Puntos por cada compra realizada (ej: 1 punto por cada $1)</li>
-            <li>• <strong>Reseña:</strong> Puntos por enviar una reseña de producto</li>
-            <li>• <strong>Referido:</strong> Puntos por referir a un nuevo cliente que se registre</li>
-            <li>• <strong>Compartir:</strong> Puntos por compartir productos en redes sociales</li>
-            <li>• <strong>Canje:</strong> Puntos por canjear un premio (puede ser negativo)</li>
+            <li>• <strong>{t('adminLoyalty.policies.actions.purchase')}:</strong> {t('adminLoyalty.policies.info.purchase')}</li>
+            <li>• <strong>{t('adminLoyalty.policies.actions.review')}:</strong> {t('adminLoyalty.policies.info.review')}</li>
+            <li>• <strong>{t('adminLoyalty.policies.actions.referral')}:</strong> {t('adminLoyalty.policies.info.referral')}</li>
+            <li>• <strong>{t('adminLoyalty.policies.actions.share')}:</strong> {t('adminLoyalty.policies.info.share')}</li>
+            <li>• <strong>{t('adminLoyalty.policies.actions.redemption')}:</strong> {t('adminLoyalty.policies.info.redemption')}</li>
           </ul>
         </div>
 
@@ -269,14 +271,14 @@ const PointsPolicyForm: React.FC<PointsPolicyFormProps> = ({
           <button
             type="submit"
             disabled={isLoading || currentPolicies.length === 0}
-            className="flex items-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="flex items-center space-x-2 px-6 py-2 bg-[#FFC300] text-white rounded-md hover:bg-[#E6B000] disabled:opacity-50"
           >
             {isLoading ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <Save className="w-4 h-4" />
             )}
-            <span>Guardar Políticas</span>
+            <span>{t('adminLoyalty.policies.savePolicies')}</span>
           </button>
         </div>
       </form>

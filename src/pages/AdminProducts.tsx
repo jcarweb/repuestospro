@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { 
   Package, 
   Plus, 
@@ -73,6 +74,7 @@ interface ProductStats {
 
 const AdminProducts: React.FC = () => {
   const { user, token } = useAuth();
+  const { t, tWithParams } = useLanguage();
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Store[]>([]);
   const [stats, setStats] = useState<ProductStats | null>(null);
@@ -222,13 +224,13 @@ const AdminProducts: React.FC = () => {
         });
         fetchProducts();
         fetchStats();
-        alert('Producto creado exitosamente');
+        alert(t('adminProducts.messages.productCreated'));
       } else {
-        alert(data.message || 'Error creando producto');
+        alert(data.message || t('adminProducts.errors.creatingProduct'));
       }
     } catch (error) {
       console.error('Error creando producto:', error);
-      alert('Error de conexión');
+      alert(t('adminProducts.errors.connection'));
     }
   };
 
@@ -252,19 +254,19 @@ const AdminProducts: React.FC = () => {
         setShowEditModal(false);
         setSelectedProduct(null);
         fetchProducts();
-        alert('Producto actualizado exitosamente');
+        alert(t('adminProducts.messages.productUpdated'));
       } else {
-        alert(data.message || 'Error actualizando producto');
+        alert(data.message || t('adminProducts.errors.updatingProduct'));
       }
     } catch (error) {
       console.error('Error actualizando producto:', error);
-      alert('Error de conexión');
+      alert(t('adminProducts.errors.connection'));
     }
   };
 
   // Eliminar producto
   const handleDeleteProduct = async (productId: string) => {
-    const confirmed = window.confirm('¿Estás seguro de que deseas desactivar este producto?');
+    const confirmed = window.confirm(t('adminProducts.confirm.delete'));
     if (!confirmed) return;
 
     try {
@@ -280,25 +282,25 @@ const AdminProducts: React.FC = () => {
       if (data.success) {
         fetchProducts();
         fetchStats();
-        alert('Producto desactivado exitosamente');
+        alert(t('adminProducts.messages.productDeactivated'));
       } else {
-        alert(data.message || 'Error desactivando producto');
+        alert(data.message || t('adminProducts.errors.deactivatingProduct'));
       }
     } catch (error) {
       console.error('Error desactivando producto:', error);
-      alert('Error de conexión');
+      alert(t('adminProducts.errors.connection'));
     }
   };
 
   // Importar productos desde CSV
   const handleImportCSV = async () => {
     if (!csvFile) {
-      alert('Por favor selecciona un archivo CSV');
+      alert(t('adminProducts.errors.selectCSV'));
       return;
     }
 
     if (!formData.storeId) {
-      alert('Por favor selecciona una tienda');
+      alert(t('adminProducts.errors.selectStore'));
       return;
     }
 
@@ -323,13 +325,13 @@ const AdminProducts: React.FC = () => {
         setCsvFile(null);
         fetchProducts();
         fetchStats();
-        alert(`Importación completada. ${data.data.successCount} productos importados exitosamente.`);
+        alert(tWithParams('adminProducts.messages.importSuccess', { successCount: data.data.successCount.toString() }));
       } else {
-        alert(data.message || 'Error importando productos');
+        alert(data.message || t('adminProducts.errors.importingProducts'));
       }
     } catch (error) {
       console.error('Error importando productos:', error);
-      alert('Error de conexión');
+      alert(t('adminProducts.errors.connection'));
     } finally {
       setImporting(false);
     }
@@ -368,8 +370,8 @@ const AdminProducts: React.FC = () => {
       <div className="p-4">
         <div className="text-center py-12">
           <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Acceso Denegado</h2>
-          <p className="text-gray-600">No tienes permisos para acceder a esta página.</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('adminProducts.access.denied')}</h2>
+          <p className="text-gray-600">{t('adminProducts.access.noPermissions')}</p>
         </div>
       </div>
     );
@@ -378,55 +380,55 @@ const AdminProducts: React.FC = () => {
   return (
     <div className="p-4">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Gestión de Productos</h1>
-        <p className="text-gray-600 mt-2">Administra el catálogo de productos</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-[#FFC300]">{t('adminProducts.title')}</h1>
+        <p className="text-gray-600 dark:text-white mt-2">{t('adminProducts.subtitle')}</p>
       </div>
 
       {/* Estadísticas */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="bg-white dark:bg-[#333333] p-4 rounded-lg shadow">
             <div className="flex items-center">
               <Package className="w-8 h-8 text-blue-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Total</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalProducts}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-white">{t('adminProducts.stats.total')}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-[#FFC300]">{stats.totalProducts}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="bg-white dark:bg-[#333333] p-4 rounded-lg shadow">
             <div className="flex items-center">
               <CheckCircle className="w-8 h-8 text-green-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Activos</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.activeProducts}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-white">{t('adminProducts.stats.active')}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-[#FFC300]">{stats.activeProducts}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="bg-white dark:bg-[#333333] p-4 rounded-lg shadow">
             <div className="flex items-center">
               <BarChart3 className="w-8 h-8 text-purple-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Destacados</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.featuredProducts}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-white">{t('adminProducts.stats.featured')}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-[#FFC300]">{stats.featuredProducts}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="bg-white dark:bg-[#333333] p-4 rounded-lg shadow">
             <div className="flex items-center">
               <AlertCircle className="w-8 h-8 text-yellow-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Stock Bajo</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.lowStockProducts}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-white">{t('adminProducts.stats.lowStock')}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-[#FFC300]">{stats.lowStockProducts}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
+          <div className="bg-white dark:bg-[#333333] p-4 rounded-lg shadow">
             <div className="flex items-center">
               <X className="w-8 h-8 text-red-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Sin Stock</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.outOfStockProducts}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-white">{t('adminProducts.stats.outOfStock')}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-[#FFC300]">{stats.outOfStockProducts}</p>
               </div>
             </div>
           </div>
@@ -439,19 +441,19 @@ const AdminProducts: React.FC = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Buscar productos..."
+            placeholder={t('adminProducts.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
           />
         </div>
         
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
         >
-          <option value="all">Todas las categorías</option>
+          <option value="all">{t('adminProducts.allCategories')}</option>
           {stats?.productsByCategory.map((cat) => (
             <option key={cat._id} value={cat._id}>{cat._id} ({cat.count})</option>
           ))}
@@ -460,9 +462,9 @@ const AdminProducts: React.FC = () => {
         <select
           value={selectedStore}
           onChange={(e) => setSelectedStore(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
         >
-          <option value="all">Todas las tiendas</option>
+          <option value="all">{t('adminProducts.allStores')}</option>
           {stores.map((store) => (
             <option key={store._id} value={store._id}>{store.name} - {store.city}</option>
           ))}
@@ -471,81 +473,81 @@ const AdminProducts: React.FC = () => {
         <select
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
         >
-          <option value="all">Todos los estados</option>
-          <option value="active">Activos</option>
-          <option value="inactive">Inactivos</option>
+          <option value="all">{t('adminProducts.allStatuses')}</option>
+          <option value="active">{t('adminProducts.active')}</option>
+          <option value="inactive">{t('adminProducts.inactive')}</option>
         </select>
         
         <button 
           onClick={() => setShowImportModal(true)}
-          className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+          className="flex items-center gap-2 bg-[#FFC300] text-[#333333] px-4 py-2 rounded-lg hover:bg-[#E6B800] transition-colors font-semibold"
         >
           <Upload className="w-5 h-5" />
-          Importar CSV
+          {t('adminProducts.importCSV')}
         </button>
         
         <button 
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 bg-[#FFC300] text-[#333333] px-4 py-2 rounded-lg hover:bg-[#E6B800] transition-colors font-semibold"
         >
           <Plus className="w-5 h-5" />
-          Agregar Producto
+          {t('adminProducts.createProduct')}
         </button>
       </div>
 
       {/* Tabla de productos */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-[#333333] rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-[#555555]">
+            <thead className="bg-gray-50 dark:bg-[#444444]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Producto
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tienda
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Categoría
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  SKU
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Precio
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
-                </th>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                    {t('adminProducts.table.product')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                    {t('adminProducts.table.store')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                    {t('adminProducts.table.category')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                    {t('adminProducts.table.sku')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                    {t('adminProducts.table.price')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                    {t('adminProducts.table.stock')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                    {t('adminProducts.table.status')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">
+                    {t('adminProducts.table.actions')}
+                  </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-[#333333] divide-y divide-gray-200 dark:divide-[#555555]">
               {loading ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-4 text-center">
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                      <span className="ml-2">Cargando productos...</span>
+                      <span className="ml-2">{t('adminProducts.loading')}</span>
                     </div>
                   </td>
                 </tr>
               ) : products.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
-                    No se encontraron productos
+                  <td colSpan={8} className="px-6 py-4 text-center text-gray-500 dark:text-gray-300">
+                    {t('adminProducts.noProducts')}
                   </td>
                 </tr>
               ) : (
                 products.map((product) => (
-                  <tr key={product._id} className="hover:bg-gray-50">
+                  <tr key={product._id} className="hover:bg-gray-50 dark:hover:bg-[#444444]">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -562,8 +564,8 @@ const AdminProducts: React.FC = () => {
                           )}
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                          <div className="text-sm text-gray-500">{product.brand}</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{product.name}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-300">{product.brand}</div>
                         </div>
                       </div>
                     </td>
@@ -571,18 +573,18 @@ const AdminProducts: React.FC = () => {
                       <div className="flex items-center">
                         <Store className="w-4 h-4 text-gray-400 mr-2" />
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{product.store.name}</div>
-                          <div className="text-sm text-gray-500">{product.store.city}, {product.store.state}</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{product.store.name}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-300">{product.store.city}, {product.store.state}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {product.category}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {product.sku}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       ${product.price}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -602,7 +604,7 @@ const AdminProducts: React.FC = () => {
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {product.isActive ? 'Activo' : 'Inactivo'}
+                        {product.isActive ? t('adminProducts.status.active') : t('adminProducts.status.inactive')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -610,21 +612,21 @@ const AdminProducts: React.FC = () => {
                         <button 
                           onClick={() => openViewModal(product)}
                           className="text-blue-600 hover:text-blue-900 p-1 rounded"
-                          title="Ver detalles"
+                          title={t('adminProducts.actions.viewDetails')}
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => openEditModal(product)}
                           className="text-green-600 hover:text-green-900 p-1 rounded"
-                          title="Editar"
+                          title={t('adminProducts.actions.edit')}
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleDeleteProduct(product._id)}
                           className="text-red-600 hover:text-red-900 p-1 rounded"
-                          title="Desactivar"
+                          title={t('adminProducts.actions.deactivate')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -646,22 +648,20 @@ const AdminProducts: React.FC = () => {
                 disabled={currentPage === 1}
                 className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
               >
-                Anterior
+                {t('adminProducts.pagination.previous')}
               </button>
               <button
                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
                 className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
               >
-                Siguiente
+                {t('adminProducts.pagination.next')}
               </button>
             </div>
             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm text-gray-700">
-                  Mostrando <span className="font-medium">{((currentPage - 1) * 20) + 1}</span> a{' '}
-                  <span className="font-medium">{Math.min(currentPage * 20, totalProducts)}</span> de{' '}
-                  <span className="font-medium">{totalProducts}</span> resultados
+                                     {tWithParams('adminProducts.pagination.showing', { start: (((currentPage - 1) * 20) + 1).toString(), end: Math.min(currentPage * 20, totalProducts).toString(), total: totalProducts.toString() })}
                 </p>
               </div>
               <div>
@@ -705,86 +705,86 @@ const AdminProducts: React.FC = () => {
 
       {/* Modal para crear producto */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-[#333333]">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Crear Nuevo Producto</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-[#FFC300] mb-4">{t('adminProducts.modals.create.title')}</h3>
               <div className="space-y-4">
                 <select
                   value={formData.storeId}
                   onChange={(e) => setFormData({...formData, storeId: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                   required
                 >
-                  <option value="">Seleccionar tienda</option>
+                  <option value="">{t('select_store')}</option>
                   {stores.map((store) => (
                     <option key={store._id} value={store._id}>{store.name} - {store.city}</option>
                   ))}
                 </select>
                 <input
                   type="text"
-                  placeholder="Nombre del producto"
+                  placeholder={t('adminProducts.modals.productName')}
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                 />
                 <textarea
-                  placeholder="Descripción"
+                  placeholder={t('adminProducts.modals.description')}
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                   rows={3}
                 />
                 <input
                   type="number"
-                  placeholder="Precio"
+                  placeholder={t('adminProducts.modals.price')}
                   value={formData.price}
                   onChange={(e) => setFormData({...formData, price: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                 />
                 <input
                   type="text"
-                  placeholder="Categoría"
+                  placeholder={t('adminProducts.modals.category')}
                   value={formData.category}
                   onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                 />
                 <input
                   type="text"
-                  placeholder="SKU"
+                  placeholder={t('adminProducts.modals.sku')}
                   value={formData.sku}
                   onChange={(e) => setFormData({...formData, sku: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                 />
                 <input
                   type="number"
-                  placeholder="Stock"
+                  placeholder={t('adminProducts.modals.stock')}
                   value={formData.stock}
                   onChange={(e) => setFormData({...formData, stock: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                 />
                 <div className="flex items-center">
                   <input
                     type="checkbox"
                     checked={formData.isFeatured}
                     onChange={(e) => setFormData({...formData, isFeatured: e.target.checked})}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-[#FFC300] focus:ring-[#FFC300] border-gray-300 dark:border-[#555555] rounded"
                   />
-                  <label className="ml-2 text-sm text-gray-700">Producto destacado</label>
+                  <label className="ml-2 text-sm text-gray-700 dark:text-white">{t('adminProducts.modals.featured')}</label>
                 </div>
               </div>
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  className="px-4 py-2 bg-gray-300 dark:bg-[#555555] text-gray-700 dark:text-white rounded-md hover:bg-gray-400 dark:hover:bg-[#666666]"
                 >
-                  Cancelar
+                  {t('adminProducts.modals.cancel')}
                 </button>
                 <button
                   onClick={handleCreateProduct}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 bg-[#FFC300] text-[#333333] rounded-md hover:bg-[#E6B800] font-semibold"
                 >
-                  Crear
+                  {t('adminProducts.modals.create')}
                 </button>
               </div>
             </div>
@@ -794,86 +794,86 @@ const AdminProducts: React.FC = () => {
 
       {/* Modal para editar producto */}
       {showEditModal && selectedProduct && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-[#333333]">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Editar Producto</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-[#FFC300] mb-4">{t('edit_product')}</h3>
               <div className="space-y-4">
                 <select
                   value={formData.storeId}
                   onChange={(e) => setFormData({...formData, storeId: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                   required
                 >
-                  <option value="">Seleccionar tienda</option>
+                  <option value="">{t('select_store')}</option>
                   {stores.map((store) => (
                     <option key={store._id} value={store._id}>{store.name} - {store.city}</option>
                   ))}
                 </select>
                 <input
                   type="text"
-                  placeholder="Nombre del producto"
+                  placeholder={t('product_name')}
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                 />
                 <textarea
-                  placeholder="Descripción"
+                  placeholder={t('description')}
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                   rows={3}
                 />
                 <input
                   type="number"
-                  placeholder="Precio"
+                  placeholder={t('price')}
                   value={formData.price}
                   onChange={(e) => setFormData({...formData, price: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                 />
                 <input
                   type="text"
-                  placeholder="Categoría"
+                  placeholder={t('category')}
                   value={formData.category}
                   onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                 />
                 <input
                   type="text"
-                  placeholder="SKU"
+                  placeholder={t('sku')}
                   value={formData.sku}
                   onChange={(e) => setFormData({...formData, sku: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                 />
                 <input
                   type="number"
-                  placeholder="Stock"
+                  placeholder={t('stock')}
                   value={formData.stock}
                   onChange={(e) => setFormData({...formData, stock: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                 />
                 <div className="flex items-center">
                   <input
                     type="checkbox"
                     checked={formData.isFeatured}
                     onChange={(e) => setFormData({...formData, isFeatured: e.target.checked})}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-[#FFC300] focus:ring-[#FFC300] border-gray-300 dark:border-[#555555] rounded"
                   />
-                  <label className="ml-2 text-sm text-gray-700">Producto destacado</label>
+                  <label className="ml-2 text-sm text-gray-700 dark:text-white">{t('featured_product')}</label>
                 </div>
               </div>
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  className="px-4 py-2 bg-gray-300 dark:bg-[#555555] text-gray-700 dark:text-white rounded-md hover:bg-gray-400 dark:hover:bg-[#666666]"
                 >
-                  Cancelar
+                  {t('cancel')}
                 </button>
                 <button
                   onClick={handleUpdateProduct}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 bg-[#FFC300] text-[#333333] rounded-md hover:bg-[#E6B800] font-semibold"
                 >
-                  Actualizar
+                  {t('update')}
                 </button>
               </div>
             </div>
@@ -883,23 +883,23 @@ const AdminProducts: React.FC = () => {
 
       {/* Modal para importar CSV */}
       {showImportModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-[#333333]">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Importar Productos desde CSV</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-[#FFC300] mb-4">{t('import_products_from_csv')}</h3>
               <div className="space-y-4">
                 <select
                   value={formData.storeId}
                   onChange={(e) => setFormData({...formData, storeId: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                   required
                 >
-                  <option value="">Seleccionar tienda</option>
+                  <option value="">{t('select_store')}</option>
                   {stores.map((store) => (
                     <option key={store._id} value={store._id}>{store.name} - {store.city}</option>
                   ))}
                 </select>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <div className="border-2 border-dashed border-gray-300 dark:border-[#555555] rounded-lg p-6 text-center">
                   <input
                     type="file"
                     accept=".csv"
@@ -909,19 +909,19 @@ const AdminProducts: React.FC = () => {
                   />
                   <label htmlFor="csv-upload" className="cursor-pointer">
                     <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                    <p className="mt-2 text-sm text-gray-600">
-                      {csvFile ? csvFile.name : 'Haz clic para seleccionar archivo CSV'}
+                    <p className="mt-2 text-sm text-gray-600 dark:text-white">
+                      {csvFile ? csvFile.name : t('click_to_select_csv_file')}
                     </p>
                   </label>
                 </div>
-                <div className="text-sm text-gray-600">
-                  <p className="font-medium">Formato requerido:</p>
-                  <p>name,description,price,category,brand,subcategory,sku,originalPartCode,stock,isFeatured,tags,specifications,images</p>
+                <div className="text-sm text-gray-600 dark:text-white">
+                  <p className="font-medium">{t('required_format')}:</p>
+                  <p className="break-all overflow-wrap-anywhere">{t('csv_format_requirement')}</p>
                 </div>
                 {importResult && (
-                  <div className="bg-blue-50 p-4 rounded-md">
-                    <p className="text-sm text-blue-800">
-                      Importación completada: {importResult.successCount} exitosos, {importResult.errorCount} errores
+                  <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-md">
+                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                                             {tWithParams('adminProducts.modals.importCompleted', { successCount: importResult.successCount.toString(), errorCount: importResult.errorCount.toString() })}
                     </p>
                   </div>
                 )}
@@ -929,16 +929,16 @@ const AdminProducts: React.FC = () => {
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={() => setShowImportModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  className="px-4 py-2 bg-gray-300 dark:bg-[#555555] text-gray-700 dark:text-white rounded-md hover:bg-gray-400 dark:hover:bg-[#666666]"
                 >
-                  Cancelar
+                  {t('cancel')}
                 </button>
                 <button
                   onClick={handleImportCSV}
                   disabled={!csvFile || !formData.storeId || importing}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-[#FFC300] text-[#333333] rounded-md hover:bg-[#E6B800] disabled:opacity-50 font-semibold"
                 >
-                  {importing ? 'Importando...' : 'Importar'}
+                  {importing ? t('importing') : t('import')}
                 </button>
               </div>
             </div>
@@ -948,54 +948,54 @@ const AdminProducts: React.FC = () => {
 
       {/* Modal para ver detalles */}
       {showViewModal && selectedProduct && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-[#333333]">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Detalles del Producto</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-[#FFC300] mb-4">{t('product_details')}</h3>
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Nombre:</label>
-                  <p className="text-sm text-gray-900">{selectedProduct.name}</p>
+                  <label className="text-sm font-medium text-gray-700 dark:text-white">{t('name')}:</label>
+                  <p className="text-sm text-gray-900 dark:text-white">{selectedProduct.name}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Descripción:</label>
-                  <p className="text-sm text-gray-900">{selectedProduct.description}</p>
+                  <label className="text-sm font-medium text-gray-700 dark:text-white">{t('description')}:</label>
+                  <p className="text-sm text-gray-900 dark:text-white">{selectedProduct.description}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Tienda:</label>
-                  <p className="text-sm text-gray-900">{selectedProduct.store.name} - {selectedProduct.store.city}</p>
+                  <label className="text-sm font-medium text-gray-700 dark:text-white">{t('store')}:</label>
+                  <p className="text-sm text-gray-900 dark:text-white">{selectedProduct.store.name} - {selectedProduct.store.city}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Precio:</label>
-                  <p className="text-sm text-gray-900">${selectedProduct.price}</p>
+                  <label className="text-sm font-medium text-gray-700 dark:text-white">{t('price')}:</label>
+                  <p className="text-sm text-gray-900 dark:text-white">${selectedProduct.price}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Categoría:</label>
-                  <p className="text-sm text-gray-900">{selectedProduct.category}</p>
+                  <label className="text-sm font-medium text-gray-700 dark:text-white">{t('category')}:</label>
+                  <p className="text-sm text-gray-900 dark:text-white">{selectedProduct.category}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">SKU:</label>
-                  <p className="text-sm text-gray-900">{selectedProduct.sku}</p>
+                  <label className="text-sm font-medium text-gray-700 dark:text-white">{t('sku')}:</label>
+                  <p className="text-sm text-gray-900 dark:text-white">{selectedProduct.sku}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Stock:</label>
-                  <p className="text-sm text-gray-900">{selectedProduct.stock}</p>
+                  <label className="text-sm font-medium text-gray-700 dark:text-white">{t('stock')}:</label>
+                  <p className="text-sm text-gray-900 dark:text-white">{selectedProduct.stock}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Estado:</label>
-                  <p className="text-sm text-gray-900">{selectedProduct.isActive ? 'Activo' : 'Inactivo'}</p>
+                  <label className="text-sm font-medium text-gray-700 dark:text-white">{t('status')}:</label>
+                  <p className="text-sm text-gray-900 dark:text-white">{selectedProduct.isActive ? t('active') : t('inactive')}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Destacado:</label>
-                  <p className="text-sm text-gray-900">{selectedProduct.isFeatured ? 'Sí' : 'No'}</p>
+                  <label className="text-sm font-medium text-gray-700 dark:text-white">{t('featured')}:</label>
+                  <p className="text-sm text-gray-900 dark:text-white">{selectedProduct.isFeatured ? t('yes') : t('no')}</p>
                 </div>
               </div>
               <div className="flex justify-end mt-6">
                 <button
                   onClick={() => setShowViewModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  className="px-4 py-2 bg-[#FFC300] text-[#333333] rounded-md hover:bg-[#E6B800] font-semibold"
                 >
-                  Cerrar
+                  {t('close')}
                 </button>
               </div>
             </div>

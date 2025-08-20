@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -45,27 +45,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { user, hasRole, hasAnyRole } = useAuth();
   const { t, currentLanguage, updateTrigger } = useLanguage();
   const location = useLocation();
+  
+  // Estado local para forzar re-renders
+  const [forceUpdate, setForceUpdate] = useState(0);
 
-  // Debug: Log cuando cambia el idioma
+  // Forzar re-render cuando cambie el idioma
   useEffect(() => {
-    console.log('Sidebar - Language changed to:', currentLanguage);
-    console.log('Sidebar - Update trigger:', updateTrigger);
-    console.log('Sidebar - Testing translation for users:', t('sidebar.admin.users'));
-    console.log('Sidebar - Testing translation for dashboard:', t('sidebar.admin.dashboard'));
-    console.log('Sidebar - Current language from context:', currentLanguage);
-    console.log('Sidebar - Translation service language:', localStorage.getItem('language'));
+    setForceUpdate(prev => prev + 1);
   }, [currentLanguage, updateTrigger, t]);
-
-  // Forzar re-render cuando cambie el updateTrigger
-  useEffect(() => {
-    console.log('Sidebar - Force re-render triggered by updateTrigger:', updateTrigger);
-  }, [updateTrigger]);
-
-  // Log cada vez que el componente se renderiza
-  console.log('Sidebar - Component rendered with language:', currentLanguage);
-  console.log('Sidebar - Users translation:', t('sidebar.admin.users'));
-  console.log('Sidebar - Dashboard translation:', t('sidebar.admin.dashboard'));
-  console.log('Sidebar - Update trigger value:', updateTrigger);
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -107,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       title: t('sidebar.admin.sales'),
       path: '/admin/sales',
       icon: ShoppingCart,
-      description: 'Reportes de ventas globales'
+      description: t('sidebar.admin.sales.description')
     },
     {
       title: t('sidebar.admin.loyalty'),
@@ -171,7 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       title: t('sidebar.storeManager.sales'),
       path: '/store-manager/sales',
       icon: ShoppingCart,
-      description: 'Reportes de ventas de la tienda'
+      description: t('sidebar.storeManager.sales.description')
     },
     {
       title: t('sidebar.storeManager.orders'),
@@ -362,13 +349,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         />
       )}
 
-      {/* Sidebar */}
-      <div className={`
-        fixed top-0 left-0 h-full bg-white dark:bg-[#333333] shadow-lg z-50 transform transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:z-auto
-        w-64 border-r border-gray-200 dark:border-[#555555]
-      `}>
+             {/* Sidebar */}
+       <div 
+         key={`sidebar-${currentLanguage}-${forceUpdate}`}
+         className={`
+           fixed top-0 left-0 h-full bg-white dark:bg-[#333333] shadow-lg z-50 transform transition-transform duration-300 ease-in-out
+           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+           lg:translate-x-0 lg:static lg:z-auto
+           w-64 border-r border-gray-200 dark:border-[#555555]
+         `}>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-[#555555]">
@@ -378,7 +367,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 <h1 className="text-lg font-bold text-[#333333] dark:text-[#FFC300]">PIEZAS YA</h1>
                                  <p className="text-sm text-gray-500 dark:text-white capitalize">
                    {getRoleText()}
-                </p>
+                 </p>
               </div>
             </div>
           </div>
@@ -386,10 +375,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           {/* Menú */}
           <nav className="flex-1 overflow-y-auto p-4">
             <ul className="space-y-2">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <li key={item.path}>
+                             {menuItems.map((item) => {
+                 const Icon = item.icon;
+                 return (
+                   <li key={`${item.path}-${currentLanguage}-${forceUpdate}`}>
                     <Link
                       to={item.path}
                       className={`

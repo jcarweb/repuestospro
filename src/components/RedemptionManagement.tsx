@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Search, Filter, CheckCircle, XCircle, Truck, Eye, Clock } from 'lucide-react';
 
 interface Redemption {
@@ -43,6 +44,7 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
   onUpdateTracking,
   isLoading = false
 }) => {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedRedemption, setSelectedRedemption] = useState<Redemption | null>(null);
@@ -50,13 +52,13 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
   const [notes, setNotes] = useState('');
 
   const statusOptions = [
-    { value: 'all', label: 'Todos los estados' },
-    { value: 'pending', label: 'Pendiente' },
-    { value: 'approved', label: 'Aprobado' },
-    { value: 'rejected', label: 'Rechazado' },
-    { value: 'shipped', label: 'Enviado' },
-    { value: 'delivered', label: 'Entregado' },
-    { value: 'delivered_only', label: 'Solo Entregados' }
+    { value: 'all', label: t('redemptionManagement.filterAll') },
+    { value: 'pending', label: t('redemptionManagement.filterPending') },
+    { value: 'approved', label: t('redemptionManagement.filterApproved') },
+    { value: 'rejected', label: t('redemptionManagement.filterRejected') },
+    { value: 'shipped', label: t('redemptionManagement.filterShipped') },
+    { value: 'delivered', label: t('redemptionManagement.filterDelivered') },
+    { value: 'delivered_only', label: t('redemptionManagement.filterDeliveredOnly') }
   ];
 
   const statusColors = {
@@ -118,7 +120,7 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
   };
 
   const formatAddress = (address?: any) => {
-    if (!address) return 'No especificada';
+    if (!address) return t('redemptionManagement.modal.addressNotSpecified');
     return `${address.street}, ${address.city}, ${address.state} ${address.zipCode}`;
   };
 
@@ -129,14 +131,14 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
         {/* Estadísticas rápidas */}
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="flex items-center space-x-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-            <span>Total: {redemptions.length}</span>
+            <span>{t('redemptionManagement.stats.total')}: {redemptions.length}</span>
           </div>
           <div className="flex items-center space-x-2 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
-            <span>Pendientes: {redemptions.filter(r => r.status === 'pending').length}</span>
+            <span>{t('redemptionManagement.stats.pending')}: {redemptions.filter(r => r.status === 'pending').length}</span>
           </div>
           <div className="flex items-center space-x-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
             <CheckCircle className="w-4 h-4" />
-            <span>Entregados: {redemptions.filter(r => r.status === 'delivered').length}</span>
+            <span>{t('redemptionManagement.stats.delivered')}: {redemptions.filter(r => r.status === 'delivered').length}</span>
           </div>
         </div>
 
@@ -147,10 +149,10 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Buscar por cliente o premio..."
+                placeholder={t('redemptionManagement.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
               />
             </div>
           </div>
@@ -162,7 +164,7 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] appearance-none"
               >
                 {statusOptions.map(option => (
                   <option key={option.value} value={option.value}>
@@ -181,22 +183,22 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Cliente
+                {t('redemptionManagement.table.customer')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Premio
+                {t('redemptionManagement.table.reward')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Costo
+                {t('redemptionManagement.table.points')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Estado
+                {t('redemptionManagement.table.status')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Fecha
+                {t('redemptionManagement.table.date')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Acciones
+                {t('redemptionManagement.table.actions')}
               </th>
             </tr>
           </thead>
@@ -206,14 +208,14 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
                 <td colSpan={6} className="px-6 py-4 text-center">
                   <div className="flex items-center justify-center">
                     <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2" />
-                    Cargando canjes...
+                    {t('redemptionManagement.loading')}
                   </div>
                 </td>
               </tr>
             ) : filteredRedemptions.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
-                  No se encontraron canjes
+                  {t('redemptionManagement.noRedemptions')}
                 </td>
               </tr>
             ) : (
@@ -269,7 +271,7 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
                         <div className="mt-1">
                           <span className="inline-flex items-center px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
                             <CheckCircle className="w-3 h-3 mr-1" />
-                            Entregado
+                            {t('redemptionManagement.actions.deliver')}
                           </span>
                         </div>
                       )}
@@ -298,7 +300,7 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Detalles del Canje</h3>
+              <h3 className="text-lg font-semibold">{t('redemptionManagement.modal.title')}</h3>
               <button
                 onClick={() => setSelectedRedemption(null)}
                 className="text-gray-400 hover:text-gray-600"
@@ -310,14 +312,14 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
             <div className="space-y-4">
               {/* Información del cliente */}
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Cliente</h4>
+                <h4 className="font-medium text-gray-900 mb-2">{t('redemptionManagement.modal.customer')}</h4>
                 <p className="text-sm text-gray-600">{selectedRedemption.userId.name}</p>
                 <p className="text-sm text-gray-600">{selectedRedemption.userId.email}</p>
               </div>
 
               {/* Información del premio */}
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Premio</h4>
+                <h4 className="font-medium text-gray-900 mb-2">{t('redemptionManagement.modal.reward')}</h4>
                 <div className="flex items-center">
                   {selectedRedemption.rewardId.image && (
                     <img
@@ -335,22 +337,22 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
 
               {/* Costo */}
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Costo</h4>
+                <h4 className="font-medium text-gray-900 mb-2">{t('redemptionManagement.modal.pointsSpent')}</h4>
                 <p className="text-sm text-gray-600">
-                  {selectedRedemption.pointsSpent} puntos
+                  {selectedRedemption.pointsSpent} {t('redemptionManagement.modal.points')}
                   {selectedRedemption.cashSpent > 0 && ` + $${selectedRedemption.cashSpent}`}
                 </p>
               </div>
 
               {/* Dirección de envío */}
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Dirección de Envío</h4>
+                <h4 className="font-medium text-gray-900 mb-2">{t('redemptionManagement.modal.shippingAddress')}</h4>
                 <p className="text-sm text-gray-600">{formatAddress(selectedRedemption.shippingAddress)}</p>
               </div>
 
               {/* Estado actual */}
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Estado Actual</h4>
+                <h4 className="font-medium text-gray-900 mb-2">{t('redemptionManagement.modal.status')}</h4>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[selectedRedemption.status]}`}>
                   {statusOptions.find(opt => opt.value === selectedRedemption.status)?.label}
                 </span>
@@ -359,7 +361,7 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
               {/* Tracking number */}
               {selectedRedemption.trackingNumber && (
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Número de Seguimiento</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">{t('redemptionManagement.modal.trackingNumber')}</h4>
                   <p className="text-sm text-gray-600">{selectedRedemption.trackingNumber}</p>
                 </div>
               )}
@@ -367,18 +369,18 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
               {/* Notas */}
               {selectedRedemption.notes && (
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Notas</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">{t('redemptionManagement.modal.notes')}</h4>
                   <p className="text-sm text-gray-600">{selectedRedemption.notes}</p>
                 </div>
               )}
 
               {/* Acciones */}
               <div className="border-t pt-4">
-                <h4 className="font-medium text-gray-900 mb-3">Acciones</h4>
+                <h4 className="font-medium text-gray-900 mb-3">{t('redemptionManagement.modal.actions')}</h4>
                 
                 {/* Cambiar estado */}
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Cambiar Estado</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('redemptionManagement.modal.changeStatus')}</label>
                   <div className="flex flex-wrap gap-2">
                     {['pending', 'approved', 'rejected', 'shipped', 'delivered'].map(status => (
                       <button
@@ -404,21 +406,21 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
                   <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h5 className="text-sm font-medium text-green-800">Marcar como Entregado</h5>
+                        <h5 className="text-sm font-medium text-green-800">{t('redemptionManagement.modal.markAsDelivered')}</h5>
                         <p className="text-xs text-green-600 mt-1">
-                          Confirma que el premio ha sido entregado al cliente
+                          {t('redemptionManagement.modal.markAsDeliveredDesc')}
                         </p>
                       </div>
                       <button
                         onClick={() => {
-                          if (window.confirm('¿Estás seguro de que quieres marcar este premio como entregado?')) {
+                          if (window.confirm(t('redemptionManagement.modal.confirmDelivered'))) {
                             handleStatusChange(selectedRedemption._id, 'delivered');
                           }
                         }}
                         className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
                       >
                         <CheckCircle className="w-4 h-4 inline mr-1" />
-                        Entregado
+                        {t('redemptionManagement.actions.deliver')}
                       </button>
                     </div>
                   </div>
@@ -427,13 +429,13 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
                 {/* Agregar tracking */}
                 {selectedRedemption.status === 'approved' && (
                   <div className="space-y-2 mt-4">
-                    <label className="block text-sm font-medium text-gray-700">Número de Seguimiento</label>
+                    <label className="block text-sm font-medium text-gray-700">{t('redemptionManagement.modal.trackingNumber')}</label>
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={trackingNumber}
                         onChange={(e) => setTrackingNumber(e.target.value)}
-                        placeholder="Ingrese número de tracking"
+                        placeholder={t('redemptionManagement.modal.trackingNumberPlaceholder')}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       <button
@@ -441,7 +443,7 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
                         disabled={!trackingNumber.trim()}
                         className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
                       >
-                        Agregar
+                        {t('redemptionManagement.modal.add')}
                       </button>
                     </div>
                   </div>
@@ -449,11 +451,11 @@ const RedemptionManagement: React.FC<RedemptionManagementProps> = ({
 
                 {/* Notas */}
                 <div className="space-y-2 mt-4">
-                  <label className="block text-sm font-medium text-gray-700">Notas (opcional)</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('redemptionManagement.modal.notesOptional')}</label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Agregar notas sobre el canje..."
+                    placeholder={t('redemptionManagement.modal.notesPlaceholder')}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />

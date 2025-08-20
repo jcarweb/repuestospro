@@ -11,7 +11,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#333333]">
       <AdminHeader />
       
       {/* Botón para abrir/cerrar sidebar en móvil */}
@@ -24,7 +24,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
       <div className="flex h-[calc(100vh-64px)]">
         {/* Sidebar - siempre visible en desktop */}
-        <div className="hidden lg:block w-64 bg-white shadow-lg">
+        <div className="hidden lg:block w-64 bg-white dark:bg-[#333333] shadow-lg">
           <AdminSidebar isOpen={true} onClose={() => {}} />
         </div>
 
@@ -34,7 +34,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         </div>
 
         {/* Contenido principal */}
-        <main className="flex-1 overflow-auto bg-gray-50">
+        <main className="flex-1 overflow-auto bg-gray-50 dark:bg-[#333333]">
           <div className="p-6">
             {children}
           </div>

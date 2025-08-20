@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import {
   Users,
   Plus,
@@ -56,6 +57,7 @@ interface CodeStats {
 
 const AdminRegistrationCodes: React.FC = () => {
   const { token, user } = useAuth();
+  const { t } = useLanguage();
   const [codes, setCodes] = useState<RegistrationCode[]>([]);
   const [stats, setStats] = useState<CodeStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,7 +84,7 @@ const AdminRegistrationCodes: React.FC = () => {
       }
     } catch (error) {
       console.error('Error obteniendo códigos:', error);
-      setMessage({ type: 'error', text: 'Error cargando códigos' });
+      setMessage({ type: 'error', text: t('adminRegistrationCodes.errorLoadingCodes') });
     } finally {
       setLoading(false);
     }
@@ -116,7 +118,7 @@ const AdminRegistrationCodes: React.FC = () => {
     
     if (user.role !== 'admin') {
       console.log('AdminRegistrationCodes - User is not admin, role:', user.role);
-      setMessage({ type: 'error', text: 'Acceso denegado. Solo administradores pueden acceder a esta página.' });
+      setMessage({ type: 'error', text: t('adminRegistrationCodes.accessDeniedMessage') });
       return;
     }
     
@@ -142,23 +144,23 @@ const AdminRegistrationCodes: React.FC = () => {
 
       const result = await response.json();
       if (result.success) {
-        setMessage({ type: 'success', text: 'Código creado exitosamente' });
+        setMessage({ type: 'success', text: t('adminRegistrationCodes.codeCreated') });
         setShowCreateModal(false);
         setCreateForm({ email: '', role: 'store_manager', expiresInDays: 7 });
         fetchCodes();
         fetchStats();
       } else {
-        setMessage({ type: 'error', text: result.message || 'Error creando código' });
+        setMessage({ type: 'error', text: result.message || t('adminRegistrationCodes.errorCreatingCode') });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Error de conexión' });
+      setMessage({ type: 'error', text: t('adminRegistrationCodes.connectionError') });
     } finally {
       setCreating(false);
     }
   };
 
   const handleRevokeCode = async (codeId: string) => {
-    if (!confirm('¿Estás seguro de que quieres revocar este código?')) return;
+    if (!confirm(t('adminRegistrationCodes.confirmRevoke'))) return;
 
     try {
       const response = await fetch(`http://localhost:5000/api/registration-codes/revoke/${codeId}`, {
@@ -170,14 +172,14 @@ const AdminRegistrationCodes: React.FC = () => {
 
       const result = await response.json();
       if (result.success) {
-        setMessage({ type: 'success', text: 'Código revocado exitosamente' });
+        setMessage({ type: 'success', text: t('adminRegistrationCodes.codeRevoked') });
         fetchCodes();
         fetchStats();
       } else {
-        setMessage({ type: 'error', text: result.message || 'Error revocando código' });
+        setMessage({ type: 'error', text: result.message || t('adminRegistrationCodes.errorRevokingCode') });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Error de conexión' });
+      setMessage({ type: 'error', text: t('adminRegistrationCodes.connectionError') });
     }
   };
 
@@ -196,10 +198,10 @@ const AdminRegistrationCodes: React.FC = () => {
         fetchCodes();
         fetchStats();
       } else {
-        setMessage({ type: 'error', text: result.message || 'Error limpiando códigos' });
+        setMessage({ type: 'error', text: result.message || t('adminRegistrationCodes.errorCleaningCodes') });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Error de conexión' });
+      setMessage({ type: 'error', text: t('adminRegistrationCodes.connectionError') });
     }
   };
 
@@ -246,13 +248,33 @@ const AdminRegistrationCodes: React.FC = () => {
     }
   };
 
+  // Funciones para obtener traducciones de roles y estados
+  const getRoleLabel = (role: string) => {
+    const roleLabels: { [key: string]: string } = {
+      admin: t('adminRegistrationCodes.roles.admin'),
+      store_manager: t('adminRegistrationCodes.roles.storeManager'),
+      delivery: t('adminRegistrationCodes.roles.delivery')
+    };
+    return roleLabels[role] || role;
+  };
+
+  const getStatusLabel = (status: string) => {
+    const statusLabels: { [key: string]: string } = {
+      pending: t('adminRegistrationCodes.status.pending'),
+      used: t('adminRegistrationCodes.status.used'),
+      expired: t('adminRegistrationCodes.status.expired'),
+      revoked: t('adminRegistrationCodes.status.revoked')
+    };
+    return statusLabels[status] || status;
+  };
+
   // Verificar si el usuario está cargando
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando usuario...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FFC300] mx-auto"></div>
+          <p className="mt-4 text-gray-600">{t('adminRegistrationCodes.loadingUser')}</p>
         </div>
       </div>
     );
@@ -267,12 +289,12 @@ const AdminRegistrationCodes: React.FC = () => {
             <AlertCircle className="w-12 h-12 text-red-500" />
           </div>
           <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">
-            Acceso Denegado
+            {t('adminRegistrationCodes.accessDenied')}
           </h2>
           <p className="text-gray-600 text-center">
-            Solo los administradores pueden acceder a esta página.
+            {t('adminRegistrationCodes.accessDeniedMessage')}
             <br />
-            <span className="text-sm text-gray-500">Tu rol actual: {user.role}</span>
+            <span className="text-sm text-gray-500">{t('adminRegistrationCodes.currentRole')} {user.role}</span>
           </p>
         </div>
       </div>
@@ -283,8 +305,8 @@ const AdminRegistrationCodes: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando códigos de registro...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FFC300] mx-auto"></div>
+          <p className="mt-4 text-gray-600">{t('adminRegistrationCodes.loadingCodes')}</p>
         </div>
       </div>
     );
@@ -296,9 +318,9 @@ const AdminRegistrationCodes: React.FC = () => {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
-            <Users className="w-8 h-8 text-blue-600 mr-3" />
+            <Users className="w-8 h-8 text-[#FFC300] mr-3" />
             <h1 className="text-3xl font-bold text-gray-900">
-              Códigos de Registro
+              {t('adminRegistrationCodes.title')}
             </h1>
           </div>
           <div className="flex space-x-3">
@@ -307,19 +329,19 @@ const AdminRegistrationCodes: React.FC = () => {
               className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
-              Limpiar Expirados
+              {t('adminRegistrationCodes.cleanExpired')}
             </button>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center px-4 py-2 bg-[#FFC300] text-white rounded-lg hover:bg-[#E6B000] transition-colors"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Crear Código
+              {t('adminRegistrationCodes.createCode')}
             </button>
           </div>
         </div>
         <p className="text-gray-600">
-          Gestiona los códigos de registro para administradores, gestores de tienda y delivery.
+          {t('adminRegistrationCodes.subtitle')}
         </p>
       </div>
 
@@ -339,22 +361,18 @@ const AdminRegistrationCodes: React.FC = () => {
         </div>
       )}
 
-      {/* Debug info - temporal */}
-      <div className="mb-6 p-4 bg-blue-50 text-blue-800 rounded-lg">
-        <div className="flex items-center justify-between">
-          <div>
-            <strong>Debug Info:</strong> Usuario: {user?.name} | Rol: {user?.role} | ID: {user?.id}
-          </div>
-          <button
-            onClick={() => {
-              console.log('Forzando recarga de usuario...');
-              window.location.reload();
-            }}
-            className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-          >
-            Recargar
-          </button>
-        </div>
+      {/* Botón de recargar */}
+      <div className="mb-6 flex justify-end">
+        <button
+          onClick={() => {
+            console.log('Forzando recarga de usuario...');
+            window.location.reload();
+          }}
+          className="flex items-center px-3 py-2 bg-[#FFC300] text-white rounded-lg hover:bg-[#E6B000] transition-colors"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          {t('adminRegistrationCodes.reload')}
+        </button>
       </div>
 
       {/* Estadísticas */}
@@ -362,9 +380,9 @@ const AdminRegistrationCodes: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <div className="bg-white p-4 rounded-lg shadow">
             <div className="flex items-center">
-              <BarChart3 className="w-8 h-8 text-blue-600 mr-3" />
+              <BarChart3 className="w-8 h-8 text-[#FFC300] mr-3" />
               <div>
-                <p className="text-sm text-gray-600">Total</p>
+                <p className="text-sm text-gray-600">{t('adminRegistrationCodes.stats.total')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
               </div>
             </div>
@@ -373,7 +391,7 @@ const AdminRegistrationCodes: React.FC = () => {
             <div className="flex items-center">
               <Clock className="w-8 h-8 text-yellow-600 mr-3" />
               <div>
-                <p className="text-sm text-gray-600">Pendientes</p>
+                <p className="text-sm text-gray-600">{t('adminRegistrationCodes.stats.pending')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
               </div>
             </div>
@@ -382,7 +400,7 @@ const AdminRegistrationCodes: React.FC = () => {
             <div className="flex items-center">
               <CheckCircle className="w-8 h-8 text-green-600 mr-3" />
               <div>
-                <p className="text-sm text-gray-600">Usados</p>
+                <p className="text-sm text-gray-600">{t('adminRegistrationCodes.stats.used')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.used}</p>
               </div>
             </div>
@@ -391,7 +409,7 @@ const AdminRegistrationCodes: React.FC = () => {
             <div className="flex items-center">
               <XCircle className="w-8 h-8 text-red-600 mr-3" />
               <div>
-                <p className="text-sm text-gray-600">Expirados</p>
+                <p className="text-sm text-gray-600">{t('adminRegistrationCodes.stats.expired')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.expired}</p>
               </div>
             </div>
@@ -400,7 +418,7 @@ const AdminRegistrationCodes: React.FC = () => {
             <div className="flex items-center">
               <AlertCircle className="w-8 h-8 text-gray-600 mr-3" />
               <div>
-                <p className="text-sm text-gray-600">Revocados</p>
+                <p className="text-sm text-gray-600">{t('adminRegistrationCodes.stats.revoked')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.revoked}</p>
               </div>
             </div>
@@ -411,32 +429,32 @@ const AdminRegistrationCodes: React.FC = () => {
       {/* Tabla de códigos */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Códigos de Registro</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('adminRegistrationCodes.table.title')}</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Código
+                  {t('adminRegistrationCodes.table.code')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
+                  {t('adminRegistrationCodes.table.email')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rol
+                  {t('adminRegistrationCodes.table.role')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
+                  {t('adminRegistrationCodes.table.status')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Expira
+                  {t('adminRegistrationCodes.table.expires')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Usado Por
+                  {t('adminRegistrationCodes.table.usedBy')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
+                  {t('adminRegistrationCodes.table.actions')}
                 </th>
               </tr>
             </thead>
@@ -455,17 +473,14 @@ const AdminRegistrationCodes: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleColor(code.role)}`}>
-                      {code.role === 'admin' ? 'Administrador' : 
-                       code.role === 'store_manager' ? 'Gestor de Tienda' : 'Delivery'}
+                      {getRoleLabel(code.role)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {getStatusIcon(code.status)}
                       <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(code.status)}`}>
-                        {code.status === 'pending' ? 'Pendiente' :
-                         code.status === 'used' ? 'Usado' :
-                         code.status === 'expired' ? 'Expirado' : 'Revocado'}
+                        {getStatusLabel(code.status)}
                       </span>
                     </div>
                   </td>
@@ -479,7 +494,7 @@ const AdminRegistrationCodes: React.FC = () => {
                         <div className="text-gray-500">{code.usedBy.email}</div>
                       </div>
                     ) : (
-                      <span className="text-gray-400">No usado</span>
+                      <span className="text-gray-400">{t('adminRegistrationCodes.notUsed')}</span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -507,7 +522,7 @@ const AdminRegistrationCodes: React.FC = () => {
           <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                Crear Código de Registro
+                {t('adminRegistrationCodes.modal.title')}
               </h2>
               <button
                 onClick={() => setShowCreateModal(false)}
@@ -520,35 +535,35 @@ const AdminRegistrationCodes: React.FC = () => {
             <form onSubmit={handleCreateCode} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
+                  {t('adminRegistrationCodes.modal.email')}
                 </label>
                 <input
                   type="email"
                   value={createForm.email}
                   onChange={(e) => setCreateForm(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                   required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Rol
+                  {t('adminRegistrationCodes.modal.role')}
                 </label>
                 <select
                   value={createForm.role}
                   onChange={(e) => setCreateForm(prev => ({ ...prev, role: e.target.value as any }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                 >
-                  <option value="admin">Administrador</option>
-                  <option value="store_manager">Gestor de Tienda</option>
-                  <option value="delivery">Delivery</option>
+                  <option value="admin">{t('adminRegistrationCodes.roles.admin')}</option>
+                  <option value="store_manager">{t('adminRegistrationCodes.roles.storeManager')}</option>
+                  <option value="delivery">{t('adminRegistrationCodes.roles.delivery')}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Días de Expiración
+                  {t('adminRegistrationCodes.modal.expirationDays')}
                 </label>
                 <input
                   type="number"
@@ -556,7 +571,7 @@ const AdminRegistrationCodes: React.FC = () => {
                   max="30"
                   value={createForm.expiresInDays}
                   onChange={(e) => setCreateForm(prev => ({ ...prev, expiresInDays: parseInt(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                 />
               </div>
 
@@ -566,22 +581,22 @@ const AdminRegistrationCodes: React.FC = () => {
                   onClick={() => setShowCreateModal(false)}
                   className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
                 >
-                  Cancelar
+                  {t('adminRegistrationCodes.modal.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={creating}
-                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center px-4 py-2 bg-[#FFC300] text-white rounded-lg hover:bg-[#E6B000] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {creating ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Creando...
+                      {t('adminRegistrationCodes.modal.creating')}
                     </>
                   ) : (
                     <>
                       <Plus className="w-4 h-4 mr-2" />
-                      Crear Código
+                      {t('adminRegistrationCodes.modal.createCode')}
                     </>
                   )}
                 </button>

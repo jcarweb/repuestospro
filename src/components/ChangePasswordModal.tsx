@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import { X, Eye, EyeOff, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface ChangePasswordModalProps {
@@ -20,6 +21,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
   onClose,
   onSubmit
 }) => {
+  const { t } = useLanguage();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -55,7 +57,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
       await onSubmit(currentPassword, newPassword);
       
-      setSuccess('Contraseña cambiada exitosamente');
+      setSuccess(t('securityModal.passwordChangedSuccess'));
       
       // Limpiar formulario
       setCurrentPassword('');
@@ -69,7 +71,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
       }, 2000);
       
     } catch (error: any) {
-      setError(error.message || 'Error al cambiar la contraseña');
+      setError(error.message || t('securityModal.errorChangingPassword'));
     } finally {
       setIsLoading(false);
     }

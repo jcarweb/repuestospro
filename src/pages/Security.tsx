@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { 
   Lock, 
   Shield, 
@@ -24,6 +25,7 @@ import { useSensitiveAction, SENSITIVE_ACTIONS } from '../hooks/useSensitiveActi
 
 const SecurityContent: React.FC = () => {
   const { user, token } = useAuth();
+  const { t } = useLanguage();
   const { containerClasses, contentClasses } = useLayoutContext();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -64,7 +66,7 @@ const SecurityContent: React.FC = () => {
         setProfile(userProfile);
       } catch (error) {
         console.error('Error loading profile:', error);
-        setMessage({ type: 'error', text: 'Error al cargar el perfil' });
+        setMessage({ type: 'error', text: t('security.errorLoading') });
       } finally {
         setLoading(false);
       }
@@ -79,23 +81,23 @@ const SecurityContent: React.FC = () => {
   const handleChangePassword = async (currentPassword: string, newPassword: string) => {
     try {
       await profileService.changePassword({ currentPassword, newPassword });
-      setMessage({ type: 'success', text: 'Contraseña cambiada correctamente' });
+      setMessage({ type: 'success', text: t('security.passwordChanged') });
       setShowChangePasswordModal(false);
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.response?.data?.message || 'Error al cambiar contraseña' });
+      setMessage({ type: 'error', text: error.response?.data?.message || t('security.errorChangingPassword') });
     }
   };
 
   const handlePinSetup = async (data: { pin: string; currentPassword: string }) => {
     try {
       await profileService.setPin(data);
-      setMessage({ type: 'success', text: 'PIN configurado correctamente' });
+      setMessage({ type: 'success', text: t('security.pinConfigured') });
       setShowPinModal(false);
       // Recargar perfil para actualizar el estado
       const updatedProfile = await profileService.getProfile();
       setProfile(updatedProfile);
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.response?.data?.message || 'Error al configurar PIN' });
+      setMessage({ type: 'error', text: error.response?.data?.message || t('security.errorSettingPin') });
     }
   };
 
@@ -111,7 +113,7 @@ const SecurityContent: React.FC = () => {
       const updatedProfile = await profileService.getProfile();
       setProfile(updatedProfile);
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.response?.data?.message || 'Error al configurar huella digital' });
+      setMessage({ type: 'error', text: error.response?.data?.message || t('security.errorSettingFingerprint') });
     }
   };
 
@@ -131,7 +133,7 @@ const SecurityContent: React.FC = () => {
       } else {
         setMessage({ 
           type: 'success', 
-          text: `Autenticación de dos factores ${data.enabled ? 'activada' : 'desactivada'} correctamente` 
+          text: data.enabled ? t('security.2FAEnabledSuccess') : t('security.2FADisabledSuccess')
         });
         setShowTwoFactorModal(false);
         // Recargar perfil para actualizar el estado
@@ -142,7 +144,7 @@ const SecurityContent: React.FC = () => {
       }
     } catch (error: any) {
       console.error('🔍 Error en configuración 2FA:', error);
-      setMessage({ type: 'error', text: error.response?.data?.message || 'Error al configurar 2FA' });
+              setMessage({ type: 'error', text: error.response?.data?.message || t('security.errorSetting2FA') });
       throw error; // Re-lanzar el error para que el modal lo maneje
     }
   };
@@ -155,7 +157,7 @@ const SecurityContent: React.FC = () => {
       setShowTwoFactorModal(false);
       setMessage({ 
         type: 'success', 
-        text: 'Autenticación de dos factores configurada correctamente' 
+        text: t('security.2FAConfigured') 
       });
     } catch (error: any) {
       console.error('Error reloading profile:', error);
@@ -165,9 +167,9 @@ const SecurityContent: React.FC = () => {
   const handleResendVerificationEmail = async () => {
     try {
       // Nota: Este método no existe en el servicio, se puede implementar si es necesario
-      setMessage({ type: 'success', text: 'Email de verificación enviado correctamente' });
+      setMessage({ type: 'success', text: t('security.emailSentSuccess') });
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.response?.data?.message || 'Error al enviar email de verificación' });
+      setMessage({ type: 'error', text: error.response?.data?.message || t('security.errorSendingEmail') });
     }
   };
 
@@ -188,9 +190,9 @@ const SecurityContent: React.FC = () => {
       <div className={contentClasses}>
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Configuración de Seguridad</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('security.title')}</h1>
           <p className="text-gray-600 mt-2">
-            Gestiona la seguridad de tu cuenta y protege tu información personal
+            {t('security.subtitle')}
           </p>
         </div>
 
@@ -216,7 +218,7 @@ const SecurityContent: React.FC = () => {
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
               <Shield className="w-5 h-5 text-gray-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Opciones de Seguridad</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('security.securityOptions')}</h2>
             </div>
           </div>
           
@@ -229,15 +231,15 @@ const SecurityContent: React.FC = () => {
                     <Lock className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">Contraseña</h3>
-                    <p className="text-sm text-gray-500">Cambia tu contraseña de acceso</p>
+                    <h3 className="font-medium text-gray-900">{t('security.password')}</h3>
+                    <p className="text-sm text-gray-500">{t('security.changePasswordDescription')}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowChangePasswordModal(true)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
-                  Cambiar
+                  {t('security.changePassword')}
                 </button>
               </div>
 
@@ -248,9 +250,9 @@ const SecurityContent: React.FC = () => {
                     <Key className="h-5 w-5 text-indigo-600" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">PIN de Acceso</h3>
+                    <h3 className="font-medium text-gray-900">{t('security.pin')} de Acceso</h3>
                     <p className="text-sm text-gray-500">
-                      {profile?.pin ? 'PIN configurado' : 'PIN no configurado'}
+                      {profile?.pin ? t('security.pinDescription') : t('security.pinNotConfigured')}
                     </p>
                   </div>
                 </div>
@@ -260,13 +262,13 @@ const SecurityContent: React.FC = () => {
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-gray-100 text-gray-800'
                   }`}>
-                    {profile?.pin ? 'Configurado' : 'No configurado'}
+                    {profile?.pin ? t('security.configured') : t('security.notConfigured')}
                   </div>
                   <button
                     onClick={() => setShowPinModal(true)}
                     className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                   >
-                    {profile?.pin ? 'Cambiar' : 'Configurar'}
+                    {profile?.pin ? t('security.changePassword') : t('security.setupPin')}
                   </button>
                 </div>
               </div>
@@ -278,9 +280,9 @@ const SecurityContent: React.FC = () => {
                     <Mail className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">Verificación de Email</h3>
+                    <h3 className="font-medium text-gray-900">{t('security.emailVerification')}</h3>
                     <p className="text-sm text-gray-500">
-                      {profile?.isEmailVerified ? 'Email verificado' : 'Email no verificado'}
+                      {profile?.isEmailVerified ? t('security.emailVerified') : t('security.emailNotVerified')}
                     </p>
                   </div>
                 </div>
@@ -290,13 +292,13 @@ const SecurityContent: React.FC = () => {
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-yellow-100 text-yellow-800'
                   }`}>
-                    {profile?.isEmailVerified ? 'Verificado' : 'Pendiente'}
+                    {profile?.isEmailVerified ? t('security.verified') : t('security.pending')}
                   </div>
                   <button
                     onClick={() => setShowEmailVerificationModal(true)}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                   >
-                    Ver
+                    {t('security.view')}
                   </button>
                 </div>
               </div>
@@ -308,9 +310,9 @@ const SecurityContent: React.FC = () => {
                     <Fingerprint className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">Huella Digital</h3>
+                    <h3 className="font-medium text-gray-900">{t('security.fingerprint')}</h3>
                     <p className="text-sm text-gray-500">
-                      {profile?.fingerprintEnabled ? 'Huella configurada' : 'Huella no configurada'}
+                      {profile?.fingerprintEnabled ? t('security.fingerprintConfigured') : t('security.fingerprintNotConfigured')}
                     </p>
                   </div>
                 </div>
@@ -320,13 +322,13 @@ const SecurityContent: React.FC = () => {
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-gray-100 text-gray-800'
                   }`}>
-                    {profile?.fingerprintEnabled ? 'Activada' : 'Inactiva'}
+                    {profile?.fingerprintEnabled ? t('security.active') : t('security.inactive')}
                   </div>
                   <button
                     onClick={() => setShowFingerprintModal(true)}
                     className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
                   >
-                    {profile?.fingerprintEnabled ? 'Desactivar' : 'Activar'}
+                    {profile?.fingerprintEnabled ? t('security.deactivate') : t('security.activate')}
                   </button>
                 </div>
               </div>
@@ -338,9 +340,9 @@ const SecurityContent: React.FC = () => {
                     <Shield className="h-5 w-5 text-orange-600" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">Autenticación de dos factores</h3>
+                    <h3 className="font-medium text-gray-900">{t('security.twoFactor')}</h3>
                     <p className="text-sm text-gray-500">
-                      {profile?.twoFactorEnabled ? '2FA activada' : '2FA no activada'}
+                      {profile?.twoFactorEnabled ? t('security.2FAEnabled') : t('security.2FANotEnabled')}
                     </p>
                   </div>
                 </div>
@@ -350,13 +352,13 @@ const SecurityContent: React.FC = () => {
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-gray-100 text-gray-800'
                   }`}>
-                    {profile?.twoFactorEnabled ? 'Activada' : 'Inactiva'}
+                    {profile?.twoFactorEnabled ? t('security.active') : t('security.inactive')}
                   </div>
                   <button
                     onClick={() => setShowTwoFactorModal(true)}
                     className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
                   >
-                    {profile?.twoFactorEnabled ? 'Desactivar' : 'Activar'}
+                    {profile?.twoFactorEnabled ? t('security.deactivate') : t('security.activate')}
                   </button>
                 </div>
               </div>

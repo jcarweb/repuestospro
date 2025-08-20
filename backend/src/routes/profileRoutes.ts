@@ -34,6 +34,9 @@ router.put('/privacy', profileController.updatePrivacy);
 // Actualizar configuración de tema e idioma
 router.put('/preferences', profileController.updatePreferences);
 
+// Actualizar configuraciones de notificaciones push
+router.put('/push-notifications', profileController.updatePushNotifications);
+
 // Subir foto de perfil
 router.post('/avatar', profileController.uploadAvatar);
 

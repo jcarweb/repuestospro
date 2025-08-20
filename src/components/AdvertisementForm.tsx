@@ -16,6 +16,7 @@ import {
   Eye,
   Zap
 } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Store {
   _id: string;
@@ -85,6 +86,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
   isEditing = false,
   token
 }) => {
+  const { t } = useLanguage();
   const [stores, setStores] = useState<Store[]>([]);
   const [analyticsData, setAnalyticsData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -332,37 +334,37 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
   };
 
   const daysOfWeek = [
-    { value: 0, label: 'Domingo' },
-    { value: 1, label: 'Lunes' },
-    { value: 2, label: 'Martes' },
-    { value: 3, label: 'Miércoles' },
-    { value: 4, label: 'Jueves' },
-    { value: 5, label: 'Viernes' },
-    { value: 6, label: 'Sábado' }
+    { value: 0, label: t('advertisementForm.daysOfWeek.sunday') },
+    { value: 1, label: t('advertisementForm.daysOfWeek.monday') },
+    { value: 2, label: t('advertisementForm.daysOfWeek.tuesday') },
+    { value: 3, label: t('advertisementForm.daysOfWeek.wednesday') },
+    { value: 4, label: t('advertisementForm.daysOfWeek.thursday') },
+    { value: 5, label: t('advertisementForm.daysOfWeek.friday') },
+    { value: 6, label: t('advertisementForm.daysOfWeek.saturday') }
   ];
 
   const displayTypes = [
-    { value: 'fullscreen', label: 'Pantalla Completa', icon: Monitor },
-    { value: 'footer', label: 'Pie de Página', icon: BarChart3 },
-    { value: 'mid_screen', label: 'Mitad de Pantalla', icon: Target },
-    { value: 'search_card', label: 'Card de Búsqueda', icon: Search }
+    { value: 'fullscreen' as const, label: t('advertisementForm.displayTypes.fullscreen'), icon: Monitor },
+    { value: 'footer' as const, label: t('advertisementForm.displayTypes.footer'), icon: BarChart3 },
+    { value: 'mid_screen' as const, label: t('advertisementForm.displayTypes.midScreen'), icon: Target },
+    { value: 'search_card' as const, label: t('advertisementForm.displayTypes.searchCard'), icon: Search }
   ];
 
   const platforms = [
-    { value: 'android', label: 'Android', icon: Smartphone },
-    { value: 'ios', label: 'iOS', icon: Smartphone },
-    { value: 'both', label: 'Ambas', icon: Monitor }
+    { value: 'android' as const, label: t('advertisementForm.platforms.android'), icon: Smartphone },
+    { value: 'ios' as const, label: t('advertisementForm.platforms.ios'), icon: Smartphone },
+    { value: 'both' as const, label: t('advertisementForm.platforms.both'), icon: Monitor }
   ];
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg w-full max-w-6xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">
-              {isEditing ? 'Editar Publicidad' : 'Nueva Publicidad'}
+            <h2 className="text-2xl font-bold text-[#FFC300]">
+              {isEditing ? t('advertisementForm.title.edit') : t('advertisementForm.title.create')}
             </h2>
             <button
               onClick={onClose}
@@ -377,10 +379,10 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
           {/* Tabs */}
           <div className="flex space-x-1 mb-6 border-b border-gray-200">
             {[
-              { id: 'basic', label: 'Información Básica', icon: Eye },
-              { id: 'targeting', label: 'Segmentación', icon: Target },
-              { id: 'schedule', label: 'Programación', icon: Calendar },
-              { id: 'display', label: 'Configuración', icon: Settings }
+              { id: 'basic', label: t('advertisementForm.tabs.basic'), icon: Eye },
+              { id: 'targeting', label: t('advertisementForm.tabs.targeting'), icon: Target },
+              { id: 'schedule', label: t('advertisementForm.tabs.schedule'), icon: Calendar },
+              { id: 'display', label: t('advertisementForm.tabs.display'), icon: Settings }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -388,8 +390,8 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    ? 'bg-[#FFC300] text-white'
+                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -406,27 +408,27 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Título *
+                      {t('advertisementForm.basic.title')}
                     </label>
                     <input
                       type="text"
                       value={formData.title}
                       onChange={(e) => handleInputChange('title', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                       required
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tienda *
+                      {t('advertisementForm.basic.store')}
                     </label>
                     <select
                       value={formData.store}
                       onChange={(e) => handleInputChange('store', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                       required
                     >
-                      <option value="">Seleccionar tienda</option>
+                      <option value="">{t('advertisementForm.basic.selectStore')}</option>
                       {Array.isArray(stores) && stores.map(store => (
                         <option key={store._id} value={store._id}>
                           {store.name} - {store.city}
@@ -438,53 +440,53 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Descripción *
+                    {t('advertisementForm.basic.description')}
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                     required
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Contenido *
+                    {t('advertisementForm.basic.content')}
                   </label>
                   <textarea
                     value={formData.content}
                     onChange={(e) => handleInputChange('content', e.target.value)}
                     rows={6}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                     required
-                    placeholder="Contenido completo de la publicidad..."
+                    placeholder={t('advertisementForm.basic.contentPlaceholder')}
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      URL de Imagen
+                      {t('advertisementForm.basic.imageUrl')}
                     </label>
                     <input
                       type="url"
                       value={formData.imageUrl}
                       onChange={(e) => handleInputChange('imageUrl', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                       placeholder="https://ejemplo.com/imagen.jpg"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      URL de Video
+                      {t('advertisementForm.basic.videoUrl')}
                     </label>
                     <input
                       type="url"
                       value={formData.videoUrl}
                       onChange={(e) => handleInputChange('videoUrl', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                       placeholder="https://ejemplo.com/video.mp4"
                     />
                   </div>
@@ -492,34 +494,34 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    URL de Navegación
+                    {t('advertisementForm.basic.navigationUrl')}
                   </label>
                   <input
                     type="url"
                     value={formData.navigationUrl}
                     onChange={(e) => handleInputChange('navigationUrl', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                     placeholder="https://ejemplo.com/promocion-o-producto"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    URL a la que navegará el cliente cuando haga clic en la publicidad
+                    {t('advertisementForm.basic.navigationUrlHelp')}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tipo de Display *
+                      {t('advertisementForm.basic.displayType')}
                     </label>
                     <div className="grid grid-cols-2 gap-3">
                       {displayTypes.map(type => (
                         <button
                           key={type.value}
                           type="button"
-                          onClick={() => handleInputChange('displayType', type.value)}
+                          onClick={() => handleInputChange('displayType', type.value as any)}
                           className={`flex items-center space-x-2 p-3 border rounded-lg transition-colors ${
                             formData.displayType === type.value
-                              ? 'border-blue-500 bg-blue-50 text-blue-700'
+                              ? 'border-[#FFC300] bg-yellow-50 text-yellow-700'
                               : 'border-gray-300 hover:border-gray-400'
                           }`}
                         >
@@ -531,17 +533,17 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Plataforma Objetivo *
+                      {t('advertisementForm.basic.targetPlatform')}
                     </label>
                     <div className="space-y-2">
                       {platforms.map(platform => (
                         <button
                           key={platform.value}
                           type="button"
-                          onClick={() => handleInputChange('targetPlatform', platform.value)}
+                          onClick={() => handleInputChange('targetPlatform', platform.value as any)}
                           className={`flex items-center space-x-2 w-full p-3 border rounded-lg transition-colors ${
                             formData.targetPlatform === platform.value
-                              ? 'border-blue-500 bg-blue-50 text-blue-700'
+                              ? 'border-[#FFC300] bg-yellow-50 text-yellow-700'
                               : 'border-gray-300 hover:border-gray-400'
                           }`}
                         >
@@ -561,7 +563,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Roles de Usuario
+                      {t('advertisementForm.targeting.userRoles')}
                     </label>
                     <div className="space-y-2">
                       {['client', 'store_manager', 'delivery', 'admin'].map(role => (
@@ -585,7 +587,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Niveles de Fidelización
+                      {t('advertisementForm.targeting.loyaltyLevels')}
                     </label>
                     <div className="space-y-2">
                       {['bronze', 'silver', 'gold', 'platinum'].map(level => (
@@ -612,7 +614,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tipos de Dispositivo
+                      {t('advertisementForm.targeting.deviceTypes')}
                     </label>
                     <div className="space-y-2">
                       {['mobile', 'tablet', 'desktop'].map(device => (
@@ -636,7 +638,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Sistemas Operativos
+                      {t('advertisementForm.targeting.operatingSystems')}
                     </label>
                     <div className="space-y-2">
                       {['android', 'ios', 'web'].map(os => (
@@ -662,7 +664,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ubicaciones
+                    {t('advertisementForm.targeting.locations')}
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     {analyticsData?.locationBreakdown && Object.keys(analyticsData.locationBreakdown).map(location => (
@@ -687,7 +689,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Intereses
+                    {t('advertisementForm.targeting.interests')}
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     {analyticsData?.interests && analyticsData.interests.map((interest: string) => (
@@ -718,25 +720,25 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Fecha de Inicio *
+                      {t('advertisementForm.schedule.startDate')}
                     </label>
                     <input
                       type="date"
                       value={formData.schedule.startDate}
                       onChange={(e) => handleScheduleChange('startDate', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                       required
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Fecha de Fin *
+                      {t('advertisementForm.schedule.endDate')}
                     </label>
                     <input
                       type="date"
                       value={formData.schedule.endDate}
                       onChange={(e) => handleScheduleChange('endDate', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                       required
                     />
                   </div>
@@ -745,25 +747,25 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Hora de Inicio *
+                      {t('advertisementForm.schedule.startTime')}
                     </label>
                     <input
                       type="time"
                       value={formData.schedule.startTime}
                       onChange={(e) => handleScheduleChange('startTime', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                       required
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Hora de Fin *
+                      {t('advertisementForm.schedule.endTime')}
                     </label>
                     <input
                       type="time"
                       value={formData.schedule.endTime}
                       onChange={(e) => handleScheduleChange('endTime', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                       required
                     />
                   </div>
@@ -771,7 +773,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Días de la Semana
+                    {t('advertisementForm.schedule.daysOfWeek')}
                   </label>
                   <div className="grid grid-cols-7 gap-2">
                     {daysOfWeek.map(day => (
@@ -781,7 +783,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                         onClick={() => toggleDayOfWeek(day.value)}
                         className={`p-2 text-sm border rounded-lg transition-colors ${
                           formData.schedule.daysOfWeek.includes(day.value)
-                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            ? 'border-[#FFC300] bg-yellow-50 text-yellow-700'
                             : 'border-gray-300 hover:border-gray-400'
                         }`}
                       >
@@ -790,21 +792,21 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                     ))}
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
-                    Si no seleccionas ningún día, la publicidad se mostrará todos los días
+                    {t('advertisementForm.schedule.daysOfWeekHelp')}
                   </p>
                 </div>
 
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Slots de Tiempo Específicos
+                      {t('advertisementForm.schedule.timeSlots')}
                     </label>
                     <button
                       type="button"
                       onClick={addTimeSlot}
-                      className="text-sm text-blue-600 hover:text-blue-700"
+                      className="text-sm text-[#FFC300] hover:text-[#E6B000]"
                     >
-                      + Agregar Slot
+                      {t('advertisementForm.schedule.addSlot')}
                     </button>
                   </div>
                   <div className="space-y-2">
@@ -814,14 +816,14 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                           type="time"
                           value={slot.start}
                           onChange={(e) => updateTimeSlot(index, 'start', e.target.value)}
-                          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                         />
-                        <span>a</span>
+                        <span>{t('advertisementForm.schedule.to')}</span>
                         <input
                           type="time"
                           value={slot.end}
                           onChange={(e) => updateTimeSlot(index, 'end', e.target.value)}
-                          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                         />
                         <button
                           type="button"
@@ -834,7 +836,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                     ))}
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
-                    Si no agregas slots específicos, se usará el horario general
+                    {t('advertisementForm.schedule.timeSlotsHelp')}
                   </p>
                 </div>
               </div>
@@ -846,34 +848,34 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Impresiones Máximas
+                      {t('advertisementForm.display.maxImpressions')}
                     </label>
                     <input
                       type="number"
                       value={formData.displaySettings.maxImpressions}
                       onChange={(e) => handleDisplaySettingsChange('maxImpressions', parseInt(e.target.value) || 0)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                       placeholder="0 = sin límite"
                       min="0"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      0 = sin límite de impresiones
+                      {t('advertisementForm.display.maxImpressionsHelp')}
                     </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Clicks Máximos
+                      {t('advertisementForm.display.maxClicks')}
                     </label>
                     <input
                       type="number"
                       value={formData.displaySettings.maxClicks}
                       onChange={(e) => handleDisplaySettingsChange('maxClicks', parseInt(e.target.value) || 0)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                       placeholder="0 = sin límite"
                       min="0"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      0 = sin límite de clicks
+                      {t('advertisementForm.display.maxClicksHelp')}
                     </p>
                   </div>
                 </div>
@@ -881,34 +883,34 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Frecuencia por Usuario
+                      {t('advertisementForm.display.frequency')}
                     </label>
                     <input
                       type="number"
                       value={formData.displaySettings.frequency}
                       onChange={(e) => handleDisplaySettingsChange('frequency', parseInt(e.target.value) || 1)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                       min="1"
                       max="10"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Número de veces que se mostrará por usuario
+                      {t('advertisementForm.display.frequencyHelp')}
                     </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Prioridad
+                      {t('advertisementForm.display.priority')}
                     </label>
                     <input
                       type="number"
                       value={formData.displaySettings.priority}
                       onChange={(e) => handleDisplaySettingsChange('priority', parseInt(e.target.value) || 5)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300] bg-white text-gray-900"
                       min="1"
                       max="10"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      1 = más baja, 10 = más alta
+                      {t('advertisementForm.display.priorityHelp')}
                     </p>
                   </div>
                 </div>
@@ -922,11 +924,11 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
                       className="mr-2"
                     />
                     <span className="text-sm font-medium text-gray-700">
-                      Activar publicidad inmediatamente
+                      {t('advertisementForm.display.activateImmediately')}
                     </span>
                   </label>
                   <p className="text-xs text-gray-500 mt-1">
-                    Si no está marcado, la publicidad se creará como borrador
+                    {t('advertisementForm.display.activateImmediatelyHelp')}
                   </p>
                 </div>
               </div>
@@ -938,16 +940,16 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
             >
-              Cancelar
+              {t('advertisementForm.buttons.cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="px-4 py-2 bg-[#FFC300] text-white rounded-lg hover:bg-[#E6B000] transition-colors disabled:opacity-50"
             >
-              {loading ? 'Guardando...' : (isEditing ? 'Actualizar' : 'Crear')}
+              {loading ? t('advertisementForm.buttons.saving') : (isEditing ? t('advertisementForm.buttons.update') : t('advertisementForm.buttons.create'))}
             </button>
           </div>
         </form>

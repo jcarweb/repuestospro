@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { 
   User, 
   Mail, 
@@ -19,6 +20,7 @@ import type { UserProfile } from '../services/profileService';
 
 const Profile: React.FC = () => {
   const { user, token } = useAuth();
+  const { t } = useLanguage();
   const { containerClasses, contentClasses } = useLayoutContext();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -73,7 +75,7 @@ const Profile: React.FC = () => {
               setUserLocation({
                 latitude: lat,
                 longitude: lng,
-                address: 'Ubicación guardada'
+                address: t('profile.savedLocation')
               });
             }
           }
@@ -83,7 +85,7 @@ const Profile: React.FC = () => {
         }
       } catch (error) {
         console.error('Error loading profile:', error);
-        setMessage({ type: 'error', text: 'Error al cargar el perfil' });
+        setMessage({ type: 'error', text: t('profile.errorLoading') });
       } finally {
         setLoading(false);
       }
@@ -108,21 +110,21 @@ const Profile: React.FC = () => {
         phone: formData.phone
       });
       
-      setMessage({ type: 'success', text: result.message });
-      setIsEditing(false);
-      
-      // Recargar perfil
-      const userProfile = await profileService.getProfile();
-      setProfile(userProfile);
-    } catch (error: any) {
-      console.error('Error updating profile:', error);
-      setMessage({ 
-        type: 'error', 
-        text: error.response?.data?.message || 'Error al actualizar el perfil' 
-      });
-    } finally {
-      setLoading(false);
-    }
+              setMessage({ type: 'success', text: result.message });
+        setIsEditing(false);
+        
+        // Recargar perfil
+        const userProfile = await profileService.getProfile();
+        setProfile(userProfile);
+      } catch (error: any) {
+        console.error('Error updating profile:', error);
+        setMessage({
+          type: 'error',
+          text: error.response?.data?.message || t('profile.errorUpdating')
+        });
+      } finally {
+        setLoading(false);
+      }
   };
 
   const handleCancel = () => {
@@ -151,10 +153,10 @@ const Profile: React.FC = () => {
         enabled: true
       });
       
-      setMessage({ type: 'success', text: 'Ubicación actualizada correctamente' });
+             setMessage({ type: 'success', text: t('profile.locationUpdated') });
     } catch (error) {
       console.error('Error saving location:', error);
-      setMessage({ type: 'error', text: 'Error al guardar la ubicación' });
+      setMessage({ type: 'error', text: t('profile.errorSavingLocation') });
     }
   };
 
@@ -167,7 +169,7 @@ const Profile: React.FC = () => {
           <div className="bg-white shadow rounded-lg p-6">
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-2 text-gray-600">Cargando perfil...</span>
+              <span className="ml-2 text-gray-600">{t('profile.loading')}</span>
             </div>
           </div>
         </div>
@@ -194,14 +196,14 @@ const Profile: React.FC = () => {
           {/* Header */}
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-gray-900">Mi Perfil</h1>
+                             <h1 className="text-2xl font-bold text-gray-900">{t('profile.title')}</h1>
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   <Edit className="w-4 h-4" />
-                  <span>Editar</span>
+                                     <span>{t('profile.edit')}</span>
                 </button>
               ) : (
                 <div className="flex space-x-2">
@@ -210,14 +212,14 @@ const Profile: React.FC = () => {
                     className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                   >
                     <Save className="w-4 h-4" />
-                    <span>Guardar</span>
+                    <span>{t('profile.save')}</span>
                   </button>
                   <button
                     onClick={handleCancel}
                     className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
                   >
                     <X className="w-4 h-4" />
-                    <span>Cancelar</span>
+                    <span>{t('profile.cancel')}</span>
                   </button>
                 </div>
               )}
@@ -228,9 +230,9 @@ const Profile: React.FC = () => {
           <div className="px-6 py-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre completo
-                </label>
+                                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                   {t('profile.name')}
+                 </label>
                 <div className="relative">
                   <input
                     type="text"
@@ -247,9 +249,9 @@ const Profile: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Correo electrónico
-                </label>
+                                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                   {t('profile.email')}
+                 </label>
                 <div className="relative">
                   <input
                     type="email"
@@ -266,9 +268,9 @@ const Profile: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Teléfono
-                </label>
+                                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                   {t('profile.phone')}
+                 </label>
                 <div className="relative">
                   <input
                     type="tel"
@@ -286,9 +288,9 @@ const Profile: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Dirección
-                </label>
+                                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                   {t('profile.address')}
+                 </label>
                 <div className="relative">
                   <input
                     type="text"
@@ -314,13 +316,13 @@ const Profile: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Navigation className="w-5 h-5 text-gray-600" />
-                <h2 className="text-lg font-semibold text-gray-900">Mi Ubicación</h2>
+                                 <h2 className="text-lg font-semibold text-gray-900">{t('profile.location')}</h2>
               </div>
               <button
                 onClick={() => setShowLocationMap(!showLocationMap)}
                 className="text-sm text-blue-600 hover:text-blue-700"
               >
-                {showLocationMap ? 'Ocultar mapa' : 'Configurar ubicación'}
+                                 {showLocationMap ? t('common.hide') : t('profile.configureLocation')}
               </button>
             </div>
           </div>
@@ -339,10 +341,10 @@ const Profile: React.FC = () => {
                   <div className="flex items-start gap-3">
                     <MapPin className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
-                      <h4 className="font-medium text-blue-900 mb-1">Ubicación configurada:</h4>
+                                             <h4 className="font-medium text-blue-900 mb-1">{t('profile.configuredLocation')}:</h4>
                       <p className="text-sm text-blue-800 mb-2">{userLocation.address}</p>
                       <div className="text-xs text-blue-600">
-                        Coordenadas: {userLocation.latitude.toFixed(6)}, {userLocation.longitude.toFixed(6)}
+                                                 {t('profile.coordinates')}: {userLocation.latitude.toFixed(6)}, {userLocation.longitude.toFixed(6)}
                       </div>
                     </div>
                   </div>
@@ -350,16 +352,16 @@ const Profile: React.FC = () => {
               ) : (
                 <div className="text-center py-8">
                   <Navigation className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No hay ubicación configurada</h3>
-                  <p className="text-gray-500 mb-4">
-                    Configura tu ubicación para mejorar la experiencia de búsqueda de productos cercanos.
-                  </p>
-                  <button
-                    onClick={() => setShowLocationMap(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    Configurar ubicación
-                  </button>
+                                     <h3 className="text-lg font-medium text-gray-900 mb-2">{t('profile.noLocationConfigured')}</h3>
+                   <p className="text-gray-500 mb-4">
+                     {t('profile.locationDescription')}
+                   </p>
+                   <button
+                     onClick={() => setShowLocationMap(true)}
+                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                   >
+                     {t('profile.configureLocation')}
+                   </button>
                 </div>
               )}
             </div>
@@ -374,13 +376,13 @@ const Profile: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Activity className="w-5 h-5 text-gray-600" />
-                <h2 className="text-lg font-semibold text-gray-900">Historial de Actividades</h2>
+                                 <h2 className="text-lg font-semibold text-gray-900">{t('profile.activityHistory')}</h2>
               </div>
               <button
                 onClick={() => setShowActivityHistory(!showActivityHistory)}
                 className="text-sm text-blue-600 hover:text-blue-700"
               >
-                {showActivityHistory ? 'Ocultar' : 'Ver historial'}
+                                 {showActivityHistory ? t('common.hide') : t('profile.viewHistory')}
               </button>
             </div>
           </div>

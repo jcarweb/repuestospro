@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import { TrendingUp, TrendingDown, Users, Award, Gift, Star, DollarSign, Calendar } from 'lucide-react';
 
 interface LoyaltyStatsProps {
@@ -31,6 +32,8 @@ interface LoyaltyStatsProps {
 }
 
 const LoyaltyStats: React.FC<LoyaltyStatsProps> = ({ stats }) => {
+  const { t } = useLanguage();
+  
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat('es-ES').format(num);
   };
@@ -56,6 +59,24 @@ const LoyaltyStats: React.FC<LoyaltyStatsProps> = ({ stats }) => {
     return growth >= 0 ? 'text-green-600' : 'text-red-600';
   };
 
+  const getActivityDescription = (activity: any) => {
+    const baseDescription = activity.description;
+    const userName = baseDescription.split(' por ')[1] || baseDescription.split(' by ')[1] || baseDescription.split(' por ')[1];
+    
+    switch (activity.type) {
+      case 'purchase':
+        return `${t('loyaltyDashboard.activity.purchase')} ${userName}`;
+      case 'review':
+        return `${t('loyaltyDashboard.activity.review')} ${userName}`;
+      case 'referral':
+        return `${t('loyaltyDashboard.activity.referral')} ${userName}`;
+      case 'redemption':
+        return `${t('loyaltyDashboard.activity.redemption')} ${userName}`;
+      default:
+        return activity.description;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Métricas principales */}
@@ -64,18 +85,18 @@ const LoyaltyStats: React.FC<LoyaltyStatsProps> = ({ stats }) => {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Usuarios Totales</p>
+              <p className="text-sm font-medium text-gray-600">{t('loyaltyDashboard.stats.totalUsers')}</p>
               <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.totalUsers)}</p>
               <div className="flex items-center mt-2">
                 {getGrowthIcon(stats.monthlyGrowth)}
                 <span className={`text-sm font-medium ml-1 ${getGrowthColor(stats.monthlyGrowth)}`}>
                   {stats.monthlyGrowth >= 0 ? '+' : ''}{stats.monthlyGrowth}%
                 </span>
-                <span className="text-sm text-gray-500 ml-1">este mes</span>
+                <span className="text-sm text-gray-500 ml-1">{t('loyaltyDashboard.stats.thisMonth')}</span>
               </div>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <Users className="w-6 h-6 text-blue-600" />
+            <div className="p-3 bg-[#FFC300] bg-opacity-20 rounded-full">
+              <Users className="w-6 h-6 text-[#FFC300]" />
             </div>
           </div>
         </div>
@@ -84,19 +105,19 @@ const LoyaltyStats: React.FC<LoyaltyStatsProps> = ({ stats }) => {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Puntos Totales</p>
+              <p className="text-sm font-medium text-gray-600">{t('loyaltyDashboard.stats.totalPoints')}</p>
               <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.totalPoints)}</p>
               <div className="flex items-center mt-2">
                 <span className="text-sm text-green-600 font-medium">
-                  +{formatNumber(stats.pointsIssued)} emitidos
+                  +{formatNumber(stats.pointsIssued)} {t('loyaltyDashboard.stats.issued')}
                 </span>
                 <span className="text-sm text-red-600 font-medium ml-2">
-                  -{formatNumber(stats.pointsRedeemed)} canjeados
+                  -{formatNumber(stats.pointsRedeemed)} {t('loyaltyDashboard.stats.redeemed')}
                 </span>
               </div>
             </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <Award className="w-6 h-6 text-green-600" />
+            <div className="p-3 bg-[#FFC300] bg-opacity-20 rounded-full">
+              <Award className="w-6 h-6 text-[#FFC300]" />
             </div>
           </div>
         </div>
@@ -105,12 +126,12 @@ const LoyaltyStats: React.FC<LoyaltyStatsProps> = ({ stats }) => {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Premios Activos</p>
+              <p className="text-sm font-medium text-gray-600">{t('loyaltyDashboard.stats.activeRewards')}</p>
               <p className="text-2xl font-bold text-gray-900">{stats.activeRewards}</p>
-              <p className="text-sm text-gray-500 mt-1">de {stats.totalRewards} total</p>
+              <p className="text-sm text-gray-500 mt-1">{t('loyaltyDashboard.stats.ofTotal')} {stats.totalRewards} {t('loyaltyDashboard.stats.total')}</p>
             </div>
-            <div className="p-3 bg-purple-100 rounded-full">
-              <Gift className="w-6 h-6 text-purple-600" />
+            <div className="p-3 bg-[#FFC300] bg-opacity-20 rounded-full">
+              <Gift className="w-6 h-6 text-[#FFC300]" />
             </div>
           </div>
         </div>
@@ -119,12 +140,12 @@ const LoyaltyStats: React.FC<LoyaltyStatsProps> = ({ stats }) => {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Canjes Completados</p>
+              <p className="text-sm font-medium text-gray-600">{t('loyaltyDashboard.stats.completedRedemptions')}</p>
               <p className="text-2xl font-bold text-gray-900">{stats.completedRedemptions}</p>
-              <p className="text-sm text-gray-500 mt-1">{stats.pendingRedemptions} pendientes</p>
+              <p className="text-sm text-gray-500 mt-1">{stats.pendingRedemptions} {t('loyaltyDashboard.stats.pending')}</p>
             </div>
-            <div className="p-3 bg-yellow-100 rounded-full">
-              <DollarSign className="w-6 h-6 text-yellow-600" />
+            <div className="p-3 bg-[#FFC300] bg-opacity-20 rounded-full">
+              <DollarSign className="w-6 h-6 text-[#FFC300]" />
             </div>
           </div>
         </div>
@@ -134,7 +155,7 @@ const LoyaltyStats: React.FC<LoyaltyStatsProps> = ({ stats }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Premios más populares */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Premios Más Populares</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('loyaltyDashboard.sections.popularRewards')}</h3>
           <div className="space-y-4">
             {stats.topRewards.map((reward, index) => (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -144,12 +165,12 @@ const LoyaltyStats: React.FC<LoyaltyStatsProps> = ({ stats }) => {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">{reward.name}</p>
-                    <p className="text-sm text-gray-500">{reward.points} puntos</p>
+                    <p className="text-sm text-gray-500">{reward.points} {t('loyaltyDashboard.rewards.points')}</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-gray-900">{reward.redemptions}</p>
-                  <p className="text-sm text-gray-500">canjes</p>
+                  <p className="text-sm text-gray-500">{t('loyaltyDashboard.rewards.redemptions')}</p>
                 </div>
               </div>
             ))}
@@ -158,7 +179,7 @@ const LoyaltyStats: React.FC<LoyaltyStatsProps> = ({ stats }) => {
 
         {/* Actividad reciente */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Actividad Reciente</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('loyaltyDashboard.sections.recentActivity')}</h3>
           <div className="space-y-3">
             {stats.recentActivity.map((activity, index) => (
               <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
@@ -170,7 +191,7 @@ const LoyaltyStats: React.FC<LoyaltyStatsProps> = ({ stats }) => {
                     {activity.type === 'redemption' && <Gift className="w-4 h-4 text-blue-600" />}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{activity.description}</p>
+                    <p className="font-medium text-gray-900">{getActivityDescription(activity)}</p>
                     <p className="text-sm text-gray-500">{formatDate(activity.date)}</p>
                   </div>
                 </div>
@@ -191,12 +212,12 @@ const LoyaltyStats: React.FC<LoyaltyStatsProps> = ({ stats }) => {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Valoración Promedio</p>
+              <p className="text-sm font-medium text-gray-600">{t('loyaltyDashboard.stats.averageRating')}</p>
               <p className="text-2xl font-bold text-gray-900">{stats.averageRating.toFixed(1)}</p>
-              <p className="text-sm text-gray-500">{formatNumber(stats.totalReviews)} reseñas</p>
+              <p className="text-sm text-gray-500">{formatNumber(stats.totalReviews)} {t('loyaltyDashboard.stats.reviews')}</p>
             </div>
-            <div className="p-3 bg-yellow-100 rounded-full">
-              <Star className="w-6 h-6 text-yellow-600" />
+            <div className="p-3 bg-[#FFC300] bg-opacity-20 rounded-full">
+              <Star className="w-6 h-6 text-[#FFC300]" />
             </div>
           </div>
         </div>
@@ -205,10 +226,10 @@ const LoyaltyStats: React.FC<LoyaltyStatsProps> = ({ stats }) => {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Usuarios Activos</p>
+              <p className="text-sm font-medium text-gray-600">{t('loyaltyDashboard.stats.activeUsers')}</p>
               <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.activeUsers)}</p>
               <p className="text-sm text-gray-500">
-                {((stats.activeUsers / stats.totalUsers) * 100).toFixed(1)}% del total
+                {((stats.activeUsers / stats.totalUsers) * 100).toFixed(1)}{t('loyaltyDashboard.stats.ofTotalUsers')}
               </p>
             </div>
             <div className="p-3 bg-green-100 rounded-full">
@@ -221,11 +242,11 @@ const LoyaltyStats: React.FC<LoyaltyStatsProps> = ({ stats }) => {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Tasa de Conversión</p>
+              <p className="text-sm font-medium text-gray-600">{t('loyaltyDashboard.stats.conversionRate')}</p>
               <p className="text-2xl font-bold text-gray-900">
                 {stats.totalUsers > 0 ? ((stats.completedRedemptions / stats.totalUsers) * 100).toFixed(1) : 0}%
               </p>
-              <p className="text-sm text-gray-500">usuarios que canjearon</p>
+              <p className="text-sm text-gray-500">{t('loyaltyDashboard.stats.usersWhoRedeemed')}</p>
             </div>
             <div className="p-3 bg-purple-100 rounded-full">
               <TrendingUp className="w-6 h-6 text-purple-600" />

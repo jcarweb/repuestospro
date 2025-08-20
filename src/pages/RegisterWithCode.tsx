@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import {
   CheckCircle,
   AlertCircle,
@@ -26,6 +27,7 @@ const RegisterWithCode: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useLanguage();
   const [code, setCode] = useState('');
   const [codeData, setCodeData] = useState<CodeData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -60,10 +62,10 @@ const RegisterWithCode: React.FC = () => {
         setCodeData(result.data);
         setFormData(prev => ({ ...prev, email: result.data.email }));
       } else {
-        setError(result.message || 'Código inválido o expirado');
+        setError(result.message || t('registerWithCode.errorInvalidCode'));
       }
     } catch (error) {
-      setError('Error verificando código');
+      setError(t('registerWithCode.errorVerifyingCode'));
     } finally {
       setVerifying(false);
     }
@@ -71,7 +73,7 @@ const RegisterWithCode: React.FC = () => {
 
   const handleVerifyCode = async () => {
     if (!code.trim()) {
-      setError('Por favor ingresa un código de registro');
+      setError(t('registerWithCode.pleaseEnterCode'));
       return;
     }
 
@@ -95,10 +97,10 @@ const RegisterWithCode: React.FC = () => {
       if (result.success) {
         setCodeData(result.data);
       } else {
-        setError(result.message || 'Error iniciando registro');
+        setError(result.message || t('registerWithCode.errorStartingRegistration'));
       }
     } catch (error) {
-      setError('Error de conexión');
+      setError(t('adminRegistrationCodes.connectionError'));
     } finally {
       setLoading(false);
     }
@@ -110,7 +112,7 @@ const RegisterWithCode: React.FC = () => {
     setError(null);
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setError(t('registerWithCode.passwordsDoNotMatch'));
       setRegistering(false);
       return;
     }
@@ -151,13 +153,13 @@ const RegisterWithCode: React.FC = () => {
           login(registerResult.data.user, registerResult.data.token);
           navigate('/');
         } else {
-          setError(completeResult.message || 'Error completando registro');
+          setError(completeResult.message || t('registerWithCode.errorCompletingRegistration'));
         }
       } else {
-        setError(registerResult.message || 'Error registrando usuario');
+        setError(registerResult.message || t('registerWithCode.errorRegisteringUser'));
       }
     } catch (error) {
-      setError('Error de conexión');
+      setError(t('adminRegistrationCodes.connectionError'));
     } finally {
       setRegistering(false);
     }
@@ -177,29 +179,22 @@ const RegisterWithCode: React.FC = () => {
   };
 
   const getRoleName = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return 'Administrador';
-      case 'store_manager':
-        return 'Gestor de Tienda';
-      case 'delivery':
-        return 'Delivery';
-      default:
-        return 'Usuario';
-    }
+    const roleNames: { [key: string]: string } = {
+      admin: t('adminRegistrationCodes.roles.admin'),
+      store_manager: t('adminRegistrationCodes.roles.storeManager'),
+      delivery: t('adminRegistrationCodes.roles.delivery')
+    };
+    return roleNames[role] || 'Usuario';
   };
 
   const getRoleDescription = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return 'Acceso completo al sistema de administración';
-      case 'store_manager':
-        return 'Gestión de inventario y ventas de la tienda';
-      case 'delivery':
-        return 'Gestión de entregas y logística';
-      default:
-        return 'Acceso básico al sistema';
-    }
+    const roleDescriptions: { [key: string]: string } = {
+      admin: t('registerWithCode.roleDescriptions.admin'),
+      store_manager: t('registerWithCode.roleDescriptions.storeManager'),
+      delivery: t('registerWithCode.roleDescriptions.delivery'),
+      user: t('registerWithCode.roleDescriptions.user')
+    };
+    return roleDescriptions[role] || t('registerWithCode.roleDescriptions.user');
   };
 
   return (
@@ -212,10 +207,10 @@ const RegisterWithCode: React.FC = () => {
               <UserPlus className="w-12 h-12 text-blue-600" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Registro con Código
+              {t('registerWithCode.title')}
             </h1>
             <p className="text-gray-600">
-              Completa tu registro usando el código proporcionado
+              {t('registerWithCode.subtitle')}
             </p>
           </div>
 
@@ -234,14 +229,14 @@ const RegisterWithCode: React.FC = () => {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Código de Registro
+                  {t('registerWithCode.registrationCode')}
                 </label>
                 <div className="flex space-x-2">
                   <input
                     type="text"
                     value={code}
                     onChange={(e) => setCode(e.target.value.toUpperCase())}
-                    placeholder="Ingresa el código"
+                    placeholder={t('registerWithCode.enterCode')}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
@@ -252,7 +247,7 @@ const RegisterWithCode: React.FC = () => {
                     {verifying ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     ) : (
-                      'Verificar'
+                      t('registerWithCode.verify')
                     )}
                   </button>
                 </div>
@@ -260,7 +255,7 @@ const RegisterWithCode: React.FC = () => {
 
               <div className="text-center">
                 <p className="text-sm text-gray-600">
-                  ¿No tienes un código? Contacta con la administración.
+                  {t('registerWithCode.noCodeMessage')}
                 </p>
               </div>
             </div>
@@ -273,7 +268,7 @@ const RegisterWithCode: React.FC = () => {
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center mb-3">
                   <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                  <span className="font-medium text-green-800">Código Válido</span>
+                  <span className="font-medium text-green-800">{t('registerWithCode.codeValid')}</span>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center">
@@ -287,7 +282,7 @@ const RegisterWithCode: React.FC = () => {
                   <div className="flex items-center">
                     <Clock className="w-4 h-4 text-gray-400 mr-2" />
                     <span className="text-gray-700">
-                      Expira: {new Date(codeData.expiresAt).toLocaleDateString()}
+                      {t('registerWithCode.expires')} {new Date(codeData.expiresAt).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
@@ -300,7 +295,7 @@ const RegisterWithCode: React.FC = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre Completo
+                    {t('registerWithCode.fullName')}
                   </label>
                   <input
                     type="text"
@@ -322,13 +317,13 @@ const RegisterWithCode: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    El email no se puede cambiar
+                    {t('registerWithCode.emailCannotChange')}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Teléfono
+                    {t('registerWithCode.phone')}
                   </label>
                   <input
                     type="tel"
@@ -340,7 +335,7 @@ const RegisterWithCode: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Contraseña
+                    {t('registerWithCode.password')}
                   </label>
                   <input
                     type="password"
@@ -354,7 +349,7 @@ const RegisterWithCode: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Confirmar Contraseña
+                    {t('registerWithCode.confirmPassword')}
                   </label>
                   <input
                     type="password"
@@ -374,11 +369,11 @@ const RegisterWithCode: React.FC = () => {
                   {registering ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Registrando...
+                      {t('registerWithCode.registering')}
                     </>
                   ) : (
                     <>
-                      Completar Registro
+                      {t('registerWithCode.completeRegistration')}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </>
                   )}
@@ -394,7 +389,7 @@ const RegisterWithCode: React.FC = () => {
                   }}
                   className="text-sm text-gray-600 hover:text-gray-800"
                 >
-                  Usar otro código
+                  {t('registerWithCode.useAnotherCode')}
                 </button>
               </div>
             </div>

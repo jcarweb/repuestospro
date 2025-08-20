@@ -8,7 +8,7 @@ class ProfileController {
   // Obtener perfil del usuario
   async getProfile(req: Request, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = (req as any).user?._id;
       
       const user = await User.findById(userId).select('-password -twoFactorSecret -backupCodes');
       
@@ -35,7 +35,7 @@ class ProfileController {
   // Actualizar información del perfil
   async updateProfile(req: Request, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = (req as any).user?._id;
       const { name, email, phone } = req.body;
 
       const user = await User.findById(userId);
@@ -364,6 +364,7 @@ class ProfileController {
   // Actualizar configuraciones de notificaciones
   async updateNotifications(req: Request, res: Response) {
     try {
+      console.log('🔍 updateNotifications - Request body:', req.body);
       const userId = req.user?.id;
       const { emailNotifications, pushNotifications, marketingEmails } = req.body;
 
@@ -429,17 +430,33 @@ class ProfileController {
         });
       }
 
-      // Aquí podrías agregar campos de privacidad al modelo User si es necesario
-      // Por ahora solo registramos la actividad
+      // Actualizar campos de privacidad
+      const updatedFields: string[] = [];
+      if (profileVisibility && profileVisibility !== user.profileVisibility) {
+        user.profileVisibility = profileVisibility;
+        updatedFields.push('profileVisibility');
+      }
+      if (showEmail !== undefined && showEmail !== user.showEmail) {
+        user.showEmail = showEmail;
+        updatedFields.push('showEmail');
+      }
+      if (showPhone !== undefined && showPhone !== user.showPhone) {
+        user.showPhone = showPhone;
+        updatedFields.push('showPhone');
+      }
+
+      await user.save();
 
       // Registrar actividad
-      await Activity.createActivity(
-        userId,
-        'privacy_update',
-        'Usuario actualizó configuraciones de privacidad',
-        { profileVisibility, showEmail, showPhone },
-        true
-      );
+      if (updatedFields.length > 0) {
+        await Activity.createActivity(
+          userId,
+          'privacy_update',
+          'Usuario actualizó configuraciones de privacidad',
+          { updatedFields },
+          true
+        );
+      }
 
       res.json({
         success: true,
@@ -468,17 +485,29 @@ class ProfileController {
         });
       }
 
-      // Aquí podrías agregar campos de preferencias al modelo User si es necesario
-      // Por ahora solo registramos la actividad
+      // Actualizar campos de preferencias
+      const updatedFields: string[] = [];
+      if (theme && theme !== user.theme) {
+        user.theme = theme;
+        updatedFields.push('theme');
+      }
+      if (language && language !== user.language) {
+        user.language = language;
+        updatedFields.push('language');
+      }
+
+      await user.save();
 
       // Registrar actividad
-      await Activity.createActivity(
-        userId,
-        'preferences_update',
-        'Usuario actualizó preferencias de tema e idioma',
-        { theme, language },
-        true
-      );
+      if (updatedFields.length > 0) {
+        await Activity.createActivity(
+          userId,
+          'preferences_update',
+          'Usuario actualizó preferencias de tema e idioma',
+          { updatedFields },
+          true
+        );
+      }
 
       res.json({
         success: true,
@@ -486,6 +515,57 @@ class ProfileController {
       });
     } catch (error) {
       console.error('Error updating preferences:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Actualizar configuraciones de notificaciones push
+  async updatePushNotifications(req: Request, res: Response) {
+    try {
+      const userId = req.user?.id;
+      const { pushEnabled, pushToken } = req.body;
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+      }
+
+      // Actualizar campos de notificaciones push
+      const updatedFields: string[] = [];
+      if (pushEnabled !== undefined && pushEnabled !== user.pushEnabled) {
+        user.pushEnabled = pushEnabled;
+        updatedFields.push('pushEnabled');
+      }
+      if (pushToken && pushToken !== user.pushToken) {
+        user.pushToken = pushToken;
+        updatedFields.push('pushToken');
+      }
+
+      await user.save();
+
+      // Registrar actividad
+      if (updatedFields.length > 0) {
+        await Activity.createActivity(
+          userId,
+          'push_notifications_update',
+          'Usuario actualizó configuraciones de notificaciones push',
+          { updatedFields },
+          true
+        );
+      }
+
+      res.json({
+        success: true,
+        message: 'Configuraciones de notificaciones push actualizadas correctamente'
+      });
+    } catch (error) {
+      console.error('Error updating push notifications:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

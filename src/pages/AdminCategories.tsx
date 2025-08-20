@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { 
   Folder, 
   Plus, 
@@ -43,6 +44,7 @@ interface CategoryStats {
 
 const AdminCategories: React.FC = () => {
   const { user, token } = useAuth();
+  const { t } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [stats, setStats] = useState<CategoryStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -122,7 +124,7 @@ const AdminCategories: React.FC = () => {
   // Crear categoría
   const handleCreateCategory = async () => {
     if (!formData.name || !formData.description) {
-      alert('Los campos nombre y descripción son obligatorios');
+              alert(t('adminCategories.errors.requiredFields'));
       return;
     }
 
@@ -151,13 +153,13 @@ const AdminCategories: React.FC = () => {
         });
         fetchCategories();
         fetchStats();
-        alert('Categoría creada exitosamente');
+        alert(t('adminCategories.messages.categoryCreated'));
       } else {
-        alert(data.message || 'Error creando categoría');
+        alert(data.message || t('adminCategories.errors.createError'));
       }
     } catch (error) {
       console.error('Error creando categoría:', error);
-      alert('Error de conexión');
+      alert(t('adminCategories.errors.connection'));
     }
   };
 
@@ -166,7 +168,7 @@ const AdminCategories: React.FC = () => {
     if (!selectedCategory) return;
     
     if (!formData.name || !formData.description) {
-      alert('Los campos nombre y descripción son obligatorios');
+      alert(t('adminCategories.errors.requiredFields'));
       return;
     }
     
@@ -192,19 +194,19 @@ const AdminCategories: React.FC = () => {
         setShowEditModal(false);
         setSelectedCategory(null);
         fetchCategories();
-        alert('Categoría actualizada exitosamente');
+        alert(t('adminCategories.messages.categoryUpdated'));
       } else {
-        alert(data.message || 'Error actualizando categoría');
+        alert(data.message || t('adminCategories.errors.updateError'));
       }
     } catch (error) {
       console.error('Error actualizando categoría:', error);
-      alert('Error de conexión');
+      alert(t('adminCategories.errors.connection'));
     }
   };
 
   // Eliminar categoría
   const handleDeleteCategory = async (categoryId: string) => {
-    const confirmed = window.confirm('¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer.');
+    const confirmed = window.confirm(t('adminCategories.delete.confirm'));
     if (!confirmed) return;
 
     try {
@@ -220,13 +222,13 @@ const AdminCategories: React.FC = () => {
       if (data.success) {
         fetchCategories();
         fetchStats();
-        alert('Categoría eliminada exitosamente');
+        alert(t('adminCategories.messages.categoryDeleted'));
       } else {
-        alert(data.message || 'Error eliminando categoría');
+        alert(data.message || t('adminCategories.errors.deleteError'));
       }
     } catch (error) {
       console.error('Error eliminando categoría:', error);
-      alert('Error de conexión');
+      alert(t('adminCategories.errors.connection'));
     }
   };
 
@@ -245,13 +247,13 @@ const AdminCategories: React.FC = () => {
       if (data.success) {
         fetchCategories();
         fetchStats();
-        alert('Estado de categoría actualizado exitosamente');
+        alert(t('adminCategories.messages.statusUpdated'));
       } else {
-        alert(data.message || 'Error actualizando estado');
+        alert(data.message || t('adminCategories.errors.statusUpdateError'));
       }
     } catch (error) {
       console.error('Error actualizando estado:', error);
-      alert('Error de conexión');
+      alert(t('adminCategories.errors.connection'));
     }
   };
 
@@ -336,7 +338,7 @@ const AdminCategories: React.FC = () => {
                 <div className="font-medium text-gray-900">{category.name}</div>
                 <div className="text-sm text-gray-500">{category.description}</div>
                 <div className="text-xs text-gray-400">
-                  Orden: {category.order} • Productos: {category.productCount || 0}
+                  {t('adminCategories.categoryList.order')}: {category.order} • {t('adminCategories.categoryList.products')}: {category.productCount || 0}
                 </div>
               </div>
             </div>
@@ -348,21 +350,21 @@ const AdminCategories: React.FC = () => {
                 ? 'bg-green-100 text-green-800' 
                 : 'bg-red-100 text-red-800'
             }`}>
-              {category.isActive ? 'Activa' : 'Inactiva'}
+              {category.isActive ? t('adminCategories.categoryList.active') : t('adminCategories.categoryList.inactive')}
             </span>
             
             <div className="flex space-x-1">
               <button 
                 onClick={() => openViewModal(category)}
                 className="text-blue-600 hover:text-blue-900 p-1 rounded"
-                title="Ver detalles"
+                title={t('adminCategories.categoryList.viewDetails')}
               >
                 <Eye className="w-4 h-4" />
               </button>
               <button 
                 onClick={() => openEditModal(category)}
                 className="text-green-600 hover:text-green-900 p-1 rounded"
-                title="Editar"
+                title={t('adminCategories.categoryList.edit')}
               >
                 <Edit className="w-4 h-4" />
               </button>
@@ -373,14 +375,14 @@ const AdminCategories: React.FC = () => {
                     ? 'text-orange-600 hover:text-orange-900' 
                     : 'text-green-600 hover:text-green-900'
                 }`}
-                title={category.isActive ? 'Desactivar' : 'Activar'}
+                title={category.isActive ? t('adminCategories.categoryList.deactivate') : t('adminCategories.categoryList.activate')}
               >
                 {category.isActive ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
               </button>
               <button 
                 onClick={() => handleDeleteCategory(category._id)}
                 className="text-red-600 hover:text-red-900 p-1 rounded"
-                title="Eliminar"
+                title={t('adminCategories.categoryList.delete')}
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -402,8 +404,8 @@ const AdminCategories: React.FC = () => {
       <div className="p-4">
         <div className="text-center py-12">
           <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Acceso Denegado</h2>
-          <p className="text-gray-600">No tienes permisos para acceder a esta página.</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('adminCategories.accessDenied.title')}</h2>
+          <p className="text-gray-600">{t('adminCategories.accessDenied.message')}</p>
         </div>
       </div>
     );
@@ -412,8 +414,8 @@ const AdminCategories: React.FC = () => {
   return (
     <div className="p-4">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Gestión de Categorías</h1>
-        <p className="text-gray-600 mt-2">Organiza los productos por categorías y subcategorías</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('adminCategories.title')}</h1>
+        <p className="text-gray-600 mt-2">{t('adminCategories.subtitle')}</p>
       </div>
 
       {/* Estadísticas */}
@@ -421,9 +423,9 @@ const AdminCategories: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white p-4 rounded-lg shadow">
             <div className="flex items-center">
-              <Folder className="w-8 h-8 text-blue-600" />
+              <Folder className="w-8 h-8 text-[#FFC300]" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Total</p>
+                <p className="text-sm font-medium text-gray-600">{t('adminCategories.stats.total')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.totalCategories}</p>
               </div>
             </div>
@@ -432,7 +434,7 @@ const AdminCategories: React.FC = () => {
             <div className="flex items-center">
               <CheckCircle className="w-8 h-8 text-green-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Activas</p>
+                <p className="text-sm font-medium text-gray-600">{t('adminCategories.stats.active')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.activeCategories}</p>
               </div>
             </div>
@@ -441,7 +443,7 @@ const AdminCategories: React.FC = () => {
             <div className="flex items-center">
               <XCircle className="w-8 h-8 text-red-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Inactivas</p>
+                <p className="text-sm font-medium text-gray-600">{t('adminCategories.stats.inactive')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.inactiveCategories}</p>
               </div>
             </div>
@@ -450,7 +452,7 @@ const AdminCategories: React.FC = () => {
             <div className="flex items-center">
               <ImageIcon className="w-8 h-8 text-purple-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Con Productos</p>
+                <p className="text-sm font-medium text-gray-600">{t('adminCategories.stats.withProducts')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.categoriesWithProducts}</p>
               </div>
             </div>
@@ -464,29 +466,29 @@ const AdminCategories: React.FC = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Buscar categorías..."
+            placeholder={t('adminCategories.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
           />
         </div>
         
         <select
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
         >
-          <option value="all">Todos los estados</option>
-          <option value="active">Activas</option>
-          <option value="inactive">Inactivas</option>
+          <option value="all">{t('adminCategories.statusFilter.all')}</option>
+          <option value="active">{t('adminCategories.statusFilter.active')}</option>
+          <option value="inactive">{t('adminCategories.statusFilter.inactive')}</option>
         </select>
         
         <button 
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 bg-[#FFC300] text-white px-4 py-2 rounded-lg hover:bg-[#E6B000] transition-colors"
         >
           <Plus className="w-5 h-5" />
-          Nueva Categoría
+          {t('adminCategories.newCategoryButton')}
         </button>
       </div>
 
@@ -494,14 +496,14 @@ const AdminCategories: React.FC = () => {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {loading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Cargando categorías...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FFC300] mx-auto"></div>
+            <p className="mt-2 text-gray-600">{t('adminCategories.loadingCategories')}</p>
           </div>
         ) : categories.length === 0 ? (
           <div className="p-8 text-center">
             <Folder className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No se encontraron categorías</p>
-            <p className="text-sm text-gray-500 mt-2">Crea tu primera categoría para empezar</p>
+            <p className="text-gray-600">{t('adminCategories.noCategoriesFound')}</p>
+            <p className="text-sm text-gray-500 mt-2">{t('adminCategories.createFirstCategory')}</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
@@ -510,55 +512,55 @@ const AdminCategories: React.FC = () => {
         )}
       </div>
 
-      {/* Modal para crear categoría */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+             {/* Modal para crear categoría */}
+       {showCreateModal && (
+         <div className="fixed inset-0 bg-black bg-opacity-30 overflow-y-auto h-full w-full z-50">
+           <div className="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Crear Nueva Categoría</h3>
+                             <h3 className="text-lg font-medium text-[#FFC300] mb-4">{t('adminCategories.createModal.title')}</h3>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Nombre *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminCategories.createModal.name')}</label>
                   <input
                     type="text"
-                    placeholder="Nombre de la categoría"
+                    placeholder={t('adminCategories.createModal.namePlaceholder')}
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] text-gray-900 bg-white"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Descripción *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminCategories.createModal.description')}</label>
                   <textarea
-                    placeholder="Descripción de la categoría"
+                    placeholder={t('adminCategories.createModal.descriptionPlaceholder')}
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] text-gray-900 bg-white"
                     rows={3}
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">URL de imagen (opcional)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminCategories.createModal.imageUrlOptional')}</label>
                   <input
                     type="url"
-                    placeholder="https://ejemplo.com/imagen.jpg"
+                    placeholder={t('adminCategories.createModal.imageUrlPlaceholder')}
                     value={formData.image}
                     onChange={(e) => setFormData({...formData, image: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] text-gray-900 bg-white"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Categoría padre (opcional)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminCategories.createModal.parentCategoryOptional')}</label>
                   <select
                     value={formData.parentCategory}
                     onChange={(e) => setFormData({...formData, parentCategory: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] text-gray-900 bg-white"
                   >
-                    <option value="">Sin categoría padre</option>
+                    <option value="">{t('adminCategories.createModal.noParentCategory')}</option>
                     {categories.map(category => (
                       <option key={category._id} value={category._id}>
                         {category.name}
@@ -568,13 +570,13 @@ const AdminCategories: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Orden</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminCategories.createModal.order')}</label>
                   <input
                     type="number"
                     placeholder="0"
                     value={formData.order}
                     onChange={(e) => setFormData({...formData, order: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] text-gray-900 bg-white"
                   />
                 </div>
               </div>
@@ -589,13 +591,13 @@ const AdminCategories: React.FC = () => {
                   }}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
                 >
-                  Cancelar
+                  {t('adminCategories.createModal.cancel')}
                 </button>
                 <button
                   onClick={handleCreateCategory}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 bg-[#FFC300] text-white rounded-md hover:bg-[#E6B000]"
                 >
-                  Crear
+                  {t('adminCategories.createModal.create')}
                 </button>
               </div>
             </div>
@@ -603,55 +605,55 @@ const AdminCategories: React.FC = () => {
         </div>
       )}
 
-      {/* Modal para editar categoría */}
-      {showEditModal && selectedCategory && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+             {/* Modal para editar categoría */}
+       {showEditModal && selectedCategory && (
+         <div className="fixed inset-0 bg-black bg-opacity-30 overflow-y-auto h-full w-full z-50">
+           <div className="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Editar Categoría</h3>
+                             <h3 className="text-lg font-medium text-[#FFC300] mb-4">{t('adminCategories.editModal.title')}</h3>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Nombre *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminCategories.editModal.name')}</label>
                   <input
                     type="text"
-                    placeholder="Nombre de la categoría"
+                    placeholder={t('adminCategories.editModal.namePlaceholder')}
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] text-gray-900 bg-white"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Descripción *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminCategories.editModal.description')}</label>
                   <textarea
-                    placeholder="Descripción de la categoría"
+                    placeholder={t('adminCategories.editModal.descriptionPlaceholder')}
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] text-gray-900 bg-white"
                     rows={3}
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">URL de imagen (opcional)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminCategories.editModal.imageUrlOptional')}</label>
                   <input
                     type="url"
-                    placeholder="https://ejemplo.com/imagen.jpg"
+                    placeholder={t('adminCategories.editModal.imageUrlPlaceholder')}
                     value={formData.image}
                     onChange={(e) => setFormData({...formData, image: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] text-gray-900 bg-white"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Categoría padre (opcional)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminCategories.editModal.parentCategoryOptional')}</label>
                   <select
                     value={formData.parentCategory}
                     onChange={(e) => setFormData({...formData, parentCategory: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] text-gray-900 bg-white"
                   >
-                    <option value="">Sin categoría padre</option>
+                    <option value="">{t('adminCategories.editModal.noParentCategory')}</option>
                     {categories
                       .filter(cat => cat._id !== selectedCategory._id)
                       .map(category => (
@@ -663,13 +665,13 @@ const AdminCategories: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Orden</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminCategories.editModal.order')}</label>
                   <input
                     type="number"
                     placeholder="0"
                     value={formData.order}
                     onChange={(e) => setFormData({...formData, order: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] text-gray-900 bg-white"
                   />
                 </div>
               </div>
@@ -682,13 +684,13 @@ const AdminCategories: React.FC = () => {
                   }}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
                 >
-                  Cancelar
+                  {t('adminCategories.editModal.cancel')}
                 </button>
                 <button
                   onClick={handleUpdateCategory}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 bg-[#FFC300] text-white rounded-md hover:bg-[#E6B000]"
                 >
-                  Actualizar
+                  {t('adminCategories.editModal.update')}
                 </button>
               </div>
             </div>
@@ -696,24 +698,24 @@ const AdminCategories: React.FC = () => {
         </div>
       )}
 
-      {/* Modal para ver detalles */}
-      {showViewModal && selectedCategory && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+             {/* Modal para ver detalles */}
+       {showViewModal && selectedCategory && (
+         <div className="fixed inset-0 bg-black bg-opacity-30 overflow-y-auto h-full w-full z-50">
+           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Detalles de la Categoría</h3>
+                             <h3 className="text-lg font-medium text-[#FFC300] mb-4">{t('adminCategories.viewModal.title')}</h3>
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Nombre:</label>
+                  <label className="text-sm font-medium text-gray-700">{t('adminCategories.viewModal.name')}:</label>
                   <p className="text-sm text-gray-900">{selectedCategory.name}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Descripción:</label>
+                  <label className="text-sm font-medium text-gray-700">{t('adminCategories.viewModal.description')}:</label>
                   <p className="text-sm text-gray-900">{selectedCategory.description}</p>
                 </div>
                 {selectedCategory.image && (
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Imagen:</label>
+                    <label className="text-sm font-medium text-gray-700">{t('adminCategories.viewModal.image')}:</label>
                     <img 
                       src={selectedCategory.image} 
                       alt={selectedCategory.name}
@@ -722,27 +724,27 @@ const AdminCategories: React.FC = () => {
                   </div>
                 )}
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Categoría padre:</label>
+                  <label className="text-sm font-medium text-gray-700">{t('adminCategories.viewModal.parentCategory')}:</label>
                   <p className="text-sm text-gray-900">
-                    {selectedCategory.parentCategory?.name || 'Sin categoría padre'}
+                    {selectedCategory.parentCategory?.name || t('adminCategories.viewModal.noParentCategory')}
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Orden:</label>
+                  <label className="text-sm font-medium text-gray-700">{t('adminCategories.viewModal.order')}:</label>
                   <p className="text-sm text-gray-900">{selectedCategory.order}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Estado:</label>
+                  <label className="text-sm font-medium text-gray-700">{t('adminCategories.viewModal.status')}:</label>
                   <p className="text-sm text-gray-900">
-                    {selectedCategory.isActive ? 'Activa' : 'Inactiva'}
+                    {selectedCategory.isActive ? t('adminCategories.viewModal.active') : t('adminCategories.viewModal.inactive')}
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Productos:</label>
+                  <label className="text-sm font-medium text-gray-700">{t('adminCategories.viewModal.products')}:</label>
                   <p className="text-sm text-gray-900">{selectedCategory.productCount || 0}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Creada:</label>
+                  <label className="text-sm font-medium text-gray-700">{t('adminCategories.viewModal.createdAt')}:</label>
                   <p className="text-sm text-gray-900">
                     {new Date(selectedCategory.createdAt).toLocaleDateString()}
                   </p>
@@ -753,7 +755,7 @@ const AdminCategories: React.FC = () => {
                   onClick={() => setShowViewModal(false)}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
                 >
-                  Cerrar
+                  {t('adminCategories.viewModal.close')}
                 </button>
               </div>
             </div>
