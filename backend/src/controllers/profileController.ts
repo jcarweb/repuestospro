@@ -750,4 +750,3 @@ class ProfileController {
 }
 
 export default new ProfileController();
-traducciones faltantes 
