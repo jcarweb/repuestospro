@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import ActivityHistory from '../components/ActivityHistory';
 import WorkingLocationMap from '../components/WorkingLocationMap';
+import RateLimitModal from '../components/RateLimitModal';
+import AvatarImageSimple from '../components/AvatarImageSimple';
 import { useLayoutContext } from '../hooks/useLayoutContext';
 import { profileService } from '../services/profileService';
 import type { UserProfile } from '../services/profileService';
@@ -41,16 +43,21 @@ const Profile: React.FC = () => {
   const [showActivityHistory, setShowActivityHistory] = useState(false);
   const [showLocationMap, setShowLocationMap] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [shouldReloadProfile, setShouldReloadProfile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showRateLimitModal, setShowRateLimitModal] = useState(false);
+  const [rateLimitRetryAfter, setRateLimitRetryAfter] = useState<number | undefined>(undefined);
 
   // Cargar perfil del usuario
   useEffect(() => {
+    console.log('Profile - useEffect ejecutándose, shouldReloadProfile:', shouldReloadProfile);
     const loadProfile = async () => {
       try {
         setLoading(true);
         const userProfile = await profileService.getProfile();
+        console.log('Profile - Perfil cargado, avatar:', userProfile.avatar);
         setProfile(userProfile);
         setFormData({
           name: userProfile.name,
@@ -87,16 +94,28 @@ const Profile: React.FC = () => {
           console.warn('Error loading location:', locationError);
           // No mostrar error al usuario por problemas de ubicación
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error loading profile:', error);
-        setMessage({ type: 'error', text: t('profile.errorLoading') });
+        
+        // Manejar específicamente errores de rate limiting
+        if (error.response?.status === 429) {
+          setShowRateLimitModal(true);
+          // Intentar extraer el tiempo de retry del header
+          const retryAfter = error.response.headers['retry-after'];
+          if (retryAfter) {
+            setRateLimitRetryAfter(parseInt(retryAfter));
+          }
+        } else {
+          setMessage({ type: 'error', text: t('profile.errorLoading') });
+        }
       } finally {
         setLoading(false);
+        setShouldReloadProfile(false); // Reset después de cargar
       }
     };
 
     loadProfile();
-  }, []);
+  }, [shouldReloadProfile]); // Solo recargar cuando shouldReloadProfile cambie
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -174,15 +193,26 @@ const Profile: React.FC = () => {
       
       setMessage({ type: 'success', text: result.message });
       
-      // Recargar perfil para obtener la nueva URL del avatar
-      const userProfile = await profileService.getProfile();
-      setProfile(userProfile);
+      // Recargar perfil inmediatamente sin delay
+      console.log('Profile - Avatar subido, resultado:', result);
+      setShouldReloadProfile(true);
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
-      setMessage({
-        type: 'error',
-        text: error.response?.data?.message || t('profile.errorUploadingAvatar')
-      });
+      
+      // Manejar específicamente errores de rate limiting
+      if (error.response?.status === 429) {
+        setShowRateLimitModal(true);
+        // Intentar extraer el tiempo de retry del header
+        const retryAfter = error.response.headers['retry-after'];
+        if (retryAfter) {
+          setRateLimitRetryAfter(parseInt(retryAfter));
+        }
+      } else {
+        setMessage({
+          type: 'error',
+          text: error.response?.data?.message || t('profile.errorUploadingAvatar')
+        });
+      }
     } finally {
       setUploadingAvatar(false);
     }
@@ -197,29 +227,31 @@ const Profile: React.FC = () => {
       const result = await profileService.deleteAvatar();
       setMessage({ type: 'success', text: result.message });
       
-      // Recargar perfil
-      const userProfile = await profileService.getProfile();
-      setProfile(userProfile);
+      // Recargar perfil inmediatamente sin delay
+      setShouldReloadProfile(true);
     } catch (error: any) {
       console.error('Error deleting avatar:', error);
-      setMessage({
-        type: 'error',
-        text: error.response?.data?.message || t('profile.errorDeletingAvatar')
-      });
+      
+      // Manejar específicamente errores de rate limiting
+      if (error.response?.status === 429) {
+        setShowRateLimitModal(true);
+        // Intentar extraer el tiempo de retry del header
+        const retryAfter = error.response.headers['retry-after'];
+        if (retryAfter) {
+          setRateLimitRetryAfter(parseInt(retryAfter));
+        }
+      } else {
+        setMessage({
+          type: 'error',
+          text: error.response?.data?.message || t('profile.errorDeletingAvatar')
+        });
+      }
     } finally {
       setUploadingAvatar(false);
     }
   };
 
-  // Obtener URL del avatar
-  const getAvatarUrl = () => {
-    if (profile?.avatar) {
-      return profile.avatar.startsWith('http') 
-        ? profile.avatar 
-        : `${window.location.origin}${profile.avatar}`;
-    }
-    return '/uploads/perfil/default-avatar.svg';
-  };
+
 
   // Manejar selección de ubicación
   const handleLocationSelect = async (location: { latitude: number; longitude: number; address: string }) => {
@@ -312,17 +344,12 @@ const Profile: React.FC = () => {
             <div className="flex items-center space-x-6">
               {/* Avatar Display */}
               <div className="relative">
-                <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-gray-300">
-                  <img
-                    src={getAvatarUrl()}
-                    alt={t('profile.avatar')}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/uploads/perfil/default-avatar.svg';
-                    }}
-                  />
-                </div>
+                <AvatarImageSimple
+                  key={profile?.avatar || 'default'} // Forzar re-render cuando cambie el avatar
+                  avatar={profile?.avatar}
+                  alt={t('profile.avatar')}
+                  size="md"
+                />
                 
                 {/* Loading overlay */}
                 {uploadingAvatar && (
@@ -543,6 +570,15 @@ const Profile: React.FC = () => {
           )}
         </div>
 
+        {/* Rate Limit Modal */}
+        <RateLimitModal
+          isOpen={showRateLimitModal}
+          onClose={() => {
+            setShowRateLimitModal(false);
+            setRateLimitRetryAfter(undefined);
+          }}
+          retryAfter={rateLimitRetryAfter}
+        />
 
       </div>
     </div>

@@ -18,7 +18,8 @@ import {
   Database,
   Store,
   FolderOpen,
-  Megaphone
+  Megaphone,
+  DollarSign
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -119,10 +120,18 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
       name: t('sidebar.admin.globalSettings'),
       path: '/admin/settings',
       icon: Settings
+    },
+    {
+      name: t('sidebar.admin.monetization'),
+      path: '/admin/monetization',
+      icon: DollarSign
     }
   ];
 
-
+  console.log('🔍 AdminSidebar: Renderizando sidebar');
+  console.log('🔍 AdminSidebar: Menu items:', menuItems.length);
+  console.log('🔍 AdminSidebar: Current location:', location.pathname);
+  console.log('🔍 AdminSidebar: Monetization item:', menuItems.find(item => item.path === '/admin/monetization'));
 
   return (
     <>
@@ -138,11 +147,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
       <div 
         key={`admin-sidebar-${currentLanguage}-${forceUpdate}`}
         className={`
-          fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-[#333333] shadow-lg transform transition-transform duration-300 ease-in-out
+          fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-[#333333] shadow-lg transform transition-transform duration-300 ease-in-out flex flex-col
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
                  {/* Header del sidebar */}
-         <div className="p-4 border-b border-gray-200 dark:border-[#555555]">
+         <div className="p-4 border-b border-gray-200 dark:border-[#555555] flex-shrink-0">
            {/* Botón cerrar en móvil */}
           <button
             onClick={onClose}
@@ -157,8 +166,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Menú */}
-        <nav className="p-4 space-y-2">
+        {/* Menú con scroll */}
+        <nav className="flex-1 overflow-y-auto p-4 space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -182,7 +191,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
         </nav>
 
         {/* Footer del sidebar */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-[#555555] bg-white dark:bg-[#333333]">
+        <div className="p-4 border-t border-gray-200 dark:border-[#555555] bg-white dark:bg-[#333333] flex-shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gray-200 dark:bg-[#555555] rounded-full flex items-center justify-center">
               <Users className="w-4 h-4 text-gray-600 dark:text-gray-200" />

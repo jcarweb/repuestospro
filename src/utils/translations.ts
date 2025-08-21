@@ -1312,6 +1312,11 @@ export const translations: Translations = {
     en: 'Global Settings',
     pt: 'Configurações Globais'
   },
+  'sidebar.admin.monetization': {
+    es: 'Monetización',
+    en: 'Monetization',
+    pt: 'Monetização'
+  },
   'sidebar.storeManager.dashboard': {
     es: 'Dashboard',
     en: 'Dashboard',
@@ -7291,11 +7296,7 @@ export const translations: Translations = {
     en: 'View',
     pt: 'Ver'
   },
-  'security.fingerprintConfigured': {
-    es: 'Huella configurada',
-    en: 'Fingerprint configured',
-    pt: 'Impressão digital configurada'
-  },
+
   'security.fingerprintNotConfigured': {
     es: 'Huella no configurada',
     en: 'Fingerprint not configured',
@@ -7962,6 +7963,368 @@ export const translations: Translations = {
     es: 'No se encontraron canjes',
     en: 'No redemptions found',
     pt: 'Nenhum resgate encontrado'
+  },
+
+  // ===== MÓDULO DE MONETIZACIÓN =====
+  'monetization.title': {
+    es: 'Monetización',
+    en: 'Monetization',
+    pt: 'Monetização'
+  },
+  'monetization.exchangeRate.title': {
+    es: 'Tasa de Cambio',
+    en: 'Exchange Rate',
+    pt: 'Taxa de Câmbio'
+  },
+  'monetization.exchangeRate.current': {
+    es: 'Tasa Actual',
+    en: 'Current Rate',
+    pt: 'Taxa Atual'
+  },
+  'monetization.exchangeRate.updateFromBcv': {
+    es: 'Actualizar desde BCV',
+    en: 'Update from BCV',
+    pt: 'Atualizar do BCV'
+  },
+  'monetization.exchangeRate.updateManually': {
+    es: 'Actualizar Manualmente',
+    en: 'Update Manually',
+    pt: 'Atualizar Manualmente'
+  },
+  'monetization.exchangeRate.history': {
+    es: 'Historial de Tasas',
+    en: 'Rate History',
+    pt: 'Histórico de Taxas'
+  },
+  'monetization.exchangeRate.sourceUrl': {
+    es: 'URL de Fuente',
+    en: 'Source URL',
+    pt: 'URL da Fonte'
+  },
+  'monetization.exchangeRate.manualRate': {
+    es: 'Tasa Manual',
+    en: 'Manual Rate',
+    pt: 'Taxa Manual'
+  },
+  'monetization.exchangeRate.reason': {
+    es: 'Motivo de Actualización',
+    en: 'Update Reason',
+    pt: 'Motivo da Atualização'
+  },
+  'monetization.exchangeRate.lastUpdated': {
+    es: 'Última Actualización',
+    en: 'Last Updated',
+    pt: 'Última Atualização'
+  },
+  'monetization.exchangeRate.source': {
+    es: 'Fuente',
+    en: 'Source',
+    pt: 'Fonte'
+  },
+  'monetization.exchangeRate.manual': {
+    es: 'Manual',
+    en: 'Manual',
+    pt: 'Manual'
+  },
+  'monetization.exchangeRate.bcv': {
+    es: 'BCV',
+    en: 'BCV',
+    pt: 'BCV'
+  },
+
+  'monetization.commissions.title': {
+    es: 'Comisiones',
+    en: 'Commissions',
+    pt: 'Comissões'
+  },
+  'monetization.commissions.create': {
+    es: 'Crear Comisión',
+    en: 'Create Commission',
+    pt: 'Criar Comissão'
+  },
+  'monetization.commissions.edit': {
+    es: 'Editar Comisión',
+    en: 'Edit Commission',
+    pt: 'Editar Comissão'
+  },
+  'monetization.commissions.name': {
+    es: 'Nombre',
+    en: 'Name',
+    pt: 'Nome'
+  },
+  'monetization.commissions.description': {
+    es: 'Descripción',
+    en: 'Description',
+    pt: 'Descrição'
+  },
+  'monetization.commissions.type': {
+    es: 'Tipo',
+    en: 'Type',
+    pt: 'Tipo'
+  },
+  'monetization.commissions.baseRate': {
+    es: 'Tasa Base',
+    en: 'Base Rate',
+    pt: 'Taxa Base'
+  },
+  'monetization.commissions.storeType': {
+    es: 'Tipo de Tienda',
+    en: 'Store Type',
+    pt: 'Tipo de Loja'
+  },
+  'monetization.commissions.percentage': {
+    es: 'Porcentaje',
+    en: 'Percentage',
+    pt: 'Percentual'
+  },
+  'monetization.commissions.fixed': {
+    es: 'Fijo',
+    en: 'Fixed',
+    pt: 'Fixo'
+  },
+  'monetization.commissions.tiered': {
+    es: 'Por Niveles',
+    en: 'Tiered',
+    pt: 'Por Níveis'
+  },
+  'monetization.commissions.storeTypes.new': {
+    es: 'Nueva',
+    en: 'New',
+    pt: 'Nova'
+  },
+  'monetization.commissions.storeTypes.growing': {
+    es: 'En Crecimiento',
+    en: 'Growing',
+    pt: 'Em Crescimento'
+  },
+  'monetization.commissions.storeTypes.established': {
+    es: 'Establecida',
+    en: 'Established',
+    pt: 'Estabelecida'
+  },
+  'monetization.commissions.storeTypes.premium': {
+    es: 'Premium',
+    en: 'Premium',
+    pt: 'Premium'
+  },
+
+  'monetization.subscriptions.title': {
+    es: 'Suscripciones',
+    en: 'Subscriptions',
+    pt: 'Assinaturas'
+  },
+  'monetization.subscriptions.create': {
+    es: 'Crear Plan',
+    en: 'Create Plan',
+    pt: 'Criar Plano'
+  },
+  'monetization.subscriptions.name': {
+    es: 'Nombre del Plan',
+    en: 'Plan Name',
+    pt: 'Nome do Plano'
+  },
+  'monetization.subscriptions.price': {
+    es: 'Precio',
+    en: 'Price',
+    pt: 'Preço'
+  },
+  'monetization.subscriptions.currency': {
+    es: 'Moneda',
+    en: 'Currency',
+    pt: 'Moeda'
+  },
+  'monetization.subscriptions.billingCycle': {
+    es: 'Ciclo de Facturación',
+    en: 'Billing Cycle',
+    pt: 'Ciclo de Cobrança'
+  },
+  'monetization.subscriptions.monthly': {
+    es: 'Mensual',
+    en: 'Monthly',
+    pt: 'Mensal'
+  },
+  'monetization.subscriptions.yearly': {
+    es: 'Anual',
+    en: 'Yearly',
+    pt: 'Anual'
+  },
+  'monetization.subscriptions.features': {
+    es: 'Características',
+    en: 'Features',
+    pt: 'Recursos'
+  },
+  'monetization.subscriptions.types.basic': {
+    es: 'Básico',
+    en: 'Basic',
+    pt: 'Básico'
+  },
+  'monetization.subscriptions.types.pro': {
+    es: 'Pro',
+    en: 'Pro',
+    pt: 'Pro'
+  },
+  'monetization.subscriptions.types.elite': {
+    es: 'Élite',
+    en: 'Élite',
+    pt: 'Élite'
+  },
+
+  'monetization.taxes.title': {
+    es: 'Impuestos',
+    en: 'Taxes',
+    pt: 'Impostos'
+  },
+  'monetization.taxes.create': {
+    es: 'Crear Impuesto',
+    en: 'Create Tax',
+    pt: 'Criar Imposto'
+  },
+  'monetization.taxes.name': {
+    es: 'Nombre del Impuesto',
+    en: 'Tax Name',
+    pt: 'Nome do Imposto'
+  },
+  'monetization.taxes.rate': {
+    es: 'Tasa',
+    en: 'Rate',
+    pt: 'Taxa'
+  },
+  'monetization.taxes.type': {
+    es: 'Tipo de Impuesto',
+    en: 'Tax Type',
+    pt: 'Tipo de Imposto'
+  },
+  'monetization.taxes.iva': {
+    es: 'IVA',
+    en: 'VAT',
+    pt: 'IVA'
+  },
+  'monetization.taxes.islr': {
+    es: 'ISLR',
+    en: 'ISLR',
+    pt: 'ISLR'
+  },
+  'monetization.taxes.custom': {
+    es: 'Personalizado',
+    en: 'Custom',
+    pt: 'Personalizado'
+  },
+  'monetization.taxes.country': {
+    es: 'País',
+    en: 'Country',
+    pt: 'País'
+  },
+  'monetization.taxes.state': {
+    es: 'Estado',
+    en: 'State',
+    pt: 'Estado'
+  },
+
+  'monetization.calculator.title': {
+    es: 'Calculadora',
+    en: 'Calculator',
+    pt: 'Calculadora'
+  },
+  'monetization.calculator.commission': {
+    es: 'Calcular Comisión',
+    en: 'Calculate Commission',
+    pt: 'Calcular Comissão'
+  },
+  'monetization.calculator.taxes': {
+    es: 'Calcular Impuestos',
+    en: 'Calculate Taxes',
+    pt: 'Calcular Impostos'
+  },
+  'monetization.calculator.amount': {
+    es: 'Monto',
+    en: 'Amount',
+    pt: 'Valor'
+  },
+  'monetization.calculator.monthlySales': {
+    es: 'Ventas Mensuales',
+    en: 'Monthly Sales',
+    pt: 'Vendas Mensais'
+  },
+  'monetization.calculator.calculate': {
+    es: 'Calcular',
+    en: 'Calculate',
+    pt: 'Calcular'
+  },
+  'monetization.calculator.results': {
+    es: 'Resultados',
+    en: 'Results',
+    pt: 'Resultados'
+  },
+  'monetization.calculator.commissionAmount': {
+    es: 'Comisión',
+    en: 'Commission',
+    pt: 'Comissão'
+  },
+  'monetization.calculator.netAmount': {
+    es: 'Monto Neto',
+    en: 'Net Amount',
+    pt: 'Valor Líquido'
+  },
+  'monetization.calculator.totalTax': {
+    es: 'Total de Impuestos',
+    en: 'Total Tax',
+    pt: 'Total de Impostos'
+  },
+  'monetization.calculator.total': {
+    es: 'Total',
+    en: 'Total',
+    pt: 'Total'
+  },
+
+  'monetization.common.save': {
+    es: 'Guardar',
+    en: 'Save',
+    pt: 'Salvar'
+  },
+  'monetization.common.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'monetization.common.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'monetization.common.delete': {
+    es: 'Eliminar',
+    en: 'Delete',
+    pt: 'Excluir'
+  },
+  'monetization.common.create': {
+    es: 'Crear',
+    en: 'Create',
+    pt: 'Criar'
+  },
+  'monetization.common.update': {
+    es: 'Actualizar',
+    en: 'Update',
+    pt: 'Atualizar'
+  },
+  'monetization.common.success': {
+    es: 'Operación exitosa',
+    en: 'Operation successful',
+    pt: 'Operação bem-sucedida'
+  },
+  'monetization.common.error': {
+    es: 'Error en la operación',
+    en: 'Operation error',
+    pt: 'Erro na operação'
+  },
+  'monetization.common.loading': {
+    es: 'Cargando...',
+    en: 'Loading...',
+    pt: 'Carregando...'
+  },
+  'monetization.common.noData': {
+    es: 'No hay datos disponibles',
+    en: 'No data available',
+    pt: 'Nenhum dado disponível'
   }
 };
 

@@ -20,7 +20,7 @@ export const config = {
 
   // Configuración de Rate Limiting
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutos
-  RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
+  RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '300'), // Aumentado de 100 a 300
 
   // Configuración de argon2
   ARGON2_MEMORY_COST: parseInt(process.env.ARGON2_MEMORY_COST || '65536'),

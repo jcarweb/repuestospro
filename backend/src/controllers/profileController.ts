@@ -691,9 +691,15 @@ class ProfileController {
 
       // Eliminar imagen anterior si existe y no es el avatar por defecto
       if (user.avatar && user.avatar !== '/uploads/perfil/default-avatar.svg') {
-        const oldAvatarPath = path.join(process.cwd(), user.avatar);
-        if (fs.existsSync(oldAvatarPath)) {
-          fs.unlinkSync(oldAvatarPath);
+        try {
+          const oldAvatarPath = path.join(process.cwd(), user.avatar);
+          if (fs.existsSync(oldAvatarPath)) {
+            fs.unlinkSync(oldAvatarPath);
+            console.log('Archivo eliminado:', oldAvatarPath);
+          }
+        } catch (fileError) {
+          console.warn('Error eliminando archivo físico:', fileError);
+          // Continuar aunque falle la eliminación del archivo
         }
       }
 
@@ -702,13 +708,18 @@ class ProfileController {
       await user.save();
 
       // Registrar actividad
-      await Activity.createActivity(
-        userId,
-        'avatar_deleted',
-        'Usuario eliminó su foto de perfil',
-        {},
-        true
-      );
+      try {
+        await Activity.createActivity(
+          userId,
+          'avatar_deleted',
+          'Usuario eliminó su foto de perfil',
+          {},
+          true
+        );
+      } catch (activityError) {
+        console.warn('Error registrando actividad:', activityError);
+        // Continuar aunque falle el registro de actividad
+      }
 
       res.json({
         success: true,

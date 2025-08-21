@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 import DatabaseService from './config/database';
 import config from './config/env';
 import passport from './config/passport';
@@ -27,6 +28,7 @@ import storeRoutes from './routes/storeRoutes';
 import activityRoutes from './routes/activityRoutes';
 import profileRoutes from './routes/profileRoutes';
 import notificationRoutes from './routes/notificationRoutes';
+import monetizationRoutes from './routes/monetizationRoutes';
 
 const app = express();
 
@@ -37,6 +39,16 @@ const limiter = rateLimit({
   message: {
     success: false,
     message: 'Demasiadas solicitudes desde esta IP, intenta de nuevo más tarde.'
+  }
+});
+
+// Rate limiter específico para rutas de perfil (más permisivo)
+const profileLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 500, // 500 requests por 15 minutos para perfil
+  message: {
+    success: false,
+    message: 'Demasiadas solicitudes de perfil desde esta IP, intenta de nuevo más tarde.'
   }
 });
 
@@ -67,7 +79,23 @@ app.use(cors({
 // Middleware de logging
 app.use(morgan('combined'));
 
-// Aplicar rate limiting
+// Configurar archivos estáticos para uploads (ANTES del rate limiter)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  setHeaders: (res, filePath) => {
+    console.log('Sirviendo archivo estático:', filePath);
+    if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.gif')) {
+      res.setHeader('Content-Type', 'image/gif');
+    } else if (filePath.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    }
+  }
+}));
+
+// Aplicar rate limiting (DESPUÉS de archivos estáticos)
 app.use(limiter);
 
 // Middleware para parsear JSON
@@ -115,8 +143,7 @@ app.get('/api/db-status', async (req, res) => {
   }
 });
 
-// Configurar archivos estáticos para uploads
-app.use('/uploads', express.static('../uploads'));
+
 
 // Rutas de la API
 app.use('/api/products', productRoutes);
@@ -135,8 +162,9 @@ app.use('/api/search', searchRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api', storeRoutes);
 app.use('/api/activities', activityRoutes);
-app.use('/api/profile', profileRoutes);
+app.use('/api/profile', profileLimiter, profileRoutes); // Rate limiter específico para perfil
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/monetization', monetizationRoutes);
 
 // Middleware para manejar rutas no encontradas
 app.use('*', (req, res) => {

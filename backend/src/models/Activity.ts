@@ -4,7 +4,7 @@ export interface IActivity extends Document {
   userId: mongoose.Types.ObjectId;
     type: 'login' | 'logout' | 'register' | 'password_reset' | 'password_changed' | 'email_verification' | 
                 'cart_add' | 'cart_remove' | 'cart_clear' | 'purchase' | 'profile_update' | 'preferences_update' |
-                'push_notifications_update' | 'avatar_upload' |
+                'push_notifications_update' | 'avatar_upload' | 'avatar_deleted' |
                 'pin_setup' | 'fingerprint_setup' | 'google_login' | 'account_lock' | 'account_unlock' |
                 'two_factor_enabled' | 'two_factor_disabled' | 'two_factor_verification' | 'backup_codes_generated' |
                 'location_update' | 'location_enabled' | 'location_disabled' |
@@ -39,7 +39,7 @@ const activitySchema = new Schema<IActivity>({
     enum: [
               'login', 'logout', 'register', 'password_reset', 'password_changed', 'email_verification',
         'cart_add', 'cart_remove', 'cart_clear', 'purchase', 'profile_update', 'preferences_update',
-        'push_notifications_update', 'avatar_upload',
+        'push_notifications_update', 'avatar_upload', 'avatar_deleted',
         'pin_setup', 'fingerprint_setup', 'google_login', 'account_lock', 'account_unlock',
         'two_factor_enabled', 'two_factor_disabled', 'two_factor_verification', 'backup_codes_generated',
         'location_update', 'location_enabled', 'location_disabled',

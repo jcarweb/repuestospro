@@ -52,6 +52,8 @@ import AdminAnalytics from './pages/AdminAnalytics';
 import AdminRegistrationCodes from './pages/AdminRegistrationCodes';
 import AdminSearchConfig from './pages/AdminSearchConfig';
 import AdminGenerateProducts from './pages/AdminGenerateProducts';
+import AdminMonetization from './pages/AdminMonetization';
+import AdminGlobalSettings from './pages/AdminGlobalSettings';
 
 // Páginas de gestor de tienda
 import StoreManagerDashboard from './pages/StoreManagerDashboard';
@@ -208,6 +210,20 @@ function AppContent() {
               <AdminRoute>
                 <AdminLayout>
                   <AdminGenerateProducts />
+                </AdminLayout>
+              </AdminRoute>
+            } />
+            <Route path="/monetization" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <AdminMonetization />
+                </AdminLayout>
+              </AdminRoute>
+            } />
+            <Route path="/settings" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <AdminGlobalSettings />
                 </AdminLayout>
               </AdminRoute>
             } />

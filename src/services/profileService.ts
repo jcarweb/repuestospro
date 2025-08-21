@@ -94,27 +94,32 @@ class ProfileService {
     data: null,
     timestamp: 0
   };
+  
+  // Cache para evitar múltiples llamadas simultáneas
+  private pendingRequest: Promise<UserProfile> | null = null;
 
   // Obtener perfil del usuario
   async getProfile(): Promise<UserProfile> {
     try {
-      // Verificar cache (5 segundos)
+      // Verificar cache (30 segundos en lugar de 5)
       const now = Date.now();
-      if (this.profileCache.data && (now - this.profileCache.timestamp) < 5000) {
+      if (this.profileCache.data && (now - this.profileCache.timestamp) < 30000) {
         return this.profileCache.data;
       }
 
-      const response = await api.get('/profile');
-      const profileData = response.data.data;
-      
-      // Actualizar cache
-      this.profileCache = {
-        data: profileData,
-        timestamp: now
-      };
+      // Si hay una petición pendiente, esperar a que termine
+      if (this.pendingRequest) {
+        return await this.pendingRequest;
+      }
+
+      // Crear nueva petición
+      this.pendingRequest = this.fetchProfileFromAPI();
+      const profileData = await this.pendingRequest;
+      this.pendingRequest = null;
       
       return profileData;
     } catch (error: any) {
+      this.pendingRequest = null;
       console.error('Error fetching profile:', error);
       
       // Si el error es de autenticación, redirigir al login
@@ -125,8 +130,34 @@ class ProfileService {
         throw new Error('Usuario no autenticado');
       }
       
+      // Si es un error 429, mostrar mensaje específico
+      if (error.response?.status === 429) {
+        throw new Error('Demasiadas solicitudes. Por favor, espera un momento antes de intentar de nuevo.');
+      }
+      
       throw error;
     }
+  }
+
+  // Método privado para hacer la llamada real al API
+  private async fetchProfileFromAPI(): Promise<UserProfile> {
+    const response = await api.get('/profile');
+    const profileData = response.data.data;
+    
+    // Actualizar cache
+    this.profileCache = {
+      data: profileData,
+      timestamp: Date.now()
+    };
+    
+    return profileData;
+  }
+
+  // Limpiar cache (útil después de actualizaciones)
+  clearCache() {
+    console.log('ProfileService - Limpiando cache, cache anterior:', this.profileCache);
+    this.profileCache = { data: null, timestamp: 0 };
+    console.log('ProfileService - Cache limpiado');
   }
 
   // Actualizar información del perfil
@@ -265,6 +296,13 @@ class ProfileService {
           'Content-Type': 'multipart/form-data',
         },
       });
+      
+      console.log('ProfileService - Avatar subido, respuesta:', response.data);
+      
+      // Limpiar caché después de subir avatar
+      this.clearCache();
+      console.log('ProfileService - Cache limpiado');
+      
       return response.data;
     } catch (error) {
       console.error('Error uploading avatar:', error);
@@ -276,6 +314,10 @@ class ProfileService {
   async deleteAvatar(): Promise<{ success: boolean; message: string }> {
     try {
       const response = await api.delete('/profile/avatar');
+      
+      // Limpiar caché después de eliminar avatar
+      this.clearCache();
+      
       return response.data;
     } catch (error) {
       console.error('Error deleting avatar:', error);
