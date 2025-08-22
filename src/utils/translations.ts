@@ -1237,6 +1237,11 @@ export const translations: Translations = {
     en: 'Administration Panel',
     pt: 'Painel de Administração'
   },
+  'sidebar.storeManager.title': {
+    es: 'Gestor de Tienda',
+    en: 'Store Manager',
+    pt: 'Gerente de Loja'
+  },
   'sidebar.admin.dashboard': {
     es: 'Dashboard',
     en: 'Dashboard',

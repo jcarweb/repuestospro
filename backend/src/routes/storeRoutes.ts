@@ -7,6 +7,7 @@ const router = Router();
 // Rutas públicas
 router.get('/stores', storeController.getAllStores);
 router.get('/stores/:id', storeController.getStoreById);
+router.get('/stores/search/by-division', storeController.searchByAdministrativeDivision);
 
 // Rutas protegidas
 router.use(authMiddleware);
@@ -22,6 +23,10 @@ router.delete('/stores/:id/managers', storeController.removeManager);
 
 // Rutas para desactivar tienda (solo owner)
 router.put('/stores/:id/deactivate', storeController.deactivateStore);
+
+// Rutas para toggle status y eliminar (solo owner)
+router.patch('/stores/:id/toggle-status', storeController.toggleStoreStatus);
+router.delete('/stores/:id', storeController.deleteStore);
 
 // Rutas para admin
 router.get('/admin/stores/stats', adminMiddleware, storeController.getStoreStats);

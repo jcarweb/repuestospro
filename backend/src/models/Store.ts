@@ -9,10 +9,17 @@ export interface IStore extends Document {
   zipCode: string;
   country: string;
   phone: string;
+  phoneLocal?: string;
   email: string;
   website?: string;
   logo?: string;
   banner?: string;
+  socialMedia?: {
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+    tiktok?: string;
+  };
   isActive: boolean;
   owner: mongoose.Types.ObjectId; // Usuario propietario de la tienda
   managers: mongoose.Types.ObjectId[]; // Gestores de la tienda
@@ -20,6 +27,10 @@ export interface IStore extends Document {
     latitude: number;
     longitude: number;
   };
+  // Referencias a las divisiones administrativas
+  stateRef: mongoose.Types.ObjectId; // Referencia al Estado
+  municipalityRef: mongoose.Types.ObjectId; // Referencia al Municipio
+  parishRef: mongoose.Types.ObjectId; // Referencia a la Parroquia
   businessHours: {
     monday: { open: string; close: string; isOpen: boolean };
     tuesday: { open: string; close: string; isOpen: boolean };
@@ -81,6 +92,10 @@ const StoreSchema = new Schema<IStore>({
     required: true,
     trim: true
   },
+  phoneLocal: {
+    type: String,
+    trim: true
+  },
   email: {
     type: String,
     required: true,
@@ -98,6 +113,24 @@ const StoreSchema = new Schema<IStore>({
   banner: {
     type: String,
     trim: true
+  },
+  socialMedia: {
+    facebook: {
+      type: String,
+      trim: true
+    },
+    instagram: {
+      type: String,
+      trim: true
+    },
+    twitter: {
+      type: String,
+      trim: true
+    },
+    tiktok: {
+      type: String,
+      trim: true
+    }
   },
   isActive: {
     type: Boolean,
@@ -121,6 +154,22 @@ const StoreSchema = new Schema<IStore>({
       type: Number,
       required: true
     }
+  },
+  // Referencias a las divisiones administrativas
+  stateRef: {
+    type: Schema.Types.ObjectId,
+    ref: 'State',
+    required: true
+  },
+  municipalityRef: {
+    type: Schema.Types.ObjectId,
+    ref: 'Municipality',
+    required: true
+  },
+  parishRef: {
+    type: Schema.Types.ObjectId,
+    ref: 'Parish',
+    required: true
   },
   businessHours: {
     monday: {
@@ -197,5 +246,12 @@ StoreSchema.index({ owner: 1 });
 StoreSchema.index({ managers: 1 });
 StoreSchema.index({ isActive: 1 });
 StoreSchema.index({ coordinates: '2dsphere' }); // Para consultas geográficas
+
+// Índices para búsquedas por división administrativa
+StoreSchema.index({ stateRef: 1 });
+StoreSchema.index({ municipalityRef: 1 });
+StoreSchema.index({ parishRef: 1 });
+StoreSchema.index({ stateRef: 1, municipalityRef: 1 });
+StoreSchema.index({ stateRef: 1, municipalityRef: 1, parishRef: 1 });
 
 export default mongoose.model<IStore>('Store', StoreSchema);

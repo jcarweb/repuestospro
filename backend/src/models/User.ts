@@ -206,7 +206,7 @@ const userSchema = new Schema<IUser>({
     },
     coordinates: {
       type: [Number],
-      default: undefined
+      default: [0, 0] // Coordenadas por defecto en lugar de undefined
     }
   },
   locationEnabled: {
@@ -464,46 +464,55 @@ userSchema.methods.generateBackupCodes = function(): string[] {
 
 // Middleware pre-save para generar referralCode si no existe
 userSchema.pre('save', async function(next) {
-
-  
-  if (!this.referralCode) {
-    let referralCode = '';
-    let isUnique = false;
-    
-    while (!isUnique) {
-      referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-      const existingUser = await mongoose.model('User').findOne({ referralCode });
-      if (!existingUser) {
-        isUnique = true;
+  try {
+    if (!this.referralCode) {
+      let referralCode = '';
+      let isUnique = false;
+      let attempts = 0;
+      const maxAttempts = 10; // Limitar intentos para evitar bucles infinitos
+      
+      while (!isUnique && attempts < maxAttempts) {
+        referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const existingUser = await mongoose.model('User').findOne({ referralCode });
+        if (!existingUser) {
+          isUnique = true;
+        }
+        attempts++;
+      }
+      
+      if (isUnique) {
+        this.referralCode = referralCode;
+      } else {
+        // Si no se puede generar un código único después de maxAttempts, usar timestamp
+        this.referralCode = Date.now().toString(36).toUpperCase();
       }
     }
-    
-    this.referralCode = referralCode;
-  }
 
-  // Hash password si ha sido modificado y no está ya hasheado
-  if (this.isModified('password') && this.password && !this.password.startsWith('$argon2')) {
-    try {
-      this.password = await argon2.hash(this.password);
-    } catch (error) {
-      console.error('Error hashing password:', error);
-      // Si hay error en el hash, mantener la contraseña original
+    // Hash password si ha sido modificado y no está ya hasheado
+    if (this.isModified('password') && this.password && !this.password.startsWith('$argon2')) {
+      try {
+        this.password = await argon2.hash(this.password);
+      } catch (error) {
+        console.error('Error hashing password:', error);
+        // Si hay error en el hash, mantener la contraseña original
+      }
     }
-  }
 
-  // Hash PIN si ha sido modificado y no está ya hasheado
-  if (this.isModified('pin') && this.pin && !this.pin.startsWith('$argon2')) {
-    try {
-      this.pin = await argon2.hash(this.pin);
-    } catch (error) {
-      console.error('Error hashing PIN:', error);
-      // Si hay error en el hash, mantener el PIN original
+    // Hash PIN si ha sido modificado y no está ya hasheado
+    if (this.isModified('pin') && this.pin && !this.pin.startsWith('$argon2')) {
+      try {
+        this.pin = await argon2.hash(this.pin);
+      } catch (error) {
+        console.error('Error hashing PIN:', error);
+        // Si hay error en el hash, mantener el PIN original
+      }
     }
+
+    next();
+  } catch (error) {
+    console.error('Error en middleware pre-save:', error);
+    next(error);
   }
-
-
-
-  next();
 });
 
 

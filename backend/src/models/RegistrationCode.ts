@@ -84,14 +84,14 @@ registrationCodeSchema.index({ expiresAt: 1 });
 registrationCodeSchema.index({ createdBy: 1 });
 registrationCodeSchema.index({ createdAt: -1 });
 
-// Middleware para verificar expiración automáticamente
-registrationCodeSchema.pre('find', function() {
-  this.where({ expiresAt: { $gt: new Date() } });
-});
+// Remover el middleware problemático que interfiere con otras consultas
+// registrationCodeSchema.pre('find', function() {
+//   this.where({ expiresAt: { $gt: new Date() } });
+// });
 
-registrationCodeSchema.pre('findOne', function() {
-  this.where({ expiresAt: { $gt: new Date() } });
-});
+// registrationCodeSchema.pre('findOne', function() {
+//   this.where({ expiresAt: { $gt: new Date() } });
+// });
 
 const RegistrationCode = mongoose.model<IRegistrationCode>('RegistrationCode', registrationCodeSchema);
 

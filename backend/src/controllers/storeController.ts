@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import Store from '../models/Store';
 import User from '../models/User';
+import State from '../models/State';
+import Municipality from '../models/Municipality';
+import Parish from '../models/Parish';
 
 class StoreController {
   // Obtener todas las tiendas (para admin)
@@ -35,6 +38,9 @@ class StoreController {
       const stores = await Store.find(filter)
         .populate('owner', 'name email')
         .populate('managers', 'name email')
+        .populate('stateRef', 'name code')
+        .populate('municipalityRef', 'name')
+        .populate('parishRef', 'name')
         .sort({ createdAt: -1 })
         .limit(Number(limit))
         .skip(skip)
@@ -71,6 +77,9 @@ class StoreController {
       const store = await Store.findById(id)
         .populate('owner', 'name email')
         .populate('managers', 'name email')
+        .populate('stateRef', 'name code')
+        .populate('municipalityRef', 'name')
+        .populate('parishRef', 'name')
         .select('-__v');
 
       if (!store) {
@@ -107,6 +116,9 @@ class StoreController {
       })
         .populate('owner', 'name email')
         .populate('managers', 'name email')
+        .populate('stateRef', 'name code')
+        .populate('municipalityRef', 'name')
+        .populate('parishRef', 'name')
         .sort({ createdAt: -1 })
         .select('-__v');
 
@@ -143,6 +155,9 @@ class StoreController {
         logo,
         banner,
         coordinates,
+        stateRef,
+        municipalityRef,
+        parishRef,
         businessHours,
         settings
       } = req.body;
@@ -154,6 +169,37 @@ class StoreController {
           success: false,
           message: 'Los campos nombre, dirección, ciudad, estado, código postal, teléfono y email son obligatorios'
         });
+      }
+
+      // Validar que las referencias de divisiones administrativas existan
+      if (stateRef) {
+        const stateExists = await State.findById(stateRef);
+        if (!stateExists) {
+          return res.status(400).json({
+            success: false,
+            message: 'El estado seleccionado no existe'
+          });
+        }
+      }
+
+      if (municipalityRef) {
+        const municipalityExists = await Municipality.findById(municipalityRef);
+        if (!municipalityExists) {
+          return res.status(400).json({
+            success: false,
+            message: 'El municipio seleccionado no existe'
+          });
+        }
+      }
+
+      if (parishRef) {
+        const parishExists = await Parish.findById(parishRef);
+        if (!parishExists) {
+          return res.status(400).json({
+            success: false,
+            message: 'La parroquia seleccionada no existe'
+          });
+        }
       }
 
       // Verificar si el email ya está registrado
@@ -181,6 +227,9 @@ class StoreController {
         logo,
         banner,
         coordinates: coordinates || { latitude: 0, longitude: 0 },
+        stateRef,
+        municipalityRef,
+        parishRef,
         businessHours,
         settings,
         owner: userId,
@@ -259,7 +308,10 @@ class StoreController {
         { new: true, runValidators: true }
       )
         .populate('owner', 'name email')
-        .populate('managers', 'name email');
+        .populate('managers', 'name email')
+        .populate('stateRef', 'name code')
+        .populate('municipalityRef', 'name')
+        .populate('parishRef', 'name');
 
       res.json({
         success: true,
@@ -475,6 +527,158 @@ class StoreController {
       });
     } catch (error) {
       console.error('Error obteniendo estadísticas de tiendas:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Buscar tiendas por divisiones administrativas
+  async searchByAdministrativeDivision(req: Request, res: Response) {
+    try {
+      const {
+        stateId,
+        municipalityId,
+        parishId,
+        page = 1,
+        limit = 20,
+        search
+      } = req.query;
+
+      const filter: any = { isActive: true };
+
+      // Filtros por división administrativa
+      if (stateId) filter.stateRef = stateId;
+      if (municipalityId) filter.municipalityRef = municipalityId;
+      if (parishId) filter.parishRef = parishId;
+
+      // Filtro de búsqueda adicional
+      if (search) {
+        filter.$or = [
+          { name: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { address: { $regex: search, $options: 'i' } }
+        ];
+      }
+
+      const skip = (Number(page) - 1) * Number(limit);
+
+      const stores = await Store.find(filter)
+        .populate('owner', 'name email')
+        .populate('managers', 'name email')
+        .populate('stateRef', 'name code')
+        .populate('municipalityRef', 'name')
+        .populate('parishRef', 'name')
+        .sort({ createdAt: -1 })
+        .limit(Number(limit))
+        .skip(skip)
+        .select('-__v');
+
+      const total = await Store.countDocuments(filter);
+
+      res.json({
+        success: true,
+        data: {
+          stores,
+          pagination: {
+            page: Number(page),
+            limit: Number(limit),
+            total,
+            totalPages: Math.ceil(total / Number(limit))
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error buscando tiendas por división administrativa:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Toggle status de la tienda (activar/desactivar)
+  async toggleStoreStatus(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const store = await Store.findById(id);
+      if (!store) {
+        return res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada'
+        });
+      }
+
+      const userId = (req as any).user._id;
+
+      // Solo el owner puede cambiar el status de la tienda
+      if (store.owner.toString() !== userId.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: 'Solo el propietario puede cambiar el estado de la tienda'
+        });
+      }
+
+      store.isActive = !store.isActive;
+      await store.save();
+
+      const action = store.isActive ? 'activada' : 'desactivada';
+
+      res.json({
+        success: true,
+        message: `Tienda ${action} exitosamente`,
+        data: { isActive: store.isActive }
+      });
+    } catch (error) {
+      console.error('Error cambiando estado de la tienda:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Eliminar tienda (solo para admin o propietario con confirmación)
+  async deleteStore(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const store = await Store.findById(id);
+      if (!store) {
+        return res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada'
+        });
+      }
+
+      const userId = (req as any).user._id;
+      const user = (req as any).user;
+
+      // Solo el owner o admin pueden eliminar la tienda
+      if (store.owner.toString() !== userId.toString() && user.role !== 'admin') {
+        return res.status(403).json({
+          success: false,
+          message: 'Solo el propietario o un administrador pueden eliminar la tienda'
+        });
+      }
+
+      // Eliminar la tienda
+      await Store.findByIdAndDelete(id);
+
+      // Remover la referencia de la tienda de todos los usuarios managers
+      await User.updateMany(
+        { stores: id },
+        { $pull: { stores: id } }
+      );
+
+      res.json({
+        success: true,
+        message: 'Tienda eliminada exitosamente'
+      });
+    } catch (error) {
+      console.error('Error eliminando tienda:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Store, MapPin, Phone, Mail, Clock, Settings, Save } from 'lucide-react';
+import { Store, MapPin, Phone, Mail, Clock, Settings, Save, AlertCircle } from 'lucide-react';
 import FreeStoreLocationMap from './FreeStoreLocationMap';
+import AdministrativeDivisionSelector from './AdministrativeDivisionSelector';
 
 interface StoreRegistrationFormProps {
   onSubmit: (storeData: any) => void;
@@ -23,6 +24,9 @@ const StoreRegistrationForm: React.FC<StoreRegistrationFormProps> = ({
     phone: initialData?.phone || '',
     email: initialData?.email || '',
     coordinates: initialData?.coordinates || null,
+    stateRef: initialData?.stateRef || '',
+    municipalityRef: initialData?.municipalityRef || '',
+    parishRef: initialData?.parishRef || '',
     businessHours: initialData?.businessHours || {
       monday: { open: '08:00', close: '18:00', isOpen: true },
       tuesday: { open: '08:00', close: '18:00', isOpen: true },
@@ -66,6 +70,24 @@ const StoreRegistrationForm: React.FC<StoreRegistrationFormProps> = ({
     }));
   };
 
+  const handleAdministrativeDivisionChange = (locationData: {
+    stateId: string;
+    municipalityId: string;
+    parishId: string;
+    stateName: string;
+    municipalityName: string;
+    parishName: string;
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      stateRef: locationData.stateId,
+      municipalityRef: locationData.municipalityId,
+      parishRef: locationData.parishId,
+      state: locationData.stateName,
+      city: locationData.municipalityName
+    }));
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -101,6 +123,10 @@ const StoreRegistrationForm: React.FC<StoreRegistrationFormProps> = ({
 
     if (!formData.coordinates) {
       newErrors.coordinates = 'Debe seleccionar la ubicación en el mapa';
+    }
+
+    if (!formData.stateRef) {
+      newErrors.administrativeDivision = 'Debe seleccionar el Estado, Municipio y Parroquia';
     }
 
     setErrors(newErrors);
@@ -185,6 +211,36 @@ const StoreRegistrationForm: React.FC<StoreRegistrationFormProps> = ({
           {errors.coordinates && (
             <p className="mt-2 text-sm text-red-600">{errors.coordinates}</p>
           )}
+        </div>
+
+        {/* División Administrativa */}
+        <div className="mb-6">
+          <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+            <MapPin className="w-5 h-5 mr-2 text-green-600" />
+            División Administrativa *
+          </h4>
+          <div className="border border-gray-300 rounded-md p-4 bg-gray-50">
+            <div className="mb-4">
+              <p className="text-sm text-gray-600 mb-2">
+                Selecciona el Estado, Municipio y Parroquia donde se encuentra tu tienda. Esto permite búsquedas más precisas y mejor ubicación para los clientes.
+              </p>
+            </div>
+            <AdministrativeDivisionSelector
+              onLocationChange={handleAdministrativeDivisionChange}
+              required={true}
+              initialValues={{
+                stateId: formData.stateRef,
+                municipalityId: formData.municipalityRef,
+                parishId: formData.parishRef
+              }}
+            />
+            {errors.administrativeDivision && (
+              <div className="flex items-center text-red-600 text-sm mt-2">
+                <AlertCircle className="h-4 w-4 mr-2" />
+                <span>{errors.administrativeDivision}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

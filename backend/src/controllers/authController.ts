@@ -27,11 +27,13 @@ export class AuthController {
   // Registrar usuario
   static async register(req: Request, res: Response): Promise<void> {
     try {
+      console.log('🔍 Iniciando registro de usuario:', req.body);
       const { name, email, password, phone, pin, role = 'client' } = req.body;
 
       // Validar email
       const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
       if (!emailRegex.test(email)) {
+        console.log('❌ Email inválido:', email);
         res.status(400).json({
           success: false,
           message: 'Email inválido'
@@ -40,8 +42,10 @@ export class AuthController {
       }
 
       // Verificar si el usuario ya existe
+      console.log('🔍 Verificando si el usuario ya existe...');
       const existingUser = await User.findOne({ email });
       if (existingUser) {
+        console.log('❌ Usuario ya existe:', existingUser._id);
         res.status(400).json({
           success: false,
           message: 'El email ya está registrado'
@@ -49,46 +53,81 @@ export class AuthController {
         return;
       }
 
+      console.log('✅ Usuario no existe, procediendo con el registro');
+
+      // Generar código de referido
+      console.log('🔍 Generando código de referido...');
+      let referralCode: string;
+      try {
+        referralCode = await LoyaltyService.generateReferralCode();
+        console.log('✅ Código de referido generado:', referralCode);
+      } catch (error) {
+        console.error('❌ Error generando código de referido:', error);
+        // Usar un código temporal si falla
+        referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        console.log('⚠️ Usando código temporal:', referralCode);
+      }
+
       // Crear usuario
+      console.log('🔍 Creando usuario...');
       const userData: any = {
         name,
         email,
         password,
         phone,
         role,
-        referralCode: await LoyaltyService.generateReferralCode()
+        referralCode
       };
 
       if (pin) {
         userData.pin = pin;
       }
 
+      console.log('📋 Datos del usuario a crear:', { ...userData, password: '[HIDDEN]' });
+
       const user = await User.create(userData);
+      console.log('✅ Usuario creado exitosamente:', user._id);
 
       // Generar token de verificación de email
+      console.log('🔍 Generando token de verificación...');
       const emailVerificationToken = AuthController.generateTemporaryToken();
       user.emailVerificationToken = emailVerificationToken;
       user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
       await user.save();
+      console.log('✅ Token de verificación generado');
 
       // Enviar email de verificación
       try {
+        console.log('🔍 Enviando email de verificación...');
         await emailService.sendEmailVerificationEmail(user.email, emailVerificationToken);
+        console.log('✅ Email de verificación enviado');
       } catch (emailError) {
-        console.error('Error enviando email de verificación:', emailError);
+        console.error('❌ Error enviando email de verificación:', emailError);
+        console.log('⚠️ Continuando sin email de verificación');
         // No fallar el registro si el email falla
       }
 
       // Registrar actividad
-      await Activity.create({
-        userId: user._id,
-        type: 'register',
-        description: 'Usuario registrado exitosamente',
-        metadata: { ip: req.ip, userAgent: req.get('User-Agent') }
-      });
+      try {
+        console.log('🔍 Registrando actividad...');
+        await Activity.create({
+          userId: user._id,
+          type: 'register',
+          description: 'Usuario registrado exitosamente',
+          metadata: { ip: req.ip, userAgent: req.get('User-Agent') }
+        });
+        console.log('✅ Actividad registrada');
+      } catch (activityError) {
+        console.error('❌ Error registrando actividad:', activityError);
+        // No fallar el registro si la actividad falla
+      }
 
       // Generar token JWT
+      console.log('🔍 Generando token JWT...');
       const token = AuthController.generateToken(user._id.toString());
+      console.log('✅ Token JWT generado');
+
+      console.log('🎉 Registro completado exitosamente');
 
       res.status(201).json({
         success: true,
@@ -105,7 +144,8 @@ export class AuthController {
         }
       });
     } catch (error) {
-      console.error('Error registrando usuario:', error);
+      console.error('❌ Error registrando usuario:', error);
+      console.error('Stack:', error instanceof Error ? error.stack : 'No stack available');
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

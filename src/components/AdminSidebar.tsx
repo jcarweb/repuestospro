@@ -19,7 +19,9 @@ import {
   Store,
   FolderOpen,
   Megaphone,
-  DollarSign
+  DollarSign,
+  Star,
+  Building2
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -44,94 +46,160 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
     return location.pathname === path;
   };
 
-  // Menú para Administrador - se re-evalúa en cada render
-  const menuItems = [
-    {
-      name: t('sidebar.admin.dashboard'),
-      path: '/admin/dashboard',
-      icon: BarChart3
-    },
-    {
-      name: t('sidebar.admin.users'),
-      path: '/admin/users',
-      icon: Users
-    },
-    {
-      name: t('sidebar.admin.stores'),
-      path: '/admin/stores',
-      icon: Store
-    },
-    {
-      name: t('sidebar.admin.products'),
-      path: '/admin/products',
-      icon: Package
-    },
-    {
-      name: t('sidebar.admin.categories'),
-      path: '/admin/categories',
-      icon: Database
-    },
-    {
-      name: t('sidebar.admin.subcategories'),
-      path: '/admin/subcategories',
-      icon: FolderOpen
-    },
-    {
-      name: t('sidebar.admin.promotions'),
-      path: '/admin/promotions',
-      icon: Gift
-    },
-    {
-      name: t('sidebar.admin.advertisements'),
-      path: '/admin/advertisements',
-      icon: Megaphone
-    },
-    {
-      name: t('sidebar.admin.sales'),
-      path: '/admin/sales',
-      icon: ShoppingCart
-    },
-    {
-      name: t('sidebar.admin.loyalty'),
-      path: '/admin/loyalty',
-      icon: TrendingUp
-    },
-    {
-      name: t('sidebar.admin.analytics'),
-      path: '/admin/analytics',
-      icon: BarChart3
-    },
-    {
-      name: t('sidebar.admin.registrationCodes'),
-      path: '/admin/registration-codes',
-      icon: Key
-    },
-    {
-      name: t('sidebar.admin.searchConfig'),
-      path: '/admin/search-config',
-      icon: Search
-    },
-    {
-      name: t('sidebar.admin.generateProducts'),
-      path: '/admin/generate-products',
-      icon: Package
-    },
-    {
-      name: t('sidebar.admin.globalSettings'),
-      path: '/admin/settings',
-      icon: Settings
-    },
-    {
-      name: t('sidebar.admin.monetization'),
-      path: '/admin/monetization',
-      icon: DollarSign
+  // Menú según el rol del usuario
+  const getMenuItems = () => {
+    if (user?.role === 'store_manager') {
+      return [
+        {
+          name: t('sidebar.storeManager.dashboard'),
+          path: '/store-manager/dashboard',
+          icon: BarChart3
+        },
+        {
+          name: 'Gestión de Sucursales',
+          path: '/store-manager/branches',
+          icon: Building2
+        },
+        {
+          name: t('sidebar.storeManager.products'),
+          path: '/store-manager/products',
+          icon: Package
+        },
+        {
+          name: t('sidebar.storeManager.promotions'),
+          path: '/store-manager/promotions',
+          icon: Gift
+        },
+        {
+          name: t('sidebar.storeManager.sales'),
+          path: '/store-manager/sales',
+          icon: ShoppingCart
+        },
+        {
+          name: t('sidebar.storeManager.orders'),
+          path: '/store-manager/orders',
+          icon: ShoppingCart
+        },
+        {
+          name: t('sidebar.storeManager.delivery'),
+          path: '/store-manager/delivery',
+          icon: ShoppingCart
+        },
+        {
+          name: t('sidebar.storeManager.analytics'),
+          path: '/store-manager/analytics',
+          icon: BarChart3
+        },
+        {
+          name: t('sidebar.storeManager.messages'),
+          path: '/store-manager/messages',
+          icon: Megaphone
+        },
+        {
+          name: t('sidebar.storeManager.reviews'),
+          path: '/store-manager/reviews',
+          icon: Star
+        },
+        {
+          name: t('sidebar.storeManager.settings'),
+          path: '/store-manager/settings',
+          icon: Settings
+        }
+      ];
+    } else {
+      // Menú para Administrador
+      return [
+        {
+          name: t('sidebar.admin.dashboard'),
+          path: '/admin/dashboard',
+          icon: BarChart3
+        },
+        {
+          name: t('sidebar.admin.users'),
+          path: '/admin/users',
+          icon: Users
+        },
+        {
+          name: t('sidebar.admin.stores'),
+          path: '/admin/stores',
+          icon: Store
+        },
+        {
+          name: t('sidebar.admin.products'),
+          path: '/admin/products',
+          icon: Package
+        },
+        {
+          name: t('sidebar.admin.categories'),
+          path: '/admin/categories',
+          icon: Database
+        },
+        {
+          name: t('sidebar.admin.subcategories'),
+          path: '/admin/subcategories',
+          icon: FolderOpen
+        },
+        {
+          name: t('sidebar.admin.promotions'),
+          path: '/admin/promotions',
+          icon: Gift
+        },
+        {
+          name: t('sidebar.admin.advertisements'),
+          path: '/admin/advertisements',
+          icon: Megaphone
+        },
+        {
+          name: t('sidebar.admin.sales'),
+          path: '/admin/sales',
+          icon: ShoppingCart
+        },
+        {
+          name: t('sidebar.admin.loyalty'),
+          path: '/admin/loyalty',
+          icon: TrendingUp
+        },
+        {
+          name: t('sidebar.admin.analytics'),
+          path: '/admin/analytics',
+          icon: BarChart3
+        },
+        {
+          name: t('sidebar.admin.registrationCodes'),
+          path: '/admin/registration-codes',
+          icon: Key
+        },
+        {
+          name: t('sidebar.admin.searchConfig'),
+          path: '/admin/search-config',
+          icon: Search
+        },
+        {
+          name: t('sidebar.admin.generateProducts'),
+          path: '/admin/generate-products',
+          icon: Package
+        },
+        {
+          name: t('sidebar.admin.globalSettings'),
+          path: '/admin/settings',
+          icon: Settings
+        },
+        {
+          name: t('sidebar.admin.monetization'),
+          path: '/admin/monetization',
+          icon: DollarSign
+        }
+      ];
     }
-  ];
+  };
+
+  const menuItems = getMenuItems();
 
   console.log('🔍 AdminSidebar: Renderizando sidebar');
+  console.log('🔍 AdminSidebar: User role:', user?.role);
   console.log('🔍 AdminSidebar: Menu items:', menuItems.length);
   console.log('🔍 AdminSidebar: Current location:', location.pathname);
-  console.log('🔍 AdminSidebar: Monetization item:', menuItems.find(item => item.path === '/admin/monetization'));
+  console.log('🔍 AdminSidebar: Menu items for role:', user?.role, menuItems.map(item => item.name));
 
   return (
     <>
@@ -160,9 +228,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
             <X className="w-5 h-5" />
           </button>
           
-          {/* Título del Panel de Administración */}
+          {/* Título del Panel */}
           <div className="mt-2 mb-4">
-            <h1 className="text-lg font-bold text-[#333333] dark:text-white text-center">{t('sidebar.admin.title')}</h1>
+            <h1 className="text-lg font-bold text-[#333333] dark:text-white text-center">
+              {user?.role === 'store_manager' ? t('sidebar.storeManager.title') : t('sidebar.admin.title')}
+            </h1>
           </div>
         </div>
 
@@ -197,7 +267,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
               <Users className="w-4 h-4 text-gray-600 dark:text-gray-200" />
             </div>
             <div>
-              <p className="text-sm font-medium text-[#333333] dark:text-white">{t('sidebar.roles.admin')}</p>
+              <p className="text-sm font-medium text-[#333333] dark:text-white">
+                {user?.role === 'store_manager' ? t('sidebar.roles.storeManager') : t('sidebar.roles.admin')}
+              </p>
               <p className="text-xs text-gray-500 dark:text-gray-300">{user?.email}</p>
             </div>
           </div>

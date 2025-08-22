@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useActiveStore } from '../contexts/ActiveStoreContext';
+import ActiveStoreIndicator from '../components/ActiveStoreIndicator';
+import InventoryStatusCard from '../components/InventoryStatusCard';
+import InventoryConfigModal from '../components/InventoryConfigModal';
 import { 
   Package, 
   TrendingUp, 
@@ -15,6 +19,8 @@ import {
 const StoreManagerDashboard: React.FC = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { activeStore } = useActiveStore();
+  const [showInventoryConfig, setShowInventoryConfig] = useState(false);
 
   // Datos de ejemplo - en una implementación real vendrían de la API
   const stats = {
@@ -43,12 +49,23 @@ const StoreManagerDashboard: React.FC = () => {
 
   return (
     <div className="p-6">
+      {/* Indicador de tienda activa */}
+      <ActiveStoreIndicator />
+      
+      {/* Estado del inventario */}
+      <div className="mb-6">
+        <InventoryStatusCard onConfigureClick={() => setShowInventoryConfig(true)} />
+      </div>
+      
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">
           {t('storeManagerDashboard.title')}
         </h1>
         <p className="text-gray-600 mt-2">
           {t('storeManagerDashboard.welcome')}, {user?.name || 'Gestor de Tienda'}
+          {activeStore && (
+            <span className="text-[#FFC300] font-medium"> - {activeStore.name}</span>
+          )}
         </p>
       </div>
 
@@ -194,9 +211,20 @@ const StoreManagerDashboard: React.FC = () => {
             <TrendingUp className="h-8 w-8 text-blue-600" />
           </div>
         </div>
-      </div>
-    </div>
-  );
-};
-
-export default StoreManagerDashboard;
+             </div>
+       
+       {/* Modal de configuración de inventario */}
+       <InventoryConfigModal
+         isOpen={showInventoryConfig}
+         onClose={() => setShowInventoryConfig(false)}
+         onConfigSaved={() => {
+           setShowInventoryConfig(false);
+           // Aquí podrías refrescar el estado del inventario
+           window.location.reload(); // Temporal: recargar para ver cambios
+         }}
+       />
+     </div>
+   );
+ };
+ 
+ export default StoreManagerDashboard;

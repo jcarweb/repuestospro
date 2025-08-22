@@ -87,11 +87,6 @@ const Header: React.FC = () => {
 
   return (
     <header className="bg-white dark:bg-[#333333] shadow-sm border-b border-gray-200 dark:border-[#555555]">
-      {/* TEST DIV - Should be visible */}
-      <div style={{backgroundColor: 'red', color: 'white', padding: '10px', textAlign: 'center', fontSize: '20px'}}>
-        🚨 TEST HEADER - Si ves esto, el Header funciona 🚨
-      </div>
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -99,19 +94,6 @@ const Header: React.FC = () => {
             <Link to="/" className="flex items-center space-x-3">
               <Logo className="h-10 w-auto" />
             </Link>
-          </div>
-
-          {/* CENTER - Language Selector */}
-          <div className="flex items-center justify-center flex-1">
-            {/* TEST BUTTON - Should be visible in center */}
-            <div style={{backgroundColor: 'red', padding: '5px', borderRadius: '5px'}}>
-              <button 
-                onClick={() => alert('¡Botón de prueba funciona!')}
-                style={{backgroundColor: 'yellow', color: 'black', padding: '8px', border: '2px solid black', borderRadius: '5px'}}
-              >
-                🌐 IDIOMA
-              </button>
-            </div>
           </div>
 
           {/* Desktop Navigation */}

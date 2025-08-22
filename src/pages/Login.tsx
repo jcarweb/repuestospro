@@ -31,7 +31,17 @@ const Login: React.FC = () => {
       
       // Si llegamos aquí, el login fue exitoso sin 2FA
       console.log('✅ Login exitoso, navegando...');
-      navigate('/admin/dashboard');
+      // Redirigir según el rol del usuario
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      if (userData.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else if (userData.role === 'store_manager') {
+        navigate('/store-manager');
+      } else if (userData.role === 'delivery') {
+        navigate('/delivery/dashboard');
+      } else {
+        navigate('/');
+      }
       
     } catch (error: any) {
       console.error('❌ Error en handleSubmit:', error);
@@ -71,7 +81,16 @@ const Login: React.FC = () => {
   const handleTwoFactorSuccess = (user: any, token: string) => {
     login(user, token);
     setShowTwoFactor(false);
-    navigate('/admin/dashboard');
+    // Redirigir según el rol del usuario
+    if (user.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else if (user.role === 'store_manager') {
+      navigate('/store-manager');
+    } else if (user.role === 'delivery') {
+      navigate('/delivery/dashboard');
+    } else {
+      navigate('/');
+    }
   };
 
   const handleTwoFactorClose = () => {

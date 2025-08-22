@@ -66,6 +66,20 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const handleTwoFactorSuccess = (user: any, token: string) => {
     login(user, token);
     setShowTwoFactor(false);
+    
+    // Redirigir según el rol del usuario
+    console.log('🔍 AuthModal 2FA: User data after success:', user);
+    
+    if (user.role === 'admin') {
+      window.location.href = '/admin/dashboard';
+    } else if (user.role === 'store_manager') {
+      window.location.href = '/store-manager';
+    } else if (user.role === 'delivery') {
+      window.location.href = '/delivery/dashboard';
+    } else {
+      window.location.href = '/';
+    }
+    
     onClose();
   };
 
@@ -93,6 +107,21 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           console.log('🔐 Intentando login con:', formData.email);
           await loginAsync(formData.email, formData.password);
           console.log('✅ Login exitoso');
+          
+          // Redirigir según el rol del usuario
+          const userData = JSON.parse(localStorage.getItem('user') || '{}');
+          console.log('🔍 AuthModal: User data after login:', userData);
+          
+          if (userData.role === 'admin') {
+            window.location.href = '/admin/dashboard';
+          } else if (userData.role === 'store_manager') {
+            window.location.href = '/store-manager';
+          } else if (userData.role === 'delivery') {
+            window.location.href = '/delivery/dashboard';
+          } else {
+            window.location.href = '/';
+          }
+          
           onClose();
         } catch (error: any) {
           console.error('❌ Error en login:', error);

@@ -29,6 +29,8 @@ import activityRoutes from './routes/activityRoutes';
 import profileRoutes from './routes/profileRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import monetizationRoutes from './routes/monetizationRoutes';
+import administrativeDivisionRoutes from './routes/administrativeDivisionRoutes';
+import inventoryRoutes from './routes/inventoryRoutes';
 
 const app = express();
 
@@ -151,6 +153,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api', categoryRoutes);
 app.use('/api', brandRoutes);
 app.use('/api', subcategoryRoutes);
+app.use('/api/locations', administrativeDivisionRoutes); // Rutas para divisiones administrativas (DEBE IR ANTES)
 app.use('/api/location', locationRoutes);
 app.use('/api/loyalty', loyaltyRoutes);
 app.use('/api/analytics', googleAnalyticsRoutes);
@@ -165,6 +168,7 @@ app.use('/api/activities', activityRoutes);
 app.use('/api/profile', profileLimiter, profileRoutes); // Rate limiter específico para perfil
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/monetization', monetizationRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Middleware para manejar rutas no encontradas
 app.use('*', (req, res) => {

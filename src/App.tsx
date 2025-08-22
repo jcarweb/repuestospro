@@ -5,6 +5,7 @@ import { CartProvider } from './contexts/CartContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { ActiveStoreProvider } from './contexts/ActiveStoreContext';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
@@ -84,6 +85,9 @@ import StoreManagerRoute from './components/StoreManagerRoute';
 import DeliveryRoute from './components/DeliveryRoute';
 import ClientRoute from './components/ClientRoute';
 import AdminLayout from './components/AdminLayout';
+import StoreManagerLayout from './components/StoreManagerLayout';
+import StoreManagerInitializer from './components/StoreManagerInitializer';
+import StoreBranchesManager from './components/StoreBranchesManager';
 import ProtectedRoute from './components/ProtectedRoute';
 
 
@@ -252,254 +256,269 @@ function AppContent() {
           </Routes>
         } />
 
-        {/* Rutas normales con Header y Sidebar */}
-        <Route path="/*" element={
-          <div className="min-h-screen bg-gray-50">
-            {/* TEST DIV - Should be visible at the very top */}
-            <div style={{
-              backgroundColor: 'red', 
-              color: 'white', 
-              padding: '20px', 
-              textAlign: 'center', 
-              fontSize: '24px',
-              fontWeight: 'bold',
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: 9999
-            }}>
-              🚨 TEST APP - Si ves esto, la aplicación funciona 🚨
-            </div>
-            
-            <Header />
-            
-            <div className="flex">
-              {/* Sidebar solo para usuarios autenticados */}
-              {isAuthenticated && (
-                <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-              )}
-              
-              <div className={`flex-1 ${isAuthenticated ? 'lg:ml-64' : ''}`}>
-                <Routes>
-                  {/* Rutas públicas */}
-                  <Route path="/" element={
-                    isAuthenticated && user && user.role === 'admin' ? (
-                      <Navigate to="/admin/dashboard" replace />
-                    ) : (
-                      <Home />
-                    )
-                  } />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/register-with-code" element={<RegisterWithCode />} />
-                  <Route path="/verify-email" element={<VerifyEmail />} />
-                  <Route path="/email-verification" element={<EmailVerification />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/google-callback" element={<GoogleCallback />} />
-                  <Route path="/referral/:code" element={<ReferralLanding />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/categories" element={<Categories />} />
-                  <Route path="/category/:id" element={<CategoryProducts />} />
-                  <Route path="/nearby-products" element={<NearbyProducts />} />
-                  <Route path="/store-registration" element={<StoreRegistration />} />
+                          {/* Rutas normales con Header y Sidebar */}
+         <Route path="/*" element={
+           <div className="min-h-screen bg-gray-50">
+             
+             <Header />
+             
+             <div className="flex">
+               {/* Sidebar solo para usuarios autenticados */}
+               {isAuthenticated && (
+                 <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+               )}
+               
+               <div className={`flex-1 ${isAuthenticated ? 'lg:ml-64' : ''}`}>
+                 <Routes>
+                                     {/* Rutas públicas */}
+                  <Route path="/" element={<Home />} />
+                   <Route path="/login" element={<Login />} />
+                   <Route path="/register" element={<Register />} />
+                   <Route path="/register-with-code" element={<RegisterWithCode />} />
+                   <Route path="/verify-email" element={<VerifyEmail />} />
+                   <Route path="/email-verification" element={<EmailVerification />} />
+                   <Route path="/reset-password" element={<ResetPassword />} />
+                   <Route path="/google-callback" element={<GoogleCallback />} />
+                   <Route path="/referral/:code" element={<ReferralLanding />} />
+                   <Route path="/product/:id" element={<ProductDetail />} />
+                   <Route path="/categories" element={<Categories />} />
+                   <Route path="/category/:id" element={<CategoryProducts />} />
+                   <Route path="/nearby-products" element={<NearbyProducts />} />
+                   <Route path="/store-registration" element={<StoreRegistration />} />
 
-                  {/* Rutas protegidas para clientes */}
-                  <Route path="/cart" element={
-                    <ClientRoute>
-                      <Cart />
-                    </ClientRoute>
-                  } />
-                  <Route path="/favorites" element={
-                    <ClientRoute>
-                      <Favorites />
-                    </ClientRoute>
-                  } />
-                  <Route path="/profile" element={
-                    <ClientRoute>
-                      <Profile />
-                    </ClientRoute>
-                  } />
-                  <Route path="/security" element={
-                    <ClientRoute>
-                      <Security />
-                    </ClientRoute>
-                  } />
-                  <Route path="/security-settings" element={
-                    <ClientRoute>
-                      <SecuritySettings />
-                    </ClientRoute>
-                  } />
-                  <Route path="/loyalty" element={
-                    <ClientRoute>
-                      <Loyalty />
-                    </ClientRoute>
-                  } />
-                  <Route path="/configuration" element={
-                    <ClientRoute>
-                      <Configuration />
-                    </ClientRoute>
-                  } />
-                  <Route path="/orders" element={
-                    <ClientRoute>
-                      <ClientOrders />
-                    </ClientRoute>
-                  } />
-                  <Route path="/notifications" element={
-                    <ClientRoute>
-                      <ClientNotifications />
-                    </ClientRoute>
-                  } />
+                   {/* Rutas protegidas para clientes */}
+                   <Route path="/cart" element={
+                     <ClientRoute>
+                       <Cart />
+                     </ClientRoute>
+                   } />
+                   <Route path="/favorites" element={
+                     <ClientRoute>
+                       <Favorites />
+                     </ClientRoute>
+                   } />
+                   <Route path="/profile" element={
+                     <ClientRoute>
+                       <Profile />
+                     </ClientRoute>
+                   } />
+                   <Route path="/security" element={
+                     <ClientRoute>
+                       <Security />
+                     </ClientRoute>
+                   } />
+                   <Route path="/security-settings" element={
+                     <ClientRoute>
+                       <SecuritySettings />
+                     </ClientRoute>
+                   } />
+                   <Route path="/loyalty" element={
+                     <ClientRoute>
+                       <Loyalty />
+                     </ClientRoute>
+                   } />
+                   <Route path="/configuration" element={
+                     <ClientRoute>
+                       <Configuration />
+                     </ClientRoute>
+                   } />
+                   <Route path="/orders" element={
+                     <ClientRoute>
+                       <ClientOrders />
+                     </ClientRoute>
+                   } />
+                   <Route path="/notifications" element={
+                     <ClientRoute>
+                       <ClientNotifications />
+                     </ClientRoute>
+                   } />
 
-                  {/* Rutas de gestor de tienda */}
-                  <Route path="/store-manager" element={
-                    <StoreManagerRoute>
-                      <Navigate to="/store-manager/dashboard" replace />
-                    </StoreManagerRoute>
-                  } />
-                  <Route path="/store-manager/dashboard" element={
-                    <StoreManagerRoute>
-                      <StoreManagerDashboard />
-                    </StoreManagerRoute>
-                  } />
-                  <Route path="/store-manager/products" element={
-                    <StoreManagerRoute>
-                      <StoreManagerProducts />
-                    </StoreManagerRoute>
-                  } />
-                  <Route path="/store-manager/promotions" element={
-                    <StoreManagerRoute>
-                      <StoreManagerPromotions />
-                    </StoreManagerRoute>
-                  } />
-                  <Route path="/store-manager/sales" element={
-                    <StoreManagerRoute>
-                      <StoreManagerSales />
-                    </StoreManagerRoute>
-                  } />
-                  <Route path="/store-manager/orders" element={
-                    <StoreManagerRoute>
-                      <StoreManagerOrders />
-                    </StoreManagerRoute>
-                  } />
-                  <Route path="/store-manager/delivery" element={
-                    <StoreManagerRoute>
-                      <StoreManagerDelivery />
-                    </StoreManagerRoute>
-                  } />
-                  <Route path="/store-manager/analytics" element={
-                    <StoreManagerRoute>
-                      <StoreManagerAnalytics />
-                    </StoreManagerRoute>
-                  } />
-                  <Route path="/store-manager/messages" element={
-                    <StoreManagerRoute>
-                      <StoreManagerMessages />
-                    </StoreManagerRoute>
-                  } />
-                  <Route path="/store-manager/reviews" element={
-                    <StoreManagerRoute>
-                      <StoreManagerReviews />
-                    </StoreManagerRoute>
-                  } />
-                  <Route path="/store-manager/settings" element={
-                    <StoreManagerRoute>
-                      <StoreManagerSettings />
-                    </StoreManagerRoute>
-                  } />
-                  <Route path="/store-setup" element={
-                    <StoreManagerRoute>
-                      <StoreSetup />
-                    </StoreManagerRoute>
-                  } />
-                  
-                  {/* Rutas de perfil para gestor de tienda */}
-                  <Route path="/store-manager/profile" element={
-                    <StoreManagerRoute>
-                      <Profile />
-                    </StoreManagerRoute>
-                  } />
-                  <Route path="/store-manager/security" element={
-                    <StoreManagerRoute>
-                      <Security />
-                    </StoreManagerRoute>
-                  } />
-                  <Route path="/store-manager/configuration" element={
-                    <StoreManagerRoute>
-                      <Configuration />
-                    </StoreManagerRoute>
-                  } />
+                   {/* Rutas de delivery */}
+                   <Route path="/delivery" element={
+                     <DeliveryRoute>
+                       <Navigate to="/delivery/dashboard" replace />
+                     </DeliveryRoute>
+                   } />
+                   <Route path="/delivery/dashboard" element={
+                     <DeliveryRoute>
+                       <DeliveryDashboard />
+                     </DeliveryRoute>
+                   } />
+                   <Route path="/delivery/orders" element={
+                     <DeliveryRoute>
+                       <DeliveryOrders />
+                     </DeliveryRoute>
+                   } />
+                   <Route path="/delivery/map" element={
+                     <DeliveryRoute>
+                       <DeliveryMap />
+                     </DeliveryRoute>
+                   } />
+                   <Route path="/delivery/report" element={
+                     <DeliveryRoute>
+                       <DeliveryReport />
+                     </DeliveryRoute>
+                   } />
+                   <Route path="/delivery/ratings" element={
+                     <DeliveryRoute>
+                       <DeliveryRatings />
+                     </DeliveryRoute>
+                   } />
+                   <Route path="/delivery/schedule" element={
+                     <DeliveryRoute>
+                       <DeliverySchedule />
+                     </DeliveryRoute>
+                   } />
+                   <Route path="/delivery/status" element={
+                     <DeliveryRoute>
+                       <DeliveryStatus />
+                     </DeliveryRoute>
+                   } />
+                   <Route path="/delivery/profile" element={
+                     <DeliveryRoute>
+                       <DeliveryProfile />
+                     </DeliveryRoute>
+                   } />
+                   
+                   {/* Rutas de perfil para delivery */}
+                   <Route path="/delivery/user-profile" element={
+                     <DeliveryRoute>
+                       <Profile />
+                     </DeliveryRoute>
+                   } />
+                   <Route path="/delivery/security" element={
+                     <DeliveryRoute>
+                       <Security />
+                     </DeliveryRoute>
+                   } />
+                   <Route path="/delivery/configuration" element={
+                     <DeliveryRoute>
+                       <Configuration />
+                     </DeliveryRoute>
+                   } />
+                 </Routes>
+               </div>
+             </div>
+             
+             <Footer />
+           </div>
+         } />
 
-                  {/* Rutas de delivery */}
-                  <Route path="/delivery" element={
-                    <DeliveryRoute>
-                      <Navigate to="/delivery/dashboard" replace />
-                    </DeliveryRoute>
-                  } />
-                  <Route path="/delivery/dashboard" element={
-                    <DeliveryRoute>
-                      <DeliveryDashboard />
-                    </DeliveryRoute>
-                  } />
-                  <Route path="/delivery/orders" element={
-                    <DeliveryRoute>
-                      <DeliveryOrders />
-                    </DeliveryRoute>
-                  } />
-                  <Route path="/delivery/map" element={
-                    <DeliveryRoute>
-                      <DeliveryMap />
-                    </DeliveryRoute>
-                  } />
-                  <Route path="/delivery/report" element={
-                    <DeliveryRoute>
-                      <DeliveryReport />
-                    </DeliveryRoute>
-                  } />
-                  <Route path="/delivery/ratings" element={
-                    <DeliveryRoute>
-                      <DeliveryRatings />
-                    </DeliveryRoute>
-                  } />
-                  <Route path="/delivery/schedule" element={
-                    <DeliveryRoute>
-                      <DeliverySchedule />
-                    </DeliveryRoute>
-                  } />
-                  <Route path="/delivery/status" element={
-                    <DeliveryRoute>
-                      <DeliveryStatus />
-                    </DeliveryRoute>
-                  } />
-                  <Route path="/delivery/profile" element={
-                    <DeliveryRoute>
-                      <DeliveryProfile />
-                    </DeliveryRoute>
-                  } />
-                  
-                  {/* Rutas de perfil para delivery */}
-                  <Route path="/delivery/user-profile" element={
-                    <DeliveryRoute>
-                      <Profile />
-                    </DeliveryRoute>
-                  } />
-                  <Route path="/delivery/security" element={
-                    <DeliveryRoute>
-                      <Security />
-                    </DeliveryRoute>
-                  } />
-                  <Route path="/delivery/configuration" element={
-                    <DeliveryRoute>
-                      <Configuration />
-                    </DeliveryRoute>
-                  } />
-                </Routes>
-              </div>
-            </div>
-            
-            <Footer />
-          </div>
-        } />
+                   {/* Rutas de gestor de tienda - SIN Header ni Sidebar principal */}
+          <Route path="/store-manager/*" element={
+            <Routes>
+              <Route path="/" element={
+                <StoreManagerRoute>
+                  <StoreManagerInitializer />
+                </StoreManagerRoute>
+              } />
+              <Route path="/branches" element={
+                <StoreManagerRoute>
+                  <StoreBranchesManager />
+                </StoreManagerRoute>
+              } />
+              <Route path="/dashboard" element={
+                <StoreManagerRoute>
+                  <StoreManagerLayout>
+                    <StoreManagerDashboard />
+                  </StoreManagerLayout>
+                </StoreManagerRoute>
+              } />
+             <Route path="/products" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerProducts />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/promotions" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerPromotions />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/sales" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerSales />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/orders" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerOrders />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/delivery" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerDelivery />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/analytics" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerAnalytics />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/messages" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerMessages />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/reviews" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerReviews />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/settings" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerSettings />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/profile" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <Profile />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/security" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <Security />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/configuration" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <Configuration />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+           </Routes>
+         } />
+
+         {/* Ruta de store-setup separada */}
+         <Route path="/store-setup" element={
+           <StoreManagerRoute>
+             <StoreManagerLayout>
+               <StoreSetup />
+             </StoreManagerLayout>
+           </StoreManagerRoute>
+         } />
       </Routes>
       
              
@@ -512,11 +531,13 @@ function App() {
     <LanguageProvider>
       <ThemeProvider>
         <AuthProvider>
-          <CartProvider>
-            <FavoritesProvider>
-              <AppContent />
-            </FavoritesProvider>
-          </CartProvider>
+          <ActiveStoreProvider>
+            <CartProvider>
+              <FavoritesProvider>
+                <AppContent />
+              </FavoritesProvider>
+            </CartProvider>
+          </ActiveStoreProvider>
         </AuthProvider>
       </ThemeProvider>
     </LanguageProvider>
