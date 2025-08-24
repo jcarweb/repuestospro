@@ -61,6 +61,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
           icon: Building2
         },
         {
+          name: t('sidebar.storeManager.inventory'),
+          path: '/store-manager/inventory',
+          icon: Package
+        },
+        {
           name: t('sidebar.storeManager.products'),
           path: '/store-manager/products',
           icon: Package

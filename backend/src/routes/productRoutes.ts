@@ -25,11 +25,11 @@ router.delete('/admin/:id', adminMiddleware, productController.deleteProduct);
 router.post('/admin/import-csv', adminMiddleware, upload.single('csvFile'), productController.importProductsFromCSV);
 
 // Rutas para Store Manager
-router.get('/store-manager/all', storeManagerMiddleware, productController.getStoreManagerProducts);
-router.get('/store-manager/stats', storeManagerMiddleware, productController.getProductStats);
-router.post('/store-manager/create', storeManagerMiddleware, productController.createProduct);
-router.put('/store-manager/:id', storeManagerMiddleware, productController.updateProduct);
-router.delete('/store-manager/:id', storeManagerMiddleware, productController.deleteProduct);
-router.post('/store-manager/import-csv', storeManagerMiddleware, upload.single('csvFile'), productController.importProductsFromCSV);
+router.get('/store-manager/all', authMiddleware, storeManagerMiddleware, productController.getStoreManagerProducts);
+router.get('/store-manager/stats', authMiddleware, storeManagerMiddleware, productController.getProductStats);
+router.post('/store-manager/create', authMiddleware, storeManagerMiddleware, productController.createProduct);
+router.put('/store-manager/:id', authMiddleware, storeManagerMiddleware, productController.updateProduct);
+router.delete('/store-manager/:id', authMiddleware, storeManagerMiddleware, productController.deleteProduct);
+router.post('/store-manager/import-csv', authMiddleware, storeManagerMiddleware, upload.single('csvFile'), productController.importProductsFromCSV);
 
 export default router; 

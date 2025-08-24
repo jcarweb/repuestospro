@@ -1372,6 +1372,11 @@ export const translations: Translations = {
     en: 'Settings',
     pt: 'Configurações'
   },
+  'sidebar.storeManager.inventory': {
+    es: 'Gestión de Inventario',
+    en: 'Inventory Management',
+    pt: 'Gestão de Inventário'
+  },
   'sidebar.storeManager.branches': {
     es: 'Gestión de Sucursales',
     en: 'Branch Management',
@@ -3963,6 +3968,200 @@ export const translations: Translations = {
     pt: 'Erro ao atualizar status'
   },
 
+  // ===== FORMULARIO DE PRODUCTOS =====
+  'productForm.createTitle': {
+    es: 'Crear Nuevo Producto',
+    en: 'Create New Product',
+    pt: 'Criar Novo Produto'
+  },
+  'productForm.createSubtitle': {
+    es: 'Completa la información del producto para agregarlo al catálogo',
+    en: 'Complete the product information to add it to the catalog',
+    pt: 'Complete as informações do produto para adicioná-lo ao catálogo'
+  },
+  'productForm.editTitle': {
+    es: 'Editar Producto',
+    en: 'Edit Product',
+    pt: 'Editar Produto'
+  },
+  'productForm.editSubtitle': {
+    es: 'Modifica la información del producto',
+    en: 'Modify the product information',
+    pt: 'Modifique as informações do produto'
+  },
+  'productForm.name': {
+    es: 'Nombre del Producto',
+    en: 'Product Name',
+    pt: 'Nome do Produto'
+  },
+  'productForm.namePlaceholder': {
+    es: 'Ej: Filtro de Aceite Motor, Pastillas de Freno',
+    en: 'Ex: Oil Filter, Brake Pads',
+    pt: 'Ex: Filtro de Óleo, Pastilhas de Freio'
+  },
+  'productForm.sku': {
+    es: 'SKU',
+    en: 'SKU',
+    pt: 'SKU'
+  },
+  'productForm.skuPlaceholder': {
+    es: 'Código único del producto',
+    en: 'Unique product code',
+    pt: 'Código único do produto'
+  },
+  'productForm.description': {
+    es: 'Descripción',
+    en: 'Description',
+    pt: 'Descrição'
+  },
+  'productForm.descriptionPlaceholder': {
+    es: 'Describe las características y beneficios del producto',
+    en: 'Describe the features and benefits of the product',
+    pt: 'Descreva as características e benefícios do produto'
+  },
+  'productForm.price': {
+    es: 'Precio',
+    en: 'Price',
+    pt: 'Preço'
+  },
+  'productForm.stock': {
+    es: 'Stock',
+    en: 'Stock',
+    pt: 'Estoque'
+  },
+  'productForm.originalPartCode': {
+    es: 'Código de Pieza Original',
+    en: 'Original Part Code',
+    pt: 'Código da Peça Original'
+  },
+  'productForm.originalPartCodePlaceholder': {
+    es: 'Código del fabricante original',
+    en: 'Original manufacturer code',
+    pt: 'Código do fabricante original'
+  },
+  'productForm.category': {
+    es: 'Categoría',
+    en: 'Category',
+    pt: 'Categoria'
+  },
+  'productForm.selectCategory': {
+    es: 'Selecciona una categoría',
+    en: 'Select a category',
+    pt: 'Selecione uma categoria'
+  },
+  'productForm.brand': {
+    es: 'Marca',
+    en: 'Brand',
+    pt: 'Marca'
+  },
+  'productForm.selectBrand': {
+    es: 'Selecciona una marca',
+    en: 'Select a brand',
+    pt: 'Selecione uma marca'
+  },
+  'productForm.subcategory': {
+    es: 'Subcategoría',
+    en: 'Subcategory',
+    pt: 'Subcategoria'
+  },
+  'productForm.subcategoryPlaceholder': {
+    es: 'Ej: Filtros, Pastillas, Baterías',
+    en: 'Ex: Filters, Pads, Batteries',
+    pt: 'Ex: Filtros, Pastilhas, Baterias'
+  },
+  'productForm.tags': {
+    es: 'Etiquetas',
+    en: 'Tags',
+    pt: 'Tags'
+  },
+  'productForm.tagsPlaceholder': {
+    es: 'filtro, aceite, motor, toyota',
+    en: 'filter, oil, engine, toyota',
+    pt: 'filtro, óleo, motor, toyota'
+  },
+  'productForm.tagsHelp': {
+    es: 'Separa las etiquetas con comas para facilitar la búsqueda',
+    en: 'Separate tags with commas to facilitate search',
+    pt: 'Separe as tags com vírgulas para facilitar a busca'
+  },
+  'productForm.specifications': {
+    es: 'Especificaciones',
+    en: 'Specifications',
+    pt: 'Especificações'
+  },
+  'productForm.specificationsPlaceholder': {
+    es: '{"material": "papel", "tamaño": "estándar", "compatibilidad": "Toyota"}',
+    en: '{"material": "paper", "size": "standard", "compatibility": "Toyota"}',
+    pt: '{"material": "papel", "tamanho": "padrão", "compatibilidade": "Toyota"}'
+  },
+  'productForm.specificationsHelp': {
+    es: 'Ingresa las especificaciones en formato JSON válido',
+    en: 'Enter specifications in valid JSON format',
+    pt: 'Digite as especificações em formato JSON válido'
+  },
+  'productForm.images': {
+    es: 'Imágenes',
+    en: 'Images',
+    pt: 'Imagens'
+  },
+  'productForm.isFeatured': {
+    es: 'Producto Destacado',
+    en: 'Featured Product',
+    pt: 'Produto em Destaque'
+  },
+  'productForm.errors.nameRequired': {
+    es: 'El nombre del producto es obligatorio',
+    en: 'Product name is required',
+    pt: 'Nome do produto é obrigatório'
+  },
+  'productForm.errors.descriptionRequired': {
+    es: 'La descripción es obligatoria',
+    en: 'Description is required',
+    pt: 'Descrição é obrigatória'
+  },
+  'productForm.errors.priceRequired': {
+    es: 'El precio es obligatorio y debe ser mayor a 0',
+    en: 'Price is required and must be greater than 0',
+    pt: 'Preço é obrigatório e deve ser maior que 0'
+  },
+  'productForm.errors.categoryRequired': {
+    es: 'La categoría es obligatoria',
+    en: 'Category is required',
+    pt: 'Categoria é obrigatória'
+  },
+  'productForm.errors.skuRequired': {
+    es: 'El SKU es obligatorio',
+    en: 'SKU is required',
+    pt: 'SKU é obrigatório'
+  },
+  'productForm.errors.storeRequired': {
+    es: 'Debe seleccionar una tienda',
+    en: 'You must select a store',
+    pt: 'Você deve selecionar uma loja'
+  },
+
+  // ===== BOTONES COMUNES =====
+  'common.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'common.create': {
+    es: 'Crear',
+    en: 'Create',
+    pt: 'Criar'
+  },
+  'common.update': {
+    es: 'Actualizar',
+    en: 'Update',
+    pt: 'Atualizar'
+  },
+  'common.saving': {
+    es: 'Guardando...',
+    en: 'Saving...',
+    pt: 'Salvando...'
+  },
+
   // ===== ADMIN SUBCATEGORIES =====
   'adminSubcategories.title': {
     es: 'Gestión de Subcategorías',
@@ -5467,6 +5666,593 @@ export const translations: Translations = {
     es: 'Tasa de Conversión',
     en: 'Conversion Rate',
     pt: 'Taxa de Conversão'
+  },
+
+  // ===== GESTIÓN DE INVENTARIO =====
+  'inventory.title': {
+    es: 'Gestión de Inventario',
+    en: 'Inventory Management',
+    pt: 'Gestão de Inventário'
+  },
+  'inventory.subtitle': {
+    es: 'Configura y gestiona el inventario de tus tiendas y sucursales',
+    en: 'Configure and manage inventory for your stores and branches',
+    pt: 'Configure e gerencie o inventário das suas lojas e filiais'
+  },
+  'inventory.types.title': {
+    es: 'Tipos de Inventario',
+    en: 'Inventory Types',
+    pt: 'Tipos de Inventário'
+  },
+  'inventory.types.global': {
+    es: 'Global - Stock centralizado',
+    en: 'Global - Centralized stock',
+    pt: 'Global - Estoque centralizado'
+  },
+  'inventory.types.separate': {
+    es: 'Separado - Stock independiente',
+    en: 'Separate - Independent stock',
+    pt: 'Separado - Estoque independente'
+  },
+  'inventory.types.hybrid': {
+    es: 'Híbrido - Combinación',
+    en: 'Hybrid - Combination',
+    pt: 'Híbrido - Combinação'
+  },
+  'inventory.stats.title': {
+    es: 'Estadísticas',
+    en: 'Statistics',
+    pt: 'Estatísticas'
+  },
+  'inventory.stats.totalProducts': {
+    es: 'Productos totales:',
+    en: 'Total products:',
+    pt: 'Produtos totais:'
+  },
+  'inventory.stats.lowStock': {
+    es: 'Stock bajo:',
+    en: 'Low stock:',
+    pt: 'Estoque baixo:'
+  },
+  'inventory.stats.noStock': {
+    es: 'Sin stock:',
+    en: 'No stock:',
+    pt: 'Sem estoque:'
+  },
+  'inventory.actions.title': {
+    es: 'Acciones',
+    en: 'Actions',
+    pt: 'Ações'
+  },
+  'inventory.actions.configure': {
+    es: 'Configurar Inventario',
+    en: 'Configure Inventory',
+    pt: 'Configurar Inventário'
+  },
+  'inventory.actions.reports': {
+    es: 'Ver Reportes',
+    en: 'View Reports',
+    pt: 'Ver Relatórios'
+  },
+  'inventory.actions.transfers': {
+    es: 'Transferencias',
+    en: 'Transfers',
+    pt: 'Transferências'
+  },
+  'inventory.alerts.title': {
+    es: 'Alertas de Inventario',
+    en: 'Inventory Alerts',
+    pt: 'Alertas de Inventário'
+  },
+  'inventory.alerts.lowStock': {
+    es: '12 productos con stock bajo',
+    en: '12 products with low stock',
+    pt: '12 produtos com estoque baixo'
+  },
+  'inventory.alerts.noStock': {
+    es: '3 productos sin stock',
+    en: '3 products with no stock',
+    pt: '3 produtos sem estoque'
+  },
+  'inventory.alerts.pendingTransfers': {
+    es: '2 transferencias pendientes',
+    en: '2 pending transfers',
+    pt: '2 transferências pendentes'
+  },
+  'inventoryReports.title': {
+    es: 'Reportes de Inventario',
+    en: 'Inventory Reports',
+    pt: 'Relatórios de Inventário'
+  },
+  'inventoryReports.subtitle': {
+    es: 'Analiza y visualiza el estado de tu inventario',
+    en: 'Analyze and visualize your inventory status',
+    pt: 'Analise e visualize o status do seu inventário'
+  },
+  'inventoryReports.overview': {
+    es: 'Vista General',
+    en: 'Overview',
+    pt: 'Visão Geral'
+  },
+  'inventoryReports.movements': {
+    es: 'Movimientos',
+    en: 'Movements',
+    pt: 'Movimentos'
+  },
+  'inventoryReports.topProducts': {
+    es: 'Productos Top',
+    en: 'Top Products',
+    pt: 'Produtos Top'
+  },
+  'inventoryReports.alerts': {
+    es: 'Alertas',
+    en: 'Alerts',
+    pt: 'Alertas'
+  },
+  'inventoryReports.export': {
+    es: 'Exportar',
+    en: 'Export',
+    pt: 'Exportar'
+  },
+  'inventoryReports.period': {
+    es: 'Período',
+    en: 'Period',
+    pt: 'Período'
+  },
+  'inventoryReports.last7Days': {
+    es: 'Últimos 7 días',
+    en: 'Last 7 days',
+    pt: 'Últimos 7 dias'
+  },
+  'inventoryReports.last30Days': {
+    es: 'Últimos 30 días',
+    en: 'Last 30 days',
+    pt: 'Últimos 30 dias'
+  },
+  'inventoryReports.last90Days': {
+    es: 'Últimos 90 días',
+    en: 'Last 90 days',
+    pt: 'Últimos 90 dias'
+  },
+  'inventoryReports.lastYear': {
+    es: 'Último año',
+    en: 'Last year',
+    pt: 'Último ano'
+  },
+  'inventoryReports.totalProducts': {
+    es: 'Total Productos',
+    en: 'Total Products',
+    pt: 'Total de Produtos'
+  },
+  'inventoryReports.lowStock': {
+    es: 'Stock Bajo',
+    en: 'Low Stock',
+    pt: 'Estoque Baixo'
+  },
+  'inventoryReports.noStock': {
+    es: 'Sin Stock',
+    en: 'No Stock',
+    pt: 'Sem Estoque'
+  },
+  'inventoryReports.totalValue': {
+    es: 'Valor Total',
+    en: 'Total Value',
+    pt: 'Valor Total'
+  },
+  'inventoryReports.movementsTitle': {
+    es: 'Movimientos de Inventario',
+    en: 'Inventory Movements',
+    pt: 'Movimentos de Inventário'
+  },
+  'inventoryReports.date': {
+    es: 'Fecha',
+    en: 'Date',
+    pt: 'Data'
+  },
+  'inventoryReports.type': {
+    es: 'Tipo',
+    en: 'Type',
+    pt: 'Tipo'
+  },
+  'inventoryReports.product': {
+    es: 'Producto',
+    en: 'Product',
+    pt: 'Produto'
+  },
+  'inventoryReports.quantity': {
+    es: 'Cantidad',
+    en: 'Quantity',
+    pt: 'Quantidade'
+  },
+  'inventoryReports.entry': {
+    es: 'Entrada',
+    en: 'Entry',
+    pt: 'Entrada'
+  },
+  'inventoryReports.exit': {
+    es: 'Salida',
+    en: 'Exit',
+    pt: 'Saída'
+  },
+  'inventoryReports.topProductsTitle': {
+    es: 'Productos Más Vendidos',
+    en: 'Top Selling Products',
+    pt: 'Produtos Mais Vendidos'
+  },
+  'inventoryReports.stock': {
+    es: 'Stock',
+    en: 'Stock',
+    pt: 'Estoque'
+  },
+  'inventoryReports.sales': {
+    es: 'ventas',
+    en: 'sales',
+    pt: 'vendas'
+  },
+  'inventoryReports.alertsTitle': {
+    es: 'Alertas de Inventario',
+    en: 'Inventory Alerts',
+    pt: 'Alertas de Inventário'
+  },
+  'inventoryReports.noStockAlert': {
+    es: 'Productos sin stock',
+    en: 'Products with no stock',
+    pt: 'Produtos sem estoque'
+  },
+  'inventoryReports.lowStockAlert': {
+    es: 'Stock bajo',
+    en: 'Low stock',
+    pt: 'Estoque baixo'
+  },
+  'inventoryReports.pendingTransfersAlert': {
+    es: 'Transferencias pendientes',
+    en: 'Pending transfers',
+    pt: 'Transferências pendentes'
+  },
+  'inventoryReports.noStockDescription': {
+    es: '3 productos requieren reabastecimiento inmediato',
+    en: '3 products require immediate restocking',
+    pt: '3 produtos requerem reabastecimento imediato'
+  },
+  'inventoryReports.lowStockDescription': {
+    es: '12 productos con stock por debajo del mínimo',
+    en: '12 products with stock below minimum',
+    pt: '12 produtos com estoque abaixo do mínimo'
+  },
+  'inventoryReports.pendingTransfersDescription': {
+    es: '2 transferencias entre sucursales en proceso',
+    en: '2 transfers between branches in process',
+    pt: '2 transferências entre filiais em processo'
+  },
+  'inventoryTransfers.title': {
+    es: 'Transferencias de Inventario',
+    en: 'Inventory Transfers',
+    pt: 'Transferências de Inventário'
+  },
+  'inventoryTransfers.subtitle': {
+    es: 'Gestiona las transferencias de productos entre sucursales',
+    en: 'Manage product transfers between branches',
+    pt: 'Gerencie transferências de produtos entre filiais'
+  },
+  'inventoryTransfers.newTransfer': {
+    es: 'Nueva Transferencia',
+    en: 'New Transfer',
+    pt: 'Nova Transferência'
+  },
+  'inventoryTransfers.filterByStatus': {
+    es: 'Filtrar por Estado',
+    en: 'Filter by Status',
+    pt: 'Filtrar por Status'
+  },
+  'inventoryTransfers.all': {
+    es: 'Todas',
+    en: 'All',
+    pt: 'Todas'
+  },
+  'inventoryTransfers.pending': {
+    es: 'Pendientes',
+    en: 'Pending',
+    pt: 'Pendentes'
+  },
+  'inventoryTransfers.inTransit': {
+    es: 'En Tránsito',
+    en: 'In Transit',
+    pt: 'Em Trânsito'
+  },
+  'inventoryTransfers.completed': {
+    es: 'Completadas',
+    en: 'Completed',
+    pt: 'Concluídas'
+  },
+  'inventoryTransfers.cancelled': {
+    es: 'Canceladas',
+    en: 'Cancelled',
+    pt: 'Canceladas'
+  },
+  'inventoryTransfers.totalTransfers': {
+    es: 'Total Transferencias',
+    en: 'Total Transfers',
+    pt: 'Total de Transferências'
+  },
+  'inventoryTransfers.pendingTransfers': {
+    es: 'Pendientes',
+    en: 'Pending',
+    pt: 'Pendentes'
+  },
+  'inventoryTransfers.inTransitTransfers': {
+    es: 'En Tránsito',
+    en: 'In Transit',
+    pt: 'Em Trânsito'
+  },
+  'inventoryTransfers.completedTransfers': {
+    es: 'Completadas',
+    en: 'Completed',
+    pt: 'Concluídas'
+  },
+  'inventoryTransfers.transfers': {
+    es: 'Transferencias',
+    en: 'Transfers',
+    pt: 'Transferências'
+  },
+  'inventoryTransfers.id': {
+    es: 'ID',
+    en: 'ID',
+    pt: 'ID'
+  },
+  'inventoryTransfers.from': {
+    es: 'Desde',
+    en: 'From',
+    pt: 'De'
+  },
+  'inventoryTransfers.to': {
+    es: 'Hacia',
+    en: 'To',
+    pt: 'Para'
+  },
+  'inventoryTransfers.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'inventoryTransfers.date': {
+    es: 'Fecha',
+    en: 'Date',
+    pt: 'Data'
+  },
+  'inventoryTransfers.actions': {
+    es: 'Acciones',
+    en: 'Actions',
+    pt: 'Ações'
+  },
+  'inventoryTransfers.complete': {
+    es: 'Completar',
+    en: 'Complete',
+    pt: 'Completar'
+  },
+  'inventoryTransfers.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'inventoryTransfers.pendingStatus': {
+    es: 'Pendiente',
+    en: 'Pending',
+    pt: 'Pendente'
+  },
+  'inventoryTransfers.inTransitStatus': {
+    es: 'En Tránsito',
+    en: 'In Transit',
+    pt: 'Em Trânsito'
+  },
+  'inventoryTransfers.completedStatus': {
+    es: 'Completada',
+    en: 'Completed',
+    pt: 'Concluída'
+  },
+  'inventoryTransfers.cancelledStatus': {
+    es: 'Cancelada',
+    en: 'Cancelled',
+    pt: 'Cancelada'
+  },
+  'inventoryTransfers.unknown': {
+    es: 'Desconocido',
+    en: 'Unknown',
+    pt: 'Desconhecido'
+  },
+  'inventoryTransfers.noTransfersFound': {
+    es: 'No se encontraron transferencias con los filtros seleccionados',
+    en: 'No transfers found with selected filters',
+    pt: 'Nenhuma transferência encontrada com os filtros selecionados'
+  },
+  'inventoryTransfers.newTransferModal': {
+    es: 'Nueva Transferencia',
+    en: 'New Transfer',
+    pt: 'Nova Transferência'
+  },
+  'inventoryTransfers.newTransferDescription': {
+    es: 'Funcionalidad en desarrollo. Aquí se implementará el formulario para crear nuevas transferencias.',
+    en: 'Feature under development. The form to create new transfers will be implemented here.',
+    pt: 'Funcionalidade em desenvolvimento. O formulário para criar novas transferências será implementado aqui.'
+  },
+  'inventoryTransfers.cancelButton': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'inventoryTransfers.createButton': {
+    es: 'Crear',
+    en: 'Create',
+    pt: 'Criar'
+  },
+  'inventoryTransfers.fromStore': {
+    es: 'Tienda de Origen',
+    en: 'From Store',
+    pt: 'Loja de Origem'
+  },
+  'inventoryTransfers.toStore': {
+    es: 'Tienda de Destino',
+    en: 'To Store',
+    pt: 'Loja de Destino'
+  },
+  'inventoryTransfers.product': {
+    es: 'Producto',
+    en: 'Product',
+    pt: 'Produto'
+  },
+  'inventoryTransfers.quantity': {
+    es: 'Cantidad',
+    en: 'Quantity',
+    pt: 'Quantidade'
+  },
+  'inventoryTransfers.notes': {
+    es: 'Notas',
+    en: 'Notes',
+    pt: 'Notas'
+  },
+  'inventoryTransfers.required': {
+    es: 'Requerido',
+    en: 'Required',
+    pt: 'Obrigatório'
+  },
+  'inventoryTransfers.optional': {
+    es: 'Opcional',
+    en: 'Optional',
+    pt: 'Opcional'
+  },
+  'inventoryTransfers.selectFromStore': {
+    es: 'Seleccionar tienda de origen',
+    en: 'Select origin store',
+    pt: 'Selecionar loja de origem'
+  },
+  'inventoryTransfers.selectToStore': {
+    es: 'Seleccionar tienda de destino',
+    en: 'Select destination store',
+    pt: 'Selecionar loja de destino'
+  },
+  'inventoryTransfers.selectProduct': {
+    es: 'Seleccionar producto',
+    en: 'Select product',
+    pt: 'Selecionar produto'
+  },
+  'inventoryTransfers.enterQuantity': {
+    es: 'Ingrese la cantidad',
+    en: 'Enter quantity',
+    pt: 'Digite a quantidade'
+  },
+  'inventoryTransfers.addNotes': {
+    es: 'Agregue notas adicionales sobre la transferencia...',
+    en: 'Add additional notes about the transfer...',
+    pt: 'Adicione notas adicionais sobre a transferência...'
+  },
+  'inventoryTransfers.maxStock': {
+    es: 'Máx',
+    en: 'Max',
+    pt: 'Máx'
+  },
+  'inventoryTransfers.stockAvailable': {
+    es: 'Stock disponible',
+    en: 'Stock available',
+    pt: 'Estoque disponível'
+  },
+  'inventoryTransfers.transferCreated': {
+    es: '¡Transferencia Creada!',
+    en: 'Transfer Created!',
+    pt: 'Transferência Criada!'
+  },
+  'inventoryTransfers.transferCreatedMessage': {
+    es: 'La transferencia ha sido creada exitosamente y está pendiente de aprobación.',
+    en: 'The transfer has been created successfully and is pending approval.',
+    pt: 'A transferência foi criada com sucesso e está pendente de aprovação.'
+  },
+  'inventoryTransfers.creating': {
+    es: 'Creando...',
+    en: 'Creating...',
+    pt: 'Criando...'
+  },
+  'inventoryReports.exportModal.title': {
+    es: 'Exportar Reporte',
+    en: 'Export Report',
+    pt: 'Exportar Relatório'
+  },
+  'inventoryReports.exportModal.reportDetails': {
+    es: 'Detalles del Reporte',
+    en: 'Report Details',
+    pt: 'Detalhes do Relatório'
+  },
+  'inventoryReports.exportModal.type': {
+    es: 'Tipo',
+    en: 'Type',
+    pt: 'Tipo'
+  },
+  'inventoryReports.exportModal.period': {
+    es: 'Período',
+    en: 'Period',
+    pt: 'Período'
+  },
+  'inventoryReports.exportModal.exportFormat': {
+    es: 'Formato de Exportación',
+    en: 'Export Format',
+    pt: 'Formato de Exportação'
+  },
+  'inventoryReports.exportModal.excelDescription': {
+    es: 'Formato ideal para análisis y manipulación de datos',
+    en: 'Ideal format for data analysis and manipulation',
+    pt: 'Formato ideal para análise e manipulação de dados'
+  },
+  'inventoryReports.exportModal.pdfDescription': {
+    es: 'Formato perfecto para presentaciones y reportes formales',
+    en: 'Perfect format for presentations and formal reports',
+    pt: 'Formato perfeito para apresentações e relatórios formais'
+  },
+  'inventoryReports.exportModal.csvDescription': {
+    es: 'Formato simple para importar a otras aplicaciones',
+    en: 'Simple format to import into other applications',
+    pt: 'Formato simples para importar em outras aplicações'
+  },
+  'inventoryReports.exportModal.additionalOptions': {
+    es: 'Opciones Adicionales',
+    en: 'Additional Options',
+    pt: 'Opções Adicionais'
+  },
+  'inventoryReports.exportModal.includeCharts': {
+    es: 'Incluir gráficos y visualizaciones',
+    en: 'Include charts and visualizations',
+    pt: 'Incluir gráficos e visualizações'
+  },
+  'inventoryReports.exportModal.customDateRange': {
+    es: 'Rango de Fechas Personalizado',
+    en: 'Custom Date Range',
+    pt: 'Intervalo de Datas Personalizado'
+  },
+  'inventoryReports.exportModal.startDate': {
+    es: 'Fecha de Inicio',
+    en: 'Start Date',
+    pt: 'Data de Início'
+  },
+  'inventoryReports.exportModal.endDate': {
+    es: 'Fecha de Fin',
+    en: 'End Date',
+    pt: 'Data de Fim'
+  },
+  'inventoryReports.exportModal.exportReport': {
+    es: 'Exportar Reporte',
+    en: 'Export Report',
+    pt: 'Exportar Relatório'
+  },
+  'inventoryReports.exportModal.exporting': {
+    es: 'Exportando...',
+    en: 'Exporting...',
+    pt: 'Exportando...'
+  },
+  'inventoryReports.exportModal.exportSuccess': {
+    es: '¡Reporte Exportado!',
+    en: 'Report Exported!',
+    pt: 'Relatório Exportado!'
+  },
+  'inventoryReports.exportModal.exportSuccessMessage': {
+    es: 'El reporte se ha descargado exitosamente en tu dispositivo.',
+    en: 'The report has been successfully downloaded to your device.',
+    pt: 'O relatório foi baixado com sucesso no seu dispositivo.'
   },
   'storeManagerDashboard.quickActions.title': {
     es: 'Acciones Rápidas',

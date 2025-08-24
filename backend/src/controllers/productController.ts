@@ -5,6 +5,8 @@ import multer from 'multer';
 import csv from 'csv-parser';
 import fs from 'fs';
 import { ContentFilterService } from '../middleware/contentFilter';
+import { productUpload } from '../config/cloudinary';
+import imageService from '../services/imageService';
 
 // Configuración de multer para subida de archivos
 const storage = multer.diskStorage({
@@ -305,7 +307,7 @@ class ProductController {
         isFeatured,
         tags,
         specifications,
-        images,
+        images, // Ahora puede ser base64 o URLs
         storeId // ID de la tienda
       } = req.body;
 
@@ -393,6 +395,56 @@ class ProductController {
         });
       }
 
+      // Procesar imágenes
+      let processedImages: string[] = [];
+      
+      if (images && images.length > 0) {
+        try {
+          // Si las imágenes vienen como base64
+          if (Array.isArray(images)) {
+            const base64Images = images.filter(img => 
+              typeof img === 'string' && img.startsWith('data:image/')
+            );
+            
+            if (base64Images.length > 0) {
+              const uploadResults = await imageService.uploadMultipleBase64Images(
+                base64Images.map(img => ({
+                  data: img,
+                  format: img.split(';')[0].split('/')[1] || 'jpg'
+                })),
+                'piezasya/products'
+              );
+              
+              processedImages = uploadResults.map(result => result.secureUrl);
+            }
+          } else if (typeof images === 'string') {
+            // Si viene como string separado por comas
+            const imageArray = images.split(',').map((img: string) => img.trim());
+            
+            for (const img of imageArray) {
+              if (img.startsWith('data:image/')) {
+                // Es base64
+                const uploadResult = await imageService.uploadBase64Image({
+                  data: img,
+                  format: img.split(';')[0].split('/')[1] || 'jpg'
+                }, 'piezasya/products');
+                
+                processedImages.push(uploadResult.secureUrl);
+              } else if (img.startsWith('http')) {
+                // Es URL externa
+                processedImages.push(img);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error procesando imágenes:', error);
+          return res.status(400).json({
+            success: false,
+            message: 'Error al procesar las imágenes del producto'
+          });
+        }
+      }
+
       // Crear el producto
       const product = new Product({
         name,
@@ -407,7 +459,7 @@ class ProductController {
         isFeatured: Boolean(isFeatured),
         tags: tags ? tags.split(',').map((tag: string) => tag.trim()) : [],
         specifications: specifications ? JSON.parse(specifications) : {},
-        images: images ? images.split(',').map((img: string) => img.trim()) : [],
+        images: processedImages,
         store: targetStoreId,
         createdBy: userId
       });
@@ -494,6 +546,58 @@ class ProductController {
               'No incluyas información de contacto personal',
               'No incluyas enlaces externos'
             ]
+          });
+        }
+      }
+
+      // Procesar imágenes si se están actualizando
+      if (updateData.images) {
+        try {
+          let processedImages: string[] = [];
+          
+          // Si las imágenes vienen como base64
+          if (Array.isArray(updateData.images)) {
+            const base64Images = updateData.images.filter(img => 
+              typeof img === 'string' && img.startsWith('data:image/')
+            );
+            
+            if (base64Images.length > 0) {
+              const uploadResults = await imageService.uploadMultipleBase64Images(
+                base64Images.map(img => ({
+                  data: img,
+                  format: img.split(';')[0].split('/')[1] || 'jpg'
+                })),
+                'piezasya/products'
+              );
+              
+              processedImages = uploadResults.map(result => result.secureUrl);
+            }
+          } else if (typeof updateData.images === 'string') {
+            // Si viene como string separado por comas
+            const imageArray = updateData.images.split(',').map((img: string) => img.trim());
+            
+            for (const img of imageArray) {
+              if (img.startsWith('data:image/')) {
+                // Es base64
+                const uploadResult = await imageService.uploadBase64Image({
+                  data: img,
+                  format: img.split(';')[0].split('/')[1] || 'jpg'
+                }, 'piezasya/products');
+                
+                processedImages.push(uploadResult.secureUrl);
+              } else if (img.startsWith('http')) {
+                // Es URL externa
+                processedImages.push(img);
+              }
+            }
+          }
+          
+          updateData.images = processedImages;
+        } catch (error) {
+          console.error('Error procesando imágenes:', error);
+          return res.status(400).json({
+            success: false,
+            message: 'Error al procesar las imágenes del producto'
           });
         }
       }

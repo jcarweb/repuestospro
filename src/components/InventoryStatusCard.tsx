@@ -205,26 +205,52 @@ const InventoryStatusCard: React.FC<InventoryStatusCardProps> = ({ onConfigureCl
       {/* Configuración específica */}
       {config.inventoryType === 'global' && (
         <div className="space-y-3">
-          <div>
-            <h4 className="font-medium text-gray-900 mb-2">Sucursales conectadas</h4>
-            {config.childStores.length > 0 ? (
+          {/* Si es tienda principal (tiene childStores) */}
+          {config.childStores && config.childStores.length > 0 && (
+            <div>
+              <h4 className="font-medium text-gray-900 mb-2">Inventario compartido con</h4>
               <div className="space-y-1">
                 {config.childStores.map(store => (
                   <div key={store._id} className="flex items-center space-x-2 text-sm text-gray-600">
                     <Building2 className="h-3 w-3" />
                     <span>{store.name} - {store.city}</span>
+                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Sucursal</span>
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-sm text-gray-500">No hay sucursales configuradas</p>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Si es sucursal (tiene parentStore) */}
+          {config.parentStore && (
+            <div>
+              <h4 className="font-medium text-gray-900 mb-2">Tienda Principal</h4>
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <Building2 className="h-3 w-3" />
+                <span>{config.parentStore.name} - {config.parentStore.city}</span>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">Tienda Principal</span>
+              </div>
+            </div>
+          )}
 
           {config.autoDistribute && (
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <TrendingUp className="h-4 w-4 text-green-600" />
               <span>Distribución automática: {config.distributionRules.distributionMethod}</span>
+            </div>
+          )}
+
+          {/* Información adicional para sucursales con inventario global */}
+          {(config as any).globalConfig && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <h4 className="font-medium text-blue-900 mb-2">Configuración Global</h4>
+              <div className="space-y-1 text-sm text-blue-800">
+                <div>• El inventario se comparte con {(config as any).globalConfig.childStores.length} sucursales</div>
+                {(config as any).globalConfig.autoDistribute && (
+                  <div>• Distribución automática habilitada</div>
+                )}
+                <div>• Método: {(config as any).globalConfig.distributionRules.distributionMethod}</div>
+              </div>
             </div>
           )}
         </div>

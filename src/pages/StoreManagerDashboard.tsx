@@ -3,17 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useActiveStore } from '../contexts/ActiveStoreContext';
 import ActiveStoreIndicator from '../components/ActiveStoreIndicator';
-import InventoryStatusCard from '../components/InventoryStatusCard';
-import InventoryConfigModal from '../components/InventoryConfigModal';
-import StoreDebugInfo from '../components/StoreDebugInfo';
-import ApiTestComponent from '../components/ApiTestComponent';
-import StoreContextTester from '../components/StoreContextTester';
-import SimpleStoreTest from '../components/SimpleStoreTest';
-import ContextVsDirectTest from '../components/ContextVsDirectTest';
-import ContextInitializationTest from '../components/ContextInitializationTest';
-import SimpleContextTest from '../components/SimpleContextTest';
-import ActiveStoreDebugger from '../components/ActiveStoreDebugger';
 import StoreSelector from '../components/StoreSelector';
+
 import { 
   Package, 
   TrendingUp, 
@@ -29,7 +20,6 @@ const StoreManagerDashboard: React.FC = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { activeStore } = useActiveStore();
-  const [showInventoryConfig, setShowInventoryConfig] = useState(false);
 
   // Datos de ejemplo - en una implementación real vendrían de la API
   const stats = {
@@ -58,26 +48,14 @@ const StoreManagerDashboard: React.FC = () => {
 
   return (
     <div className="p-6">
-      {/* Debug Info - Temporal */}
-      <StoreDebugInfo />
-      <ApiTestComponent />
-      <StoreContextTester />
-      <SimpleStoreTest />
-      <ContextVsDirectTest />
-      <ContextInitializationTest />
-      <SimpleContextTest />
-      <ActiveStoreDebugger />
-      
+            
       {/* Selector de tienda */}
       <StoreSelector />
       
       {/* Indicador de tienda activa */}
       <ActiveStoreIndicator />
       
-      {/* Estado del inventario */}
-      <div className="mb-6">
-        <InventoryStatusCard onConfigureClick={() => setShowInventoryConfig(true)} />
-      </div>
+      
       
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">
@@ -235,16 +213,7 @@ const StoreManagerDashboard: React.FC = () => {
         </div>
              </div>
        
-       {/* Modal de configuración de inventario */}
-       <InventoryConfigModal
-         isOpen={showInventoryConfig}
-         onClose={() => setShowInventoryConfig(false)}
-         onConfigSaved={() => {
-           setShowInventoryConfig(false);
-           // Aquí podrías refrescar el estado del inventario
-           window.location.reload(); // Temporal: recargar para ver cambios
-         }}
-       />
+       
      </div>
    );
  };

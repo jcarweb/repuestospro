@@ -68,6 +68,9 @@ import StoreManagerMessages from './pages/StoreManagerMessages';
 import StoreManagerReviews from './pages/StoreManagerReviews';
 import StoreManagerSettings from './pages/StoreManagerSettings';
 import StoreSetup from './pages/StoreSetup';
+import InventoryManagementPage from './pages/InventoryManagementPage';
+import InventoryReportsPage from './pages/InventoryReportsPage';
+import InventoryTransfersPage from './pages/InventoryTransfersPage';
 
 // Páginas de delivery
 import DeliveryDashboard from './pages/DeliveryDashboard';
@@ -508,6 +511,27 @@ function AppContent() {
                <StoreManagerRoute>
                  <StoreManagerLayout>
                    <Configuration />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/inventory" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <InventoryManagementPage />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/inventory/reports" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <InventoryReportsPage />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/inventory/transfers" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <InventoryTransfersPage />
                  </StoreManagerLayout>
                </StoreManagerRoute>
              } />

@@ -10,6 +10,8 @@ router.use(authMiddleware);
 // Configuración de inventario
 router.post('/config/:storeId', inventoryController.configureInventory);
 router.get('/config/:storeId', inventoryController.getInventoryConfig);
+router.get('/configs', inventoryController.getUserInventoryConfigs);
+router.post('/clean-duplicates', inventoryController.cleanDuplicateConfigs);
 
 // Gestión de stock
 router.post('/stock/:storeId/:productId', inventoryController.updateStock);

@@ -29,6 +29,16 @@ class InventoryController {
         return res.status(404).json({ success: false, message: 'Tienda no encontrada' });
       }
 
+      // Verificar si la tienda es una sucursal con inventario global configurado
+      const existingConfig = await InventoryConfig.findOne({ store: storeId });
+      if (existingConfig && existingConfig.inventoryType === 'global' && existingConfig.parentStore && !store.isMainStore) {
+        console.log('Intento de modificar configuración de sucursal con inventario global');
+        return res.status(403).json({ 
+          success: false, 
+          message: 'No puedes modificar la configuración de inventario. Esta sucursal tiene inventario global configurado por la tienda principal.' 
+        });
+      }
+
       // Validar datos requeridos
       if (!inventoryType) {
         return res.status(400).json({ success: false, message: 'El tipo de inventario es requerido' });
@@ -74,6 +84,70 @@ class InventoryController {
       await config.save();
       console.log('Configuración guardada exitosamente');
 
+      // Si es inventario global, actualizar configuración de las sucursales
+      if (inventoryType === 'global' && childStores && childStores.length > 0) {
+        console.log('Actualizando configuración de sucursales para inventario global...');
+        
+        for (const childStoreId of childStores) {
+          try {
+            // Buscar o crear configuración para la sucursal
+            let childConfig = await InventoryConfig.findOne({ store: childStoreId });
+            
+            if (!childConfig) {
+              console.log(`Creando configuración para sucursal: ${childStoreId}`);
+              childConfig = new InventoryConfig({
+                store: childStoreId,
+                inventoryType: 'global',
+                parentStore: storeId, // La tienda principal es el padre
+                childStores: [],
+                allowLocalStock: allowLocalStock || false,
+                autoDistribute: false, // Las sucursales no distribuyen automáticamente
+                distributionRules: {
+                  minStock: distributionRules.minStock || 0,
+                  maxStock: distributionRules.maxStock || 1000,
+                  distributionMethod: distributionRules.distributionMethod || 'equal'
+                }
+              });
+            } else {
+              console.log(`Actualizando configuración para sucursal: ${childStoreId}`);
+              childConfig.inventoryType = 'global';
+              childConfig.parentStore = storeId; // La tienda principal es el padre
+              childConfig.allowLocalStock = allowLocalStock || false;
+              childConfig.autoDistribute = false; // Las sucursales no distribuyen automáticamente
+              childConfig.distributionRules = {
+                minStock: distributionRules.minStock || 0,
+                maxStock: distributionRules.maxStock || 1000,
+                distributionMethod: distributionRules.distributionMethod || 'equal'
+              };
+            }
+            
+            await childConfig.save();
+            console.log(`Configuración actualizada para sucursal: ${childStoreId}`);
+          } catch (error) {
+            console.error(`Error actualizando configuración para sucursal ${childStoreId}:`, error);
+          }
+        }
+      }
+
+      // Si se cambió de global a otro tipo, limpiar referencias de las sucursales
+      if (inventoryType !== 'global' && config.childStores && config.childStores.length > 0) {
+        console.log('Limpiando referencias de sucursales...');
+        
+        for (const childStoreId of config.childStores) {
+          try {
+            const childConfig = await InventoryConfig.findOne({ store: childStoreId });
+            if (childConfig && childConfig.parentStore && childConfig.parentStore.toString() === storeId) {
+              console.log(`Limpiando configuración de sucursal: ${childStoreId}`);
+              childConfig.inventoryType = 'separate';
+              childConfig.parentStore = undefined;
+              await childConfig.save();
+            }
+          } catch (error) {
+            console.error(`Error limpiando configuración de sucursal ${childStoreId}:`, error);
+          }
+        }
+      }
+
       res.json({
         success: true,
         message: 'Configuración de inventario actualizada exitosamente',
@@ -117,12 +191,100 @@ class InventoryController {
         });
       }
 
+      // Si es una sucursal con inventario global, obtener información adicional
+      if (config.inventoryType === 'global' && config.parentStore) {
+        // Buscar la configuración de la tienda principal para obtener información completa
+        const parentConfig = await InventoryConfig.findOne({ store: config.parentStore })
+          .populate('childStores', 'name address city');
+        
+        if (parentConfig) {
+          // Agregar información adicional sobre la configuración global
+          const enhancedConfig = {
+            ...config.toObject(),
+            globalConfig: {
+              parentStore: config.parentStore,
+              childStores: parentConfig.childStores,
+              autoDistribute: parentConfig.autoDistribute,
+              distributionRules: parentConfig.distributionRules
+            }
+          };
+          
+          return res.json({
+            success: true,
+            data: enhancedConfig
+          });
+        }
+      }
+
       res.json({
         success: true,
         data: config
       });
     } catch (error) {
       console.error('Error obteniendo configuración:', error);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
+
+  // Obtener configuración de inventario de todas las tiendas del usuario
+  async getUserInventoryConfigs(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user.id;
+      
+      // Obtener todas las tiendas del usuario
+      const stores = await Store.find({ owner: userId });
+      const storeIds = stores.map(store => store._id);
+      
+      // Obtener todas las configuraciones de inventario
+      const configs = await InventoryConfig.find({ store: { $in: storeIds } })
+        .populate('store', 'name address city isMainStore')
+        .populate('parentStore', 'name address city')
+        .populate('childStores', 'name address city');
+      
+      // Organizar las configuraciones por tienda
+      const configsByStore = configs.reduce((acc, config) => {
+        acc[config.store._id.toString()] = config;
+        return acc;
+      }, {});
+      
+      // Crear respuesta con información completa
+      const response = stores.map(store => {
+        const config = configsByStore[store._id.toString()];
+        return {
+          store: {
+            _id: store._id,
+            name: store.name,
+            address: store.address,
+            city: store.city,
+            isMainStore: store.isMainStore
+          },
+          inventoryConfig: config ? {
+            inventoryType: config.inventoryType,
+            parentStore: config.parentStore,
+            childStores: config.childStores,
+            allowLocalStock: config.allowLocalStock,
+            autoDistribute: config.autoDistribute,
+            distributionRules: config.distributionRules
+          } : {
+            inventoryType: 'separate',
+            childStores: [],
+            allowLocalStock: false,
+            autoDistribute: false,
+            distributionRules: {
+              minStock: 0,
+              maxStock: 1000,
+              distributionMethod: 'equal'
+            }
+          }
+        };
+      });
+      
+      res.json({
+        success: true,
+        data: response
+      });
+    } catch (error) {
+      console.error('Error obteniendo configuraciones de inventario:', error);
       res.status(500).json({ success: false, message: 'Error interno del servidor' });
     }
   }
@@ -507,6 +669,101 @@ class InventoryController {
     } catch (error) {
       console.error('Error completando transferencia:', error);
       res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
+
+  // Limpiar configuraciones duplicadas de inventario
+  async cleanDuplicateConfigs(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user.id;
+      
+      console.log('Iniciando limpieza de configuraciones duplicadas...');
+      
+      // Obtener todas las tiendas del usuario
+      const stores = await Store.find({ owner: userId });
+      const storeIds = stores.map(store => store._id);
+      
+      // Obtener todas las configuraciones
+      const configs = await InventoryConfig.find({ store: { $in: storeIds } });
+      
+      console.log(`Encontradas ${configs.length} configuraciones para ${stores.length} tiendas`);
+      
+      // Agrupar configuraciones por tienda
+      const configsByStore = {};
+      configs.forEach(config => {
+        const storeId = config.store.toString();
+        if (!configsByStore[storeId]) {
+          configsByStore[storeId] = [];
+        }
+        configsByStore[storeId].push(config);
+      });
+      
+      // Identificar y eliminar duplicados
+      let deletedCount = 0;
+      for (const [storeId, storeConfigs] of Object.entries(configsByStore)) {
+        if (storeConfigs.length > 1) {
+          console.log(`Tienda ${storeId} tiene ${storeConfigs.length} configuraciones`);
+          
+          // Mantener la más reciente y eliminar las demás
+          const sortedConfigs = storeConfigs.sort((a, b) => 
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          );
+          
+          const configToKeep = sortedConfigs[0];
+          const configsToDelete = sortedConfigs.slice(1);
+          
+          console.log(`Manteniendo configuración más reciente: ${configToKeep._id}`);
+          console.log(`Eliminando ${configsToDelete.length} configuraciones duplicadas`);
+          
+          for (const configToDelete of configsToDelete) {
+            await InventoryConfig.findByIdAndDelete(configToDelete._id);
+            deletedCount++;
+          }
+        }
+      }
+      
+      // Limpiar childStores duplicados en configuraciones globales
+      const globalConfigs = await InventoryConfig.find({ 
+        store: { $in: storeIds },
+        inventoryType: 'global'
+      });
+      
+      let cleanedChildStores = 0;
+      for (const config of globalConfigs) {
+        if (config.childStores && config.childStores.length > 0) {
+          // Remover duplicados de childStores
+          const uniqueChildStores = [...new Set(config.childStores.map(id => id.toString()))];
+          
+          if (uniqueChildStores.length !== config.childStores.length) {
+            console.log(`Limpiando childStores duplicados en configuración ${config._id}`);
+            console.log(`Antes: ${config.childStores.length}, Después: ${uniqueChildStores.length}`);
+            
+            config.childStores = uniqueChildStores;
+            await config.save();
+            cleanedChildStores++;
+          }
+        }
+      }
+      
+      console.log(`Limpieza completada. Eliminadas ${deletedCount} configuraciones duplicadas, limpiadas ${cleanedChildStores} configuraciones de childStores`);
+      
+      res.json({
+        success: true,
+        message: 'Limpieza de configuraciones duplicadas completada',
+        data: {
+          deletedConfigs: deletedCount,
+          cleanedChildStores: cleanedChildStores,
+          totalStores: stores.length,
+          totalConfigs: configs.length - deletedCount
+        }
+      });
+    } catch (error) {
+      console.error('Error limpiando configuraciones duplicadas:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Error interno del servidor',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
   }
 }

@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveStore } from '../contexts/ActiveStoreContext';
 import { 
-  X, 
-  Save, 
   Settings, 
+  X, 
+  CheckCircle, 
   Building2, 
   Package, 
-  Share2, 
+  Share2,
   AlertTriangle,
-  CheckCircle,
-  Info
+  Info,
+  Save
 } from 'lucide-react';
 
 interface InventoryConfigModalProps {
@@ -85,6 +85,32 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  // Verificar si la tienda actual es una sucursal con inventario global configurado
+  const isBranchWithGlobalInventory = () => {
+    // Solo es una sucursal con inventario global si:
+    // 1. Tiene inventario global configurado
+    // 2. Tiene una tienda padre (es decir, es una sucursal)
+    // 3. NO es la tienda principal
+    return currentConfig?.inventoryType === 'global' && 
+           currentConfig?.parentStore && 
+           !activeStore?.isMainStore;
+  };
+
+  // Verificar si la tienda actual es la tienda principal
+  const isMainStore = () => {
+    return activeStore?.isMainStore;
+  };
+
+  // Verificar si se puede editar la configuración
+  const canEditConfig = () => {
+    // Si es sucursal con inventario global, no puede editar
+    if (isBranchWithGlobalInventory()) {
+      return false;
+    }
+    // Si es tienda principal o tiene inventario separado, puede editar
+    return true;
   };
 
   const handleSave = async () => {
@@ -175,6 +201,46 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FFC300] mx-auto"></div>
             <p className="mt-2 text-gray-600">Cargando configuración...</p>
           </div>
+        ) : isBranchWithGlobalInventory() ? (
+          <div className="p-6 space-y-6">
+            {/* Mensaje de restricción para sucursales */}
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 text-center">
+              <div className="flex items-center justify-center space-x-2 mb-4">
+                <AlertTriangle className="h-8 w-8 text-orange-600" />
+                <h3 className="text-lg font-semibold text-orange-900">
+                  Configuración Bloqueada
+                </h3>
+              </div>
+              <p className="text-orange-700 mb-4">
+                Esta sucursal tiene inventario global configurado por la tienda principal.
+              </p>
+              <div className="bg-white border border-orange-200 rounded-lg p-4 mb-4">
+                <h4 className="font-medium text-orange-900 mb-2">Configuración Actual:</h4>
+                <div className="space-y-2 text-sm text-orange-800">
+                  <div><strong>Tipo:</strong> Inventario Global</div>
+                  <div><strong>Tienda Principal:</strong> {(currentConfig?.parentStore as any)?.name || 'N/A'}</div>
+                  <div><strong>Dirección:</strong> {(currentConfig?.parentStore as any)?.address ? `${(currentConfig?.parentStore as any)?.address}, ${(currentConfig?.parentStore as any)?.city}` : 'N/A'}</div>
+                  {currentConfig?.autoDistribute && (
+                    <div><strong>Distribución:</strong> {currentConfig?.distributionRules?.distributionMethod}</div>
+                  )}
+                </div>
+              </div>
+              <p className="text-sm text-orange-600">
+                Solo la tienda principal puede modificar la configuración de inventario global.
+                Contacta al administrador de la tienda principal para realizar cambios.
+              </p>
+            </div>
+            
+            {/* Botón de cerrar */}
+            <div className="flex justify-center">
+              <button
+                onClick={onClose}
+                className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="p-6 space-y-6">
             {/* Información de la tienda */}
@@ -196,12 +262,12 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
                 {['separate', 'global', 'hybrid'].map((type) => (
                   <div
                     key={type}
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    className={`border-2 rounded-lg p-4 transition-all ${
                       config.inventoryType === type
                         ? 'border-[#FFC300] bg-yellow-50'
                         : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() => setConfig({ ...config, inventoryType: type as any })}
+                    } ${!canEditConfig() ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    onClick={() => canEditConfig() && setConfig({ ...config, inventoryType: type as any })}
                   >
                     <div className="flex items-center space-x-2 mb-2">
                       {getInventoryTypeIcon(type)}
@@ -238,6 +304,7 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
                           <input
                             type="checkbox"
                             checked={config.childStores.includes(store._id)}
+                            disabled={!canEditConfig()}
                             onChange={(e) => {
                               if (e.target.checked) {
                                 setConfig({
@@ -251,9 +318,11 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
                                 });
                               }
                             }}
-                            className="rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300]"
+                            className={`rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300] ${
+                              !canEditConfig() ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
                           />
-                          <span className="text-sm text-gray-700">
+                          <span className={`text-sm ${!canEditConfig() ? 'text-gray-500' : 'text-gray-700'}`}>
                             {store.name} - {store.address}, {store.city}
                           </span>
                         </label>
@@ -267,10 +336,13 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
                     <input
                       type="checkbox"
                       checked={config.autoDistribute}
+                      disabled={!canEditConfig()}
                       onChange={(e) => setConfig({ ...config, autoDistribute: e.target.checked })}
-                      className="rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300]"
+                      className={`rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300] ${
+                        !canEditConfig() ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     />
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className={`text-sm font-medium ${!canEditConfig() ? 'text-gray-500' : 'text-gray-700'}`}>
                       Distribución automática de stock
                     </span>
                   </label>
@@ -287,6 +359,7 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
                     </label>
                     <select
                       value={config.distributionRules.distributionMethod}
+                      disabled={!canEditConfig()}
                       onChange={(e) => setConfig({
                         ...config,
                         distributionRules: {
@@ -294,7 +367,9 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
                           distributionMethod: e.target.value as any
                         }
                       })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] focus:border-transparent ${
+                        !canEditConfig() ? 'opacity-50 cursor-not-allowed bg-gray-100' : ''
+                      }`}
                     >
                       <option value="equal">Igual para todas las sucursales</option>
                       <option value="proportional">Proporcional según ventas</option>
@@ -315,10 +390,13 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
                     <input
                       type="checkbox"
                       checked={config.allowLocalStock}
+                      disabled={!canEditConfig()}
                       onChange={(e) => setConfig({ ...config, allowLocalStock: e.target.checked })}
-                      className="rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300]"
+                      className={`rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300] ${
+                        !canEditConfig() ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     />
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className={`text-sm font-medium ${!canEditConfig() ? 'text-gray-500' : 'text-gray-700'}`}>
                       Permitir stock local en sucursales
                     </span>
                   </label>
@@ -341,6 +419,7 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
                   <input
                     type="number"
                     value={config.distributionRules.minStock}
+                    disabled={!canEditConfig()}
                     onChange={(e) => setConfig({
                       ...config,
                       distributionRules: {
@@ -348,7 +427,9 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
                         minStock: parseInt(e.target.value) || 0
                       }
                     })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] focus:border-transparent ${
+                      !canEditConfig() ? 'opacity-50 cursor-not-allowed bg-gray-100' : ''
+                    }`}
                     min="0"
                   />
                 </div>
@@ -360,6 +441,7 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
                   <input
                     type="number"
                     value={config.distributionRules.maxStock}
+                    disabled={!canEditConfig()}
                     onChange={(e) => setConfig({
                       ...config,
                       distributionRules: {
@@ -367,7 +449,9 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
                         maxStock: parseInt(e.target.value) || 1000
                       }
                     })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] focus:border-transparent ${
+                      !canEditConfig() ? 'opacity-50 cursor-not-allowed bg-gray-100' : ''
+                    }`}
                     min="0"
                   />
                 </div>
@@ -418,7 +502,7 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
           </button>
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || !canEditConfig()}
             className="px-4 py-2 bg-[#FFC300] text-[#333333] font-medium rounded-md hover:bg-[#E6B800] focus:outline-none focus:ring-2 focus:ring-[#FFC300] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
             {saving ? (
@@ -429,7 +513,7 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                Guardar Configuración
+                {canEditConfig() ? 'Guardar Configuración' : 'Configuración Bloqueada'}
               </>
             )}
           </button>

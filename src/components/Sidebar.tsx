@@ -55,7 +55,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   }, [currentLanguage, updateTrigger, t]);
 
   const isActive = (path: string) => {
-    return location.pathname === path;
+    const isExactMatch = location.pathname === path;
+    const isPartialMatch = location.pathname.startsWith(path + '/');
+    const isActiveRoute = isExactMatch || isPartialMatch;
+    
+    return isActiveRoute;
   };
 
   // Menú para Administrador - se re-evalúa en cada render
@@ -136,6 +140,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   // Menú para Gestor de Tienda - se re-evalúa en cada render
   const storeManagerMenuItems = [
+    {
+      title: t('sidebar.storeManager.inventory'),
+      path: '/store-manager/inventory',
+      icon: Package,
+      description: 'Configurar y gestionar inventario'
+    },
     {
       title: t('sidebar.storeManager.dashboard'),
       path: '/store-manager/dashboard',
@@ -372,33 +382,35 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Menú */}
-          <nav className="flex-1 overflow-y-auto p-4">
-            <ul className="space-y-2">
-                             {menuItems.map((item) => {
-                 const Icon = item.icon;
-                 return (
+                     {/* Menú */}
+           <nav className="flex-1 overflow-y-auto p-4">
+             <ul className="space-y-2">
+                               {menuItems.map((item) => {
+                  const Icon = item.icon;
+                  const isItemActive = isActive(item.path);
+                  
+                  return (
                    <li key={`${item.path}-${currentLanguage}-${forceUpdate}`}>
-                    <Link
-                      to={item.path}
-                      className={`
-                        flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                        ${isActive(item.path)
-                          ? 'bg-[#FFC300] bg-opacity-20 text-[#333333] border-r-2 border-[#FFC300]'
-                          : 'text-[#333333] dark:text-white hover:bg-[#FFC300] hover:bg-opacity-10 hover:text-[#333333]'
-                        }
-                      `}
-                      onClick={onClose}
-                      title={item.description}
-                    >
-                      <Icon className="w-5 h-5 text-[#333333] dark:text-white" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
+                     <Link
+                       to={item.path}
+                       className={`
+                         flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                         ${isItemActive
+                           ? 'bg-[#FFC300] bg-opacity-20 text-[#333333] border-r-2 border-[#FFC300]'
+                           : 'text-[#333333] dark:text-white hover:bg-[#FFC300] hover:bg-opacity-10 hover:text-[#333333]'
+                         }
+                       `}
+                       onClick={onClose}
+                       title={item.description}
+                     >
+                       <Icon className="w-5 h-5 text-[#333333] dark:text-white" />
+                       <span>{item.title}</span>
+                     </Link>
+                   </li>
+                 );
+               })}
+             </ul>
+           </nav>
 
           {/* Footer */}
           <div className="p-4 border-t border-gray-200 dark:border-[#555555]">

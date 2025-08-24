@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useActiveStore } from '../contexts/ActiveStoreContext';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { AdminCard, AdminButton, AdminTable } from './ui';
@@ -92,6 +93,7 @@ interface StoreStats {
 
 const StoreBranchesManager: React.FC = () => {
   const { user, token } = useAuth();
+  const { userStores, loading: contextLoading, refreshStores } = useActiveStore();
   const navigate = useNavigate();
   const { t } = useLanguage();
   
@@ -105,34 +107,27 @@ const StoreBranchesManager: React.FC = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [storeStats, setStoreStats] = useState<{ [key: string]: StoreStats }>({});
 
-  // Cargar tiendas del usuario
+  // Usar las tiendas del contexto en lugar de hacer una llamada separada
   useEffect(() => {
-    const loadUserStores = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/user/stores', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        const data = await response.json();
-        
-        if (data.success) {
-          setStores(data.data);
-          // Cargar estadísticas para cada tienda
-          await loadStoreStats(data.data);
-        }
-      } catch (error) {
-        console.error('Error cargando tiendas:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (token && !loading) {
-      loadUserStores();
+    console.log('StoreBranchesManager: useEffect triggered');
+    console.log('StoreBranchesManager: contextLoading:', contextLoading);
+    console.log('StoreBranchesManager: userStores.length:', userStores.length);
+    
+    if (!contextLoading && userStores.length > 0) {
+      console.log('StoreBranchesManager: Usando tiendas del contexto');
+      setStores(userStores);
+      // Cargar estadísticas para cada tienda
+      loadStoreStats(userStores);
+      setLoading(false);
+    } else if (!contextLoading && userStores.length === 0) {
+      console.log('StoreBranchesManager: No hay tiendas en el contexto');
+      setStores([]);
+      setLoading(false);
+    } else if (contextLoading) {
+      console.log('StoreBranchesManager: Contexto aún cargando...');
+      setLoading(true);
     }
-  }, [token, user?.id]);
+  }, [contextLoading, userStores, token]);
 
   const loadStoreStats = async (storesList: Store[]) => {
     const stats: { [key: string]: StoreStats } = {};
@@ -199,14 +194,9 @@ const StoreBranchesManager: React.FC = () => {
       console.log('Respuesta del servidor:', data);
       
       if (data.success) {
-        // Recargar tiendas
-        const storesResponse = await fetch('http://localhost:5000/api/user/stores', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const storesData = await storesResponse.json();
-        if (storesData.success) {
-          setStores(storesData.data);
-        }
+        console.log('Sucursal creada exitosamente');
+        // Usar el contexto para recargar las tiendas
+        await refreshStores();
       } else {
         throw new Error(data.message || 'Error creating branch');
       }
@@ -236,14 +226,8 @@ const StoreBranchesManager: React.FC = () => {
       const data = await response.json();
       
       if (data.success) {
-        // Recargar tiendas
-        const storesResponse = await fetch('http://localhost:5000/api/user/stores', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const storesData = await storesResponse.json();
-        if (storesData.success) {
-          setStores(storesData.data);
-        }
+        // Usar el contexto para recargar las tiendas
+        await refreshStores();
       } else {
         throw new Error(data.message || 'Error updating branch');
       }
@@ -273,14 +257,8 @@ const StoreBranchesManager: React.FC = () => {
       const data = await response.json();
       
       if (data.success) {
-        // Recargar tiendas
-        const storesResponse = await fetch('http://localhost:5000/api/user/stores', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const storesData = await storesResponse.json();
-        if (storesData.success) {
-          setStores(storesData.data);
-        }
+        // Usar el contexto para recargar las tiendas
+        await refreshStores();
       } else {
         throw new Error(data.message || 'Error updating business hours');
       }
@@ -306,14 +284,8 @@ const StoreBranchesManager: React.FC = () => {
       const data = await response.json();
       
       if (data.success) {
-        // Recargar tiendas
-        const storesResponse = await fetch('http://localhost:5000/api/user/stores', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const storesData = await storesResponse.json();
-        if (storesData.success) {
-          setStores(storesData.data);
-        }
+        // Usar el contexto para recargar las tiendas
+        await refreshStores();
       } else {
         throw new Error(data.message || 'Error setting main store');
       }
@@ -341,14 +313,8 @@ const StoreBranchesManager: React.FC = () => {
       const data = await response.json();
       
       if (data.success) {
-        // Recargar tiendas
-        const storesResponse = await fetch('http://localhost:5000/api/user/stores', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const storesData = await storesResponse.json();
-        if (storesData.success) {
-          setStores(storesData.data);
-        }
+        // Usar el contexto para recargar las tiendas
+        await refreshStores();
       } else {
         throw new Error(data.message || 'Error toggling store status');
       }
@@ -374,14 +340,8 @@ const StoreBranchesManager: React.FC = () => {
       const data = await response.json();
       
       if (data.success) {
-        // Recargar tiendas
-        const storesResponse = await fetch('http://localhost:5000/api/user/stores', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const storesData = await storesResponse.json();
-        if (storesData.success) {
-          setStores(storesData.data);
-        }
+        // Usar el contexto para recargar las tiendas
+        await refreshStores();
         setShowDeleteModal(false);
         setSelectedStore(null);
       } else {
