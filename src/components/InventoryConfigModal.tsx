@@ -92,6 +92,8 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
 
     setSaving(true);
     try {
+      console.log('Enviando configuración:', config);
+      
       const response = await fetch(`http://localhost:5000/api/inventory/config/${activeStore._id}`, {
         method: 'POST',
         headers: {
@@ -101,17 +103,21 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
         body: JSON.stringify(config)
       });
 
+      console.log('Status de respuesta:', response.status);
       const data = await response.json();
+      console.log('Respuesta del servidor:', data);
       
       if (data.success) {
+        console.log('Configuración guardada exitosamente');
         onConfigSaved();
         onClose();
       } else {
-        alert(data.message || 'Error al guardar la configuración');
+        console.error('Error del servidor:', data.message);
+        alert(`Error al guardar la configuración: ${data.message}`);
       }
     } catch (error) {
       console.error('Error guardando configuración:', error);
-      alert('Error al guardar la configuración');
+      alert('Error de conexión al guardar la configuración');
     } finally {
       setSaving(false);
     }

@@ -5,7 +5,7 @@ export interface IStore extends Document {
   description?: string;
   address: string;
   city: string;
-  state: string;
+  state?: string;
   zipCode: string;
   country: string;
   phone: string;
@@ -21,6 +21,7 @@ export interface IStore extends Document {
     tiktok?: string;
   };
   isActive: boolean;
+  isMainStore: boolean; // Indica si es la tienda principal
   owner: mongoose.Types.ObjectId; // Usuario propietario de la tienda
   managers: mongoose.Types.ObjectId[]; // Gestores de la tienda
   coordinates: {
@@ -73,7 +74,6 @@ const StoreSchema = new Schema<IStore>({
   },
   state: {
     type: String,
-    required: true,
     trim: true
   },
   zipCode: {
@@ -135,6 +135,10 @@ const StoreSchema = new Schema<IStore>({
   isActive: {
     type: Boolean,
     default: true
+  },
+  isMainStore: {
+    type: Boolean,
+    default: false
   },
   owner: {
     type: Schema.Types.ObjectId,

@@ -5,6 +5,7 @@ import AdminSidebar from './AdminSidebar';
 import ActiveStoreSelector from './ActiveStoreSelector';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveStore } from '../contexts/ActiveStoreContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface StoreManagerLayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ const StoreManagerLayout: React.FC<StoreManagerLayoutProps> = ({ children }) => 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user } = useAuth();
   const { activeStore } = useActiveStore();
+  const { t } = useLanguage();
   
   console.log('🔍 StoreManagerLayout: User role:', user?.role);
   console.log('🔍 StoreManagerLayout: Active store:', activeStore?.name);
@@ -28,7 +30,7 @@ const StoreManagerLayout: React.FC<StoreManagerLayoutProps> = ({ children }) => 
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Tienda Activa:
+                {t('store.activeStore')}
               </span>
               <ActiveStoreSelector />
             </div>

@@ -1372,6 +1372,604 @@ export const translations: Translations = {
     en: 'Settings',
     pt: 'Configurações'
   },
+  'sidebar.storeManager.branches': {
+    es: 'Gestión de Sucursales',
+    en: 'Branch Management',
+    pt: 'Gestão de Filiais'
+  },
+  'store.activeStore': {
+    es: 'Tienda Activa:',
+    en: 'Active Store:',
+    pt: 'Loja Ativa:'
+  },
+  'store.selectStore': {
+    es: 'Seleccionar Tienda',
+    en: 'Select Store',
+    pt: 'Selecionar Loja'
+  },
+  'store.noStores': {
+    es: 'Sin tiendas',
+    en: 'No stores',
+    pt: 'Sem lojas'
+  },
+  // ===== GESTIÓN DE SUCURSALES =====
+  'branches.title': {
+    es: 'Gestión de Sucursales',
+    en: 'Branch Management',
+    pt: 'Gestão de Filiais'
+  },
+  'branches.subtitle': {
+    es: 'Administra tus tiendas y sucursales',
+    en: 'Manage your stores and branches',
+    pt: 'Gerencie suas lojas e filiais'
+  },
+  'branches.mainStore': {
+    es: 'Tienda Principal',
+    en: 'Main Store',
+    pt: 'Loja Principal'
+  },
+  'branches.branch': {
+    es: 'Sucursal',
+    en: 'Branch',
+    pt: 'Filia'
+  },
+  'branches.setAsMain': {
+    es: 'Establecer como Principal',
+    en: 'Set as Main',
+    pt: 'Definir como Principal'
+  },
+  'branches.createBranch': {
+    es: 'Crear Nueva Sucursal',
+    en: 'Create New Branch',
+    pt: 'Criar Nova Filial'
+  },
+  'branches.createFirstBranch': {
+    es: 'Crear Primera Sucursal',
+    en: 'Create First Branch',
+    pt: 'Criar Primeira Filial'
+  },
+  'branches.noBranches': {
+    es: 'No tienes sucursales',
+    en: 'You have no branches',
+    pt: 'Você não tem filiais'
+  },
+  'branches.noBranchesDescription': {
+    es: 'Comienza creando tu primera sucursal',
+    en: 'Start by creating your first branch',
+    pt: 'Comece criando sua primeira filial'
+  },
+  'branches.totalBranches': {
+    es: 'Tus Sucursales',
+    en: 'Your Branches',
+    pt: 'Suas Filiais'
+  },
+  'branches.status.active': {
+    es: 'Activa',
+    en: 'Active',
+    pt: 'Ativa'
+  },
+  'branches.status.inactive': {
+    es: 'Inactiva',
+    en: 'Inactive',
+    pt: 'Inativa'
+  },
+  'branches.status.main': {
+    es: 'Principal',
+    en: 'Main',
+    pt: 'Principal'
+  },
+  'branches.status.mainStore': {
+    es: 'Tienda Principal',
+    en: 'Main Store',
+    pt: 'Loja Principal'
+  },
+  'branches.status.mainStoreDescription': {
+    es: 'Esta es la tienda principal de tu negocio',
+    en: 'This is the main store of your business',
+    pt: 'Esta é a loja principal do seu negócio'
+  },
+  'branches.actions.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'branches.actions.delete': {
+    es: 'Eliminar',
+    en: 'Delete',
+    pt: 'Excluir'
+  },
+  'branches.actions.activate': {
+    es: 'Activar',
+    en: 'Activate',
+    pt: 'Ativar'
+  },
+  'branches.actions.deactivate': {
+    es: 'Desactivar',
+    en: 'Deactivate',
+    pt: 'Desativar'
+  },
+  'branches.actions.setMain': {
+    es: 'Establecer como Principal',
+    en: 'Set as Main',
+    pt: 'Definir como Principal'
+  },
+  'branches.confirmDelete': {
+    es: '¿Estás seguro de que quieres eliminar esta sucursal?',
+    en: 'Are you sure you want to delete this branch?',
+    pt: 'Tem certeza de que deseja excluir esta filial?'
+  },
+  'branches.confirmSetMain': {
+    es: '¿Estás seguro de que quieres establecer esta sucursal como principal?',
+    en: 'Are you sure you want to set this branch as main?',
+    pt: 'Tem certeza de que deseja definir esta filial como principal?'
+  },
+  'branches.confirmActivate': {
+    es: '¿Estás seguro de que quieres activar esta sucursal?',
+    en: 'Are you sure you want to activate this branch?',
+    pt: 'Tem certeza de que deseja ativar esta filial?'
+  },
+  'branches.confirmDeactivate': {
+    es: '¿Estás seguro de que quieres desactivar esta sucursal?',
+    en: 'Are you sure you want to deactivate this branch?',
+    pt: 'Tem certeza de que deseja desativar esta filial?'
+  },
+  'branches.form.title': {
+    es: 'Crear Nueva Sucursal',
+    en: 'Create New Branch',
+    pt: 'Criar Nova Filial'
+  },
+  'branches.form.editTitle': {
+    es: 'Editar Sucursal',
+    en: 'Edit Branch',
+    pt: 'Editar Filial'
+  },
+  'branches.form.name': {
+    es: 'Nombre de la Sucursal',
+    en: 'Branch Name',
+    pt: 'Nome da Filial'
+  },
+  'branches.form.namePlaceholder': {
+    es: 'Ej: Sucursal Centro, Sucursal Norte',
+    en: 'Ex: Downtown Branch, North Branch',
+    pt: 'Ex: Filial Centro, Filial Norte'
+  },
+  'branches.form.description': {
+    es: 'Descripción',
+    en: 'Description',
+    pt: 'Descrição'
+  },
+  'branches.form.descriptionPlaceholder': {
+    es: 'Descripción de la sucursal',
+    en: 'Branch description',
+    pt: 'Descrição da filial'
+  },
+  'branches.form.address': {
+    es: 'Dirección',
+    en: 'Address',
+    pt: 'Endereço'
+  },
+  'branches.form.city': {
+    es: 'Ciudad',
+    en: 'City',
+    pt: 'Cidade'
+  },
+  'branches.form.state': {
+    es: 'Estado',
+    en: 'State',
+    pt: 'Estado'
+  },
+  'branches.form.zipCode': {
+    es: 'Código Postal',
+    en: 'Zip Code',
+    pt: 'Código Postal'
+  },
+  'branches.form.phone': {
+    es: 'Teléfono',
+    en: 'Phone',
+    pt: 'Telefone'
+  },
+  'branches.form.email': {
+    es: 'Email',
+    en: 'Email',
+    pt: 'Email'
+  },
+  'branches.form.website': {
+    es: 'Sitio Web',
+    en: 'Website',
+    pt: 'Site Web'
+  },
+  'branches.form.save': {
+    es: 'Guardar Sucursal',
+    en: 'Save Branch',
+    pt: 'Salvar Filial'
+  },
+  'branches.form.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'branches.form.isMainStore': {
+    es: 'Establecer como Tienda Principal',
+    en: 'Set as Main Store',
+    pt: 'Definir como Loja Principal'
+  },
+  'branches.form.isMainStoreHelp': {
+    es: 'Solo una tienda puede ser principal. Si seleccionas esta opción, la tienda principal actual será cambiada a sucursal.',
+    en: 'Only one store can be main. If you select this option, the current main store will be changed to a branch.',
+    pt: 'Apenas uma loja pode ser principal. Se você selecionar esta opção, a loja principal atual será alterada para filial.'
+  },
+  // ===== HORARIOS DE TRABAJO =====
+  'businessHours.title': {
+    es: 'Horarios de Trabajo',
+    en: 'Business Hours',
+    pt: 'Horários de Funcionamento'
+  },
+  'businessHours.quickTemplates': {
+    es: 'Plantillas Rápidas',
+    en: 'Quick Templates',
+    pt: 'Modelos Rápidos'
+  },
+  'businessHours.dailySchedule': {
+    es: 'Horario Diario',
+    en: 'Daily Schedule',
+    pt: 'Horário Diário'
+  },
+  'businessHours.open': {
+    es: 'Abierto',
+    en: 'Open',
+    pt: 'Aberto'
+  },
+  'businessHours.closed': {
+    es: 'Cerrado',
+    en: 'Closed',
+    pt: 'Fechado'
+  },
+  'businessHours.openTime': {
+    es: 'Hora de Apertura',
+    en: 'Opening Time',
+    pt: 'Horário de Abertura'
+  },
+  'businessHours.closeTime': {
+    es: 'Hora de Cierre',
+    en: 'Closing Time',
+    pt: 'Horário de Fechamento'
+  },
+  'businessHours.templates.weekdays': {
+    es: 'Días Laborables',
+    en: 'Weekdays',
+    pt: 'Dias Úteis'
+  },
+  'businessHours.templates.weekend': {
+    es: 'Fin de Semana',
+    en: 'Weekend',
+    pt: 'Fim de Semana'
+  },
+  'businessHours.templates.all': {
+    es: 'Todos los Días',
+    en: 'All Days',
+    pt: 'Todos os Dias'
+  },
+  'businessHours.monday': {
+    es: 'Lunes',
+    en: 'Monday',
+    pt: 'Segunda-feira'
+  },
+  'businessHours.tuesday': {
+    es: 'Martes',
+    en: 'Tuesday',
+    pt: 'Terça-feira'
+  },
+  'businessHours.wednesday': {
+    es: 'Miércoles',
+    en: 'Wednesday',
+    pt: 'Quarta-feira'
+  },
+  'businessHours.thursday': {
+    es: 'Jueves',
+    en: 'Thursday',
+    pt: 'Quinta-feira'
+  },
+  'businessHours.friday': {
+    es: 'Viernes',
+    en: 'Friday',
+    pt: 'Sexta-feira'
+  },
+  'businessHours.saturday': {
+    es: 'Sábado',
+    en: 'Saturday',
+    pt: 'Sábado'
+  },
+  'businessHours.sunday': {
+    es: 'Domingo',
+    en: 'Sunday',
+    pt: 'Domingo'
+  },
+  'businessHours.info.title': {
+    es: 'Información Importante',
+    en: 'Important Information',
+    pt: 'Informação Importante'
+  },
+  'businessHours.info.description': {
+    es: 'Los horarios configurados aquí serán visibles para los clientes y determinarán cuándo pueden realizar pedidos.',
+    en: 'The hours configured here will be visible to customers and will determine when they can place orders.',
+    pt: 'Os horários configurados aqui serão visíveis para os clientes e determinarão quando eles podem fazer pedidos.'
+  },
+  'businessHours.save': {
+    es: 'Guardar Horarios',
+    en: 'Save Hours',
+    pt: 'Salvar Horários'
+  },
+  'businessHours.saving': {
+    es: 'Guardando...',
+    en: 'Saving...',
+    pt: 'Salvando...'
+  },
+  'businessHours.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'branches.actions.businessHours': {
+    es: 'Horarios de Trabajo',
+    en: 'Business Hours',
+    pt: 'Horários de Funcionamento'
+  },
+  // ===== UBICACIÓN Y MAPA =====
+  'location.administrativeDivision': {
+    es: 'División Administrativa',
+    en: 'Administrative Division',
+    pt: 'Divisão Administrativa'
+  },
+  'location.administrativeDivisionHelp': {
+    es: 'Selecciona el Estado, Municipio y Parroquia donde se encuentra la sucursal. Esto permite búsquedas más precisas y mejor ubicación para los clientes.',
+    en: 'Select the State, Municipality and Parish where the branch is located. This allows for more precise searches and better location for customers.',
+    pt: 'Selecione o Estado, Município e Paróquia onde a filial está localizada. Isso permite buscas mais precisas e melhor localização para os clientes.'
+  },
+  'location.gpsLocation': {
+    es: 'Ubicación GPS',
+    en: 'GPS Location',
+    pt: 'Localização GPS'
+  },
+  'location.mapHelp': {
+    es: 'Haz clic en el mapa para seleccionar la ubicación exacta de la sucursal. Esto ayudará a los clientes a encontrar tu tienda más fácilmente.',
+    en: 'Click on the map to select the exact location of the branch. This will help customers find your store more easily.',
+    pt: 'Clique no mapa para selecionar a localização exata da filial. Isso ajudará os clientes a encontrar sua loja mais facilmente.'
+  },
+  'location.selectLocation': {
+    es: 'Debe seleccionar una ubicación en el mapa',
+    en: 'You must select a location on the map',
+    pt: 'Você deve selecionar uma localização no mapa'
+  },
+  'location.selectAdministrativeDivision': {
+    es: 'Debe seleccionar estado, municipio y parroquia',
+    en: 'You must select state, municipality and parish',
+    pt: 'Você deve selecionar estado, município e paróquia'
+  },
+  // ===== DIVISIÓN ADMINISTRATIVA =====
+  'location.state': {
+    es: 'Estado',
+    en: 'State',
+    pt: 'Estado'
+  },
+  'location.municipality': {
+    es: 'Municipio',
+    en: 'Municipality',
+    pt: 'Município'
+  },
+  'location.parish': {
+    es: 'Parroquia',
+    en: 'Parish',
+    pt: 'Paróquia'
+  },
+  'location.selectState': {
+    es: 'Selecciona un estado',
+    en: 'Select a state',
+    pt: 'Selecione um estado'
+  },
+  'location.selectMunicipality': {
+    es: 'Selecciona un municipio',
+    en: 'Select a municipality',
+    pt: 'Selecione um município'
+  },
+  'location.selectParish': {
+    es: 'Selecciona una parroquia',
+    en: 'Select a parish',
+    pt: 'Selecione uma paróquia'
+  },
+  'location.locationSelected': {
+    es: 'Ubicación seleccionada',
+    en: 'Location selected',
+    pt: 'Localização selecionada'
+  },
+  // ===== REDES SOCIALES =====
+  'socialMedia.title': {
+    es: 'Redes Sociales',
+    en: 'Social Media',
+    pt: 'Redes Sociais'
+  },
+  'socialMedia.facebook': {
+    es: 'Facebook',
+    en: 'Facebook',
+    pt: 'Facebook'
+  },
+  'socialMedia.instagram': {
+    es: 'Instagram',
+    en: 'Instagram',
+    pt: 'Instagram'
+  },
+  'socialMedia.twitter': {
+    es: 'Twitter',
+    en: 'Twitter',
+    pt: 'Twitter'
+  },
+  'socialMedia.facebookPlaceholder': {
+    es: 'https://facebook.com/tuempresa',
+    en: 'https://facebook.com/yourcompany',
+    pt: 'https://facebook.com/suaempresa'
+  },
+  'socialMedia.instagramPlaceholder': {
+    es: 'https://instagram.com/tuempresa',
+    en: 'https://instagram.com/yourcompany',
+    pt: 'https://instagram.com/suaempresa'
+  },
+  'socialMedia.twitterPlaceholder': {
+    es: 'https://twitter.com/tuempresa',
+    en: 'https://twitter.com/yourcompany',
+    pt: 'https://twitter.com/suaempresa'
+  },
+  'socialMedia.tiktok': {
+    es: 'TikTok',
+    en: 'TikTok',
+    pt: 'TikTok'
+  },
+  'socialMedia.tiktokPlaceholder': {
+    es: 'https://tiktok.com/@tuempresa',
+    en: 'https://tiktok.com/@yourcompany',
+    pt: 'https://tiktok.com/@suaempresa'
+  },
+  // ===== BOTONES Y ACCIONES =====
+  'branches.actions.manage': {
+    es: 'Gestionar',
+    en: 'Manage',
+    pt: 'Gerenciar'
+  },
+  'branches.actions.continueToDashboard': {
+    es: 'Continuar al Dashboard',
+    en: 'Continue to Dashboard',
+    pt: 'Continuar para o Dashboard'
+  },
+  // ===== MENSAJES DE ELIMINACIÓN =====
+  'branches.delete.warning': {
+    es: '¡Advertencia!',
+    en: 'Warning!',
+    pt: 'Aviso!'
+  },
+  'branches.delete.willDelete': {
+    es: 'Esta acción eliminará permanentemente:',
+    en: 'This action will permanently delete:',
+    pt: 'Esta ação irá excluir permanentemente:'
+  },
+  'branches.delete.products': {
+    es: 'Todos los productos asociados',
+    en: 'All associated products',
+    pt: 'Todos os produtos associados'
+  },
+  'branches.delete.orders': {
+    es: 'Historial de pedidos',
+    en: 'Order history',
+    pt: 'Histórico de pedidos'
+  },
+  'branches.delete.customers': {
+    es: 'Datos de clientes',
+    en: 'Customer data',
+    pt: 'Dados dos clientes'
+  },
+  'branches.delete.settings': {
+    es: 'Configuraciones de la sucursal',
+    en: 'Branch settings',
+    pt: 'Configurações da filial'
+  },
+  'branches.delete.cannotUndo': {
+    es: 'Esta acción no se puede deshacer.',
+    en: 'This action cannot be undone.',
+    pt: 'Esta ação não pode ser desfeita.'
+  },
+  'branches.delete.permanently': {
+    es: 'Eliminar Permanentemente',
+    en: 'Delete Permanently',
+    pt: 'Excluir Permanentemente'
+  },
+  // ===== EJEMPLO DE MÓDULO ADMINISTRATIVO =====
+  'example.title': {
+    es: 'Ejemplo de Módulo',
+    en: 'Module Example',
+    pt: 'Exemplo de Módulo'
+  },
+  'example.description': {
+    es: 'Este es un ejemplo de cómo implementar un módulo administrativo con tema y traducciones',
+    en: 'This is an example of how to implement an administrative module with theme and translations',
+    pt: 'Este é um exemplo de como implementar um módulo administrativo com tema e traduções'
+  },
+  'example.actions.create': {
+    es: 'Crear Nuevo',
+    en: 'Create New',
+    pt: 'Criar Novo'
+  },
+  'example.actions.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'example.actions.delete': {
+    es: 'Eliminar',
+    en: 'Delete',
+    pt: 'Excluir'
+  },
+  'example.table.headers.name': {
+    es: 'Nombre',
+    en: 'Name',
+    pt: 'Nome'
+  },
+  'example.table.headers.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'example.table.headers.date': {
+    es: 'Fecha',
+    en: 'Date',
+    pt: 'Data'
+  },
+  'example.table.headers.actions': {
+    es: 'Acciones',
+    en: 'Actions',
+    pt: 'Ações'
+  },
+  'example.table.emptyMessage': {
+    es: 'No hay elementos disponibles',
+    en: 'No items available',
+    pt: 'Nenhum item disponível'
+  },
+  'example.form.title': {
+    es: 'Crear Nuevo Elemento',
+    en: 'Create New Item',
+    pt: 'Criar Novo Item'
+  },
+  'example.form.nameLabel': {
+    es: 'Nombre',
+    en: 'Name',
+    pt: 'Nome'
+  },
+  'example.form.namePlaceholder': {
+    es: 'Ingrese el nombre',
+    en: 'Enter name',
+    pt: 'Digite o nome'
+  },
+  'example.form.statusLabel': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'example.form.statusActive': {
+    es: 'Activo',
+    en: 'Active',
+    pt: 'Ativo'
+  },
+  'example.form.statusInactive': {
+    es: 'Inactivo',
+    en: 'Inactive',
+    pt: 'Inativo'
+  },
+  'example.form.save': {
+    es: 'Guardar',
+    en: 'Save',
+    pt: 'Salvar'
+  },
+  'example.form.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
   'sidebar.delivery.dashboard': {
     es: 'Dashboard',
     en: 'Dashboard',
@@ -1590,11 +2188,6 @@ export const translations: Translations = {
     es: 'Ofertas Especiales',
     en: 'Special Offers',
     pt: 'Ofertas Especiais'
-  },
-  'home.features.title': {
-    es: '¿Por qué elegir PiezasYA?',
-    en: 'Why choose PiezasYA?',
-    pt: 'Por que escolher PiezasYA?'
   },
   'home.features.subtitle': {
     es: 'La mejor plataforma para encontrar repuestos de calidad',
@@ -3194,11 +3787,6 @@ export const translations: Translations = {
     en: 'Category description',
     pt: 'Descrição da categoria'
   },
-  'adminCategories.createModal.imageUrlOptional': {
-    es: 'URL de imagen (opcional)',
-    en: 'Image URL (optional)',
-    pt: 'URL da imagem (opcional)'
-  },
   'adminCategories.createModal.imageUrlPlaceholder': {
     es: 'https://ejemplo.com/imagen.jpg',
     en: 'https://example.com/image.jpg',
@@ -4791,11 +5379,6 @@ export const translations: Translations = {
     en: 'Pending Orders',
     pt: 'Pedidos Pendentes'
   },
-  'adminSales.stats.activeCustomers': {
-    es: 'Clientes Activos',
-    en: 'Active Customers',
-    pt: 'Clientes Ativos'
-  },
   'adminSales.salesHistory.title': {
     es: 'Historial de Ventas',
     en: 'Sales History',
@@ -5591,11 +6174,6 @@ export const translations: Translations = {
     en: 'Are you sure you want to mark this reward as delivered?',
     pt: 'Tem certeza de que deseja marcar este prêmio como entregue?'
   },
-  'redemptionManagement.modal.trackingNumberPlaceholder': {
-    es: 'Ingrese número de tracking',
-    en: 'Enter tracking number',
-    pt: 'Digite o número de rastreamento'
-  },
   'redemptionManagement.modal.add': {
     es: 'Agregar',
     en: 'Add',
@@ -6386,11 +6964,6 @@ export const translations: Translations = {
     es: 'Búsqueda Semántica',
     en: 'Semantic Search',
     pt: 'Busca Semântica'
-  },
-  'adminSearchConfig.enableSemanticSearch': {
-    es: 'Habilitar búsqueda semántica',
-    en: 'Enable semantic search',
-    pt: 'Habilitar busca semântica'
   },
   'adminSearchConfig.semanticThreshold': {
     es: 'Umbral semántico (0-1)',
@@ -7186,11 +7759,6 @@ export const translations: Translations = {
     en: 'Enabled',
     pt: 'Habilitado'
   },
-  'security.disabled': {
-    es: 'Deshabilitado',
-    en: 'Disabled',
-    pt: 'Desabilitado'
-  },
   'security.configure': {
     es: 'Configurar',
     en: 'Configure',
@@ -7980,16 +8548,6 @@ export const translations: Translations = {
     es: 'Tasa de Cambio',
     en: 'Exchange Rate',
     pt: 'Taxa de Câmbio'
-  },
-  'monetization.exchangeRate.current': {
-    es: 'Tasa Actual',
-    en: 'Current Rate',
-    pt: 'Taxa Atual'
-  },
-  'monetization.exchangeRate.updateFromBcv': {
-    es: 'Actualizar desde BCV',
-    en: 'Update from BCV',
-    pt: 'Atualizar do BCV'
   },
   'monetization.exchangeRate.updateManually': {
     es: 'Actualizar Manualmente',

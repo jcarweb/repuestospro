@@ -106,6 +106,7 @@ class StoreController {
   async getUserStores(req: Request, res: Response) {
     try {
       const userId = (req as any).user._id;
+      console.log('getUserStores: Usuario ID:', userId);
 
       const stores = await Store.find({
         $or: [
@@ -122,12 +123,90 @@ class StoreController {
         .sort({ createdAt: -1 })
         .select('-__v');
 
+      console.log('getUserStores: Tiendas encontradas:', stores.length);
       res.json({
         success: true,
         data: stores
       });
     } catch (error) {
       console.error('Error obteniendo tiendas del usuario:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Debug: Obtener información detallada de tiendas del usuario
+  async getUserStoresDebug(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user._id;
+      console.log('getUserStoresDebug: Usuario ID:', userId);
+
+      // Buscar todas las tiendas (sin filtro de isActive)
+      const allStores = await Store.find({
+        $or: [
+          { owner: userId },
+          { managers: userId }
+        ]
+      }).select('name isActive owner managers');
+
+      // Buscar tiendas activas
+      const activeStores = await Store.find({
+        $or: [
+          { owner: userId },
+          { managers: userId }
+        ],
+        isActive: true
+      }).select('name isActive owner managers');
+
+      res.json({
+        success: true,
+        data: {
+          userId,
+          totalStores: allStores.length,
+          activeStores: activeStores.length,
+          allStores,
+          activeStores
+        }
+      });
+    } catch (error) {
+      console.error('Error en getUserStoresDebug:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Debug: Obtener tiendas completas del usuario
+  async getUserStoresComplete(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user._id;
+      console.log('getUserStoresComplete: Usuario ID:', userId);
+
+      const stores = await Store.find({
+        $or: [
+          { owner: userId },
+          { managers: userId }
+        ],
+        isActive: true
+      })
+        .populate('owner', 'name email')
+        .populate('managers', 'name email')
+        .populate('stateRef', 'name code')
+        .populate('municipalityRef', 'name')
+        .populate('parishRef', 'name')
+        .sort({ createdAt: -1 })
+        .select('-__v');
+
+      console.log('getUserStoresComplete: Tiendas encontradas:', stores.length);
+      res.json({
+        success: true,
+        data: stores
+      });
+    } catch (error) {
+      console.error('Error en getUserStoresComplete:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
@@ -163,11 +242,19 @@ class StoreController {
       } = req.body;
 
       // Validaciones básicas
-      if (!name || !address || !city || !state || !zipCode || !phone || !email) {
-        console.log('Campos faltantes:', { name, address, city, state, zipCode, phone, email });
+      if (!name || !address || !city || !zipCode || !phone || !email) {
+        console.log('Campos faltantes:', { name, address, city, zipCode, phone, email });
         return res.status(400).json({
           success: false,
-          message: 'Los campos nombre, dirección, ciudad, estado, código postal, teléfono y email son obligatorios'
+          message: 'Los campos nombre, dirección, ciudad, código postal, teléfono y email son obligatorios'
+        });
+      }
+
+      // Validar que se haya seleccionado una división administrativa
+      if (!stateRef || !municipalityRef || !parishRef) {
+        return res.status(400).json({
+          success: false,
+          message: 'Debe seleccionar estado, municipio y parroquia'
         });
       }
 
@@ -218,7 +305,6 @@ class StoreController {
         description,
         address,
         city,
-        state,
         zipCode,
         country: country || 'Venezuela',
         phone,
@@ -633,6 +719,56 @@ class StoreController {
       });
     } catch (error) {
       console.error('Error cambiando estado de la tienda:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Establecer tienda como principal
+  async setMainStore(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const store = await Store.findById(id);
+      if (!store) {
+        return res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada'
+        });
+      }
+
+      const userId = (req as any).user._id;
+
+      // Solo el owner puede establecer la tienda principal
+      if (store.owner.toString() !== userId.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: 'Solo el propietario puede establecer la tienda principal'
+        });
+      }
+
+      // Primero, quitar el estado de tienda principal de todas las tiendas del usuario
+      await Store.updateMany(
+        { 
+          owner: userId,
+          _id: { $ne: id } // Excluir la tienda actual
+        },
+        { isMainStore: false }
+      );
+
+      // Luego, establecer la tienda seleccionada como principal
+      store.isMainStore = true;
+      await store.save();
+
+      res.json({
+        success: true,
+        message: 'Tienda establecida como principal exitosamente',
+        data: { isMainStore: true }
+      });
+    } catch (error) {
+      console.error('Error estableciendo tienda principal:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

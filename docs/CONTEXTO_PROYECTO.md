@@ -347,6 +347,129 @@ PiezasYA/
 └── docs/                  # Documentación del proyecto
 ```
 
+## Directriz: Estrategias para Evitar Fugas de Venta Fuera de la App
+
+### 1. Política de Comunicación Segura Dentro de la App
+
+**Restricciones en Publicación de Productos:**
+- No permitir publicación directa de teléfonos, correos o links en la descripción de productos
+- Implementar filtros automáticos que detecten y bloqueen información de contacto externa
+- Validación automática de contenido antes de la publicación
+
+**Sistema de Chat Interno:**
+- Chat interno con filtro automático que detecte números y correos para bloquearlos
+- Implementación similar a Uber, Rappi y otras plataformas de confianza
+- Permitir el contacto únicamente por el chat oficial de la app
+- Registro completo de conversaciones para auditoría y seguridad
+
+### 2. Incentivos al Comprador para Cerrar Dentro de PiezasYA
+
+**Garantía de Compra Segura:**
+- Protección de pago, devolución o reclamo únicamente si se paga dentro de la app
+- Sistema de garantía exclusivo para transacciones internas
+- Proceso de resolución de disputas integrado
+
+**Promociones Exclusivas:**
+- Cashback automático en transacciones internas
+- Puntos de fidelidad con mayor valor en compras dentro de la app
+- Descuentos en próximas compras si el pago se hace en PiezasYA
+- Ofertas especiales solo disponibles para usuarios que compran internamente
+
+**Alertas de Seguridad:**
+- Mostrar alertas visibles: "⚠️ Si sales de la app, pierdes tu garantía de seguridad"
+- Notificaciones push sobre beneficios exclusivos de compra interna
+- Comparación de riesgos entre compra interna vs externa
+
+### 3. Incentivos al Vendedor para No Saltar la App
+
+**Visibilidad Preferencial:**
+- Mayor visibilidad en las búsquedas para tiendas que cumplen con la política de ventas seguras
+- Algoritmo de ranking que priorice tiendas con buen historial de ventas internas
+- Posicionamiento destacado en categorías y búsquedas populares
+
+**Sistema de Reputación:**
+- Métricas y reputación dentro de PiezasYA que aumenten sus posibilidades de vender
+- Sistema de estrellas y calificaciones visibles
+- Badges especiales como "Tienda Premium", "Vendedor Confiable", "Entrega Rápida"
+- Ranking de tiendas destacadas en la plataforma
+
+**Beneficios en Comisiones:**
+- Comisiones más bajas para tiendas con buen historial de ventas internas
+- Planes de comisión escalonados según volumen y cumplimiento
+- Bonificaciones por mantener transacciones dentro de la plataforma
+
+### 4. Tecnología Anti-Trampa
+
+**Detección Automática de Patrones:**
+- Chat con detección automática de patrones de fraude
+- Identificación de números de teléfono, palabras clave como "WhatsApp", "fuera de la app"
+- Análisis de lenguaje natural para detectar intentos de contacto externo
+- Machine learning para mejorar la detección de patrones fraudulentos
+
+**Sistema de Sanciones Progresivas:**
+- Primera infracción: Advertencia automática
+- Segunda infracción: Reducción de visibilidad en búsquedas
+- Infracciones repetidas: Suspensión temporal de la cuenta
+- Infracciones graves: Suspensión permanente
+
+**Monitoreo Continuo:**
+- Análisis de comportamiento de usuarios y vendedores
+- Detección de patrones sospechosos en tiempo real
+- Reportes automáticos de posibles violaciones
+
+### 5. Modelo Flexible de Comisiones
+
+**Estructura de Comisiones Competitiva:**
+- Comisiones significativamente menores a Mercado Libre para reducir tentación de "escapar"
+- Transparencia total en la estructura de comisiones
+- Comparación visible con competidores
+
+**Planes Personalizados:**
+- Planes de comisión personalizados según volumen de ventas
+- Descuentos progresivos para vendedores de alto volumen
+- Beneficios especiales para tiendas que mantienen ventas internas consistentes
+
+**Incentivos Adicionales:**
+- Bonificaciones por cumplimiento de políticas de venta segura
+- Programas de fidelización para vendedores destacados
+- Acceso a herramientas premium para vendedores confiables
+
+### Implementación Técnica
+
+**Filtros de Contenido:**
+```typescript
+interface ContentFilter {
+  phonePatterns: RegExp[];
+  emailPatterns: RegExp[];
+  externalLinks: RegExp[];
+  forbiddenKeywords: string[];
+  fraudPatterns: RegExp[];
+}
+```
+
+**Sistema de Reputación:**
+```typescript
+interface StoreReputation {
+  internalSalesScore: number;
+  complianceScore: number;
+  customerRating: number;
+  badges: string[];
+  commissionTier: string;
+  visibilityMultiplier: number;
+}
+```
+
+**Detección de Fraude:**
+```typescript
+interface FraudDetection {
+  patternMatching: boolean;
+  nlpAnalysis: boolean;
+  behaviorAnalysis: boolean;
+  realTimeMonitoring: boolean;
+  automaticFlagging: boolean;
+}
+```
+
 ## Recapitulemos: Estado de Desarrollo Actual
 
 El proyecto es un ecommerce completo de repuestos de vehículos con frontend en React/TypeScript y backend en Node.js/Express. Tiene implementado un sistema robusto de autenticación con 4 roles principales (Administrador, Cliente, Delivery, Gestor de Tienda), cada uno con funcionalidades específicas y permisos bien definidos. 

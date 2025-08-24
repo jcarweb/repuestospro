@@ -130,6 +130,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const loginAsync = async (email: string, password: string) => {
     try {
       console.log('🌐 Enviando request a:', `http://localhost:5000/api/auth/login`);
+      
+      // Verificar si el servidor está disponible antes de hacer la petición
+      const serverCheck = await fetch('http://localhost:5000/health', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).catch(() => null);
+
+      if (!serverCheck || !serverCheck.ok) {
+        throw new Error('El servidor backend no está disponible. Por favor, asegúrate de que el servidor esté ejecutándose en el puerto 5000.');
+      }
+
       const response = await fetch(`http://localhost:5000/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -158,8 +171,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       console.log('✅ Login exitoso, guardando datos...');
       login(data.data.user, data.data.token);
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error en loginAsync:', error);
+      
+      // Manejar errores específicos de red
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        throw new Error('No se pudo conectar con el servidor. Verifica que el backend esté ejecutándose en http://localhost:5000');
+      }
+      
       throw error;
     }
   };

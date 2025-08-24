@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useActiveStore } from '../contexts/ActiveStoreContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Store, ChevronDown, Building2, Check } from 'lucide-react';
 
 const ActiveStoreSelector: React.FC = () => {
   const { activeStore, setActiveStore, userStores, loading } = useActiveStore();
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
   if (loading) {
@@ -19,7 +21,7 @@ const ActiveStoreSelector: React.FC = () => {
     return (
       <div className="flex items-center space-x-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-md">
         <Building2 className="h-4 w-4 text-yellow-600" />
-        <span className="text-sm text-yellow-800">Sin tiendas</span>
+        <span className="text-sm text-yellow-800">{t('store.noStores')}</span>
       </div>
     );
   }
@@ -32,7 +34,7 @@ const ActiveStoreSelector: React.FC = () => {
       >
         <Building2 className="h-4 w-4 text-[#FFC300]" />
         <span className="text-sm font-medium text-gray-700 truncate max-w-32">
-          {activeStore?.name || 'Seleccionar Tienda'}
+          {activeStore?.name || t('store.selectStore')}
         </span>
         <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>

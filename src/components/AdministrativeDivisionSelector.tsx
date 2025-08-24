@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, MapPin } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface State {
   _id: string;
@@ -48,6 +49,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
   required = false,
   className = ''
 }) => {
+  const { t } = useLanguage();
   const [states, setStates] = useState<State[]>([]);
   const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
   const [parishes, setParishes] = useState<Parish[]>([]);
@@ -159,7 +161,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           <MapPin className="inline h-4 w-4 mr-1" />
-          Estado {required && '*'}
+          {t('location.state')} {required && '*'}
         </label>
         <div className="relative">
           <select
@@ -168,7 +170,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] focus:border-transparent appearance-none bg-white"
             disabled={loading.states}
           >
-            <option value="">Selecciona un estado</option>
+            <option value="">{t('location.selectState')}</option>
             {states.map((state) => (
               <option key={state._id} value={state._id}>
                 {state.name} ({state.code})
@@ -187,7 +189,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
       {selectedState && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Municipio {required && '*'}
+            {t('location.municipality')} {required && '*'}
           </label>
           <div className="relative">
             <select
@@ -196,7 +198,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] focus:border-transparent appearance-none bg-white"
               disabled={loading.municipalities}
             >
-              <option value="">Selecciona un municipio</option>
+              <option value="">{t('location.selectMunicipality')}</option>
               {municipalities.map((municipality) => (
                 <option key={municipality._id} value={municipality._id}>
                   {municipality.name} - {municipality.capital}
@@ -216,7 +218,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
       {selectedMunicipality && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Parroquia {required && '*'}
+            {t('location.parish')} {required && '*'}
           </label>
           <div className="relative">
             <select
@@ -225,7 +227,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300] focus:border-transparent appearance-none bg-white"
               disabled={loading.parishes}
             >
-              <option value="">Selecciona una parroquia</option>
+              <option value="">{t('location.selectParish')}</option>
               {parishes.map((parish) => (
                 <option key={parish._id} value={parish._id}>
                   {parish.name}
@@ -246,7 +248,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
         <div className="bg-green-50 border border-green-200 rounded-md p-3">
           <div className="flex items-center text-green-800">
             <MapPin className="h-4 w-4 mr-2" />
-            <span className="text-sm font-medium">Ubicación seleccionada</span>
+            <span className="text-sm font-medium">{t('location.locationSelected')}</span>
           </div>
           <div className="text-xs text-green-700 mt-1">
             <div>{states.find(s => s._id === selectedState)?.name}</div>

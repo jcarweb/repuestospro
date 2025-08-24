@@ -141,7 +141,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             return;
           }
           
-          setError(error.message || 'Error en el inicio de sesión');
+          // Manejar errores específicos de conexión
+          if (error.message.includes('servidor backend no está disponible') || 
+              error.message.includes('No se pudo conectar con el servidor')) {
+            setError('🔧 Error de conexión: El servidor backend no está ejecutándose. Por favor, inicia el servidor backend primero.');
+          } else {
+            setError(error.message || 'Error en el inicio de sesión');
+          }
         }
       } else if (mode === 'register') {
         const response = await fetch('http://localhost:5000/api/auth/register', {

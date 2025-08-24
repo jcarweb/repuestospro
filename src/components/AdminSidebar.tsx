@@ -56,7 +56,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
           icon: BarChart3
         },
         {
-          name: 'Gestión de Sucursales',
+          name: t('sidebar.storeManager.branches'),
           path: '/store-manager/branches',
           icon: Building2
         },

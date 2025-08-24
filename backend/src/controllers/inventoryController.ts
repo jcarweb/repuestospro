@@ -19,44 +19,74 @@ class InventoryController {
         distributionRules 
       } = req.body;
 
+      console.log('Configurando inventario para tienda:', storeId);
+      console.log('Datos recibidos:', req.body);
+
       // Verificar que la tienda existe
       const store = await Store.findById(storeId);
       if (!store) {
+        console.log('Tienda no encontrada:', storeId);
         return res.status(404).json({ success: false, message: 'Tienda no encontrada' });
+      }
+
+      // Validar datos requeridos
+      if (!inventoryType) {
+        return res.status(400).json({ success: false, message: 'El tipo de inventario es requerido' });
+      }
+
+      if (!distributionRules) {
+        return res.status(400).json({ success: false, message: 'Las reglas de distribución son requeridas' });
       }
 
       // Crear o actualizar configuración de inventario
       let config = await InventoryConfig.findOne({ store: storeId });
       
       if (!config) {
+        console.log('Creando nueva configuración de inventario');
         config = new InventoryConfig({
           store: storeId,
           inventoryType,
           parentStore,
           childStores: childStores || [],
-          allowLocalStock,
-          autoDistribute,
-          distributionRules
+          allowLocalStock: allowLocalStock || false,
+          autoDistribute: autoDistribute || false,
+          distributionRules: {
+            minStock: distributionRules.minStock || 0,
+            maxStock: distributionRules.maxStock || 1000,
+            distributionMethod: distributionRules.distributionMethod || 'equal'
+          }
         });
       } else {
+        console.log('Actualizando configuración existente');
         config.inventoryType = inventoryType;
         config.parentStore = parentStore;
         config.childStores = childStores || [];
-        config.allowLocalStock = allowLocalStock;
-        config.autoDistribute = autoDistribute;
-        config.distributionRules = distributionRules;
+        config.allowLocalStock = allowLocalStock || false;
+        config.autoDistribute = autoDistribute || false;
+        config.distributionRules = {
+          minStock: distributionRules.minStock || 0,
+          maxStock: distributionRules.maxStock || 1000,
+          distributionMethod: distributionRules.distributionMethod || 'equal'
+        };
       }
 
+      console.log('Guardando configuración...');
       await config.save();
+      console.log('Configuración guardada exitosamente');
 
       res.json({
         success: true,
-        message: 'Configuración de inventario actualizada',
+        message: 'Configuración de inventario actualizada exitosamente',
         data: config
       });
     } catch (error) {
       console.error('Error configurando inventario:', error);
-      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+      console.error('Stack trace:', error.stack);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Error interno del servidor',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
   }
 
@@ -69,8 +99,22 @@ class InventoryController {
         .populate('parentStore', 'name address city')
         .populate('childStores', 'name address city');
 
+      // Si no hay configuración, retornar configuración por defecto
       if (!config) {
-        return res.status(404).json({ success: false, message: 'Configuración no encontrada' });
+        return res.json({
+          success: true,
+          data: {
+            inventoryType: 'separate',
+            childStores: [],
+            allowLocalStock: false,
+            autoDistribute: false,
+            distributionRules: {
+              minStock: 0,
+              maxStock: 1000,
+              distributionMethod: 'equal'
+            }
+          }
+        });
       }
 
       res.json({

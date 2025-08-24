@@ -4,6 +4,7 @@ import Store from '../models/Store';
 import multer from 'multer';
 import csv from 'csv-parser';
 import fs from 'fs';
+import { ContentFilterService } from '../middleware/contentFilter';
 
 // Configuración de multer para subida de archivos
 const storage = multer.diskStorage({
@@ -316,6 +317,22 @@ class ProductController {
         });
       }
 
+      // Validación de contenido anti-fuga
+      const contentValidation = await ContentFilterService.validateProductDescription(description);
+      if (!contentValidation.isValid) {
+        return res.status(400).json({
+          success: false,
+          message: 'La descripción del producto contiene información no permitida',
+          violations: contentValidation.violations,
+          blockedContent: contentValidation.blockedContent,
+          suggestions: [
+            'Usa el chat interno de PiezasYA para contactar al vendedor',
+            'No incluyas información de contacto personal',
+            'No incluyas enlaces externos'
+          ]
+        });
+      }
+
       const userId = (req as any).user._id;
       const userRole = (req as any).user.role;
 
@@ -459,6 +476,24 @@ class ProductController {
           return res.status(400).json({
             success: false,
             message: 'El SKU ya existe en esta tienda'
+          });
+        }
+      }
+
+      // Validación de contenido anti-fuga si se está actualizando la descripción
+      if (updateData.description) {
+        const contentValidation = await ContentFilterService.validateProductDescription(updateData.description);
+        if (!contentValidation.isValid) {
+          return res.status(400).json({
+            success: false,
+            message: 'La descripción del producto contiene información no permitida',
+            violations: contentValidation.violations,
+            blockedContent: contentValidation.blockedContent,
+            suggestions: [
+              'Usa el chat interno de PiezasYA para contactar al vendedor',
+              'No incluyas información de contacto personal',
+              'No incluyas enlaces externos'
+            ]
           });
         }
       }

@@ -4,10 +4,17 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
+import { createServer } from 'http';
 import DatabaseService from './config/database';
 import config from './config/env';
 import passport from './config/passport';
 import session from 'express-session';
+import { ChatService } from './services/ChatService';
+import { ChatController } from './controllers/ChatController';
+import createChatRoutes from './routes/chatRoutes';
+import createWarrantyRoutes from './routes/warrantyRoutes';
+import createClaimRoutes from './routes/claimRoutes';
+import { createTransactionRoutes } from './routes/transactionRoutes';
 
 // Importar rutas
 import productRoutes from './routes/productRoutes';
@@ -169,6 +176,13 @@ app.use('/api/profile', profileLimiter, profileRoutes); // Rate limiter específ
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/monetization', monetizationRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/warranties', createWarrantyRoutes());
+app.use('/api/claims', createClaimRoutes());
+app.use('/api/transactions', createTransactionRoutes());
+
+// Variables globales para chat
+let chatService: ChatService;
+let chatController: ChatController;
 
 // Middleware para manejar rutas no encontradas
 app.use('*', (req, res) => {
@@ -226,10 +240,21 @@ const startServer = async () => {
     // Verificar si el puerto configurado está disponible
     const availablePort = await findAvailablePort(Number(config.PORT));
     
-    const server = app.listen(availablePort, () => {
+    // Crear servidor HTTP
+    const server = createServer(app);
+    
+    // Inicializar servicio de chat con WebSocket
+    chatService = new ChatService(server);
+    chatController = new ChatController(chatService);
+    
+    // Agregar rutas de chat
+    app.use('/api/chat', createChatRoutes(chatController));
+    
+    server.listen(availablePort, () => {
       console.log(`🚀 Servidor iniciado en puerto ${availablePort}`);
       console.log(`📊 Ambiente: ${config.NODE_ENV}`);
       console.log(`🔗 URL: http://localhost:${availablePort}`);
+      console.log(`💬 WebSocket Chat habilitado`);
       console.log('✅ Server listening');
       
       // Si el puerto cambió, mostrar advertencia

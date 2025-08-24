@@ -50,6 +50,7 @@ const StoreSetup: React.FC = () => {
   const { user, token } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [checkingStore, setCheckingStore] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<StoreSetupData>({
     name: '',
@@ -85,28 +86,48 @@ const StoreSetup: React.FC = () => {
   // Verificar si el usuario ya tiene una tienda
   useEffect(() => {
     const checkExistingStore = async () => {
+      if (!user?.id || !token) {
+        setCheckingStore(false);
+        return;
+      }
+
       try {
-        const response = await fetch('http://localhost:5000/api/user/stores', {
+        console.log('Verificando si el usuario ya tiene tiendas...');
+        
+        // Timeout para evitar esperar indefinidamente
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Timeout')), 10000);
+        });
+
+        const fetchPromise = fetch('http://localhost:5000/api/user/stores', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
 
+        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
         const data = await response.json();
+        console.log('Respuesta de verificación de tiendas:', data);
         
-        if (data.success && data.data.length > 0) {
+        if (data.success && data.data && data.data.length > 0) {
           // El usuario ya tiene una tienda, redirigir al dashboard
-          navigate('/store-manager/dashboard');
+          console.log(`Usuario ya tiene ${data.data.length} tienda(s), redirigiendo al dashboard`);
+          navigate('/store-manager/dashboard', { replace: true });
+          return;
+        } else {
+          console.log('Usuario no tiene tiendas, mostrando formulario de setup');
         }
       } catch (error) {
         console.error('Error verificando tienda existente:', error);
+        // En caso de error, mostrar el formulario de setup
+        console.log('Error en verificación, mostrando formulario de setup');
+      } finally {
+        setCheckingStore(false);
       }
     };
 
-    if (user && token) {
-      checkExistingStore();
-    }
-  }, [user, token, navigate]);
+    checkExistingStore();
+  }, [user?.id, token, navigate]);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
@@ -198,6 +219,19 @@ const StoreSetup: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Mostrar loading mientras se verifica si ya tiene tienda
+  if (checkingStore) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Verificando...</h2>
+          <p className="text-gray-600">Comprobando si ya tienes una tienda configurada.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user || user.role !== 'store_manager') {
     return (

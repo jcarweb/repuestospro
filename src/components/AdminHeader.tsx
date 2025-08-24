@@ -38,8 +38,15 @@ const AdminHeader: React.FC = () => {
   };
 
   const handleMenuClick = (path: string) => {
-    // Para el admin, siempre navegar a las rutas del admin
-    navigate(`/admin${path}`);
+    // Navegar según el rol del usuario
+    if (user?.role === 'admin') {
+      navigate(`/admin${path}`);
+    } else if (user?.role === 'store_manager') {
+      navigate(`/store-manager${path}`);
+    } else {
+      // Para otros roles, navegar a la ruta base
+      navigate(path);
+    }
     setIsUserMenuOpen(false);
   };
 
@@ -68,7 +75,9 @@ const AdminHeader: React.FC = () => {
             </div>
             <div className="hidden sm:block">
               <p className="text-sm font-medium text-[#333333] dark:text-white">{user?.name}</p>
-              <p className="text-xs text-gray-500 dark:text-white">{t('header.admin')}</p>
+              <p className="text-xs text-gray-500 dark:text-white">
+                {user?.role === 'store_manager' ? t('sidebar.roles.storeManager') : t('sidebar.roles.admin')}
+              </p>
             </div>
           </button>
 

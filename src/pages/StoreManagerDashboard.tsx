@@ -5,6 +5,15 @@ import { useActiveStore } from '../contexts/ActiveStoreContext';
 import ActiveStoreIndicator from '../components/ActiveStoreIndicator';
 import InventoryStatusCard from '../components/InventoryStatusCard';
 import InventoryConfigModal from '../components/InventoryConfigModal';
+import StoreDebugInfo from '../components/StoreDebugInfo';
+import ApiTestComponent from '../components/ApiTestComponent';
+import StoreContextTester from '../components/StoreContextTester';
+import SimpleStoreTest from '../components/SimpleStoreTest';
+import ContextVsDirectTest from '../components/ContextVsDirectTest';
+import ContextInitializationTest from '../components/ContextInitializationTest';
+import SimpleContextTest from '../components/SimpleContextTest';
+import ActiveStoreDebugger from '../components/ActiveStoreDebugger';
+import StoreSelector from '../components/StoreSelector';
 import { 
   Package, 
   TrendingUp, 
@@ -49,6 +58,19 @@ const StoreManagerDashboard: React.FC = () => {
 
   return (
     <div className="p-6">
+      {/* Debug Info - Temporal */}
+      <StoreDebugInfo />
+      <ApiTestComponent />
+      <StoreContextTester />
+      <SimpleStoreTest />
+      <ContextVsDirectTest />
+      <ContextInitializationTest />
+      <SimpleContextTest />
+      <ActiveStoreDebugger />
+      
+      {/* Selector de tienda */}
+      <StoreSelector />
+      
       {/* Indicador de tienda activa */}
       <ActiveStoreIndicator />
       

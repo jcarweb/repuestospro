@@ -8,6 +8,7 @@ import { useLanguageChange } from '../hooks/useLanguageChange';
 import AuthModal from './AuthModal';
 import Logo from './Logo';
 import LanguageSelector from './LanguageSelector';
+import ServerStatus from './ServerStatus';
 import { 
   ShoppingCart, 
   User, 
@@ -98,6 +99,8 @@ const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
+            {/* Server Status */}
+            <ServerStatus className="text-xs" />
             <Link 
               to="/categories" 
               className="text-[#333333] dark:text-white hover:text-[#FFC300] transition-colors"

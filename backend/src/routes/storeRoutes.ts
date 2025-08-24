@@ -14,6 +14,8 @@ router.use(authMiddleware);
 
 // Rutas para todos los usuarios autenticados
 router.get('/user/stores', storeController.getUserStores);
+router.get('/user/stores/debug', storeController.getUserStoresDebug);
+router.get('/user/stores/complete', storeController.getUserStoresComplete);
 router.post('/stores', storeController.createStore);
 router.put('/stores/:id', storeController.updateStore);
 
@@ -24,8 +26,9 @@ router.delete('/stores/:id/managers', storeController.removeManager);
 // Rutas para desactivar tienda (solo owner)
 router.put('/stores/:id/deactivate', storeController.deactivateStore);
 
-// Rutas para toggle status y eliminar (solo owner)
+// Rutas para toggle status, establecer principal y eliminar (solo owner)
 router.patch('/stores/:id/toggle-status', storeController.toggleStoreStatus);
+router.put('/stores/:id/set-main', storeController.setMainStore);
 router.delete('/stores/:id', storeController.deleteStore);
 
 // Rutas para admin

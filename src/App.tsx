@@ -89,6 +89,7 @@ import StoreManagerLayout from './components/StoreManagerLayout';
 import StoreManagerInitializer from './components/StoreManagerInitializer';
 import StoreBranchesManager from './components/StoreBranchesManager';
 import ProtectedRoute from './components/ProtectedRoute';
+import QuickStoreCheck from './components/QuickStoreCheck';
 
 
 
@@ -407,11 +408,13 @@ function AppContent() {
                    {/* Rutas de gestor de tienda - SIN Header ni Sidebar principal */}
           <Route path="/store-manager/*" element={
             <Routes>
-              <Route path="/" element={
-                <StoreManagerRoute>
-                  <StoreManagerInitializer />
-                </StoreManagerRoute>
-              } />
+                             <Route path="/" element={
+                 <StoreManagerRoute>
+                   <QuickStoreCheck>
+                     <StoreManagerInitializer />
+                   </QuickStoreCheck>
+                 </StoreManagerRoute>
+               } />
               <Route path="/branches" element={
                 <StoreManagerRoute>
                   <StoreBranchesManager />
@@ -511,14 +514,12 @@ function AppContent() {
            </Routes>
          } />
 
-         {/* Ruta de store-setup separada */}
-         <Route path="/store-setup" element={
-           <StoreManagerRoute>
-             <StoreManagerLayout>
-               <StoreSetup />
-             </StoreManagerLayout>
-           </StoreManagerRoute>
-         } />
+                   {/* Ruta de store-setup separada */}
+          <Route path="/store-setup" element={
+            <StoreManagerRoute>
+              <StoreSetup />
+            </StoreManagerRoute>
+          } />
       </Routes>
       
              
