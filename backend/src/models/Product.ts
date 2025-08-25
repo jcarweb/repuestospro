@@ -19,6 +19,8 @@ export interface IProduct extends Document {
   store: mongoose.Types.ObjectId; // Tienda a la que pertenece el producto
   createdBy?: mongoose.Types.ObjectId; // Gestor que creó el producto
   updatedBy?: mongoose.Types.ObjectId; // Gestor que actualizó el producto
+  deleted?: boolean; // Indica si el producto está en la papelera
+  deletedAt?: Date; // Fecha cuando fue movido a la papelera
   createdAt: Date;
   updatedAt: Date;
 }
@@ -106,6 +108,13 @@ const ProductSchema = new Schema<IProduct>({
   updatedBy: {
     type: Schema.Types.ObjectId,
     ref: 'User'
+  },
+  deleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedAt: {
+    type: Date
   }
 }, {
   timestamps: true
@@ -125,8 +134,10 @@ ProductSchema.index({ popularity: -1 });
 ProductSchema.index({ store: 1 }); // Índice para consultas por tienda
 ProductSchema.index({ createdBy: 1 });
 ProductSchema.index({ updatedBy: 1 });
+ProductSchema.index({ deleted: 1 });
+ProductSchema.index({ deletedAt: 1 });
 
-// Índice compuesto para SKU único por tienda
-ProductSchema.index({ sku: 1, store: 1 }, { unique: true });
+// Índice compuesto para SKU único por tienda (solo productos no eliminados)
+ProductSchema.index({ sku: 1, store: 1, deleted: 1 }, { unique: true, partialFilterExpression: { deleted: { $ne: true } } });
 
 export default mongoose.model<IProduct>('Product', ProductSchema); 

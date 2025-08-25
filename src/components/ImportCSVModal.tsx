@@ -38,7 +38,7 @@ const ImportCSVModal: React.FC<ImportCSVModalProps> = ({
   const loadStores = async () => {
     try {
       // Usar el endpoint que funciona en la aplicación
-      const response = await fetch('/api/stores/my-stores', {
+      const response = await fetch('/api/user/stores', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

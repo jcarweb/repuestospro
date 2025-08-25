@@ -4,7 +4,10 @@ import { authMiddleware, adminMiddleware, storeManagerMiddleware } from '../midd
 
 const router = Router();
 
-// Rutas públicas para clientes
+// Rutas públicas
+router.get('/test', productController.testEndpoint);
+
+// Rutas para todos los usuarios autenticados
 router.get('/', productController.getProducts);
 router.get('/featured', productController.getFeaturedProducts);
 router.get('/categories', productController.getCategories);
@@ -31,5 +34,10 @@ router.post('/store-manager/create', authMiddleware, storeManagerMiddleware, pro
 router.put('/store-manager/:id', authMiddleware, storeManagerMiddleware, productController.updateProduct);
 router.delete('/store-manager/:id', authMiddleware, storeManagerMiddleware, productController.deleteProduct);
 router.post('/store-manager/import-csv', authMiddleware, storeManagerMiddleware, upload.single('csvFile'), productController.importProductsFromCSV);
+
+// Rutas para papelera (productos eliminados)
+router.get('/store-manager/trash', authMiddleware, storeManagerMiddleware, productController.getDeletedProducts);
+router.put('/store-manager/trash/:id/restore', authMiddleware, storeManagerMiddleware, productController.restoreProduct);
+router.delete('/store-manager/trash/:id/permanent', authMiddleware, storeManagerMiddleware, productController.permanentlyDeleteProduct);
 
 export default router; 

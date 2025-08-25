@@ -16,6 +16,7 @@ router.use(authMiddleware);
 router.get('/user/stores', storeController.getUserStores);
 router.get('/user/stores/debug', storeController.getUserStoresDebug);
 router.get('/user/stores/complete', storeController.getUserStoresComplete);
+router.get('/user/stores/test', storeController.testUserStores);
 router.post('/stores', storeController.createStore);
 router.put('/stores/:id', storeController.updateStore);
 

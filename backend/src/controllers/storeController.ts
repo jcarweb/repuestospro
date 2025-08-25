@@ -214,6 +214,52 @@ class StoreController {
     }
   }
 
+  // Debug: Endpoint simple para probar
+  async testUserStores(req: Request, res: Response) {
+    try {
+      console.log('testUserStores: Iniciando...');
+      console.log('testUserStores: Headers:', req.headers);
+      console.log('testUserStores: User:', (req as any).user);
+      
+      const userId = (req as any).user?._id;
+      console.log('testUserStores: Usuario ID:', userId);
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+      }
+
+      // Buscar tiendas simples sin populate
+      const stores = await Store.find({
+        $or: [
+          { owner: userId },
+          { managers: userId }
+        ],
+        isActive: true
+      }).select('name isActive owner managers');
+
+      console.log('testUserStores: Tiendas encontradas:', stores.length);
+      
+      res.json({
+        success: true,
+        data: stores,
+        debug: {
+          userId,
+          totalStores: stores.length
+        }
+      });
+    } catch (error) {
+      console.error('Error en testUserStores:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: error.message
+      });
+    }
+  }
+
   // Crear nueva tienda
   async createStore(req: Request, res: Response) {
     try {

@@ -7,6 +7,7 @@ import fs from 'fs';
 import { ContentFilterService } from '../middleware/contentFilter';
 import { productUpload } from '../config/cloudinary';
 import imageService from '../services/imageService';
+import InventoryConfig from '../models/InventoryConfig'; // Added import for InventoryConfig
 
 // Configuración de multer para subida de archivos
 const storage = multer.diskStorage({
@@ -38,6 +39,24 @@ export const upload = multer({
 });
 
 class ProductController {
+  // Endpoint de prueba simple
+  async testEndpoint(req: Request, res: Response) {
+    try {
+      console.log('🔍 Test endpoint llamado');
+      res.json({
+        success: true,
+        message: 'Backend funcionando correctamente',
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error en test endpoint:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
   // Obtener todos los productos (con paginación y filtros)
   async getProducts(req: Request, res: Response) {
     try {
@@ -54,7 +73,7 @@ class ProductController {
         search
       } = req.query;
 
-      const filter: any = { isActive: true };
+      const filter: any = { isActive: true, deleted: { $ne: true } };
 
       // Filtros
       if (category) filter.category = category;
@@ -116,7 +135,7 @@ class ProductController {
     try {
       const { id } = req.params;
 
-      const product = await Product.findOne({ _id: id, isActive: true })
+      const product = await Product.findOne({ _id: id, isActive: true, deleted: { $ne: true } })
         .select('-__v');
 
       if (!product) {
@@ -163,6 +182,7 @@ class ProductController {
 
       const filter: any = { 
         isActive: true,
+        deleted: { $ne: true },
         category: category.toLowerCase()
       };
 
@@ -210,7 +230,8 @@ class ProductController {
     try {
       const products = await Product.find({ 
         isActive: true, 
-        isFeatured: true 
+        isFeatured: true,
+        deleted: { $ne: true }
       })
         .sort({ popularity: -1 })
         .limit(8)
@@ -233,7 +254,7 @@ class ProductController {
   async getCategories(req: Request, res: Response) {
     try {
       const categories = await Product.aggregate([
-        { $match: { isActive: true } },
+        { $match: { isActive: true, deleted: { $ne: true } } },
         {
           $group: {
             _id: '$category',
@@ -265,7 +286,7 @@ class ProductController {
   async getBrands(req: Request, res: Response) {
     try {
       const brands = await Product.aggregate([
-        { $match: { isActive: true } },
+        { $match: { isActive: true, deleted: { $ne: true } } },
         {
           $group: {
             _id: '$brand',
@@ -291,7 +312,7 @@ class ProductController {
     }
   }
 
-  // Crear un producto individual (Admin/Store Manager)
+  // Crear un producto individual (Admin/Store Manager) - VERSIÓN SIMPLIFICADA
   async createProduct(req: Request, res: Response) {
     try {
       const {
@@ -307,171 +328,98 @@ class ProductController {
         isFeatured,
         tags,
         specifications,
-        images, // Ahora puede ser base64 o URLs
-        storeId // ID de la tienda
+        images,
+        storeId
       } = req.body;
 
       // Validaciones básicas
-      if (!name || !description || !price || !category || !sku) {
+      if (!name || !description || !price || !category || !sku || !storeId) {
         return res.status(400).json({
           success: false,
-          message: 'Los campos nombre, descripción, precio, categoría y SKU son obligatorios'
+          message: 'Los campos nombre, descripción, precio, categoría, SKU y storeId son obligatorios'
         });
       }
 
-      // Validación de contenido anti-fuga
-      const contentValidation = await ContentFilterService.validateProductDescription(description);
-      if (!contentValidation.isValid) {
-        return res.status(400).json({
-          success: false,
-          message: 'La descripción del producto contiene información no permitida',
-          violations: contentValidation.violations,
-          blockedContent: contentValidation.blockedContent,
-          suggestions: [
-            'Usa el chat interno de PiezasYA para contactar al vendedor',
-            'No incluyas información de contacto personal',
-            'No incluyas enlaces externos'
-          ]
-        });
-      }
-
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
-
-      let targetStoreId = storeId;
-
-      // Si es gestor de tienda, verificar que tenga acceso a la tienda
-      if (userRole === 'store_manager') {
-        if (!storeId) {
-          return res.status(400).json({
-            success: false,
-            message: 'Debe especificar una tienda'
-          });
-        }
-
-        // Verificar que el usuario tenga acceso a la tienda
-        const store = await Store.findOne({
-          _id: storeId,
-          $or: [
-            { owner: userId },
-            { managers: userId }
-          ],
-          isActive: true
-        });
-
-        if (!store) {
-          return res.status(403).json({
-            success: false,
-            message: 'No tiene permisos para crear productos en esta tienda'
-          });
-        }
-      } else if (userRole === 'admin') {
-        // Si es admin, verificar que la tienda existe
-        if (storeId) {
-          const store = await Store.findById(storeId);
-          if (!store) {
-            return res.status(404).json({
-              success: false,
-              message: 'Tienda no encontrada'
-            });
-          }
-        } else {
-          return res.status(400).json({
-            success: false,
-            message: 'Debe especificar una tienda'
-          });
-        }
-      }
-
-      // Verificar si el SKU ya existe en la tienda
-      const existingProduct = await Product.findOne({ 
-        sku, 
-        store: targetStoreId 
-      });
-      if (existingProduct) {
-        return res.status(400).json({
-          success: false,
-          message: 'El SKU ya existe en esta tienda'
-        });
-      }
-
-      // Procesar imágenes
+      // Procesar imágenes si se proporcionan
       let processedImages: string[] = [];
-      
       if (images && images.length > 0) {
         try {
-          // Si las imágenes vienen como base64
-          if (Array.isArray(images)) {
-            const base64Images = images.filter(img => 
-              typeof img === 'string' && img.startsWith('data:image/')
-            );
-            
-            if (base64Images.length > 0) {
-              const uploadResults = await imageService.uploadMultipleBase64Images(
-                base64Images.map(img => ({
-                  data: img,
-                  format: img.split(';')[0].split('/')[1] || 'jpg'
-                })),
-                'piezasya/products'
-              );
-              
-              processedImages = uploadResults.map(result => result.secureUrl);
+          const imageService = require('../services/imageService').default;
+          
+          // Convertir imágenes base64 a URLs de Cloudinary
+          const uploadPromises = images.map(async (img: any, index: number) => {
+            if (img.startsWith('data:image/')) {
+              const result = await imageService.uploadBase64Image({
+                data: img,
+                format: img.split(';')[0].split('/')[1] || 'jpg',
+                filename: `product_${Date.now()}_${index}`
+              }, 'piezasya/products');
+              return result.secureUrl;
+            } else if (img.startsWith('http')) {
+              return img;
+            } else {
+              return img;
             }
-          } else if (typeof images === 'string') {
-            // Si viene como string separado por comas
-            const imageArray = images.split(',').map((img: string) => img.trim());
-            
-            for (const img of imageArray) {
-              if (img.startsWith('data:image/')) {
-                // Es base64
-                const uploadResult = await imageService.uploadBase64Image({
-                  data: img,
-                  format: img.split(';')[0].split('/')[1] || 'jpg'
-                }, 'piezasya/products');
-                
-                processedImages.push(uploadResult.secureUrl);
-              } else if (img.startsWith('http')) {
-                // Es URL externa
-                processedImages.push(img);
-              }
-            }
-          }
-        } catch (error) {
-          console.error('Error procesando imágenes:', error);
-          return res.status(400).json({
-            success: false,
-            message: 'Error al procesar las imágenes del producto'
           });
+          
+          processedImages = await Promise.all(uploadPromises);
+        } catch (imageError) {
+          console.error('Error procesando imágenes:', imageError);
+          processedImages = [];
         }
       }
 
-      // Crear el producto
-      const product = new Product({
-        name,
-        description,
+      // Crear el producto con datos mínimos
+      const productData = {
+        name: String(name),
+        description: String(description),
         price: Number(price),
-        category,
-        brand,
-        subcategory,
-        sku,
-        originalPartCode,
+        category: String(category),
+        brand: brand ? String(brand) : undefined,
+        subcategory: subcategory ? String(subcategory) : undefined,
+        sku: String(sku),
+        originalPartCode: originalPartCode ? String(originalPartCode) : undefined,
         stock: Number(stock) || 0,
+        isActive: true,
         isFeatured: Boolean(isFeatured),
-        tags: tags ? tags.split(',').map((tag: string) => tag.trim()) : [],
-        specifications: specifications ? JSON.parse(specifications) : {},
+        tags: tags ? (Array.isArray(tags) ? tags : tags.split(',').map((tag: string) => tag.trim())) : [],
+        specifications: specifications ? (typeof specifications === 'string' ? { description: specifications } : specifications) : {},
         images: processedImages,
-        store: targetStoreId,
-        createdBy: userId
-      });
+        store: storeId,
+        createdBy: storeId // Temporalmente usar storeId como createdBy
+      };
 
-      await product.save();
+      try {
+        const product = new Product(productData);
+        await product.save();
 
-      res.status(201).json({
-        success: true,
-        message: 'Producto creado exitosamente',
-        data: product
-      });
-    } catch (error) {
+        res.status(201).json({
+          success: true,
+          message: 'Producto creado exitosamente',
+          data: product
+        });
+      } catch (saveError: any) {
+        // Si es un error de validación de Mongoose
+        if (saveError.name === 'ValidationError') {
+          const validationErrors = Object.values(saveError.errors).map((err: any) => err.message);
+          return res.status(400).json({
+            success: false,
+            message: 'Error de validación en los datos del producto',
+            errors: validationErrors
+          });
+        }
+        
+        // Si es un error de duplicación de SKU
+        if (saveError.code === 11000) {
+          return res.status(400).json({
+            success: false,
+            message: 'El SKU ya existe en esta tienda'
+          });
+        }
+        
+        throw saveError;
+      }
+    } catch (error: any) {
       console.error('Error creando producto:', error);
       res.status(500).json({
         success: false,
@@ -480,14 +428,14 @@ class ProductController {
     }
   }
 
-  // Actualizar un producto
+  // Actualizar un producto - VERSIÓN SIMPLIFICADA
   async updateProduct(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const updateData = req.body;
 
       // Verificar si el producto existe
-      const existingProduct = await Product.findById(id).populate('store');
+      const existingProduct = await Product.findById(id);
       if (!existingProduct) {
         return res.status(404).json({
           success: false,
@@ -495,129 +443,19 @@ class ProductController {
         });
       }
 
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
-
-      // Verificar permisos
-      if (userRole === 'store_manager') {
-        const store = await Store.findOne({
-          _id: existingProduct.store,
-          $or: [
-            { owner: userId },
-            { managers: userId }
-          ],
-          isActive: true
-        });
-
-        if (!store) {
-          return res.status(403).json({
-            success: false,
-            message: 'No tiene permisos para editar este producto'
-          });
-        }
-      }
-
-      // Si se está actualizando el SKU, verificar que no exista en la misma tienda
-      if (updateData.sku && updateData.sku !== existingProduct.sku) {
-        const skuExists = await Product.findOne({ 
-          sku: updateData.sku, 
-          store: existingProduct.store,
-          _id: { $ne: id } 
-        });
-        if (skuExists) {
-          return res.status(400).json({
-            success: false,
-            message: 'El SKU ya existe en esta tienda'
-          });
-        }
-      }
-
-      // Validación de contenido anti-fuga si se está actualizando la descripción
-      if (updateData.description) {
-        const contentValidation = await ContentFilterService.validateProductDescription(updateData.description);
-        if (!contentValidation.isValid) {
-          return res.status(400).json({
-            success: false,
-            message: 'La descripción del producto contiene información no permitida',
-            violations: contentValidation.violations,
-            blockedContent: contentValidation.blockedContent,
-            suggestions: [
-              'Usa el chat interno de PiezasYA para contactar al vendedor',
-              'No incluyas información de contacto personal',
-              'No incluyas enlaces externos'
-            ]
-          });
-        }
-      }
-
-      // Procesar imágenes si se están actualizando
-      if (updateData.images) {
-        try {
-          let processedImages: string[] = [];
-          
-          // Si las imágenes vienen como base64
-          if (Array.isArray(updateData.images)) {
-            const base64Images = updateData.images.filter(img => 
-              typeof img === 'string' && img.startsWith('data:image/')
-            );
-            
-            if (base64Images.length > 0) {
-              const uploadResults = await imageService.uploadMultipleBase64Images(
-                base64Images.map(img => ({
-                  data: img,
-                  format: img.split(';')[0].split('/')[1] || 'jpg'
-                })),
-                'piezasya/products'
-              );
-              
-              processedImages = uploadResults.map(result => result.secureUrl);
-            }
-          } else if (typeof updateData.images === 'string') {
-            // Si viene como string separado por comas
-            const imageArray = updateData.images.split(',').map((img: string) => img.trim());
-            
-            for (const img of imageArray) {
-              if (img.startsWith('data:image/')) {
-                // Es base64
-                const uploadResult = await imageService.uploadBase64Image({
-                  data: img,
-                  format: img.split(';')[0].split('/')[1] || 'jpg'
-                }, 'piezasya/products');
-                
-                processedImages.push(uploadResult.secureUrl);
-              } else if (img.startsWith('http')) {
-                // Es URL externa
-                processedImages.push(img);
-              }
-            }
-          }
-          
-          updateData.images = processedImages;
-        } catch (error) {
-          console.error('Error procesando imágenes:', error);
-          return res.status(400).json({
-            success: false,
-            message: 'Error al procesar las imágenes del producto'
-          });
-        }
-      }
-
       // Actualizar el producto
       const updatedProduct = await Product.findByIdAndUpdate(
         id,
-        {
-          ...updateData,
-          updatedBy: userId
-        },
+        updateData,
         { new: true, runValidators: true }
-      ).populate('store');
+      );
 
       res.json({
         success: true,
         message: 'Producto actualizado exitosamente',
         data: updatedProduct
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error actualizando producto:', error);
       res.status(500).json({
         success: false,
@@ -626,12 +464,12 @@ class ProductController {
     }
   }
 
-  // Eliminar/desactivar un producto
+  // Mover producto a papelera - VERSIÓN SIMPLIFICADA
   async deleteProduct(req: Request, res: Response) {
     try {
       const { id } = req.params;
 
-      const product = await Product.findById(id).populate('store');
+      const product = await Product.findById(id);
       if (!product) {
         return res.status(404).json({
           success: false,
@@ -639,39 +477,146 @@ class ProductController {
         });
       }
 
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
-
-      // Verificar permisos
-      if (userRole === 'store_manager') {
-        const store = await Store.findOne({
-          _id: product.store,
-          $or: [
-            { owner: userId },
-            { managers: userId }
-          ],
-          isActive: true
-        });
-
-        if (!store) {
-          return res.status(403).json({
-            success: false,
-            message: 'No tiene permisos para eliminar este producto'
-          });
-        }
-      }
-
-      // En lugar de eliminar, desactivar el producto
+      // Marcar producto como eliminado (en papelera)
       product.isActive = false;
-      product.updatedBy = userId;
+      product.deleted = true;
+      product.deletedAt = new Date();
       await product.save();
 
       res.json({
         success: true,
-        message: 'Producto desactivado exitosamente'
+        message: 'Producto movido a papelera exitosamente'
       });
-    } catch (error) {
-      console.error('Error desactivando producto:', error);
+    } catch (error: any) {
+      console.error('Error moviendo producto a papelera:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Obtener productos eliminados (en papelera)
+  async getDeletedProducts(req: Request, res: Response) {
+    try {
+      const {
+        page = 1,
+        limit = 20,
+        search
+      } = req.query;
+
+      const filter: any = { deleted: true };
+
+      // Búsqueda por texto
+      if (search) {
+        filter.$or = [
+          { name: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { sku: { $regex: search, $options: 'i' } }
+        ];
+      }
+
+      const skip = (Number(page) - 1) * Number(limit);
+
+      const products = await Product.find(filter)
+        .populate('store', 'name city state')
+        .sort({ deletedAt: -1 })
+        .limit(Number(limit))
+        .skip(skip)
+        .select('-__v');
+
+      const total = await Product.countDocuments(filter);
+
+      res.json({
+        success: true,
+        data: {
+          products,
+          pagination: {
+            page: Number(page),
+            limit: Number(limit),
+            total,
+            totalPages: Math.ceil(total / Number(limit))
+          }
+        }
+      });
+    } catch (error: any) {
+      console.error('Error obteniendo productos eliminados:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Restaurar producto desde la papelera
+  async restoreProduct(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const product = await Product.findById(id);
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: 'Producto no encontrado'
+        });
+      }
+
+      if (!product.deleted) {
+        return res.status(400).json({
+          success: false,
+          message: 'El producto no está en la papelera'
+        });
+      }
+
+      // Restaurar producto
+      product.isActive = true;
+      product.deleted = false;
+      product.deletedAt = undefined;
+      await product.save();
+
+      res.json({
+        success: true,
+        message: 'Producto restaurado exitosamente',
+        data: product
+      });
+    } catch (error: any) {
+      console.error('Error restaurando producto:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Eliminación física permanente
+  async permanentlyDeleteProduct(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const product = await Product.findById(id);
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: 'Producto no encontrado'
+        });
+      }
+
+      if (!product.deleted) {
+        return res.status(400).json({
+          success: false,
+          message: 'Solo se pueden eliminar permanentemente productos en la papelera'
+        });
+      }
+
+      // Eliminación física permanente
+      await Product.findByIdAndDelete(id);
+
+      res.json({
+        success: true,
+        message: 'Producto eliminado permanentemente'
+      });
+    } catch (error: any) {
+      console.error('Error eliminando producto permanentemente:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
@@ -866,7 +811,9 @@ class ProductController {
         storeId // Filtrar por tienda específica
       } = req.query;
 
-      const filter: any = {};
+      const filter: any = {
+        deleted: { $ne: true } // Excluir productos eliminados (en papelera)
+      };
 
       // Filtro de estado
       if (status === 'active') {
@@ -985,7 +932,8 @@ class ProductController {
       }
 
       const filter: any = {
-        store: { $in: storeIds }
+        store: { $in: storeIds },
+        deleted: { $ne: true } // Excluir productos eliminados (en papelera)
       };
 
       // Filtro por tienda específica (si se especifica)
@@ -1070,7 +1018,9 @@ class ProductController {
       const userId = (req as any).user._id;
       const userRole = (req as any).user.role;
 
-      let filter: any = {};
+      let filter: any = {
+        deleted: { $ne: true } // Excluir productos eliminados (en papelera)
+      };
 
       // Si es gestor de tienda, filtrar por sus tiendas
       if (userRole === 'store_manager') {

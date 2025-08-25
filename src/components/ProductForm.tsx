@@ -40,6 +40,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [stores, setStores] = useState<Array<{ _id: string; name: string; type: string }>>([]);
+  const [loadingStores, setLoadingStores] = useState(false);
 
   // Hook para manejo de imágenes
   const {
@@ -60,47 +62,51 @@ const ProductForm: React.FC<ProductFormProps> = ({
   // Establecer storeId si no está definido y el usuario tiene tiendas
   useEffect(() => {
     console.log('🔍 useEffect ejecutado, storeId actual:', formData.storeId);
-    // Si no hay storeId definido, intentar obtenerlo del contexto o establecer un valor por defecto
-    if (!formData.storeId) {
-      console.log('🔍 No hay storeId, obteniendo tiendas del usuario...');
-      // Obtener la tienda activa del contexto o la primera tienda del usuario
-      const getDefaultStoreId = async () => {
-        try {
-          console.log('🔍 Haciendo fetch a /api/stores/my-stores...');
-          const response = await fetch('/api/stores/my-stores', {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-          });
-
-          console.log('🔍 Response status:', response.status);
-          if (response.ok) {
-            const data = await response.json();
-            console.log('🔍 Datos de tiendas recibidos:', data);
-            if (data.data && data.data.length > 0) {
-              const defaultStoreId = data.data[0]._id;
-              console.log('🔍 Estableciendo storeId:', defaultStoreId);
-              setFormData(prev => ({
-                ...prev,
-                storeId: defaultStoreId
-              }));
-              console.log('✅ StoreId establecido automáticamente:', defaultStoreId);
-            } else {
-              console.log('❌ No se encontraron tiendas para el usuario');
-            }
-          } else {
-            console.log('❌ Error en la respuesta:', response.status, response.statusText);
+    
+    // Cargar tiendas del usuario
+    const loadStores = async () => {
+      try {
+        setLoadingStores(true);
+        console.log('🔍 Haciendo fetch a /api/user/stores...');
+        const response = await fetch('/api/user/stores', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
-        } catch (error) {
-          console.error('❌ Error obteniendo tiendas del usuario:', error);
-        }
-      };
+        });
 
-      getDefaultStoreId();
-    } else {
-      console.log('✅ StoreId ya está definido:', formData.storeId);
-    }
-  }, [formData.storeId]);
+        console.log('🔍 Response status:', response.status);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('🔍 Datos de tiendas recibidos:', data);
+          setStores(data.data || []);
+          
+          // Si no hay storeId definido y hay tiendas disponibles, seleccionar la primera
+          if (!formData.storeId && data.data && data.data.length > 0) {
+            const defaultStoreId = data.data[0]._id;
+            console.log('🔍 Estableciendo storeId:', defaultStoreId);
+            setFormData(prev => ({
+              ...prev,
+              storeId: defaultStoreId
+            }));
+            console.log('✅ StoreId establecido automáticamente:', defaultStoreId);
+          } else if (data.data && data.data.length === 0) {
+            console.log('❌ No se encontraron tiendas para el usuario');
+            setError('No tienes tiendas asignadas. Contacta al administrador.');
+          }
+        } else {
+          console.log('❌ Error en la respuesta:', response.status, response.statusText);
+          setError('Error al cargar las tiendas. Intenta de nuevo.');
+        }
+      } catch (error) {
+        console.error('❌ Error obteniendo tiendas del usuario:', error);
+        setError('Error al cargar las tiendas. Intenta de nuevo.');
+      } finally {
+        setLoadingStores(false);
+      }
+    };
+
+    loadStores();
+  }, []); // Solo ejecutar una vez al montar el componente
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -148,10 +154,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
       errors.sku = t('productForm.errors.skuRequired');
     }
 
-    // Remover validación de storeId ya que se maneja automáticamente
-    // if (!formData.storeId) {
-    //   errors.storeId = t('productForm.errors.storeRequired');
-    // }
+    if (!formData.storeId) {
+      errors.storeId = 'Debe seleccionar una tienda';
+    }
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -318,6 +323,41 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <p className="text-alert-500 text-sm mt-1">{validationErrors.sku}</p>
             )}
           </div>
+        </div>
+
+        {/* Selector de tienda */}
+        <div>
+          <label className="block text-sm font-medium text-carbon-700 mb-2">
+            Tienda *
+          </label>
+          {loadingStores ? (
+            <div className="w-full px-3 py-2 border border-carbon-300 rounded-lg bg-carbon-50">
+              <span className="text-carbon-500">Cargando tiendas...</span>
+            </div>
+          ) : stores.length > 0 ? (
+            <select
+              name="storeId"
+              value={formData.storeId}
+              onChange={handleInputChange}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-racing-500 ${
+                validationErrors.storeId ? 'border-alert-500' : 'border-carbon-300'
+              }`}
+            >
+              <option value="">Selecciona una tienda</option>
+              {stores.map((store) => (
+                <option key={store._id} value={store._id}>
+                  {store.name} {store.type && `(${store.type})`}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="w-full px-3 py-2 border border-alert-300 rounded-lg bg-alert-50">
+              <span className="text-alert-600">No tienes tiendas asignadas</span>
+            </div>
+          )}
+          {validationErrors.storeId && (
+            <p className="text-alert-500 text-sm mt-1">{validationErrors.storeId}</p>
+          )}
         </div>
 
         {/* Descripción */}
