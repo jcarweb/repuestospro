@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useActiveStore } from '../contexts/ActiveStoreContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import SalesChart from '../components/SalesChart';
 import {
   BarChart3,
   TrendingUp,
@@ -345,13 +346,25 @@ const StoreManagerSales: React.FC = () => {
             <RefreshCw className={`h-4 w-4 ${autoRefresh ? 'animate-spin' : ''}`} />
           </button>
 
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
-          >
-            <Filter className="h-4 w-4" />
-            <span className="ml-2">Filtros</span>
-          </button>
+                     <button
+             onClick={() => setShowFilters(!showFilters)}
+             className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
+           >
+             <Filter className="h-4 w-4" />
+             <span className="ml-2">Filtros</span>
+           </button>
+
+           <button
+             onClick={() => {
+               setSelectedCategory('');
+               setSelectedPaymentMethod('');
+               setSelectedOrderStatus([]);
+             }}
+             className="px-4 py-2 bg-blue-100 dark:bg-blue-700 rounded-lg border border-blue-200 dark:border-blue-600 text-blue-700 dark:text-blue-300"
+           >
+             <RefreshCw className="h-4 w-4" />
+             <span className="ml-2">Limpiar Filtros</span>
+           </button>
 
           <div className="relative">
             <button
@@ -365,8 +378,43 @@ const StoreManagerSales: React.FC = () => {
         </div>
       </div>
 
-      {/* Filtros */}
-      {showFilters && (
+             {/* Indicador de filtros activos */}
+       {(selectedCategory || selectedPaymentMethod || selectedOrderStatus.length > 0) && (
+         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+           <div className="flex items-center justify-between">
+             <div className="flex items-center gap-2">
+               <Filter className="h-4 w-4 text-blue-600" />
+               <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Filtros activos:</span>
+               <div className="flex gap-2">
+                 {selectedCategory && (
+                   <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">Categoría</span>
+                 )}
+                 {selectedPaymentMethod && (
+                   <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">Pago: {selectedPaymentMethod}</span>
+                 )}
+                 {selectedOrderStatus.length > 0 && (
+                   <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
+                     Estados: {selectedOrderStatus.length}
+                   </span>
+                 )}
+               </div>
+             </div>
+             <button
+               onClick={() => {
+                 setSelectedCategory('');
+                 setSelectedPaymentMethod('');
+                 setSelectedOrderStatus([]);
+               }}
+               className="text-sm text-blue-600 hover:text-blue-800"
+             >
+               Limpiar todos
+             </button>
+           </div>
+         </div>
+       )}
+
+       {/* Filtros */}
+       {showFilters && (
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
           <h3 className="text-lg font-semibold mb-4">Filtros Avanzados</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -536,13 +584,19 @@ const StoreManagerSales: React.FC = () => {
                   <option value="monthly">Mensual</option>
                 </select>
               </div>
-              <div className="h-64 flex items-center justify-center text-gray-500">
-                <div className="text-center">
-                  <BarChart className="h-12 w-12 mx-auto mb-2" />
-                  <p>Gráfico de tendencias</p>
-                  <p className="text-sm">Datos: {report.trends[trendPeriod].length} puntos</p>
-                </div>
-              </div>
+              <SalesChart
+                type="bar"
+                data={report.trends[trendPeriod].map((trend: any) => ({
+                  name: trendPeriod === 'daily' ? trend.date : trendPeriod === 'weekly' ? trend.week : trend.month,
+                  value: trend.sales,
+                  orders: trend.orders,
+                  customers: trend.customers
+                }))}
+                xKey="name"
+                yKey="value"
+                height={250}
+                colors={['#3B82F6']}
+              />
             </div>
 
             {/* Gráfico de productos top */}
@@ -605,14 +659,19 @@ const StoreManagerSales: React.FC = () => {
                 </button>
               </div>
             </div>
-            <div className="h-96 flex items-center justify-center text-gray-500">
-              <div className="text-center">
-                <LineChart className="h-16 w-16 mx-auto mb-4" />
-                <p>Gráfico de líneas de tendencias</p>
-                <p className="text-sm">Período: {trendPeriod}</p>
-                <p className="text-sm">Datos: {report.trends[trendPeriod].length} puntos</p>
-              </div>
-            </div>
+            <SalesChart
+              type="line"
+              data={report.trends[trendPeriod].map((trend: any) => ({
+                name: trendPeriod === 'daily' ? trend.date : trendPeriod === 'weekly' ? trend.week : trend.month,
+                value: trend.sales,
+                orders: trend.orders,
+                customers: trend.customers
+              }))}
+              xKey="name"
+              yKey="value"
+              height={350}
+              colors={['#10B981']}
+            />
           </div>
         </div>
       )}
@@ -768,13 +827,15 @@ const StoreManagerSales: React.FC = () => {
             {/* Tendencias de pagos */}
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
               <h3 className="text-lg font-semibold mb-4">Tendencias de Pagos</h3>
-              <div className="h-64 flex items-center justify-center text-gray-500">
-                <div className="text-center">
-                  <PieChartIcon className="h-12 w-12 mx-auto mb-2" />
-                  <p>Gráfico de tendencias de pagos</p>
-                  <p className="text-sm">Datos: {report.paymentAnalytics.paymentTrends.length} puntos</p>
-                </div>
-              </div>
+              <SalesChart
+                type="pie"
+                data={report.paymentAnalytics.paymentMethods.map((method: any) => ({
+                  name: method.method.replace('_', ' '),
+                  value: method.count
+                }))}
+                height={250}
+                colors={['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']}
+              />
             </div>
           </div>
         </div>

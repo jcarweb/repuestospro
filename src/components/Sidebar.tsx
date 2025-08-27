@@ -101,6 +101,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       description: t('sidebar.admin.sales.description')
     },
     {
+      title: t('sidebar.admin.salesReports'),
+      path: '/admin/sales-reports',
+      icon: BarChart3,
+      description: 'Reportes avanzados de ventas con filtros globales'
+    },
+    {
+      title: t('sidebar.admin.delivery'),
+      path: '/admin/delivery',
+      icon: Truck,
+      description: 'Gestión de delivery con lógica mixta de riders'
+    },
+    {
       title: t('sidebar.admin.loyalty'),
       path: '/admin/loyalty',
       icon: Award,

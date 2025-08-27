@@ -160,6 +160,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
           icon: ShoppingCart
         },
         {
+          name: t('sidebar.admin.salesReports'),
+          path: '/admin/sales-reports',
+          icon: BarChart3
+        },
+        {
           name: t('sidebar.admin.loyalty'),
           path: '/admin/loyalty',
           icon: TrendingUp

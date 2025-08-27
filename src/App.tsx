@@ -194,6 +194,13 @@ function AppContent() {
                 </AdminLayout>
               </AdminRoute>
             } />
+            <Route path="/delivery" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <DeliveryDashboard />
+                </AdminLayout>
+              </AdminRoute>
+            } />
             <Route path="/loyalty" element={
               <AdminRoute>
                 <AdminLayout>

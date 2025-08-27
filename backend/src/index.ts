@@ -17,6 +17,9 @@ import createClaimRoutes from './routes/claimRoutes';
 import { createTransactionRoutes } from './routes/transactionRoutes';
 import { createOrderRoutes } from './routes/orderRoutes';
 import { createSalesReportRoutes } from './routes/salesReportRoutes';
+import deliveryRoutes from './routes/deliveryRoutes';
+import riderRoutes from './routes/riderRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
 
 // Importar rutas
 import productRoutes from './routes/productRoutes';
@@ -183,6 +186,9 @@ app.use('/api/claims', createClaimRoutes());
 app.use('/api/transactions', createTransactionRoutes());
 app.use('/api/orders', createOrderRoutes());
 app.use('/api/sales-reports', createSalesReportRoutes());
+app.use('/api/delivery', deliveryRoutes);
+app.use('/api/riders', riderRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Variables globales para chat
 let chatService: ChatService;

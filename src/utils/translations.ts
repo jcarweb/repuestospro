@@ -1287,6 +1287,16 @@ export const translations: Translations = {
     en: 'Sales',
     pt: 'Vendas'
   },
+  'sidebar.admin.salesReports': {
+    es: 'Reportes de Ventas',
+    en: 'Sales Reports',
+    pt: 'Relatórios de Vendas'
+  },
+  'sidebar.admin.delivery': {
+    es: 'Delivery',
+    en: 'Delivery',
+    pt: 'Entrega'
+  },
   'sidebar.admin.loyalty': {
     es: 'Fidelización',
     en: 'Loyalty',
