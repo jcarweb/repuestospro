@@ -273,6 +273,58 @@ export class SalesReportController {
   };
 
   /**
+   * Generar token temporal para pruebas (SOLO PARA DESARROLLO)
+   */
+  public generateTestToken = async (req: Request, res: Response) => {
+    try {
+      const jwt = require('jsonwebtoken');
+      const config = require('../config/env').config;
+      
+      // Buscar el usuario gestor de tienda
+      const User = require('../models/User').User;
+      const user = await User.findOne({ email: 'jucarl74@gmail.com' });
+      
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Usuario jucarl74@gmail.com no encontrado'
+        });
+      }
+
+      // Generar token con el secreto correcto
+      const token = jwt.sign(
+        {
+          userId: user._id,
+          email: user.email,
+          role: user.role,
+          stores: user.stores
+        },
+        config.JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      res.json({
+        success: true,
+        message: 'Token generado correctamente',
+        token: token,
+        user: {
+          id: user._id,
+          email: user.email,
+          role: user.role,
+          stores: user.stores
+        }
+      });
+    } catch (error) {
+      console.error('Error generating test token:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error al generar token de prueba',
+        error: error instanceof Error ? error.message : 'Error desconocido'
+      });
+    }
+  };
+
+  /**
    * Parsear filtros de la query
    */
   private parseFilters(query: any): SalesReportFilters {
