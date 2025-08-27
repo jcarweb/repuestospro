@@ -48,6 +48,7 @@ import AdminSubcategories from './pages/AdminSubcategories';
 import AdminPromotions from './pages/AdminPromotions';
 import AdminAdvertisements from './pages/AdminAdvertisements';
 import AdminSales from './pages/AdminSales';
+import AdminSalesReports from './pages/AdminSalesReports';
 import AdminLoyalty from './pages/AdminLoyalty';
 import AdminAnalytics from './pages/AdminAnalytics';
 import AdminRegistrationCodes from './pages/AdminRegistrationCodes';
@@ -61,7 +62,7 @@ import StoreManagerDashboard from './pages/StoreManagerDashboard';
 import StoreManagerProducts from './pages/StoreManagerProducts';
 import StoreManagerPromotions from './pages/StoreManagerPromotions';
 import StoreManagerSales from './pages/StoreManagerSales';
-import StoreManagerOrders from './pages/StoreManagerOrders';
+import StoreManagerOrdersPage from './pages/StoreManagerOrdersPage';
 import StoreManagerDelivery from './pages/StoreManagerDelivery';
 import StoreManagerAnalytics from './pages/StoreManagerAnalytics';
 import StoreManagerMessages from './pages/StoreManagerMessages';
@@ -183,6 +184,13 @@ function AppContent() {
               <AdminRoute>
                 <AdminLayout>
                   <AdminSales />
+                </AdminLayout>
+              </AdminRoute>
+            } />
+            <Route path="/sales-reports" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <AdminSalesReports />
                 </AdminLayout>
               </AdminRoute>
             } />
@@ -454,7 +462,7 @@ function AppContent() {
              <Route path="/orders" element={
                <StoreManagerRoute>
                  <StoreManagerLayout>
-                   <StoreManagerOrders />
+                   <StoreManagerOrdersPage />
                  </StoreManagerLayout>
                </StoreManagerRoute>
              } />

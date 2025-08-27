@@ -27,6 +27,9 @@ router.post('/', PromotionController.createPromotion);
 // Obtener todas las promociones
 router.get('/', PromotionController.getAllPromotions);
 
+// Verificar acceso a promociones
+router.get('/check-access', PromotionController.checkPromotionsAccess);
+
 // Obtener promoción por ID
 router.get('/:id', PromotionController.getPromotionById);
 

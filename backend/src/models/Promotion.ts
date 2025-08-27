@@ -12,6 +12,12 @@ export interface IPromotion extends Document {
   products: mongoose.Types.ObjectId[];
   categories?: mongoose.Types.ObjectId[];
   store: mongoose.Types.ObjectId; // Referencia a la tienda
+  // Alcance de la promoción
+  scope: 'store' | 'all_branches' | 'specific_branches';
+  // Sucursales específicas (solo si scope es 'specific_branches')
+  targetBranches?: mongoose.Types.ObjectId[];
+  // Indica si es una promoción creada por la tienda principal
+  isMainStorePromotion: boolean;
   startDate: Date;
   startTime: String; // HH:mm format
   endDate: Date;
@@ -116,6 +122,23 @@ const PromotionSchema = new Schema<IPromotion>({
     type: Schema.Types.ObjectId,
     ref: 'Store',
     required: true
+  },
+  // Alcance de la promoción
+  scope: {
+    type: String,
+    enum: ['store', 'all_branches', 'specific_branches'],
+    default: 'store',
+    required: true
+  },
+  // Sucursales específicas (solo si scope es 'specific_branches')
+  targetBranches: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Store'
+  }],
+  // Indica si es una promoción creada por la tienda principal
+  isMainStorePromotion: {
+    type: Boolean,
+    default: false
   },
   startDate: {
     type: Date,

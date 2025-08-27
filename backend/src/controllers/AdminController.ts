@@ -2,6 +2,10 @@ import { Request, Response } from 'express';
 import Product from '../models/Product';
 import User from '../models/User';
 import Store from '../models/Store';
+import Subscription from '../models/Subscription';
+import Category from '../models/Category';
+import Promotion from '../models/Promotion';
+import { SubscriptionService } from '../services/subscriptionService';
 import emailService from '../services/emailService';
 import crypto from 'crypto';
 
@@ -552,7 +556,7 @@ export class AdminController {
       // Mapear los usuarios para incluir el campo 'id' además de '_id'
       const mappedUsers = users.map(user => ({
         ...user.toObject(),
-        id: user._id.toString()
+        id: (user as any)._id.toString()
       }));
       
       res.json({
@@ -585,7 +589,7 @@ export class AdminController {
       // Mapear el usuario para incluir el campo 'id'
       const mappedUser = {
         ...user.toObject(),
-        id: user._id.toString()
+        id: (user as any)._id.toString()
       };
       
       res.json({
@@ -649,7 +653,7 @@ export class AdminController {
         success: true,
         message: 'Usuario creado exitosamente',
         user: {
-          id: user._id.toString(),
+          id: (user as any)._id.toString(),
           name: user.name,
           email: user.email,
           phone: user.phone,
@@ -715,7 +719,7 @@ export class AdminController {
         success: true,
         message: 'Usuario actualizado exitosamente',
         user: {
-          id: user._id.toString(),
+          id: (user as any)._id.toString(),
           name: user.name,
           email: user.email,
           phone: user.phone,
@@ -749,7 +753,7 @@ export class AdminController {
       }
 
       // No permitir desactivar al usuario actual
-      if (user._id.toString() === req.user?.id) {
+      if ((user as any)._id.toString() === (req as any).user?.id) {
         return res.status(400).json({
           success: false,
           message: 'No puedes desactivar tu propia cuenta'
@@ -1053,7 +1057,256 @@ export class AdminController {
       });
     }
   }
+
+  /**
+   * Obtiene todas las tiendas con sus suscripciones
+   */
+  static async getStoreSubscriptions(req: Request, res: Response): Promise<void> {
+    try {
+      const stores = await Store.find()
+        .populate('subscription')
+        .select('name email phone address subscription subscriptionStatus subscriptionExpiresAt createdAt updatedAt')
+        .sort({ createdAt: -1 });
+
+      const storeSubscriptions = stores.map(store => ({
+        _id: store._id,
+        store: {
+          _id: store._id,
+          name: store.name,
+          email: store.email,
+          phone: store.phone,
+          address: store.address
+        },
+        subscription: store.subscription,
+        subscriptionStatus: store.subscriptionStatus,
+        subscriptionExpiresAt: store.subscriptionExpiresAt,
+        createdAt: store.createdAt,
+        updatedAt: store.updatedAt
+      }));
+
+      res.json({
+        success: true,
+        storeSubscriptions
+      });
+    } catch (error) {
+      console.error('Error al obtener suscripciones de tiendas:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Asigna una suscripción a una tienda
+   */
+  static async assignSubscriptionToStore(req: Request, res: Response): Promise<void> {
+    try {
+      const { storeId } = req.params;
+      const { subscriptionId, status, expiresAt } = req.body;
+
+      // Verificar que la tienda existe
+      const store = await Store.findById(storeId);
+      if (!store) {
+        res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada'
+        });
+        return;
+      }
+
+      // Verificar que la suscripción existe si se proporciona
+      if (subscriptionId) {
+        const subscription = await Subscription.findById(subscriptionId);
+        if (!subscription) {
+          res.status(404).json({
+            success: false,
+            message: 'Plan de suscripción no encontrado'
+          });
+          return;
+        }
+      }
+
+      // Actualizar la tienda
+      const updateData: any = {
+        subscriptionStatus: status
+      };
+
+      if (subscriptionId) {
+        updateData.subscription = subscriptionId;
+      } else {
+        updateData.subscription = null;
+      }
+
+      if (expiresAt) {
+        updateData.subscriptionExpiresAt = new Date(expiresAt);
+      } else {
+        updateData.subscriptionExpiresAt = null;
+      }
+
+      const updatedStore = await Store.findByIdAndUpdate(
+        storeId,
+        updateData,
+        { new: true }
+      ).populate('subscription');
+
+      res.json({
+        success: true,
+        message: 'Suscripción asignada exitosamente',
+        store: updatedStore
+      });
+    } catch (error) {
+      console.error('Error al asignar suscripción:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Actualiza el estado de suscripción de una tienda
+   */
+  static async updateStoreSubscriptionStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const { storeId } = req.params;
+      const { status } = req.body;
+
+      const validStatuses = ['active', 'inactive', 'expired', 'pending'];
+      if (!validStatuses.includes(status)) {
+        res.status(400).json({
+          success: false,
+          message: 'Estado de suscripción inválido'
+        });
+        return;
+      }
+
+      const store = await Store.findByIdAndUpdate(
+        storeId,
+        { subscriptionStatus: status },
+        { new: true }
+      ).populate('subscription');
+
+      if (!store) {
+        res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada'
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        message: 'Estado de suscripción actualizado exitosamente',
+        store
+      });
+    } catch (error) {
+      console.error('Error al actualizar estado de suscripción:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Obtiene estadísticas de suscripciones
+   */
+  static async getSubscriptionStats(req: Request, res: Response): Promise<void> {
+    try {
+      const stores = await Store.find();
+      
+      const stats = {
+        totalStores: stores.length,
+        activeSubscriptions: 0,
+        inactiveSubscriptions: 0,
+        expiredSubscriptions: 0,
+        pendingSubscriptions: 0,
+        basicPlans: 0,
+        proPlans: 0,
+        elitePlans: 0,
+        noPlan: 0
+      };
+
+      for (const store of stores) {
+        // Contar por estado
+        switch (store.subscriptionStatus) {
+          case 'active':
+            stats.activeSubscriptions++;
+            break;
+          case 'inactive':
+            stats.inactiveSubscriptions++;
+            break;
+          case 'expired':
+            stats.expiredSubscriptions++;
+            break;
+          case 'pending':
+            stats.pendingSubscriptions++;
+            break;
+        }
+
+        // Contar por tipo de plan
+        if (store.subscription) {
+          const subscription = await Subscription.findById(store.subscription);
+          if (subscription) {
+            switch (subscription.type) {
+              case 'basic':
+                stats.basicPlans++;
+                break;
+              case 'pro':
+                stats.proPlans++;
+                break;
+              case 'elite':
+                stats.elitePlans++;
+                break;
+            }
+          }
+        } else {
+          stats.noPlan++;
+        }
+      }
+
+      res.json({
+        success: true,
+        stats
+      });
+    } catch (error) {
+      console.error('Error al obtener estadísticas de suscripciones:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Obtiene tiendas que necesitan renovación
+   */
+  static async getStoresNeedingRenewal(req: Request, res: Response): Promise<void> {
+    try {
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+      const stores = await Store.find({
+        subscriptionStatus: 'active',
+        subscriptionExpiresAt: { $lte: thirtyDaysFromNow }
+      })
+      .populate('subscription')
+      .select('name email subscription subscriptionExpiresAt')
+      .sort({ subscriptionExpiresAt: 1 });
+
+      res.json({
+        success: true,
+        stores
+      });
+    } catch (error) {
+      console.error('Error al obtener tiendas que necesitan renovación:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
 }
 
-const adminController = new AdminController();
-export default adminController; 
+export default AdminController;

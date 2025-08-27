@@ -32,6 +32,10 @@ export interface IStore extends Document {
   stateRef: mongoose.Types.ObjectId; // Referencia al Estado
   municipalityRef: mongoose.Types.ObjectId; // Referencia al Municipio
   parishRef: mongoose.Types.ObjectId; // Referencia a la Parroquia
+  // Sistema de monetización
+  subscription?: mongoose.Types.ObjectId; // Plan de suscripción actual
+  subscriptionStatus: 'active' | 'inactive' | 'expired' | 'pending'; // Estado de la suscripción
+  subscriptionExpiresAt?: Date; // Fecha de expiración de la suscripción
   businessHours: {
     monday: { open: string; close: string; isOpen: boolean };
     tuesday: { open: string; close: string; isOpen: boolean };
@@ -174,6 +178,19 @@ const StoreSchema = new Schema<IStore>({
     type: Schema.Types.ObjectId,
     ref: 'Parish',
     required: true
+  },
+  // Sistema de monetización
+  subscription: {
+    type: Schema.Types.ObjectId,
+    ref: 'Subscription'
+  },
+  subscriptionStatus: {
+    type: String,
+    enum: ['active', 'inactive', 'expired', 'pending'],
+    default: 'inactive'
+  },
+  subscriptionExpiresAt: {
+    type: Date
   },
   businessHours: {
     monday: {

@@ -9,6 +9,32 @@ export interface IAdvertisement extends Document {
   videoUrl?: string;
   navigationUrl?: string; // URL para navegar a la promoción o producto
   store: mongoose.Types.ObjectId;
+  
+  // 🚀 Modelo Híbrido - Nivel de Publicidad
+  advertisingLevel: 'self_managed' | 'premium_managed'; // Nivel 1: Autogestionado, Nivel 2: Premium gestionado
+  templateId?: string; // Para publicidad autogestionada (plantillas predefinidas)
+  
+  // Configuración específica por nivel
+  selfManagedConfig?: {
+    template: 'basic_banner' | 'product_highlight' | 'promotion_card' | 'featured_item';
+    colors: {
+      primary: string;
+      secondary: string;
+      text: string;
+    };
+    duration: number; // días
+    zones: string[]; // zonas de la app donde se mostrará
+    productId?: mongoose.Types.ObjectId; // producto específico a promocionar
+  };
+  
+  premiumManagedConfig?: {
+    campaignType: 'social_media' | 'banner_special' | 'featured_campaign' | 'custom_design';
+    requirements: string; // requerimientos específicos del cliente
+    budget: number; // presupuesto asignado
+    targetAudience: string; // audiencia objetivo específica
+    specialFeatures: string[]; // características especiales
+  };
+  
   displayType: 'fullscreen' | 'footer' | 'mid_screen' | 'search_card';
   targetPlatform: 'android' | 'ios' | 'both';
   targetAudience: {
@@ -67,8 +93,12 @@ export interface IAdvertisement extends Document {
   createdBy: mongoose.Types.ObjectId;
   approvedBy?: mongoose.Types.ObjectId;
   approvedAt?: Date;
-  status: 'draft' | 'pending' | 'approved' | 'rejected' | 'active' | 'paused' | 'completed';
+  status: 'draft' | 'pending' | 'approved' | 'rejected' | 'active' | 'paused' | 'completed' | 'in_progress';
   rejectionReason?: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  estimatedCompletion?: Date;
+  assignedTo?: mongoose.Types.ObjectId;
+  notes?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -114,6 +144,76 @@ const advertisementSchema = new Schema<IAdvertisement>({
     type: Schema.Types.ObjectId,
     ref: 'Store',
     required: true
+  },
+  
+  // 🚀 Modelo Híbrido - Nivel de Publicidad
+  advertisingLevel: {
+    type: String,
+    enum: ['self_managed', 'premium_managed'],
+    required: true,
+    default: 'self_managed'
+  },
+  templateId: {
+    type: String,
+    trim: true
+  },
+  
+  // Configuración para publicidad autogestionada
+  selfManagedConfig: {
+    template: {
+      type: String,
+      enum: ['basic_banner', 'product_highlight', 'promotion_card', 'featured_item'],
+      default: 'basic_banner'
+    },
+    colors: {
+      primary: {
+        type: String,
+        default: '#3B82F6'
+      },
+      secondary: {
+        type: String,
+        default: '#1E40AF'
+      },
+      text: {
+        type: String,
+        default: '#FFFFFF'
+      }
+    },
+    duration: {
+      type: Number,
+      min: 1,
+      max: 365,
+      default: 7
+    },
+    zones: [{
+      type: String,
+      enum: ['home', 'search', 'category', 'product', 'checkout']
+    }],
+    productId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Product'
+    }
+  },
+  
+  // Configuración para publicidad premium gestionada
+  premiumManagedConfig: {
+    campaignType: {
+      type: String,
+      enum: ['social_media', 'banner_special', 'featured_campaign', 'custom_design']
+    },
+    requirements: {
+      type: String,
+      maxlength: 1000
+    },
+    budget: {
+      type: Number,
+      min: 0
+    },
+    targetAudience: {
+      type: String,
+      maxlength: 500
+    },
+    specialFeatures: [String]
   },
   displayType: {
     type: String,
@@ -288,13 +388,29 @@ const advertisementSchema = new Schema<IAdvertisement>({
   },
   status: {
     type: String,
-    enum: ['draft', 'pending', 'approved', 'rejected', 'active', 'paused', 'completed'],
+    enum: ['draft', 'pending', 'approved', 'rejected', 'active', 'paused', 'completed', 'in_progress'],
     default: 'draft'
   },
   rejectionReason: {
     type: String,
     trim: true
-  }
+  },
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high', 'urgent'],
+    default: 'medium'
+  },
+  estimatedCompletion: {
+    type: Date
+  },
+  assignedTo: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  notes: [{
+    type: String,
+    trim: true
+  }]
 }, {
   timestamps: true
 });

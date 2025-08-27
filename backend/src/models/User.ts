@@ -511,7 +511,7 @@ userSchema.pre('save', async function(next) {
     next();
   } catch (error) {
     console.error('Error en middleware pre-save:', error);
-    next(error);
+    next(error as Error);
   }
 });
 

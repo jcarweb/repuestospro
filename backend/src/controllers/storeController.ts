@@ -822,6 +822,73 @@ class StoreController {
     }
   }
 
+  // Obtener sucursales de la tienda principal
+  async getBranches(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user._id;
+      const userRole = (req as any).user.role;
+
+      let branches;
+
+      if (userRole === 'admin') {
+        // Admin puede ver todas las sucursales
+        branches = await Store.find({ 
+          isMainStore: false,
+          isActive: true 
+        })
+          .populate('owner', 'name email')
+          .populate('managers', 'name email')
+          .populate('stateRef', 'name code')
+          .populate('municipalityRef', 'name')
+          .populate('parishRef', 'name')
+          .sort({ name: 1 })
+          .select('-__v');
+      } else {
+        // Store manager solo ve sucursales de su tienda principal
+        const mainStore = await Store.findOne({ 
+          $or: [
+            { owner: userId },
+            { managers: userId }
+          ],
+          isMainStore: true,
+          isActive: true
+        });
+
+        if (!mainStore) {
+          return res.status(404).json({
+            success: false,
+            message: 'No tienes una tienda principal asignada'
+          });
+        }
+
+        // Obtener todas las sucursales que pertenecen al mismo owner
+        branches = await Store.find({ 
+          owner: mainStore.owner,
+          isMainStore: false,
+          isActive: true 
+        })
+          .populate('owner', 'name email')
+          .populate('managers', 'name email')
+          .populate('stateRef', 'name code')
+          .populate('municipalityRef', 'name')
+          .populate('parishRef', 'name')
+          .sort({ name: 1 })
+          .select('-__v');
+      }
+
+      res.json({
+        success: true,
+        data: branches
+      });
+    } catch (error) {
+      console.error('Error obteniendo sucursales:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
   // Eliminar tienda (solo para admin o propietario con confirmación)
   async deleteStore(req: Request, res: Response) {
     try {

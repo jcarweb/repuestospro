@@ -71,8 +71,8 @@ const ActiveStoreIndicator: React.FC = () => {
         
         <div className="text-right text-xs text-gray-500 dark:text-gray-400">
           <div>ID: {activeStore._id.slice(-8)}</div>
-          <div>Moneda: {activeStore.settings.currency}</div>
-          <div>IVA: {activeStore.settings.taxRate}%</div>
+                          <div>Moneda: {activeStore.settings?.currency || 'USD'}</div>
+                <div>IVA: {activeStore.settings?.taxRate || 0}%</div>
         </div>
       </div>
     </div>

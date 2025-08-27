@@ -440,13 +440,13 @@ const AdminStores: React.FC = () => {
        website: store.website || '',
        logo: store.logo || '',
        banner: store.banner || '',
-       latitude: store.coordinates.latitude.toString(),
-       longitude: store.coordinates.longitude.toString(),
-       currency: store.settings.currency,
-       taxRate: store.settings.taxRate.toString(),
-       deliveryRadius: store.settings.deliveryRadius.toString(),
-       minimumOrder: store.settings.minimumOrder.toString(),
-       autoAcceptOrders: store.settings.autoAcceptOrders
+       latitude: store.coordinates?.latitude?.toString() || '0',
+       longitude: store.coordinates?.longitude?.toString() || '0',
+       currency: store.settings?.currency || 'USD',
+       taxRate: (store.settings?.taxRate || 0).toString(),
+       deliveryRadius: (store.settings?.deliveryRadius || 0).toString(),
+       minimumOrder: (store.settings?.minimumOrder || 0).toString(),
+       autoAcceptOrders: store.settings?.autoAcceptOrders || false
      });
            // Configurar las coordenadas iniciales para el mapa - Validar que existan
       if (store.coordinates && 
@@ -690,14 +690,14 @@ const AdminStores: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       <div>
-                        <div className="font-medium">{store.owner.name}</div>
-                        <div className="text-gray-500 dark:text-gray-300">{store.owner.email}</div>
+                        <div className="font-medium">{store.owner?.name || 'Sin propietario'}</div>
+                        <div className="text-gray-500 dark:text-gray-300">{store.owner?.email || 'Sin email'}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Users className="w-4 h-4 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900 dark:text-white">{store.managers.length} {t('adminStores.table.managersCount')}</span>
+                        <span className="text-sm text-gray-900 dark:text-white">{store.managers?.length || 0} {t('adminStores.table.managersCount')}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -1150,12 +1150,12 @@ const AdminStores: React.FC = () => {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">{t('adminStores.details.owner')}</label>
-                  <p className="text-sm text-gray-900">{selectedStore.owner.name}</p>
-                  <p className="text-sm text-gray-500">{selectedStore.owner.email}</p>
+                  <p className="text-sm text-gray-900">{selectedStore.owner?.name || 'Sin propietario'}</p>
+                  <p className="text-sm text-gray-500">{selectedStore.owner?.email || 'Sin email'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">{t('adminStores.details.managers')}</label>
-                  <p className="text-sm text-gray-900">{selectedStore.managers.length} {t('adminStores.table.managersCount')}</p>
+                  <p className="text-sm text-gray-900">{selectedStore.managers?.length || 0} {t('adminStores.table.managersCount')}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">{t('adminStores.details.status')}</label>
@@ -1163,9 +1163,9 @@ const AdminStores: React.FC = () => {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">{t('adminStores.details.settings')}</label>
-                  <p className="text-sm text-gray-900">{t('adminStores.details.currency')} {selectedStore.settings.currency}</p>
-                  <p className="text-sm text-gray-900">{t('adminStores.details.taxRate')} {selectedStore.settings.taxRate}%</p>
-                  <p className="text-sm text-gray-900">{t('adminStores.details.deliveryRadius')} {selectedStore.settings.deliveryRadius} {t('adminStores.details.km')}</p>
+                  <p className="text-sm text-gray-900">{t('adminStores.details.currency')} {selectedStore.settings?.currency || 'USD'}</p>
+                  <p className="text-sm text-gray-900">{t('adminStores.details.taxRate')} {selectedStore.settings?.taxRate || 0}%</p>
+                  <p className="text-sm text-gray-900">{t('adminStores.details.deliveryRadius')} {selectedStore.settings?.deliveryRadius || 0} {t('adminStores.details.km')}</p>
                 </div>
               </div>
                              <div className="flex justify-end mt-6">
@@ -1212,7 +1212,7 @@ const AdminStores: React.FC = () => {
               <div>
                 <h4 className="text-sm font-medium text-gray-700 mb-2">{t('adminStores.managers.currentManagers')}</h4>
                 <div className="space-y-2">
-                  {selectedStore.managers.map((manager) => (
+                  {selectedStore.managers?.map((manager) => (
                     <div key={manager._id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <div>
                         <p className="text-sm font-medium text-gray-900">{manager.name}</p>
@@ -1227,7 +1227,7 @@ const AdminStores: React.FC = () => {
                       </button>
                     </div>
                   ))}
-                  {selectedStore.managers.length === 0 && (
+                  {(selectedStore.managers?.length || 0) === 0 && (
                     <p className="text-sm text-gray-500">{t('adminStores.managers.noManagers')}</p>
                   )}
                 </div>

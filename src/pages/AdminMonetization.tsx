@@ -9,13 +9,17 @@ import {
   RefreshCw,
   AlertCircle,
   CheckCircle,
-  Clock
+  Clock,
+  Store,
+  Megaphone
 } from 'lucide-react';
 import ExchangeRateTab from '../components/monetization/ExchangeRateTab';
 import CommissionsTab from '../components/monetization/CommissionsTab';
 import SubscriptionsTab from '../components/monetization/SubscriptionsTab';
+import StoreSubscriptionsTab from '../components/monetization/StoreSubscriptionsTab';
 import TaxesTab from '../components/monetization/TaxesTab';
 import CalculatorTab from '../components/monetization/CalculatorTab';
+import AdvertisementRequestsTab from '../components/admin/AdvertisementRequestsTab';
 
 const AdminMonetization: React.FC = () => {
   const { t } = useLanguage();
@@ -44,6 +48,18 @@ const AdminMonetization: React.FC = () => {
       description: 'Planes de suscripción'
     },
     {
+      id: 'store-subscriptions',
+      name: 'Suscripciones de Tiendas',
+      icon: Store,
+      description: 'Gestionar suscripciones de tiendas'
+    },
+    {
+      id: 'advertisement-requests',
+      name: 'Solicitudes de Publicidad',
+      icon: Megaphone,
+      description: 'Gestionar solicitudes de publicidad de gestores'
+    },
+    {
       id: 'taxes',
       name: t('monetization.taxes.title'),
       icon: Calculator,
@@ -65,6 +81,10 @@ const AdminMonetization: React.FC = () => {
         return <CommissionsTab />;
       case 'subscriptions':
         return <SubscriptionsTab />;
+      case 'store-subscriptions':
+        return <StoreSubscriptionsTab />;
+      case 'advertisement-requests':
+        return <AdvertisementRequestsTab />;
       case 'taxes':
         return <TaxesTab />;
       case 'calculator':

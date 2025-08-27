@@ -4600,6 +4600,378 @@ export const translations: Translations = {
     en: 'New Promotion',
     pt: 'Nova Promoção'
   },
+
+  // ===== STORE MANAGER PROMOTIONS =====
+  'promotions.title': {
+    es: 'Gestión de Promociones',
+    en: 'Promotions Management',
+    pt: 'Gerenciamento de Promoções'
+  },
+  'promotions.subtitle': {
+    es: 'Administra las promociones de {storeName}',
+    en: 'Manage promotions for {storeName}',
+    pt: 'Gerencie promoções de {storeName}'
+  },
+  'promotions.newPromotion': {
+    es: 'Nueva Promoción',
+    en: 'New Promotion',
+    pt: 'Nova Promoção'
+  },
+  'promotions.stats.total': {
+    es: 'Total Promociones',
+    en: 'Total Promotions',
+    pt: 'Total de Promoções'
+  },
+  'promotions.stats.active': {
+    es: 'Activas',
+    en: 'Active',
+    pt: 'Ativas'
+  },
+  'promotions.stats.upcoming': {
+    es: 'Próximas',
+    en: 'Upcoming',
+    pt: 'Próximas'
+  },
+  'promotions.stats.expired': {
+    es: 'Expiradas',
+    en: 'Expired',
+    pt: 'Expiradas'
+  },
+  'promotions.noActiveStore.title': {
+    es: 'No hay tienda activa',
+    en: 'No active store',
+    pt: 'Nenhuma loja ativa'
+  },
+  'promotions.noActiveStore.description': {
+    es: 'Selecciona una tienda para gestionar las promociones',
+    en: 'Select a store to manage promotions',
+    pt: 'Selecione uma loja para gerenciar promoções'
+  },
+  'promotions.premium.title': {
+    es: 'Funcionalidad Premium',
+    en: 'Premium Feature',
+    pt: 'Recurso Premium'
+  },
+  'promotions.premium.description': {
+    es: 'Las promociones están disponibles solo en planes superiores',
+    en: 'Promotions are only available in higher plans',
+    pt: 'Promoções estão disponíveis apenas em planos superiores'
+  },
+  'promotions.premium.upgradeTitle': {
+    es: 'Actualiza tu Plan',
+    en: 'Upgrade Your Plan',
+    pt: 'Atualize Seu Plano'
+  },
+  'promotions.premium.upgradeDescription': {
+    es: 'Desbloquea las promociones y otras funcionalidades premium',
+    en: 'Unlock promotions and other premium features',
+    pt: 'Desbloqueie promoções e outros recursos premium'
+  },
+  'promotions.premium.viewPlans': {
+    es: 'Ver Planes Disponibles',
+    en: 'View Available Plans',
+    pt: 'Ver Planos Disponíveis'
+  },
+  'promotions.premium.modal.title': {
+    es: 'Actualizar Plan',
+    en: 'Upgrade Plan',
+    pt: 'Atualizar Plano'
+  },
+  'promotions.premium.modal.subtitle': {
+    es: 'Funcionalidad Premium',
+    en: 'Premium Feature',
+    pt: 'Recurso Premium'
+  },
+  'promotions.premium.modal.description': {
+    es: 'Para acceder a promociones y otras funcionalidades premium, necesitas actualizar tu plan.',
+    en: 'To access promotions and other premium features, you need to upgrade your plan.',
+    pt: 'Para acessar promoções e outros recursos premium, você precisa atualizar seu plano.'
+  },
+  'promotions.premium.modal.proPlan.title': {
+    es: 'Plan Pro - $29.99/mes',
+    en: 'Pro Plan - $29.99/month',
+    pt: 'Plano Pro - $29.99/mês'
+  },
+  'promotions.premium.modal.proPlan.feature1': {
+    es: 'Promociones ilimitadas',
+    en: 'Unlimited promotions',
+    pt: 'Promoções ilimitadas'
+  },
+  'promotions.premium.modal.proPlan.feature2': {
+    es: 'Analytics avanzado',
+    en: 'Advanced analytics',
+    pt: 'Analytics avançado'
+  },
+  'promotions.premium.modal.proPlan.feature3': {
+    es: 'Soporte prioritario',
+    en: 'Priority support',
+    pt: 'Suporte prioritário'
+  },
+  'promotions.premium.modal.proPlan.feature4': {
+    es: 'Hasta 200 productos',
+    en: 'Up to 200 products',
+    pt: 'Até 200 produtos'
+  },
+  'promotions.premium.modal.elitePlan.title': {
+    es: 'Plan Elite - $99.99/mes',
+    en: 'Elite Plan - $99.99/month',
+    pt: 'Plano Elite - $99.99/mês'
+  },
+  'promotions.premium.modal.elitePlan.feature1': {
+    es: 'Todo del Plan Pro',
+    en: 'Everything from Pro Plan',
+    pt: 'Tudo do Plano Pro'
+  },
+  'promotions.premium.modal.elitePlan.feature2': {
+    es: 'Publicidad in-app',
+    en: 'In-app advertising',
+    pt: 'Publicidade no app'
+  },
+  'promotions.premium.modal.elitePlan.feature3': {
+    es: 'Dominio personalizado',
+    en: 'Custom domain',
+    pt: 'Domínio personalizado'
+  },
+  'promotions.premium.modal.elitePlan.feature4': {
+    es: 'Productos ilimitados',
+    en: 'Unlimited products',
+    pt: 'Produtos ilimitados'
+  },
+  'promotions.premium.modal.managePlans': {
+    es: 'Gestionar Planes',
+    en: 'Manage Plans',
+    pt: 'Gerenciar Planos'
+  },
+  'promotions.premium.modal.contactAdmin': {
+    es: 'Contacta al administrador del sistema para actualizar tu plan.',
+    en: 'Contact the system administrator to upgrade your plan.',
+    pt: 'Entre em contato com o administrador do sistema para atualizar seu plano.'
+  },
+  'promotions.premium.modal.understood': {
+    es: 'Entendido',
+    en: 'Understood',
+    pt: 'Entendido'
+  },
+  'promotions.search.placeholder': {
+    es: 'Buscar promociones...',
+    en: 'Search promotions...',
+    pt: 'Buscar promoções...'
+  },
+  'promotions.filters.allTypes': {
+    es: 'Todos los tipos',
+    en: 'All types',
+    pt: 'Todos os tipos'
+  },
+  'promotions.filters.percentage': {
+    es: 'Porcentaje',
+    en: 'Percentage',
+    pt: 'Porcentagem'
+  },
+  'promotions.filters.fixed': {
+    es: 'Monto fijo',
+    en: 'Fixed amount',
+    pt: 'Valor fixo'
+  },
+  'promotions.filters.buyXGetY': {
+    es: 'Compra X, obtén Y',
+    en: 'Buy X, get Y',
+    pt: 'Compre X, ganhe Y'
+  },
+  'promotions.filters.custom': {
+    es: 'Personalizado',
+    en: 'Custom',
+    pt: 'Personalizado'
+  },
+  'promotions.filters.allStatuses': {
+    es: 'Todos los estados',
+    en: 'All statuses',
+    pt: 'Todos os status'
+  },
+  'promotions.filters.active': {
+    es: 'Activas',
+    en: 'Active',
+    pt: 'Ativas'
+  },
+  'promotions.filters.inactive': {
+    es: 'Inactivas',
+    en: 'Inactive',
+    pt: 'Inativas'
+  },
+  'promotions.filters.expired': {
+    es: 'Expiradas',
+    en: 'Expired',
+    pt: 'Expiradas'
+  },
+  'promotions.filters.upcoming': {
+    es: 'Próximas',
+    en: 'Upcoming',
+    pt: 'Próximas'
+  },
+  'promotions.filters.sortBy.createdAt': {
+    es: 'Fecha de creación',
+    en: 'Creation date',
+    pt: 'Data de criação'
+  },
+  'promotions.filters.sortBy.name': {
+    es: 'Nombre',
+    en: 'Name',
+    pt: 'Nome'
+  },
+  'promotions.filters.sortBy.startDate': {
+    es: 'Fecha de inicio',
+    en: 'Start date',
+    pt: 'Data de início'
+  },
+  'promotions.filters.sortBy.endDate': {
+    es: 'Fecha de fin',
+    en: 'End date',
+    pt: 'Data de fim'
+  },
+  'promotions.filters.sortBy.uses': {
+    es: 'Usos',
+    en: 'Uses',
+    pt: 'Usos'
+  },
+  'promotions.loading': {
+    es: 'Cargando promociones...',
+    en: 'Loading promotions...',
+    pt: 'Carregando promoções...'
+  },
+  'promotions.retry': {
+    es: 'Reintentar',
+    en: 'Retry',
+    pt: 'Tentar novamente'
+  },
+  'promotions.noPromotions.title': {
+    es: 'No hay promociones',
+    en: 'No promotions',
+    pt: 'Nenhuma promoção'
+  },
+  'promotions.noPromotions.filtered': {
+    es: 'No se encontraron promociones con los filtros aplicados',
+    en: 'No promotions found with the applied filters',
+    pt: 'Nenhuma promoção encontrada com os filtros aplicados'
+  },
+  'promotions.noPromotions.empty': {
+    es: 'Crea tu primera promoción para empezar',
+    en: 'Create your first promotion to get started',
+    pt: 'Crie sua primeira promoção para começar'
+  },
+  'promotions.createFirst': {
+    es: 'Crear Promoción',
+    en: 'Create Promotion',
+    pt: 'Criar Promoção'
+  },
+  'promotions.table.promotion': {
+    es: 'Promoción',
+    en: 'Promotion',
+    pt: 'Promoção'
+  },
+  'promotions.table.type': {
+    es: 'Tipo',
+    en: 'Type',
+    pt: 'Tipo'
+  },
+  'promotions.table.dates': {
+    es: 'Fechas',
+    en: 'Dates',
+    pt: 'Datas'
+  },
+  'promotions.table.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'promotions.table.uses': {
+    es: 'Usos',
+    en: 'Uses',
+    pt: 'Usos'
+  },
+  'promotions.table.actions': {
+    es: 'Acciones',
+    en: 'Actions',
+    pt: 'Ações'
+  },
+  'promotions.table.createdBy': {
+    es: 'Creada por {name}',
+    en: 'Created by {name}',
+    pt: 'Criado por {name}'
+  },
+  'promotions.table.startDate': {
+    es: 'Inicio',
+    en: 'Start',
+    pt: 'Início'
+  },
+  'promotions.table.endDate': {
+    es: 'Fin',
+    en: 'End',
+    pt: 'Fim'
+  },
+  'promotions.status.active': {
+    es: 'Activa',
+    en: 'Active',
+    pt: 'Ativa'
+  },
+  'promotions.status.expired': {
+    es: 'Expirada',
+    en: 'Expired',
+    pt: 'Expirada'
+  },
+  'promotions.status.upcoming': {
+    es: 'Próxima',
+    en: 'Upcoming',
+    pt: 'Próxima'
+  },
+  'promotions.status.inactive': {
+    es: 'Inactiva',
+    en: 'Inactive',
+    pt: 'Inativa'
+  },
+  'promotions.actions.viewDetails': {
+    es: 'Ver detalles',
+    en: 'View details',
+    pt: 'Ver detalhes'
+  },
+  'promotions.actions.edit': {
+    es: 'Editar',
+    en: 'Edit',
+    pt: 'Editar'
+  },
+  'promotions.actions.activate': {
+    es: 'Activar',
+    en: 'Activate',
+    pt: 'Ativar'
+  },
+  'promotions.actions.deactivate': {
+    es: 'Desactivar',
+    en: 'Deactivate',
+    pt: 'Desativar'
+  },
+  'promotions.actions.delete': {
+    es: 'Eliminar',
+    en: 'Delete',
+    pt: 'Excluir'
+  },
+  'promotions.pagination.previous': {
+    es: 'Anterior',
+    en: 'Previous',
+    pt: 'Anterior'
+  },
+  'promotions.pagination.next': {
+    es: 'Siguiente',
+    en: 'Next',
+    pt: 'Próximo'
+  },
+  'promotions.pagination.showing': {
+    es: 'Mostrando {start} a {end} de {total} resultados',
+    en: 'Showing {start} to {end} of {total} results',
+    pt: 'Mostrando {start} a {end} de {total} resultados'
+  },
+  'promotions.modal.view.title': {
+    es: 'Detalles de Promoción',
+    en: 'Promotion Details',
+    pt: 'Detalhes da Promoção'
+  },
   'adminPromotions.loading': {
     es: 'Cargando promociones...',
     en: 'Loading promotions...',

@@ -406,14 +406,14 @@ const StoreManagerProducts: React.FC = () => {
             <div className="flex space-x-2">
               <button
                 onClick={() => setShowImportModal(true)}
-                className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                className="flex items-center px-4 py-2 bg-racing-500 text-white rounded-lg hover:bg-racing-600"
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Importar CSV
               </button>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center px-4 py-2 bg-racing-500 text-white rounded-lg hover:bg-racing-600"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Crear Producto
@@ -740,7 +740,7 @@ const StoreManagerProducts: React.FC = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleRestoreProduct(product._id)}
-                          className="text-green-600 hover:text-green-900 bg-green-100 hover:bg-green-200 px-3 py-1 rounded-md text-xs"
+                          className="text-racing-600 hover:text-racing-900 bg-racing-100 hover:bg-racing-200 px-3 py-1 rounded-md text-xs"
                           disabled={actionLoading !== null}
                         >
                           <RotateCcw className="w-3 h-3 inline mr-1" />
@@ -748,7 +748,7 @@ const StoreManagerProducts: React.FC = () => {
                         </button>
                         <button
                           onClick={() => handlePermanentlyDeleteProduct(product._id)}
-                          className="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1 rounded-md text-xs"
+                          className="text-alert-600 hover:text-alert-900 bg-alert-100 hover:bg-alert-200 px-3 py-1 rounded-md text-xs"
                           disabled={actionLoading !== null}
                         >
                           <Trash2 className="w-3 h-3 inline mr-1" />
@@ -900,7 +900,7 @@ const StoreManagerProducts: React.FC = () => {
 
       {/* Mensaje de error */}
       {error && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg">
+        <div className="fixed bottom-4 right-4 bg-alert-500 text-white px-6 py-3 rounded-lg shadow-lg">
           {error}
           <button
             onClick={() => setError(null)}

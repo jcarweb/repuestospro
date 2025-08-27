@@ -158,8 +158,13 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
-      // Buscar usuario
-      const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil');
+      // Buscar usuario con información de tiendas
+      const user = await User.findOne({ email })
+        .select('+password +loginAttempts +lockUntil')
+        .populate({
+          path: 'stores',
+          select: 'name address city state isMainStore _id'
+        });
       
       if (!user) {
         res.status(401).json({
@@ -220,7 +225,8 @@ export class AuthController {
               isEmailVerified: user.isEmailVerified,
               role: user.role,
               fingerprintEnabled: user.fingerprintEnabled,
-              twoFactorEnabled: true
+              twoFactorEnabled: true,
+              stores: user.stores || []
             }
           }
         });
@@ -252,7 +258,8 @@ export class AuthController {
             isEmailVerified: user.isEmailVerified,
             role: user.role,
             fingerprintEnabled: user.fingerprintEnabled,
-            twoFactorEnabled: false
+            twoFactorEnabled: false,
+            stores: user.stores || []
           },
           token
         }

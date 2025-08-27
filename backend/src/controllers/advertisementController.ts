@@ -3,6 +3,7 @@ import Advertisement, { IAdvertisement } from '../models/Advertisement';
 import Store from '../models/Store';
 import User from '../models/User';
 import { authenticateToken } from '../middleware';
+import { SubscriptionService } from '../services/subscriptionService';
 
 // Obtener todas las publicidades (solo admin)
 export const getAllAdvertisements = async (req: Request, res: Response) => {
@@ -56,6 +57,36 @@ export const getAllAdvertisements = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error getting advertisements:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
+// Verificar acceso a publicidad
+export const checkAdvertisingAccess = async (req: Request, res: Response) => {
+  try {
+    const { storeId } = req.query;
+    
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID de tienda requerido'
+      });
+    }
+
+    const advertisingAccess = await SubscriptionService.hasPremiumAccess(storeId as string, 'advertising');
+    
+    res.json({
+      success: true,
+      hasAccess: advertisingAccess.hasAccess,
+      reason: advertisingAccess.reason,
+      subscription: advertisingAccess.subscription,
+      requiresUpgrade: !advertisingAccess.hasAccess
+    });
+  } catch (error) {
+    console.error('Error checking advertising access:', error);
     res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
@@ -117,6 +148,17 @@ export const createAdvertisement = async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         message: 'Tienda no encontrada'
+      });
+    }
+
+    // Verificar acceso a publicidad según el plan de suscripción
+    const advertisingAccess = await SubscriptionService.hasPremiumAccess(store, 'advertising');
+    if (!advertisingAccess.hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: advertisingAccess.reason || 'Acceso a publicidad no disponible en tu plan actual',
+        requiresUpgrade: true,
+        subscription: advertisingAccess.subscription
       });
     }
 
@@ -630,6 +672,478 @@ export const getAnalyticsData = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error getting analytics data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
+// 🚀 MODELO HÍBRIDO - Nuevas funciones para publicidad autogestionada y premium
+
+// Obtener plantillas de publicidad disponibles
+export const getAdvertisementTemplates = async (req: Request, res: Response) => {
+  try {
+    const { category, type } = req.query;
+    const AdvertisementTemplate = require('../models/AdvertisementTemplate').default;
+    
+    const query: any = { isActive: true };
+    if (category) query.category = category;
+    if (type) query.type = type;
+
+    const templates = await AdvertisementTemplate.find(query)
+      .sort({ isDefault: -1, name: 1 });
+
+    res.json({
+      success: true,
+      data: templates
+    });
+  } catch (error) {
+    console.error('Error getting advertisement templates:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
+// Crear publicidad autogestionada (Nivel 1)
+export const createSelfManagedAdvertisement = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user._id;
+    const userRole = (req as any).user.role;
+    const advertisementData = req.body;
+
+    // Validar datos requeridos para publicidad autogestionada
+    if (!advertisementData.title || !advertisementData.templateId || !advertisementData.store) {
+      return res.status(400).json({
+        success: false,
+        message: 'Título, plantilla y tienda son requeridos'
+      });
+    }
+
+    // Verificar acceso a publicidad
+    const advertisingAccess = await SubscriptionService.hasPremiumAccess(advertisementData.store, 'advertising');
+    if (!advertisingAccess.hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: advertisingAccess.reason || 'No tienes acceso a publicidad',
+        subscription: advertisingAccess.subscription,
+        requiresUpgrade: true
+      });
+    }
+
+    // Obtener la plantilla
+    const AdvertisementTemplate = require('../models/AdvertisementTemplate').default;
+    const template = await AdvertisementTemplate.findById(advertisementData.templateId);
+    if (!template) {
+      return res.status(404).json({
+        success: false,
+        message: 'Plantilla no encontrada'
+      });
+    }
+
+    // Configurar datos de la publicidad autogestionada
+    const selfManagedData = {
+      ...advertisementData,
+      advertisingLevel: 'self_managed',
+      templateId: advertisementData.templateId,
+      selfManagedConfig: {
+        template: template.type,
+        colors: advertisementData.colors || template.defaultColors,
+        duration: advertisementData.duration || template.minDuration,
+        zones: advertisementData.zones || template.zones,
+        productId: advertisementData.productId
+      },
+      status: 'pending', // Requiere aprobación automática
+      createdBy: userId
+    };
+
+    const advertisement = new Advertisement(selfManagedData);
+    await advertisement.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Publicidad autogestionada creada exitosamente',
+      data: advertisement
+    });
+  } catch (error) {
+    console.error('Error creating self-managed advertisement:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
+// Solicitar publicidad premium gestionada (Nivel 2)
+export const requestPremiumAdvertisement = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user._id;
+    const advertisementData = req.body;
+
+    // Validar datos requeridos para publicidad premium
+    if (!advertisementData.title || !advertisementData.requirements || !advertisementData.store) {
+      return res.status(400).json({
+        success: false,
+        message: 'Título, requerimientos y tienda son requeridos'
+      });
+    }
+
+    // Verificar acceso a publicidad
+    const advertisingAccess = await SubscriptionService.hasPremiumAccess(advertisementData.store, 'advertising');
+    if (!advertisingAccess.hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: advertisingAccess.reason || 'No tienes acceso a publicidad',
+        subscription: advertisingAccess.subscription,
+        requiresUpgrade: true
+      });
+    }
+
+    // Configurar datos de la publicidad premium
+    const premiumData = {
+      ...advertisementData,
+      advertisingLevel: 'premium_managed',
+      premiumManagedConfig: {
+        campaignType: advertisementData.campaignType,
+        requirements: advertisementData.requirements,
+        budget: advertisementData.budget,
+        targetAudience: advertisementData.targetAudience,
+        specialFeatures: advertisementData.specialFeatures || []
+      },
+      status: 'pending', // Requiere revisión manual
+      createdBy: userId
+    };
+
+    const advertisement = new Advertisement(premiumData);
+    await advertisement.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Solicitud de publicidad premium enviada exitosamente',
+      data: advertisement
+    });
+  } catch (error) {
+    console.error('Error requesting premium advertisement:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
+// Obtener productos disponibles para publicidad autogestionada
+export const getAvailableProductsForAdvertising = async (req: Request, res: Response) => {
+  try {
+    const { storeId } = req.query;
+    const Product = require('../models/Product').default;
+
+    if (!storeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID de tienda requerido'
+      });
+    }
+
+    const products = await Product.find({ 
+      store: storeId, 
+      isActive: true 
+    })
+    .select('name price originalPrice image sku category')
+    .populate('category', 'name')
+    .limit(50);
+
+    res.json({
+      success: true,
+      data: products
+    });
+  } catch (error) {
+    console.error('Error getting available products:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
+// Calcular precio de publicidad autogestionada
+export const calculateSelfManagedPrice = async (req: Request, res: Response) => {
+  try {
+    const { templateId, duration } = req.body;
+
+    if (!templateId || !duration) {
+      return res.status(400).json({
+        success: false,
+        message: 'Plantilla y duración son requeridos'
+      });
+    }
+
+    const AdvertisementTemplate = require('../models/AdvertisementTemplate').default;
+    const template = await AdvertisementTemplate.findById(templateId);
+
+    if (!template) {
+      return res.status(404).json({
+        success: false,
+        message: 'Plantilla no encontrada'
+      });
+    }
+
+    const totalPrice = template.pricing.basePrice + (template.pricing.pricePerDay * duration);
+
+    res.json({
+      success: true,
+      data: {
+        basePrice: template.pricing.basePrice,
+        pricePerDay: template.pricing.pricePerDay,
+        duration,
+        totalPrice,
+        currency: template.pricing.currency
+      }
+    });
+  } catch (error) {
+    console.error('Error calculating price:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
+// 🚀 GESTIÓN DE SOLICITUDES - Funciones para el administrador
+
+// Obtener todas las solicitudes de publicidad (para admin)
+export const getAdvertisementRequests = async (req: Request, res: Response) => {
+  try {
+    const { 
+      page = 1, 
+      limit = 10, 
+      status, 
+      level, 
+      priority,
+      search 
+    } = req.query;
+
+    const query: any = {};
+
+    // Filtros
+    if (status) query.status = status;
+    if (level) query.advertisingLevel = level;
+    if (priority) query.priority = priority;
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { 'store.name': { $regex: search, $options: 'i' } },
+        { 'createdBy.name': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const options = {
+      page: parseInt(page as string),
+      limit: parseInt(limit as string),
+      populate: [
+        { path: 'store', select: 'name address city state' },
+        { path: 'createdBy', select: 'name email phone' },
+        { path: 'assignedTo', select: 'name email' }
+      ],
+      sort: { 
+        priority: -1, // Urgente primero
+        createdAt: -1 
+      }
+    };
+
+    const requests = await Advertisement.paginate(query, options);
+
+    res.json({
+      success: true,
+      data: requests.docs,
+      pagination: {
+        total: requests.totalDocs,
+        page: requests.page,
+        pages: requests.totalPages,
+        limit: requests.limit
+      }
+    });
+  } catch (error) {
+    console.error('Error getting advertisement requests:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
+// Aprobar solicitud de publicidad
+export const approveAdvertisementRequest = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { notes } = req.body;
+    const adminId = (req as any).user._id;
+
+    const advertisement = await Advertisement.findById(id);
+    if (!advertisement) {
+      return res.status(404).json({
+        success: false,
+        message: 'Solicitud no encontrada'
+      });
+    }
+
+    advertisement.status = 'approved';
+    advertisement.approvedBy = adminId;
+    advertisement.approvedAt = new Date();
+    
+    if (notes) {
+      advertisement.notes = advertisement.notes || [];
+      advertisement.notes.push(`Aprobado por admin: ${notes}`);
+    }
+
+    await advertisement.save();
+
+    res.json({
+      success: true,
+      message: 'Solicitud aprobada exitosamente',
+      data: advertisement
+    });
+  } catch (error) {
+    console.error('Error approving advertisement request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
+// Rechazar solicitud de publicidad
+export const rejectAdvertisementRequest = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { rejectionReason, notes } = req.body;
+    const adminId = (req as any).user._id;
+
+    if (!rejectionReason) {
+      return res.status(400).json({
+        success: false,
+        message: 'Motivo del rechazo es requerido'
+      });
+    }
+
+    const advertisement = await Advertisement.findById(id);
+    if (!advertisement) {
+      return res.status(404).json({
+        success: false,
+        message: 'Solicitud no encontrada'
+      });
+    }
+
+    advertisement.status = 'rejected';
+    advertisement.rejectionReason = rejectionReason;
+    advertisement.approvedBy = adminId;
+    advertisement.approvedAt = new Date();
+    
+    if (notes) {
+      advertisement.notes = advertisement.notes || [];
+      advertisement.notes.push(`Rechazado por admin: ${notes}`);
+    }
+
+    await advertisement.save();
+
+    res.json({
+      success: true,
+      message: 'Solicitud rechazada exitosamente',
+      data: advertisement
+    });
+  } catch (error) {
+    console.error('Error rejecting advertisement request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
+// Asignar solicitud de publicidad
+export const assignAdvertisementRequest = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { assignedTo, estimatedCompletion, notes } = req.body;
+    const adminId = (req as any).user._id;
+
+    if (!assignedTo || !estimatedCompletion) {
+      return res.status(400).json({
+        success: false,
+        message: 'Responsable y fecha estimada son requeridos'
+      });
+    }
+
+    const advertisement = await Advertisement.findById(id);
+    if (!advertisement) {
+      return res.status(404).json({
+        success: false,
+        message: 'Solicitud no encontrada'
+      });
+    }
+
+    advertisement.status = 'in_progress';
+    advertisement.assignedTo = assignedTo;
+    advertisement.estimatedCompletion = new Date(estimatedCompletion);
+    advertisement.approvedBy = adminId;
+    advertisement.approvedAt = new Date();
+    
+    if (notes) {
+      advertisement.notes = advertisement.notes || [];
+      advertisement.notes.push(`Asignado por admin: ${notes}`);
+    }
+
+    await advertisement.save();
+
+    res.json({
+      success: true,
+      message: 'Solicitud asignada exitosamente',
+      data: advertisement
+    });
+  } catch (error) {
+    console.error('Error assigning advertisement request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
+// Marcar solicitud como completada
+export const completeAdvertisementRequest = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { notes } = req.body;
+    const adminId = (req as any).user._id;
+
+    const advertisement = await Advertisement.findById(id);
+    if (!advertisement) {
+      return res.status(404).json({
+        success: false,
+        message: 'Solicitud no encontrada'
+      });
+    }
+
+    advertisement.status = 'completed';
+    advertisement.approvedBy = adminId;
+    advertisement.approvedAt = new Date();
+    
+    if (notes) {
+      advertisement.notes = advertisement.notes || [];
+      advertisement.notes.push(`Completado por admin: ${notes}`);
+    }
+
+    await advertisement.save();
+
+    res.json({
+      success: true,
+      message: 'Solicitud marcada como completada',
+      data: advertisement
+    });
+  } catch (error) {
+    console.error('Error completing advertisement request:', error);
     res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
