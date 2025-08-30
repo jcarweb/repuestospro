@@ -2076,6 +2076,415 @@ export const translations: Translations = {
     pt: 'Notificações'
   },
 
+  // ===== DELIVERY ORDERS =====
+  'deliveryOrders.title': {
+    es: 'Pedidos Asignados',
+    en: 'Assigned Orders',
+    pt: 'Pedidos Atribuídos'
+  },
+  'deliveryOrders.subtitle': {
+    es: 'Gestiona tus pedidos asignados y actualiza su estado',
+    en: 'Manage your assigned orders and update their status',
+    pt: 'Gerencie seus pedidos atribuídos e atualize seu status'
+  },
+  'deliveryOrders.filters.all': {
+    es: 'Todos',
+    en: 'All',
+    pt: 'Todos'
+  },
+  'deliveryOrders.filters.pending': {
+    es: 'Pendientes',
+    en: 'Pending',
+    pt: 'Pendentes'
+  },
+  'deliveryOrders.filters.assigned': {
+    es: 'Asignados',
+    en: 'Assigned',
+    pt: 'Atribuídos'
+  },
+  'deliveryOrders.filters.accepted': {
+    es: 'Aceptados',
+    en: 'Accepted',
+    pt: 'Aceitos'
+  },
+  'deliveryOrders.filters.pickedUp': {
+    es: 'Recogidos',
+    en: 'Picked Up',
+    pt: 'Coletados'
+  },
+  'deliveryOrders.filters.inTransit': {
+    es: 'En Tránsito',
+    en: 'In Transit',
+    pt: 'Em Trânsito'
+  },
+  'deliveryOrders.filters.delivered': {
+    es: 'Entregados',
+    en: 'Delivered',
+    pt: 'Entregues'
+  },
+  'deliveryOrders.filters.cancelled': {
+    es: 'Cancelados',
+    en: 'Cancelled',
+    pt: 'Cancelados'
+  },
+  'deliveryOrders.search.placeholder': {
+    es: 'Buscar por código de seguimiento, cliente...',
+    en: 'Search by tracking code, customer...',
+    pt: 'Buscar por código de rastreamento, cliente...'
+  },
+  'deliveryOrders.status.pending': {
+    es: 'Pendiente',
+    en: 'Pending',
+    pt: 'Pendente'
+  },
+  'deliveryOrders.status.assigned': {
+    es: 'Asignado',
+    en: 'Assigned',
+    pt: 'Atribuído'
+  },
+  'deliveryOrders.status.accepted': {
+    es: 'Aceptado',
+    en: 'Accepted',
+    pt: 'Aceito'
+  },
+  'deliveryOrders.status.pickedUp': {
+    es: 'Recogido',
+    en: 'Picked Up',
+    pt: 'Coletado'
+  },
+  'deliveryOrders.status.inTransit': {
+    es: 'En Tránsito',
+    en: 'In Transit',
+    pt: 'Em Trânsito'
+  },
+  'deliveryOrders.status.delivered': {
+    es: 'Entregado',
+    en: 'Delivered',
+    pt: 'Entregue'
+  },
+  'deliveryOrders.status.cancelled': {
+    es: 'Cancelado',
+    en: 'Cancelled',
+    pt: 'Cancelado'
+  },
+  'deliveryOrders.status.failed': {
+    es: 'Fallido',
+    en: 'Failed',
+    pt: 'Falhou'
+  },
+  'deliveryOrders.order.trackingCode': {
+    es: 'Código de Seguimiento',
+    en: 'Tracking Code',
+    pt: 'Código de Rastreamento'
+  },
+  'deliveryOrders.order.customer': {
+    es: 'Cliente',
+    en: 'Customer',
+    pt: 'Cliente'
+  },
+  'deliveryOrders.order.store': {
+    es: 'Tienda',
+    en: 'Store',
+    pt: 'Loja'
+  },
+  'deliveryOrders.order.pickupLocation': {
+    es: 'Punto de Recogida',
+    en: 'Pickup Location',
+    pt: 'Local de Coleta'
+  },
+  'deliveryOrders.order.deliveryLocation': {
+    es: 'Punto de Entrega',
+    en: 'Delivery Location',
+    pt: 'Local de Entrega'
+  },
+  'deliveryOrders.order.deliveryFee': {
+    es: 'Tarifa de Entrega',
+    en: 'Delivery Fee',
+    pt: 'Taxa de Entrega'
+  },
+  'deliveryOrders.order.riderPayment': {
+    es: 'Pago al Repartidor',
+    en: 'Rider Payment',
+    pt: 'Pagamento do Entregador'
+  },
+  'deliveryOrders.order.estimatedPickup': {
+    es: 'Recogida Estimada',
+    en: 'Estimated Pickup',
+    pt: 'Coleta Estimada'
+  },
+  'deliveryOrders.order.estimatedDelivery': {
+    es: 'Entrega Estimada',
+    en: 'Estimated Delivery',
+    pt: 'Entrega Estimada'
+  },
+  'deliveryOrders.order.instructions': {
+    es: 'Instrucciones',
+    en: 'Instructions',
+    pt: 'Instruções'
+  },
+  'deliveryOrders.actions.accept': {
+    es: 'Aceptar',
+    en: 'Accept',
+    pt: 'Aceitar'
+  },
+  'deliveryOrders.actions.pickup': {
+    es: 'Recoger',
+    en: 'Pick Up',
+    pt: 'Coletar'
+  },
+  'deliveryOrders.actions.startDelivery': {
+    es: 'Iniciar Entrega',
+    en: 'Start Delivery',
+    pt: 'Iniciar Entrega'
+  },
+  'deliveryOrders.actions.completeDelivery': {
+    es: 'Completar Entrega',
+    en: 'Complete Delivery',
+    pt: 'Completar Entrega'
+  },
+  'deliveryOrders.actions.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'deliveryOrders.actions.viewDetails': {
+    es: 'Ver Detalles',
+    en: 'View Details',
+    pt: 'Ver Detalhes'
+  },
+  'deliveryOrders.actions.callCustomer': {
+    es: 'Llamar Cliente',
+    en: 'Call Customer',
+    pt: 'Ligar para Cliente'
+  },
+  'deliveryOrders.actions.callStore': {
+    es: 'Llamar Tienda',
+    en: 'Call Store',
+    pt: 'Ligar para Loja'
+  },
+  'deliveryOrders.stats.total': {
+    es: 'Total de Pedidos',
+    en: 'Total Orders',
+    pt: 'Total de Pedidos'
+  },
+  'deliveryOrders.stats.pending': {
+    es: 'Pendientes',
+    en: 'Pending',
+    pt: 'Pendentes'
+  },
+  'deliveryOrders.stats.inProgress': {
+    es: 'En Progreso',
+    en: 'In Progress',
+    pt: 'Em Andamento'
+  },
+  'deliveryOrders.stats.completed': {
+    es: 'Completados',
+    en: 'Completed',
+    pt: 'Concluídos'
+  },
+  'deliveryOrders.empty.title': {
+    es: 'No hay pedidos asignados',
+    en: 'No assigned orders',
+    pt: 'Nenhum pedido atribuído'
+  },
+  'deliveryOrders.empty.subtitle': {
+    es: 'Cuando tengas pedidos asignados, aparecerán aquí',
+    en: 'When you have assigned orders, they will appear here',
+    pt: 'Quando você tiver pedidos atribuídos, eles aparecerão aqui'
+  },
+  'deliveryOrders.refresh': {
+    es: 'Actualizar',
+    en: 'Refresh',
+    pt: 'Atualizar'
+  },
+  'deliveryOrders.loading': {
+    es: 'Cargando pedidos...',
+    en: 'Loading orders...',
+    pt: 'Carregando pedidos...'
+  },
+  'deliveryOrders.error': {
+    es: 'Error al cargar los pedidos',
+    en: 'Error loading orders',
+    pt: 'Erro ao carregar pedidos'
+  },
+
+  // ===== DELIVERY MAP =====
+  'deliveryMap.title': {
+    es: 'Mapa de Rutas',
+    en: 'Route Map',
+    pt: 'Mapa de Rotas'
+  },
+  'deliveryMap.subtitle': {
+    es: 'Visualiza tus rutas de entrega y optimiza tu recorrido',
+    en: 'View your delivery routes and optimize your journey',
+    pt: 'Visualize suas rotas de entrega e otimize sua jornada'
+  },
+  'deliveryMap.currentLocation': {
+    es: 'Mi Ubicación',
+    en: 'My Location',
+    pt: 'Minha Localização'
+  },
+  'deliveryMap.pickupPoints': {
+    es: 'Puntos de Recogida',
+    en: 'Pickup Points',
+    pt: 'Pontos de Coleta'
+  },
+  'deliveryMap.deliveryPoints': {
+    es: 'Puntos de Entrega',
+    en: 'Delivery Points',
+    pt: 'Pontos de Entrega'
+  },
+  'deliveryMap.routeOptimization': {
+    es: 'Optimizar Ruta',
+    en: 'Optimize Route',
+    pt: 'Otimizar Rota'
+  },
+  'deliveryMap.showRoute': {
+    es: 'Mostrar Ruta',
+    en: 'Show Route',
+    pt: 'Mostrar Rota'
+  },
+  'deliveryMap.hideRoute': {
+    es: 'Ocultar Ruta',
+    en: 'Hide Route',
+    pt: 'Ocultar Rota'
+  },
+  'deliveryMap.estimatedTime': {
+    es: 'Tiempo Estimado',
+    en: 'Estimated Time',
+    pt: 'Tempo Estimado'
+  },
+  'deliveryMap.totalDistance': {
+    es: 'Distancia Total',
+    en: 'Total Distance',
+    pt: 'Distância Total'
+  },
+  'deliveryMap.startNavigation': {
+    es: 'Iniciar Navegación',
+    en: 'Start Navigation',
+    pt: 'Iniciar Navegação'
+  },
+  'deliveryMap.navigateToStore': {
+    es: 'Navegar a Tienda',
+    en: 'Navigate to Store',
+    pt: 'Navegar para Loja'
+  },
+  'deliveryMap.refreshLocation': {
+    es: 'Actualizar Ubicación',
+    en: 'Refresh Location',
+    pt: 'Atualizar Localização'
+  },
+  'deliveryMap.loading': {
+    es: 'Cargando mapa...',
+    en: 'Loading map...',
+    pt: 'Carregando mapa...'
+  },
+  'deliveryMap.error': {
+    es: 'Error al cargar el mapa',
+    en: 'Error loading map',
+    pt: 'Erro ao carregar mapa'
+  },
+  'deliveryMap.noOrders': {
+    es: 'No hay pedidos para mostrar en el mapa',
+    en: 'No orders to show on map',
+    pt: 'Nenhum pedido para mostrar no mapa'
+  },
+  'deliveryMap.orderDetails': {
+    es: 'Detalles del Pedido',
+    en: 'Order Details',
+    pt: 'Detalhes do Pedido'
+  },
+  'deliveryMap.customer': {
+    es: 'Cliente',
+    en: 'Customer',
+    pt: 'Cliente'
+  },
+  'deliveryMap.store': {
+    es: 'Tienda',
+    en: 'Store',
+    pt: 'Loja'
+  },
+  'deliveryMap.trackingCode': {
+    es: 'Código de Seguimiento',
+    en: 'Tracking Code',
+    pt: 'Código de Rastreamento'
+  },
+  'deliveryMap.status': {
+    es: 'Estado',
+    en: 'Status',
+    pt: 'Status'
+  },
+  'deliveryMap.estimatedPickup': {
+    es: 'Recogida Estimada',
+    en: 'Estimated Pickup',
+    pt: 'Coleta Estimada'
+  },
+  'deliveryMap.estimatedDelivery': {
+    es: 'Entrega Estimada',
+    en: 'Estimated Delivery',
+    pt: 'Entrega Estimada'
+  },
+  'deliveryMap.instructions': {
+    es: 'Instrucciones',
+    en: 'Instructions',
+    pt: 'Instruções'
+  },
+  'deliveryMap.callCustomer': {
+    es: 'Llamar Cliente',
+    en: 'Call Customer',
+    pt: 'Ligar para Cliente'
+  },
+  'deliveryMap.callStore': {
+    es: 'Llamar Tienda',
+    en: 'Call Store',
+    pt: 'Ligar para Loja'
+  },
+  'deliveryMap.viewOrder': {
+    es: 'Ver Pedido',
+    en: 'View Order',
+    pt: 'Ver Pedido'
+  },
+  'deliveryMap.mapControls': {
+    es: 'Controles del Mapa',
+    en: 'Map Controls',
+    pt: 'Controles do Mapa'
+  },
+  'deliveryMap.zoomIn': {
+    es: 'Acercar',
+    en: 'Zoom In',
+    pt: 'Aproximar'
+  },
+  'deliveryMap.zoomOut': {
+    es: 'Alejar',
+    en: 'Zoom Out',
+    pt: 'Afastar'
+  },
+  'deliveryMap.centerMap': {
+    es: 'Centrar Mapa',
+    en: 'Center Map',
+    pt: 'Centralizar Mapa'
+  },
+  'deliveryMap.layers': {
+    es: 'Capas',
+    en: 'Layers',
+    pt: 'Camadas'
+  },
+  'deliveryMap.traffic': {
+    es: 'Tráfico',
+    en: 'Traffic',
+    pt: 'Tráfego'
+  },
+  'deliveryMap.satellite': {
+    es: 'Satélite',
+    en: 'Satellite',
+    pt: 'Satélite'
+  },
+  'deliveryMap.terrain': {
+    es: 'Terreno',
+    en: 'Terrain',
+    pt: 'Terreno'
+  },
+
   // ===== ADMIN DASHBOARD =====
   'adminDashboard.title': {
     es: 'Panel de Administración',
@@ -5986,6 +6395,197 @@ export const translations: Translations = {
     en: 'Store sales reports',
     pt: 'Relatórios de vendas da loja'
   },
+  // Descripciones de menús de administrador
+  'sidebar.admin.dashboard.description': {
+    es: 'Panel principal de administración',
+    en: 'Main administration panel',
+    pt: 'Painel principal de administração'
+  },
+  'sidebar.admin.users.description': {
+    es: 'Gestión de usuarios del sistema',
+    en: 'System user management',
+    pt: 'Gestão de usuários do sistema'
+  },
+  'sidebar.admin.products.description': {
+    es: 'Gestión de productos global',
+    en: 'Global product management',
+    pt: 'Gestão global de produtos'
+  },
+  'sidebar.admin.categories.description': {
+    es: 'Gestión de categorías y subcategorías',
+    en: 'Categories and subcategories management',
+    pt: 'Gestão de categorias e subcategorias'
+  },
+  'sidebar.admin.promotions.description': {
+    es: 'Gestión de promociones globales',
+    en: 'Global promotions management',
+    pt: 'Gestão global de promoções'
+  },
+  'sidebar.admin.analytics.description': {
+    es: 'Estadísticas y métricas del sistema',
+    en: 'System statistics and metrics',
+    pt: 'Estatísticas e métricas do sistema'
+  },
+  'sidebar.admin.loyalty.description': {
+    es: 'Sistema de lealtad y premios',
+    en: 'Loyalty and rewards system',
+    pt: 'Sistema de fidelidade e recompensas'
+  },
+  'sidebar.admin.registrationCodes.description': {
+    es: 'Generar códigos de registro',
+    en: 'Generate registration codes',
+    pt: 'Gerar códigos de registro'
+  },
+  'sidebar.admin.globalSettings.description': {
+    es: 'Configuración del sistema',
+    en: 'System configuration',
+    pt: 'Configuração do sistema'
+  },
+  // Descripciones de menús de gestor de tienda
+  'sidebar.storeManager.dashboard.description': {
+    es: 'Panel de gestión de tienda',
+    en: 'Store management panel',
+    pt: 'Painel de gestão da loja'
+  },
+  'sidebar.storeManager.inventory.description': {
+    es: 'Configurar y gestionar inventario',
+    en: 'Configure and manage inventory',
+    pt: 'Configurar e gerenciar inventário'
+  },
+  'sidebar.storeManager.products.description': {
+    es: 'Gestión de productos de la tienda',
+    en: 'Store product management',
+    pt: 'Gestão de produtos da loja'
+  },
+  'sidebar.storeManager.promotions.description': {
+    es: 'Promociones de la tienda',
+    en: 'Store promotions',
+    pt: 'Promoções da loja'
+  },
+  'sidebar.storeManager.orders.description': {
+    es: 'Gestión de pedidos',
+    en: 'Order management',
+    pt: 'Gestão de pedidos'
+  },
+  'sidebar.storeManager.delivery.description': {
+    es: 'Asignar y gestionar delivery',
+    en: 'Assign and manage delivery',
+    pt: 'Atribuir e gerenciar entrega'
+  },
+  'sidebar.storeManager.analytics.description': {
+    es: 'Estadísticas de la tienda',
+    en: 'Store statistics',
+    pt: 'Estatísticas da loja'
+  },
+  'sidebar.storeManager.messages.description': {
+    es: 'Mensajería con clientes',
+    en: 'Customer messaging',
+    pt: 'Mensagens com clientes'
+  },
+  'sidebar.storeManager.reviews.description': {
+    es: 'Reseñas de productos',
+    en: 'Product reviews',
+    pt: 'Avaliações de produtos'
+  },
+  'sidebar.storeManager.settings.description': {
+    es: 'Configuración de la tienda',
+    en: 'Store settings',
+    pt: 'Configurações da loja'
+  },
+  // Descripciones de menús de delivery
+  'sidebar.delivery.dashboard.description': {
+    es: 'Panel de delivery',
+    en: 'Delivery panel',
+    pt: 'Painel de entrega'
+  },
+  'sidebar.delivery.assignedOrders.description': {
+    es: 'Ver pedidos asignados',
+    en: 'View assigned orders',
+    pt: 'Ver pedidos atribuídos'
+  },
+  'sidebar.delivery.routeMap.description': {
+    es: 'Mapa con rutas de entrega',
+    en: 'Map with delivery routes',
+    pt: 'Mapa com rotas de entrega'
+  },
+  'sidebar.delivery.deliveryReport.description': {
+    es: 'Reportar estado de entregas',
+    en: 'Report delivery status',
+    pt: 'Relatar status de entrega'
+  },
+  'sidebar.delivery.ratings.description': {
+    es: 'Ver calificaciones recibidas',
+    en: 'View received ratings',
+    pt: 'Ver avaliações recebidas'
+  },
+  'sidebar.delivery.workSchedule.description': {
+    es: 'Configurar horario de trabajo',
+    en: 'Configure work schedule',
+    pt: 'Configurar horário de trabalho'
+  },
+  'sidebar.delivery.availabilityStatus.description': {
+    es: 'Cambiar estado de disponibilidad',
+    en: 'Change availability status',
+    pt: 'Alterar status de disponibilidade'
+  },
+  'sidebar.delivery.profile.description': {
+    es: 'Configuración del perfil',
+    en: 'Profile settings',
+    pt: 'Configurações do perfil'
+  },
+  // Descripciones de menús de cliente
+  'sidebar.client.home.description': {
+    es: 'Página principal',
+    en: 'Home page',
+    pt: 'Página inicial'
+  },
+  'sidebar.client.products.description': {
+    es: 'Explorar productos',
+    en: 'Explore products',
+    pt: 'Explorar produtos'
+  },
+  'sidebar.client.categories.description': {
+    es: 'Ver categorías',
+    en: 'View categories',
+    pt: 'Ver categorias'
+  },
+  'sidebar.client.cart.description': {
+    es: 'Ver carrito de compras',
+    en: 'View shopping cart',
+    pt: 'Ver carrinho de compras'
+  },
+  'sidebar.client.favorites.description': {
+    es: 'Productos favoritos',
+    en: 'Favorite products',
+    pt: 'Produtos favoritos'
+  },
+  'sidebar.client.loyalty.description': {
+    es: 'Puntos y premios',
+    en: 'Points and rewards',
+    pt: 'Pontos e recompensas'
+  },
+  'sidebar.client.myOrders.description': {
+    es: 'Historial de pedidos',
+    en: 'Order history',
+    pt: 'Histórico de pedidos'
+  },
+  'sidebar.client.profile.description': {
+    es: 'Configuración del perfil',
+    en: 'Profile settings',
+    pt: 'Configurações do perfil'
+  },
+  'sidebar.client.security.description': {
+    es: 'Configuración de seguridad',
+    en: 'Security settings',
+    pt: 'Configurações de segurança'
+  },
+  'sidebar.client.notifications.description': {
+    es: 'Configurar notificaciones',
+    en: 'Configure notifications',
+    pt: 'Configurar notificações'
+  },
+
+
   // ===== STORE MANAGER SALES =====
   'storeManagerSales.title': {
     es: 'Reportes de Ventas',
@@ -6001,6 +6601,760 @@ export const translations: Translations = {
     es: 'Funcionalidad en desarrollo',
     en: 'Feature in development',
     pt: 'Funcionalidade em desenvolvimento'
+  },
+
+  // ===== HEADER CLIENTE =====
+  'header.profile': {
+    es: 'Perfil',
+    en: 'Profile',
+    pt: 'Perfil'
+  },
+  'header.profile.description': {
+    es: 'Gestionar información personal',
+    en: 'Manage personal information',
+    pt: 'Gerenciar informações pessoais'
+  },
+  'header.security': {
+    es: 'Seguridad',
+    en: 'Security',
+    pt: 'Segurança'
+  },
+  'header.security.description': {
+    es: 'Configurar seguridad y contraseñas',
+    en: 'Configure security and passwords',
+    pt: 'Configurar segurança e senhas'
+  },
+  'header.settings': {
+    es: 'Configuración',
+    en: 'Settings',
+    pt: 'Configurações'
+  },
+  'header.settings.description': {
+    es: 'Preferencias de la cuenta',
+    en: 'Account preferences',
+    pt: 'Preferências da conta'
+  },
+  'header.logout': {
+    es: 'Cerrar Sesión',
+    en: 'Logout',
+    pt: 'Sair'
+  },
+  'header.logout.description': {
+    es: 'Cerrar sesión de la cuenta',
+    en: 'Sign out of account',
+    pt: 'Sair da conta'
+  },
+  'header.continueShopping': {
+    es: 'Continuar Comprando',
+    en: 'Continue Shopping',
+    pt: 'Continuar Comprando'
+  },
+  'header.favorites': {
+    es: 'Favoritos',
+    en: 'Favorites',
+    pt: 'Favoritos'
+  },
+  'header.notifications': {
+    es: 'Notificaciones',
+    en: 'Notifications',
+    pt: 'Notificações'
+  },
+  'header.cart': {
+    es: 'Carrito',
+    en: 'Cart',
+    pt: 'Carrinho'
+  },
+  'header.hideSidebar': {
+    es: 'Ocultar menú lateral',
+    en: 'Hide sidebar',
+    pt: 'Ocultar menu lateral'
+  },
+  'header.showSidebar': {
+    es: 'Mostrar menú lateral',
+    en: 'Show sidebar',
+    pt: 'Mostrar menu lateral'
+  },
+  'header.noNotifications': {
+    es: 'No tienes notificaciones nuevas',
+    en: 'You have no new notifications',
+    pt: 'Você não tem notificações novas'
+  },
+  
+  // ===== DASHBOARD CLIENTE =====
+  'dashboard.welcome': {
+    es: 'Bienvenido',
+    en: 'Welcome',
+    pt: 'Bem-vindo'
+  },
+  'dashboard.subtitle': {
+    es: 'Gestiona tus compras y revisa tu actividad',
+    en: 'Manage your purchases and review your activity',
+    pt: 'Gerencie suas compras e revise sua atividade'
+  },
+  'dashboard.continueShopping': {
+    es: 'Continuar Comprando',
+    en: 'Continue Shopping',
+    pt: 'Continuar Comprando'
+  },
+  'dashboard.continueShopping.description': {
+    es: 'Explorar más productos',
+    en: 'Explore more products',
+    pt: 'Explorar mais produtos'
+  },
+  'dashboard.viewCart': {
+    es: 'Ver Carrito',
+    en: 'View Cart',
+    pt: 'Ver Carrinho'
+  },
+  'dashboard.viewCart.description': {
+    es: 'Revisar productos en carrito',
+    en: 'Review products in cart',
+    pt: 'Revisar produtos no carrinho'
+  },
+  'dashboard.myOrders': {
+    es: 'Mis Pedidos',
+    en: 'My Orders',
+    pt: 'Meus Pedidos'
+  },
+  'dashboard.myOrders.description': {
+    es: 'Ver historial de pedidos',
+    en: 'View order history',
+    pt: 'Ver histórico de pedidos'
+  },
+  'dashboard.favorites': {
+    es: 'Favoritos',
+    en: 'Favorites',
+    pt: 'Favoritos'
+  },
+  'dashboard.favorites.description': {
+    es: 'Productos guardados',
+    en: 'Saved products',
+    pt: 'Produtos salvos'
+  },
+  'dashboard.totalOrders': {
+    es: 'Total de Pedidos',
+    en: 'Total Orders',
+    pt: 'Total de Pedidos'
+  },
+  'dashboard.totalSpent': {
+    es: 'Total Gastado',
+    en: 'Total Spent',
+    pt: 'Total Gasto'
+  },
+  'dashboard.loyaltyPoints': {
+    es: 'Puntos de Fidelización',
+    en: 'Loyalty Points',
+    pt: 'Pontos de Fidelidade'
+  },
+  'dashboard.favoriteProducts': {
+    es: 'Productos Favoritos',
+    en: 'Favorite Products',
+    pt: 'Produtos Favoritos'
+  },
+  'dashboard.quickActions': {
+    es: 'Acciones Rápidas',
+    en: 'Quick Actions',
+    pt: 'Ações Rápidas'
+  },
+  'dashboard.recentOrders': {
+    es: 'Pedidos Recientes',
+    en: 'Recent Orders',
+    pt: 'Pedidos Recentes'
+  },
+  'dashboard.recentActivity': {
+    es: 'Actividad Reciente',
+    en: 'Recent Activity',
+    pt: 'Atividade Recente'
+  },
+  'dashboard.loyaltyProgram': {
+    es: 'Programa de Fidelización',
+    en: 'Loyalty Program',
+    pt: 'Programa de Fidelidade'
+  },
+  'dashboard.pointsEarned': {
+    es: 'Puntos Ganados',
+    en: 'Points Earned',
+    pt: 'Pontos Ganhos'
+  },
+  'dashboard.nextReward': {
+    es: 'Próxima Recompensa',
+    en: 'Next Reward',
+    pt: 'Próxima Recompensa'
+  },
+  'dashboard.availableRewards': {
+    es: 'Recompensas Disponibles',
+    en: 'Available Rewards',
+    pt: 'Recompensas Disponíveis'
+  },
+  'dashboard.viewAllOrders': {
+    es: 'Ver Todos los Pedidos',
+    en: 'View All Orders',
+    pt: 'Ver Todos os Pedidos'
+  },
+  'dashboard.status.delivered': {
+    es: 'Entregado',
+    en: 'Delivered',
+    pt: 'Entregue'
+  },
+  'dashboard.status.inTransit': {
+    es: 'En Tránsito',
+    en: 'In Transit',
+    pt: 'Em Trânsito'
+  },
+  'dashboard.status.processing': {
+    es: 'Procesando',
+    en: 'Processing',
+    pt: 'Processando'
+  },
+
+  // ===== SIDEBAR CLIENTE =====
+  'sidebar.expand': {
+    es: 'Expandir menú',
+    en: 'Expand menu',
+    pt: 'Expandir menu'
+  },
+  'sidebar.collapse': {
+    es: 'Colapsar menú',
+    en: 'Collapse menu',
+    pt: 'Colapsar menu'
+  },
+  'sidebar.theme': {
+    es: 'Tema',
+    en: 'Theme',
+    pt: 'Tema'
+  },
+  'sidebar.language': {
+    es: 'Idioma',
+    en: 'Language',
+    pt: 'Idioma'
+  },
+
+  // ===== PEDIDOS DEL CLIENTE =====
+  'orders.title': {
+    es: 'Mis Pedidos',
+    en: 'My Orders',
+    pt: 'Meus Pedidos'
+  },
+  'orders.subtitle': {
+    es: 'Gestiona y revisa el estado de tus pedidos',
+    en: 'Manage and review the status of your orders',
+    pt: 'Gerencie e revise o status dos seus pedidos'
+  },
+  'orders.total': {
+    es: 'Total de pedidos',
+    en: 'Total orders',
+    pt: 'Total de pedidos'
+  },
+  'orders.search.placeholder': {
+    es: 'Buscar por número de orden o producto...',
+    en: 'Search by order number or product...',
+    pt: 'Buscar por número do pedido ou produto...'
+  },
+  'orders.status.all': {
+    es: 'Todos los pedidos',
+    en: 'All orders',
+    pt: 'Todos os pedidos'
+  },
+  'orders.status.pending': {
+    es: 'Pendientes',
+    en: 'Pending',
+    pt: 'Pendentes'
+  },
+  'orders.status.confirmed': {
+    es: 'Confirmados',
+    en: 'Confirmed',
+    pt: 'Confirmados'
+  },
+  'orders.status.processing': {
+    es: 'En proceso',
+    en: 'Processing',
+    pt: 'Em processamento'
+  },
+  'orders.status.shipped': {
+    es: 'Enviados',
+    en: 'Shipped',
+    pt: 'Enviados'
+  },
+  'orders.status.delivered': {
+    es: 'Entregados',
+    en: 'Delivered',
+    pt: 'Entregues'
+  },
+  'orders.status.cancelled': {
+    es: 'Cancelados',
+    en: 'Cancelled',
+    pt: 'Cancelados'
+  },
+  'orders.actions.view': {
+    es: 'Ver Detalles',
+    en: 'View Details',
+    pt: 'Ver Detalhes'
+  },
+  'orders.actions.download': {
+    es: 'Imprimir Factura',
+    en: 'Print Invoice',
+    pt: 'Imprimir Fatura'
+  },
+  'orders.actions.rate': {
+    es: 'Calificar',
+    en: 'Rate',
+    pt: 'Avaliar'
+  },
+
+  // ===== FAVORITOS =====
+  'favorites.title': {
+    es: 'Mis Favoritos',
+    en: 'My Favorites',
+    pt: 'Meus Favoritos'
+  },
+  'favorites.subtitle': {
+    es: 'Productos que te han gustado',
+    en: 'Products you liked',
+    pt: 'Produtos que você gostou'
+  },
+  'favorites.product': {
+    es: 'producto',
+    en: 'product',
+    pt: 'produto'
+  },
+  'favorites.products': {
+    es: 'productos',
+    en: 'products',
+    pt: 'produtos'
+  },
+  'favorites.inFavorites': {
+    es: 'en tus favoritos',
+    en: 'in your favorites',
+    pt: 'nos seus favoritos'
+  },
+  'favorites.empty.title': {
+    es: 'No tienes favoritos',
+    en: 'You have no favorites',
+    pt: 'Você não tem favoritos'
+  },
+  'favorites.empty.description': {
+    es: 'Agrega productos a tus favoritos para verlos aquí',
+    en: 'Add products to your favorites to see them here',
+    pt: 'Adicione produtos aos seus favoritos para vê-los aqui'
+  },
+  'favorites.empty.explore': {
+    es: 'Explorar Productos',
+    en: 'Explore Products',
+    pt: 'Explorar Produtos'
+  },
+  'favorites.search.placeholder': {
+    es: 'Buscar en favoritos...',
+    en: 'Search in favorites...',
+    pt: 'Buscar nos favoritos...'
+  },
+  'favorites.filters.allCategories': {
+    es: 'Todas las categorías',
+    en: 'All categories',
+    pt: 'Todas as categorias'
+  },
+  'favorites.sort.date': {
+    es: 'Más recientes',
+    en: 'Most recent',
+    pt: 'Mais recentes'
+  },
+  'favorites.sort.name': {
+    es: 'Por nombre',
+    en: 'By name',
+    pt: 'Por nome'
+  },
+  'favorites.sort.price': {
+    es: 'Por precio',
+    en: 'By price',
+    pt: 'Por preço'
+  },
+  'favorites.actions.addToCart': {
+    es: 'Agregar',
+    en: 'Add',
+    pt: 'Adicionar'
+  },
+  'favorites.actions.remove': {
+    es: 'Eliminar de favoritos',
+    en: 'Remove from favorites',
+    pt: 'Remover dos favoritos'
+  },
+  'favorites.actions.share': {
+    es: 'Compartir producto',
+    en: 'Share product',
+    pt: 'Compartilhar produto'
+  },
+  'favorites.addedOn': {
+    es: 'Agregado el',
+    en: 'Added on',
+    pt: 'Adicionado em'
+  },
+  'favorites.noResults.title': {
+    es: 'No se encontraron resultados',
+    en: 'No results found',
+    pt: 'Nenhum resultado encontrado'
+  },
+  'favorites.noResults.description': {
+    es: 'Intenta ajustar tus filtros de búsqueda',
+    en: 'Try adjusting your search filters',
+    pt: 'Tente ajustar seus filtros de busca'
+  },
+  'favorites.continueExploring': {
+    es: 'Continuar Explorando',
+    en: 'Continue Exploring',
+    pt: 'Continuar Explorando'
+  },
+
+  // ===== CARRITO =====
+  'cart.title': {
+    es: 'Carrito de Compras',
+    en: 'Shopping Cart',
+    pt: 'Carrinho de Compras'
+  },
+  'cart.subtitle': {
+    es: 'Revisa tus productos seleccionados',
+    en: 'Review your selected products',
+    pt: 'Revise seus produtos selecionados'
+  },
+  'cart.product': {
+    es: 'producto',
+    en: 'product',
+    pt: 'produto'
+  },
+  'cart.products': {
+    es: 'productos',
+    en: 'products',
+    pt: 'produtos'
+  },
+  'cart.inCart': {
+    es: 'en tu carrito',
+    en: 'in your cart',
+    pt: 'no seu carrinho'
+  },
+  'cart.empty.title': {
+    es: 'Tu carrito está vacío',
+    en: 'Your cart is empty',
+    pt: 'Seu carrinho está vazio'
+  },
+  'cart.empty.description': {
+    es: 'Agrega productos a tu carrito para comenzar a comprar',
+    en: 'Add products to your cart to start shopping',
+    pt: 'Adicione produtos ao seu carrinho para começar a comprar'
+  },
+  'cart.empty.explore': {
+    es: 'Explorar Productos',
+    en: 'Explore Products',
+    pt: 'Explorar Produtos'
+  },
+  'cart.items.title': {
+    es: 'Productos',
+    en: 'Products',
+    pt: 'Produtos'
+  },
+  'cart.summary.title': {
+    es: 'Resumen del Pedido',
+    en: 'Order Summary',
+    pt: 'Resumo do Pedido'
+  },
+  'cart.summary.subtotal': {
+    es: 'Subtotal',
+    en: 'Subtotal',
+    pt: 'Subtotal'
+  },
+  'cart.summary.shipping': {
+    es: 'Envío',
+    en: 'Shipping',
+    pt: 'Envio'
+  },
+  'cart.summary.free': {
+    es: 'Gratis',
+    en: 'Free',
+    pt: 'Grátis'
+  },
+  'cart.summary.taxes': {
+    es: 'Impuestos',
+    en: 'Taxes',
+    pt: 'Impostos'
+  },
+  'cart.summary.total': {
+    es: 'Total',
+    en: 'Total',
+    pt: 'Total'
+  },
+  'cart.actions.checkout': {
+    es: 'Proceder al Pago',
+    en: 'Proceed to Payment',
+    pt: 'Prosseguir para Pagamento'
+  },
+  'cart.actions.continueShopping': {
+    es: 'Continuar Comprando',
+    en: 'Continue Shopping',
+    pt: 'Continuar Comprando'
+  },
+  'cart.actions.clear': {
+    es: 'Vaciar Carrito',
+    en: 'Clear Cart',
+    pt: 'Limpar Carrinho'
+  },
+  'cart.actions.confirm': {
+    es: 'Confirmar',
+    en: 'Confirm',
+    pt: 'Confirmar'
+  },
+  'cart.actions.cancel': {
+    es: 'Cancelar',
+    en: 'Cancel',
+    pt: 'Cancelar'
+  },
+  'cart.actions.remove': {
+    es: 'Eliminar producto',
+    en: 'Remove product',
+    pt: 'Remover produto'
+  },
+  'cart.actions.share': {
+    es: 'Compartir carrito',
+    en: 'Share cart',
+    pt: 'Compartilhar carrinho'
+  },
+  'cart.info.title': {
+    es: 'Información importante',
+    en: 'Important information',
+    pt: 'Informação importante'
+  },
+  'cart.info.description': {
+    es: 'Los precios pueden variar según la disponibilidad. El envío es gratuito para pedidos superiores a $50.',
+    en: 'Prices may vary based on availability. Shipping is free for orders over $50.',
+    pt: 'Os preços podem variar conforme a disponibilidade. O envio é gratuito para pedidos acima de $50.'
+  },
+  'cart.benefits.title': {
+    es: 'Beneficios de tu compra',
+    en: 'Benefits of your purchase',
+    pt: 'Benefícios da sua compra'
+  },
+  'cart.benefits.freeShipping': {
+    es: 'Envío gratuito',
+    en: 'Free shipping',
+    pt: 'Envio gratuito'
+  },
+  'cart.benefits.securePayment': {
+    es: 'Pago seguro',
+    en: 'Secure payment',
+    pt: 'Pagamento seguro'
+  },
+  'cart.benefits.returns': {
+    es: 'Devoluciones fáciles',
+    en: 'Easy returns',
+    pt: 'Devoluções fáceis'
+  },
+  'cart.share.title': {
+    es: 'Mi carrito de compras',
+    en: 'My shopping cart',
+    pt: 'Meu carrinho de compras'
+  },
+  'cart.share.total': {
+    es: 'Total',
+    en: 'Total',
+    pt: 'Total'
+  },
+  'cart.checkout.development': {
+    es: 'Funcionalidad de checkout en desarrollo',
+    en: 'Checkout functionality in development',
+    pt: 'Funcionalidade de checkout em desenvolvimento'
+  },
+
+  // Nuevas funcionalidades del carrito
+  'cart.actions.more': {
+    es: 'Más acciones',
+    en: 'More actions',
+    pt: 'Mais ações'
+  },
+  'cart.actions.print': {
+    es: 'Imprimir carrito',
+    en: 'Print cart',
+    pt: 'Imprimir carrinho'
+  },
+  'cart.actions.download': {
+    es: 'Descargar carrito',
+    en: 'Download cart',
+    pt: 'Baixar carrinho'
+  },
+  'cart.actions.copySummary': {
+    es: 'Copiar resumen',
+    en: 'Copy summary',
+    pt: 'Copiar resumo'
+  },
+  'cart.actions.compare': {
+    es: 'Comparar productos',
+    en: 'Compare products',
+    pt: 'Comparar produtos'
+  },
+  'cart.actions.coupon': {
+    es: 'Cupón',
+    en: 'Coupon',
+    pt: 'Cupom'
+  },
+  'cart.actions.quickView': {
+    es: 'Vista rápida',
+    en: 'Quick view',
+    pt: 'Visualização rápida'
+  },
+  'cart.actions.addToFavorites': {
+    es: 'Agregar a favoritos',
+    en: 'Add to favorites',
+    pt: 'Adicionar aos favoritos'
+  },
+  'cart.actions.saveForLater': {
+    es: 'Guardar para después',
+    en: 'Save for later',
+    pt: 'Salvar para depois'
+  },
+  'cart.actions.copied': {
+    es: 'Resumen copiado al portapapeles',
+    en: 'Summary copied to clipboard',
+    pt: 'Resumo copiado para a área de transferência'
+  },
+  'cart.actions.compareFeature': {
+    es: 'Funcionalidad de comparación en desarrollo',
+    en: 'Compare feature in development',
+    pt: 'Funcionalidade de comparação em desenvolvimento'
+  },
+  'cart.actions.addedToFavorites': {
+    es: 'Producto agregado a favoritos',
+    en: 'Product added to favorites',
+    pt: 'Produto adicionado aos favoritos'
+  },
+
+  // Cupones
+  'cart.coupon.title': {
+    es: 'Aplicar Cupón',
+    en: 'Apply Coupon',
+    pt: 'Aplicar Cupom'
+  },
+  'cart.coupon.code': {
+    es: 'Código de cupón',
+    en: 'Coupon code',
+    pt: 'Código do cupom'
+  },
+  'cart.coupon.placeholder': {
+    es: 'Ingresa tu código de cupón',
+    en: 'Enter your coupon code',
+    pt: 'Digite seu código de cupom'
+  },
+  'cart.coupon.available': {
+    es: 'Cupones disponibles',
+    en: 'Available coupons',
+    pt: 'Cupons disponíveis'
+  },
+  'cart.coupon.apply': {
+    es: 'Aplicar',
+    en: 'Apply',
+    pt: 'Aplicar'
+  },
+  'cart.coupon.applied': {
+    es: 'Cupón aplicado exitosamente',
+    en: 'Coupon applied successfully',
+    pt: 'Cupom aplicado com sucesso'
+  },
+  'cart.coupon.invalid': {
+    es: 'Código de cupón inválido',
+    en: 'Invalid coupon code',
+    pt: 'Código de cupom inválido'
+  },
+  'cart.coupon.minAmount': {
+    es: 'Monto mínimo requerido: ${amount}',
+    en: 'Minimum amount required: ${amount}',
+    pt: 'Valor mínimo necessário: ${amount}'
+  },
+
+  // Envío
+  'cart.shipping.title': {
+    es: 'Opciones de Envío',
+    en: 'Shipping Options',
+    pt: 'Opções de Envio'
+  },
+  'cart.shipping.free': {
+    es: 'Gratis',
+    en: 'Free',
+    pt: 'Grátis'
+  },
+  'cart.shipping.confirm': {
+    es: 'Confirmar envío',
+    en: 'Confirm shipping',
+    pt: 'Confirmar envio'
+  },
+
+  // Vista rápida
+  'cart.quickView.title': {
+    es: 'Vista Rápida del Producto',
+    en: 'Product Quick View',
+    pt: 'Visualização Rápida do Produto'
+  },
+  'cart.quickView.quantity': {
+    es: 'Cantidad',
+    en: 'Quantity',
+    pt: 'Quantidade'
+  },
+  'cart.quickView.close': {
+    es: 'Cerrar',
+    en: 'Close',
+    pt: 'Fechar'
+  },
+
+  // Guardado para después
+  'cart.saved.title': {
+    es: 'Guardado para Después',
+    en: 'Saved for Later',
+    pt: 'Salvo para Depois'
+  },
+  'cart.saved.moveToCart': {
+    es: 'Mover al carrito',
+    en: 'Move to cart',
+    pt: 'Mover para o carrinho'
+  },
+  'cart.saved.confirmTitle': {
+    es: 'Guardar para Después',
+    en: 'Save for Later',
+    pt: 'Salvar para Depois'
+  },
+  'cart.saved.confirmMessage': {
+    es: '¿Estás seguro de que quieres guardar este producto para después? Se moverá de tu carrito a la sección "Guardado para después".',
+    en: 'Are you sure you want to save this product for later? It will be moved from your cart to the "Saved for Later" section.',
+    pt: 'Tem certeza de que deseja salvar este produto para depois? Ele será movido do seu carrinho para a seção "Salvo para Depois".'
+  },
+  'cart.saved.confirm': {
+    es: 'Guardar',
+    en: 'Save',
+    pt: 'Salvar'
+  },
+
+  // Resumen del pedido - nuevas funcionalidades
+  'cart.summary.coupon': {
+    es: 'Cupón',
+    en: 'Coupon',
+    pt: 'Cupom'
+  },
+  'cart.summary.subtotalAfterDiscount': {
+    es: 'Subtotal después del descuento',
+    en: 'Subtotal after discount',
+    pt: 'Subtotal após desconto'
+  },
+  'cart.summary.savings': {
+    es: 'Ahorro total',
+    en: 'Total savings',
+    pt: 'Economia total'
+  },
+  'orders.downloading': {
+    es: 'Generando factura...',
+    en: 'Generating invoice...',
+    pt: 'Gerando fatura...'
+  },
+  'orders.download.success': {
+    es: 'Factura generada exitosamente',
+    en: 'Invoice generated successfully',
+    pt: 'Fatura gerada com sucesso'
+  },
+  'orders.download.error': {
+    es: 'Error al generar la factura',
+    en: 'Error generating invoice',
+    pt: 'Erro ao gerar a fatura'
   },
 
   // ===== STORE MANAGER DASHBOARD =====
@@ -8635,11 +9989,6 @@ export const translations: Translations = {
     en: 'Administrator',
     pt: 'Administrador'
   },
-  'header.logout': {
-    es: 'Cerrar Sesión',
-    en: 'Logout',
-    pt: 'Sair'
-  },
   // ===== PROFILE PAGE =====
   'profile.title': {
     es: 'Mi Perfil',
@@ -10056,7 +11405,456 @@ export const translations: Translations = {
     es: 'No hay datos disponibles',
     en: 'No data available',
     pt: 'Nenhum dado disponível'
-  }
+  },
+
+  // ===== MÓDULO DE RESEÑAS =====
+  'storeManager.reviews.title': {
+    es: 'Gestión de Reseñas',
+    en: 'Reviews Management',
+    pt: 'Gestão de Avaliações'
+  },
+  'storeManager.reviews.description': {
+    es: 'Administra y responde a las reseñas de tus productos y servicios',
+    en: 'Manage and respond to reviews of your products and services',
+    pt: 'Gerencie e responda às avaliações dos seus produtos e serviços'
+  },
+  'storeManager.reviews.tabs.all': {
+    es: 'Todas las Reseñas',
+    en: 'All Reviews',
+    pt: 'Todas as Avaliações'
+  },
+  'storeManager.reviews.tabs.pending': {
+    es: 'Pendientes de Respuesta',
+    en: 'Pending Replies',
+    pt: 'Pendentes de Resposta'
+  },
+  'storeManager.reviews.tabs.stats': {
+    es: 'Estadísticas',
+    en: 'Statistics',
+    pt: 'Estatísticas'
+  },
+  'storeManager.reviews.stats.averageRating': {
+    es: 'Calificación Promedio',
+    en: 'Average Rating',
+    pt: 'Avaliação Média'
+  },
+  'storeManager.reviews.stats.totalReviews': {
+    es: 'Total de Reseñas',
+    en: 'Total Reviews',
+    pt: 'Total de Avaliações'
+  },
+  'storeManager.reviews.stats.pendingReplies': {
+    es: 'Pendientes de Respuesta',
+    en: 'Pending Replies',
+    pt: 'Pendentes de Resposta'
+  },
+  'storeManager.reviews.stats.totalPoints': {
+    es: 'Puntos Totales',
+    en: 'Total Points',
+    pt: 'Pontos Totais'
+  },
+  'storeManager.reviews.filters.rating': {
+    es: 'Calificación',
+    en: 'Rating',
+    pt: 'Avaliação'
+  },
+  'storeManager.reviews.filters.allRatings': {
+    es: 'Todas las calificaciones',
+    en: 'All ratings',
+    pt: 'Todas as avaliações'
+  },
+  'storeManager.reviews.filters.stars': {
+    es: 'estrellas',
+    en: 'stars',
+    pt: 'estrelas'
+  },
+  'storeManager.reviews.filters.star': {
+    es: 'estrella',
+    en: 'star',
+    pt: 'estrela'
+  },
+  'storeManager.reviews.filters.category': {
+    es: 'Categoría',
+    en: 'Category',
+    pt: 'Categoria'
+  },
+  'storeManager.reviews.filters.allCategories': {
+    es: 'Todas las categorías',
+    en: 'All categories',
+    pt: 'Todas as categorias'
+  },
+  'storeManager.reviews.filters.verified': {
+    es: 'Verificada',
+    en: 'Verified',
+    pt: 'Verificada'
+  },
+  'storeManager.reviews.filters.all': {
+    es: 'Todas',
+    en: 'All',
+    pt: 'Todas'
+  },
+  'storeManager.reviews.filters.notVerified': {
+    es: 'No verificada',
+    en: 'Not verified',
+    pt: 'Não verificada'
+  },
+  'storeManager.reviews.filters.sortBy': {
+    es: 'Ordenar por',
+    en: 'Sort by',
+    pt: 'Ordenar por'
+  },
+  'storeManager.reviews.filters.newest': {
+    es: 'Más recientes',
+    en: 'Newest',
+    pt: 'Mais recentes'
+  },
+  'storeManager.reviews.filters.oldest': {
+    es: 'Más antiguas',
+    en: 'Oldest',
+    pt: 'Mais antigas'
+  },
+  'storeManager.reviews.filters.highestRating': {
+    es: 'Mayor calificación',
+    en: 'Highest rating',
+    pt: 'Maior avaliação'
+  },
+  'storeManager.reviews.filters.lowestRating': {
+    es: 'Menor calificación',
+    en: 'Lowest rating',
+    pt: 'Menor avaliação'
+  },
+  'storeManager.reviews.noReviews': {
+    es: 'No hay reseñas',
+    en: 'No reviews',
+    pt: 'Nenhuma avaliação'
+  },
+  'storeManager.reviews.noReviewsDescription': {
+    es: 'Cuando los clientes escriban reseñas, aparecerán aquí',
+    en: 'When customers write reviews, they will appear here',
+    pt: 'Quando os clientes escreverem avaliações, elas aparecerão aqui'
+  },
+  'storeManager.reviews.reply.title': {
+    es: 'Responder a la Reseña',
+    en: 'Reply to Review',
+    pt: 'Responder à Avaliação'
+  },
+  'storeManager.reviews.reply.placeholder': {
+    es: 'Escribe tu respuesta...',
+    en: 'Write your reply...',
+    pt: 'Escreva sua resposta...'
+  },
+  'storeManager.reviews.reply.send': {
+    es: 'Enviar Respuesta',
+    en: 'Send Reply',
+    pt: 'Enviar Resposta'
+  },
+
+  // ===== CATEGORÍAS DE RESEÑAS =====
+  'reviews.categories.product': {
+    es: 'Producto',
+    en: 'Product',
+    pt: 'Produto'
+  },
+  'reviews.categories.service': {
+    es: 'Servicio',
+    en: 'Service',
+    pt: 'Serviço'
+  },
+  'reviews.categories.delivery': {
+    es: 'Entrega',
+    en: 'Delivery',
+    pt: 'Entrega'
+  },
+  'reviews.categories.app': {
+    es: 'Aplicación',
+    en: 'App',
+    pt: 'Aplicativo'
+  },
+
+  // ===== TRADUCCIONES COMUNES =====
+  'common.previous': {
+    es: 'Anterior',
+    en: 'Previous',
+    pt: 'Anterior'
+  },
+  'common.next': {
+    es: 'Siguiente',
+    en: 'Next',
+    pt: 'Próximo'
+  },
+  'common.sending': {
+    es: 'Enviando...',
+    en: 'Sending...',
+    pt: 'Enviando...'
+  },
+
+  // ===== ESTADÍSTICAS =====
+  'stats.periods.last7Days': {
+    es: 'Últimos 7 días',
+    en: 'Last 7 days',
+    pt: 'Últimos 7 dias'
+  },
+  'stats.periods.last30Days': {
+    es: 'Últimos 30 días',
+    en: 'Last 30 days',
+    pt: 'Últimos 30 dias'
+  },
+  'stats.periods.last90Days': {
+    es: 'Últimos 90 días',
+    en: 'Last 90 days',
+    pt: 'Últimos 90 dias'
+  },
+  'stats.periods.lastYear': {
+    es: 'Último año',
+    en: 'Last year',
+    pt: 'Último ano'
+  },
+  'storeManager.reviews.stats.title': {
+    es: 'Estadísticas de Reseñas',
+    en: 'Review Statistics',
+    pt: 'Estatísticas de Avaliações'
+  },
+  'storeManager.reviews.stats.ratingDistribution': {
+    es: 'Distribución de Calificaciones',
+    en: 'Rating Distribution',
+    pt: 'Distribuição de Avaliações'
+  },
+  'storeManager.reviews.stats.positiveReviews': {
+    es: 'Reseñas Positivas',
+    en: 'Positive Reviews',
+    pt: 'Avaliações Positivas'
+  },
+  'storeManager.reviews.stats.negativeReviews': {
+    es: 'Reseñas Negativas',
+    en: 'Negative Reviews',
+    pt: 'Avaliações Negativas'
+  },
+
+  // ===== DELIVERY REPORT =====
+  'deliveryReport.title': { es: 'Reportar Entrega', en: 'Delivery Report', pt: 'Relatório de Entrega' },
+  'deliveryReport.subtitle': { es: 'Gestiona y reporta el estado de tus entregas', en: 'Manage and report the status of your deliveries', pt: 'Gerencie e relate o status de suas entregas' },
+  'deliveryReport.activeDeliveries': { es: 'Entregas Activas', en: 'Active Deliveries', pt: 'Entregas Ativas' },
+  'deliveryReport.completedDeliveries': { es: 'Entregas Completadas', en: 'Completed Deliveries', pt: 'Entregas Concluídas' },
+  'deliveryReport.pendingDeliveries': { es: 'Entregas Pendientes', en: 'Pending Deliveries', pt: 'Entregas Pendentes' },
+  'deliveryReport.reportDelivery': { es: 'Reportar Entrega', en: 'Report Delivery', pt: 'Relatar Entrega' },
+  'deliveryReport.updateStatus': { es: 'Actualizar Estado', en: 'Update Status', pt: 'Atualizar Status' },
+  'deliveryReport.deliveryDetails': { es: 'Detalles de Entrega', en: 'Delivery Details', pt: 'Detalhes da Entrega' },
+  'deliveryReport.customerSignature': { es: 'Firma del Cliente', en: 'Customer Signature', pt: 'Assinatura do Cliente' },
+  'deliveryReport.deliveryPhoto': { es: 'Foto de Entrega', en: 'Delivery Photo', pt: 'Foto da Entrega' },
+  'deliveryReport.deliveryNotes': { es: 'Notas de Entrega', en: 'Delivery Notes', pt: 'Notas da Entrega' },
+  'deliveryReport.reportIssue': { es: 'Reportar Problema', en: 'Report Issue', pt: 'Relatar Problema' },
+  'deliveryReport.issueType': { es: 'Tipo de Problema', en: 'Issue Type', pt: 'Tipo de Problema' },
+  'deliveryReport.issueDescription': { es: 'Descripción del Problema', en: 'Issue Description', pt: 'Descrição do Problema' },
+  'deliveryReport.customerNotAvailable': { es: 'Cliente No Disponible', en: 'Customer Not Available', pt: 'Cliente Não Disponível' },
+  'deliveryReport.wrongAddress': { es: 'Dirección Incorrecta', en: 'Wrong Address', pt: 'Endereço Incorreto' },
+  'deliveryReport.packageDamaged': { es: 'Paquete Dañado', en: 'Package Damaged', pt: 'Pacote Danificado' },
+  'deliveryReport.other': { es: 'Otro', en: 'Other', pt: 'Outro' },
+  'deliveryReport.submitReport': { es: 'Enviar Reporte', en: 'Submit Report', pt: 'Enviar Relatório' },
+  'deliveryReport.reportSubmitted': { es: 'Reporte Enviado', en: 'Report Submitted', pt: 'Relatório Enviado' },
+  'deliveryReport.deliveryCompleted': { es: 'Entrega Completada', en: 'Delivery Completed', pt: 'Entrega Concluída' },
+  'deliveryReport.deliveryFailed': { es: 'Entrega Fallida', en: 'Delivery Failed', pt: 'Entrega Falhou' },
+  'deliveryReport.deliveryAttempted': { es: 'Entrega Intentada', en: 'Delivery Attempted', pt: 'Entrega Tentada' },
+  'deliveryReport.uploadPhoto': { es: 'Subir Foto', en: 'Upload Photo', pt: 'Carregar Foto' },
+  'deliveryReport.takePhoto': { es: 'Tomar Foto', en: 'Take Photo', pt: 'Tirar Foto' },
+  'deliveryReport.signatureRequired': { es: 'Firma Requerida', en: 'Signature Required', pt: 'Assinatura Obrigatória' },
+  'deliveryReport.customerRefused': { es: 'Cliente Rechazó', en: 'Customer Refused', pt: 'Cliente Recusou' },
+  'deliveryReport.paymentIssue': { es: 'Problema de Pago', en: 'Payment Issue', pt: 'Problema de Pagamento' },
+  'deliveryReport.weatherIssue': { es: 'Problema Climático', en: 'Weather Issue', pt: 'Problema Climático' },
+  'deliveryReport.trafficIssue': { es: 'Problema de Tráfico', en: 'Traffic Issue', pt: 'Problema de Trânsito' },
+  'deliveryReport.vehicleIssue': { es: 'Problema del Vehículo', en: 'Vehicle Issue', pt: 'Problema do Veículo' },
+  'deliveryReport.confirmDelivery': { es: 'Confirmar Entrega', en: 'Confirm Delivery', pt: 'Confirmar Entrega' },
+  'deliveryReport.confirmPickup': { es: 'Confirmar Recogida', en: 'Confirm Pickup', pt: 'Confirmar Coleta' },
+  'deliveryReport.startDelivery': { es: 'Iniciar Entrega', en: 'Start Delivery', pt: 'Iniciar Entrega' },
+  'deliveryReport.completeDelivery': { es: 'Completar Entrega', en: 'Complete Delivery', pt: 'Completar Entrega' },
+  'deliveryReport.returnToStore': { es: 'Devolver a Tienda', en: 'Return to Store', pt: 'Devolver à Loja' },
+  'deliveryReport.deliveryTime': { es: 'Tiempo de Entrega', en: 'Delivery Time', pt: 'Tempo de Entrega' },
+  'deliveryReport.estimatedTime': { es: 'Tiempo Estimado', en: 'Estimated Time', pt: 'Tempo Estimado' },
+  'deliveryReport.actualTime': { es: 'Tiempo Real', en: 'Actual Time', pt: 'Tempo Real' },
+  'deliveryReport.distance': { es: 'Distancia', en: 'Distance', pt: 'Distância' },
+  'deliveryReport.fuelConsumption': { es: 'Consumo de Combustible', en: 'Fuel Consumption', pt: 'Consumo de Combustível' },
+  'deliveryReport.earnings': { es: 'Ganancias', en: 'Earnings', pt: 'Ganhos' },
+  'deliveryReport.todayEarnings': { es: 'Ganancias de Hoy', en: 'Today\'s Earnings', pt: 'Ganhos de Hoje' },
+  'deliveryReport.weeklyEarnings': { es: 'Ganancias Semanales', en: 'Weekly Earnings', pt: 'Ganhos Semanais' },
+  'deliveryReport.monthlyEarnings': { es: 'Ganancias Mensuales', en: 'Monthly Earnings', pt: 'Ganhos Mensais' },
+  'deliveryReport.deliveryStats': { es: 'Estadísticas de Entrega', en: 'Delivery Statistics', pt: 'Estatísticas de Entrega' },
+  'deliveryReport.completedToday': { es: 'Completadas Hoy', en: 'Completed Today', pt: 'Concluídas Hoje' },
+  'deliveryReport.failedToday': { es: 'Fallidas Hoy', en: 'Failed Today', pt: 'Falharam Hoje' },
+  'deliveryReport.avgDeliveryTime': { es: 'Tiempo Promedio', en: 'Average Time', pt: 'Tempo Médio' },
+  'deliveryReport.totalDistance': { es: 'Distancia Total', en: 'Total Distance', pt: 'Distância Total' },
+  'deliveryReport.customerRating': { es: 'Calificación del Cliente', en: 'Customer Rating', pt: 'Avaliação do Cliente' },
+  'deliveryReport.ratingSubmitted': { es: 'Calificación Enviada', en: 'Rating Submitted', pt: 'Avaliação Enviada' },
+  'deliveryReport.thankCustomer': { es: 'Gracias al Cliente', en: 'Thank Customer', pt: 'Agradecer Cliente' },
+  'deliveryReport.rateExperience': { es: 'Calificar Experiencia', en: 'Rate Experience', pt: 'Avaliar Experiência' },
+  'deliveryReport.excellent': { es: 'Excelente', en: 'Excellent', pt: 'Excelente' },
+  'deliveryReport.good': { es: 'Bueno', en: 'Good', pt: 'Bom' },
+  'deliveryReport.fair': { es: 'Regular', en: 'Fair', pt: 'Regular' },
+  'deliveryReport.poor': { es: 'Malo', en: 'Poor', pt: 'Ruim' },
+  'deliveryReport.veryPoor': { es: 'Muy Malo', en: 'Very Poor', pt: 'Muito Ruim' },
+
+  // ===== CAPTURA DE FIRMA Y FOTO =====
+  'capture.signature.title': { es: 'Capturar Firma del Cliente', en: 'Capture Customer Signature', pt: 'Capturar Assinatura do Cliente' },
+  'capture.signature.instructions': { es: 'Dibuja tu firma en el área de arriba', en: 'Draw your signature in the area above', pt: 'Desenhe sua assinatura na área acima' },
+  'capture.signature.captured': { es: 'Firma capturada ✓', en: 'Signature captured ✓', pt: 'Assinatura capturada ✓' },
+  'capture.signature.clear': { es: 'Limpiar', en: 'Clear', pt: 'Limpar' },
+  'capture.signature.capture': { es: 'Capturar', en: 'Capture', pt: 'Capturar' },
+  'capture.photo.title': { es: 'Tomar Foto de Entrega', en: 'Take Delivery Photo', pt: 'Tirar Foto da Entrega' },
+  'capture.photo.instructions': { es: 'Posiciona la cámara y toma la foto', en: 'Position the camera and take the photo', pt: 'Posicione a câmera e tire a foto' },
+  'capture.photo.upload': { es: 'Sube una imagen desde tu dispositivo', en: 'Upload an image from your device', pt: 'Faça upload de uma imagem do seu dispositivo' },
+  'capture.photo.captured': { es: 'Foto capturada ✓', en: 'Photo captured ✓', pt: 'Foto capturada ✓' },
+  'capture.photo.take': { es: 'Tomar Foto', en: 'Take Photo', pt: 'Tirar Foto' },
+  'capture.photo.activate': { es: 'Activar Cámara', en: 'Activate Camera', pt: 'Ativar Câmera' },
+  'capture.photo.retake': { es: 'Volver a Tomar', en: 'Retake', pt: 'Tirar Novamente' },
+  'capture.photo.confirm': { es: 'Confirmar', en: 'Confirm', pt: 'Confirmar' },
+  'capture.photo.error': { es: 'No se pudo acceder a la cámara. Puedes subir una imagen desde tu dispositivo.', en: 'Could not access camera. You can upload an image from your device.', pt: 'Não foi possível acessar a câmera. Você pode fazer upload de uma imagem do seu dispositivo.' },
+  'capture.photo.invalidFile': { es: 'Por favor selecciona un archivo de imagen válido.', en: 'Please select a valid image file.', pt: 'Por favor selecione um arquivo de imagem válido.' },
+
+  // ===== SISTEMA DE CALIFICACIONES =====
+  'rating.excellent': { es: 'Excelente', en: 'Excellent', pt: 'Excelente' },
+  'rating.good': { es: 'Bueno', en: 'Good', pt: 'Bom' },
+  'rating.fair': { es: 'Regular', en: 'Fair', pt: 'Regular' },
+  'rating.poor': { es: 'Malo', en: 'Poor', pt: 'Ruim' },
+  'rating.veryPoor': { es: 'Muy Malo', en: 'Very Poor', pt: 'Muito Ruim' },
+  'rating.stats.title': { es: 'Estadísticas de Calificaciones', en: 'Rating Statistics', pt: 'Estatísticas de Avaliações' },
+  'rating.stats.totalRatings': { es: 'calificaciones', en: 'ratings', pt: 'avaliações' },
+  'rating.stats.excellent': { es: 'Excelentes', en: 'Excellent', pt: 'Excelentes' },
+  'rating.stats.needsImprovement': { es: 'Necesitan Mejora', en: 'Need Improvement', pt: 'Precisam Melhorar' },
+  'rating.title': { es: 'Calificaciones', en: 'Ratings', pt: 'Avaliações' },
+  'rating.subtitle': { es: 'Gestiona y revisa las calificaciones de tus entregas', en: 'Manage and review your delivery ratings', pt: 'Gerencie e revise as avaliações de suas entregas' },
+  'rating.myRatings': { es: 'Mis Calificaciones', en: 'My Ratings', pt: 'Minhas Avaliações' },
+  'rating.customerRatings': { es: 'Calificaciones de Clientes', en: 'Customer Ratings', pt: 'Avaliações de Clientes' },
+  'rating.givenRatings': { es: 'Calificaciones Dadas', en: 'Given Ratings', pt: 'Avaliações Dadas' },
+  'rating.receivedRatings': { es: 'Calificaciones Recibidas', en: 'Received Ratings', pt: 'Avaliações Recebidas' },
+  'rating.averageRating': { es: 'Calificación Promedio', en: 'Average Rating', pt: 'Avaliação Média' },
+  'rating.totalDeliveries': { es: 'Total de Entregas', en: 'Total Deliveries', pt: 'Total de Entregas' },
+  'rating.thisMonth': { es: 'Este Mes', en: 'This Month', pt: 'Este Mês' },
+  'rating.lastMonth': { es: 'Mes Pasado', en: 'Last Month', pt: 'Mês Passado' },
+  'rating.ratingHistory': { es: 'Historial de Calificaciones', en: 'Rating History', pt: 'Histórico de Avaliações' },
+  'rating.recentRatings': { es: 'Calificaciones Recientes', en: 'Recent Ratings', pt: 'Avaliações Recentes' },
+  'rating.rateCustomer': { es: 'Calificar Cliente', en: 'Rate Customer', pt: 'Avaliar Cliente' },
+  'rating.rateDelivery': { es: 'Calificar Entrega', en: 'Rate Delivery', pt: 'Avaliar Entrega' },
+  'rating.submitRating': { es: 'Enviar Calificación', en: 'Submit Rating', pt: 'Enviar Avaliação' },
+  'rating.ratingSubmitted': { es: 'Calificación Enviada', en: 'Rating Submitted', pt: 'Avaliação Enviada' },
+  'rating.comment': { es: 'Comentario', en: 'Comment', pt: 'Comentário' },
+  'rating.commentPlaceholder': { es: 'Agrega un comentario sobre tu experiencia...', en: 'Add a comment about your experience...', pt: 'Adicione um comentário sobre sua experiência...' },
+  'rating.noRatings': { es: 'No hay calificaciones disponibles', en: 'No ratings available', pt: 'Nenhuma avaliação disponível' },
+  'rating.filterByRating': { es: 'Filtrar por Calificación', en: 'Filter by Rating', pt: 'Filtrar por Avaliação' },
+  'rating.allRatings': { es: 'Todas las Calificaciones', en: 'All Ratings', pt: 'Todas as Avaliações' },
+  'rating.5stars': { es: '5 Estrellas', en: '5 Stars', pt: '5 Estrelas' },
+  'rating.4stars': { es: '4 Estrellas', en: '4 Stars', pt: '4 Estrelas' },
+  'rating.3stars': { es: '3 Estrellas', en: '3 Stars', pt: '3 Estrelas' },
+  'rating.2stars': { es: '2 Estrellas', en: '2 Stars', pt: '2 Estrelas' },
+  'rating.1star': { es: '1 Estrella', en: '1 Star', pt: '1 Estrela' },
+  'rating.orderNumber': { es: 'Número de Pedido', en: 'Order Number', pt: 'Número do Pedido' },
+  'rating.customerName': { es: 'Nombre del Cliente', en: 'Customer Name', pt: 'Nome do Cliente' },
+  'rating.deliveryDate': { es: 'Fecha de Entrega', en: 'Delivery Date', pt: 'Data da Entrega' },
+  'rating.ratingValue': { es: 'Calificación', en: 'Rating', pt: 'Avaliação' },
+  'rating.actions': { es: 'Acciones', en: 'Actions', pt: 'Ações' },
+  'rating.exportRatings': { es: 'Exportar Calificaciones', en: 'Export Ratings', pt: 'Exportar Avaliações' },
+  'rating.ratingTrends': { es: 'Tendencias de Calificación', en: 'Rating Trends', pt: 'Tendências de Avaliação' },
+  'rating.weeklyAverage': { es: 'Promedio Semanal', en: 'Weekly Average', pt: 'Média Semanal' },
+  'rating.monthlyAverage': { es: 'Promedio Mensual', en: 'Monthly Average', pt: 'Média Mensal' },
+  'rating.ratingImprovement': { es: 'Mejora de Calificación', en: 'Rating Improvement', pt: 'Melhoria da Avaliação' },
+  'rating.ratingDecline': { es: 'Disminución de Calificación', en: 'Rating Decline', pt: 'Queda da Avaliação' },
+  'rating.ratingStable': { es: 'Calificación Estable', en: 'Rating Stable', pt: 'Avaliação Estável' },
+  'rating.clearFilters': { es: 'Limpiar Filtros', en: 'Clear Filters', pt: 'Limpar Filtros' },
+  'rating.activeFilters': { es: 'Filtros activos', en: 'Active filters', pt: 'Filtros ativos' },
+  'rating.clearAll': { es: 'Limpiar todos', en: 'Clear all', pt: 'Limpar todos' },
+  'rating.ratingsFound': { es: 'calificaciones encontradas', en: 'ratings found', pt: 'avaliações encontradas' },
+  'rating.noOrdersToRate': { es: 'No hay pedidos disponibles para calificar', en: 'No orders available to rate', pt: 'Nenhum pedido disponível para avaliar' },
+  'rating.statsCopied': { es: 'Estadísticas copiadas al portapapeles', en: 'Statistics copied to clipboard', pt: 'Estatísticas copiadas para a área de transferência' },
+  'rating.exportSuccess': { es: 'Calificaciones exportadas exitosamente', en: 'Ratings exported successfully', pt: 'Avaliações exportadas com sucesso' },
+  'rating.shareTitle': { es: 'Mis Calificaciones de Delivery', en: 'My Delivery Ratings', pt: 'Minhas Avaliações de Entrega' },
+  'rating.editRating': { es: 'Editar calificación', en: 'Edit rating', pt: 'Editar avaliação' },
+
+  // ===== HORARIO DE TRABAJO =====
+  'schedule.title': { es: 'Horario de Trabajo', en: 'Work Schedule', pt: 'Horário de Trabalho' },
+  'schedule.subtitle': { es: 'Gestiona tu horario de trabajo y disponibilidad', en: 'Manage your work schedule and availability', pt: 'Gerencie seu horário de trabalho e disponibilidade' },
+  'schedule.weeklySchedule': { es: 'Horario Semanal', en: 'Weekly Schedule', pt: 'Cronograma Semanal' },
+  'schedule.availability': { es: 'Disponibilidad', en: 'Availability', pt: 'Disponibilidade' },
+  'schedule.timeOff': { es: 'Tiempo Libre', en: 'Time Off', pt: 'Tempo Livre' },
+  'schedule.currentWeek': { es: 'Semana Actual', en: 'Current Week', pt: 'Semana Atual' },
+  'schedule.nextWeek': { es: 'Próxima Semana', en: 'Next Week', pt: 'Próxima Semana' },
+  'schedule.previousWeek': { es: 'Semana Anterior', en: 'Previous Week', pt: 'Semana Anterior' },
+  'schedule.today': { es: 'Hoy', en: 'Today', pt: 'Hoje' },
+  'schedule.workingHours': { es: 'Horas de Trabajo', en: 'Working Hours', pt: 'Horas de Trabalho' },
+  'schedule.breakTime': { es: 'Tiempo de Descanso', en: 'Break Time', pt: 'Tempo de Descanso' },
+  'schedule.totalHours': { es: 'Total de Horas', en: 'Total Hours', pt: 'Total de Horas' },
+  'schedule.averageHours': { es: 'Promedio de Horas', en: 'Average Hours', pt: 'Média de Horas' },
+  'schedule.workingDays': { es: 'Días de Trabajo', en: 'Working Days', pt: 'Dias de Trabalho' },
+  'schedule.status.available': { es: 'Disponible', en: 'Available', pt: 'Disponível' },
+  'schedule.status.busy': { es: 'Ocupado', en: 'Busy', pt: 'Ocupado' },
+  'schedule.status.offline': { es: 'Desconectado', en: 'Offline', pt: 'Desconectado' },
+  'schedule.status.break': { es: 'En Descanso', en: 'On Break', pt: 'Em Descanso' },
+  'schedule.status.pending': { es: 'Pendiente', en: 'Pending', pt: 'Pendente' },
+  'schedule.status.approved': { es: 'Aprobado', en: 'Approved', pt: 'Aprovado' },
+  'schedule.status.rejected': { es: 'Rechazado', en: 'Rejected', pt: 'Rejeitado' },
+  'schedule.updateStatus': { es: 'Actualizar Estado', en: 'Update Status', pt: 'Atualizar Status' },
+  'schedule.requestTimeOff': { es: 'Solicitar Tiempo Libre', en: 'Request Time Off', pt: 'Solicitar Tempo Livre' },
+  'schedule.viewRequests': { es: 'Ver Solicitudes', en: 'View Requests', pt: 'Ver Solicitações' },
+  'schedule.startTime': { es: 'Hora de Inicio', en: 'Start Time', pt: 'Hora de Início' },
+  'schedule.endTime': { es: 'Hora de Fin', en: 'End Time', pt: 'Hora de Fim' },
+  'schedule.breakStart': { es: 'Inicio de Descanso', en: 'Break Start', pt: 'Início do Descanso' },
+  'schedule.breakEnd': { es: 'Fin de Descanso', en: 'Break End', pt: 'Fim do Descanso' },
+  'schedule.reason': { es: 'Motivo', en: 'Reason', pt: 'Motivo' },
+  'schedule.notes': { es: 'Notas', en: 'Notes', pt: 'Notas' },
+  'schedule.submit': { es: 'Enviar', en: 'Submit', pt: 'Enviar' },
+  'schedule.cancel': { es: 'Cancelar', en: 'Cancel', pt: 'Cancelar' },
+  'schedule.save': { es: 'Guardar', en: 'Save', pt: 'Salvar' },
+  'schedule.edit': { es: 'Editar', en: 'Edit', pt: 'Editar' },
+  'schedule.delete': { es: 'Eliminar', en: 'Delete', pt: 'Excluir' },
+  'schedule.active': { es: 'Activo', en: 'Active', pt: 'Ativo' },
+  'schedule.inactive': { es: 'Inactivo', en: 'Inactive', pt: 'Inativo' },
+  'schedule.noShifts': { es: 'No hay turnos programados', en: 'No shifts scheduled', pt: 'Nenhum turno programado' },
+  'schedule.noRequests': { es: 'No hay solicitudes de tiempo libre', en: 'No time off requests', pt: 'Nenhuma solicitação de tempo livre' },
+  'schedule.requestSubmitted': { es: 'Solicitud enviada exitosamente', en: 'Request submitted successfully', pt: 'Solicitação enviada com sucesso' },
+  'schedule.statusUpdated': { es: 'Estado actualizado exitosamente', en: 'Status updated successfully', pt: 'Status atualizado com sucesso' },
+  'schedule.confirmDelete': { es: '¿Estás seguro de que quieres eliminar este turno?', en: 'Are you sure you want to delete this shift?', pt: 'Tem certeza de que deseja excluir este turno?' },
+  'schedule.days.monday': { es: 'Lunes', en: 'Monday', pt: 'Segunda-feira' },
+  'schedule.days.tuesday': { es: 'Martes', en: 'Tuesday', pt: 'Terça-feira' },
+  'schedule.days.wednesday': { es: 'Miércoles', en: 'Wednesday', pt: 'Quarta-feira' },
+  'schedule.days.thursday': { es: 'Jueves', en: 'Thursday', pt: 'Quinta-feira' },
+  'schedule.days.friday': { es: 'Viernes', en: 'Friday', pt: 'Sexta-feira' },
+  'schedule.days.saturday': { es: 'Sábado', en: 'Saturday', pt: 'Sábado' },
+  'schedule.days.sunday': { es: 'Domingo', en: 'Sunday', pt: 'Domingo' },
+  'schedule.timeOffTypes.vacation': { es: 'Vacaciones', en: 'Vacation', pt: 'Férias' },
+  'schedule.timeOffTypes.sick': { es: 'Enfermedad', en: 'Sick Leave', pt: 'Licença Médica' },
+  'schedule.timeOffTypes.personal': { es: 'Personal', en: 'Personal', pt: 'Pessoal' },
+  'schedule.timeOffTypes.other': { es: 'Otro', en: 'Other', pt: 'Outro' },
+
+  // ===== ESTADO DE DISPONIBILIDAD =====
+  'availability.title': { es: 'Estado de Disponibilidad', en: 'Availability Status', pt: 'Status de Disponibilidade' },
+  'availability.subtitle': { es: 'Gestiona y visualiza tu estado de disponibilidad en tiempo real', en: 'Manage and view your availability status in real time', pt: 'Gerencie e visualize seu status de disponibilidade em tempo real' },
+  'availability.quickStats': { es: 'Estadísticas Rápidas', en: 'Quick Statistics', pt: 'Estatísticas Rápidas' },
+  'availability.totalTime': { es: 'Tiempo Total', en: 'Total Time', pt: 'Tempo Total' },
+  'availability.availableTime': { es: 'Disponible', en: 'Available', pt: 'Disponível' },
+  'availability.busyTime': { es: 'Ocupado', en: 'Busy', pt: 'Ocupado' },
+  'availability.breakTime': { es: 'En Descanso', en: 'On Break', pt: 'Em Descanso' },
+  'availability.availabilityRate': { es: 'Tasa de Disponibilidad', en: 'Availability Rate', pt: 'Taxa de Disponibilidade' },
+  'availability.quickActions': { es: 'Acciones Rápidas', en: 'Quick Actions', pt: 'Ações Rápidas' },
+  'availability.configureLocation': { es: 'Configurar Ubicación', en: 'Configure Location', pt: 'Configurar Localização' },
+  'availability.scheduleAvailability': { es: 'Programar Disponibilidad', en: 'Schedule Availability', pt: 'Programar Disponibilidade' },
+  'availability.settings': { es: 'Configuraciones', en: 'Settings', pt: 'Configurações' },
+  'availability.period': { es: 'Período', en: 'Period', pt: 'Período' },
+  'availability.today': { es: 'Hoy', en: 'Today', pt: 'Hoje' },
+  'availability.thisWeek': { es: 'Esta Semana', en: 'This Week', pt: 'Esta Semana' },
+  'availability.thisMonth': { es: 'Este Mes', en: 'This Month', pt: 'Este Mês' },
+  'availability.status': { es: 'Estado', en: 'Status', pt: 'Status' },
+  'availability.all': { es: 'Todos', en: 'All', pt: 'Todos' },
+  'availability.searchPlaceholder': { es: 'Buscar en notas o ubicación...', en: 'Search in notes or location...', pt: 'Pesquisar em notas ou localização...' },
+  'availability.recordsFound': { es: 'registros encontrados', en: 'records found', pt: 'registros encontrados' },
+  'availability.history': { es: 'Historial de Disponibilidad', en: 'Availability History', pt: 'Histórico de Disponibilidade' },
+  'availability.noRecords': { es: 'No hay registros de disponibilidad', en: 'No availability records', pt: 'Nenhum registro de disponibilidade' },
+  'availability.noRecordsFiltered': { es: 'No se encontraron registros con los filtros aplicados', en: 'No records found with applied filters', pt: 'Nenhum registro encontrado com os filtros aplicados' },
+  'availability.noHistory': { es: 'Aún no hay historial de disponibilidad registrado', en: 'No availability history recorded yet', pt: 'Ainda não há histórico de disponibilidade registrado' },
+  'availability.noDuration': { es: 'Sin duración', en: 'No duration', pt: 'Sem duração' },
+  'availability.notes': { es: 'Notas', en: 'Notes', pt: 'Notas' },
+  'availability.location': { es: 'Ubicación', en: 'Location', pt: 'Localização' },
+  'availability.configureLocationTitle': { es: 'Configurar Ubicación', en: 'Configure Location', pt: 'Configurar Localização' },
+  'availability.configureLocationDesc': { es: 'Configura tu ubicación actual para mejorar la precisión de tu estado de disponibilidad.', en: 'Configure your current location to improve the accuracy of your availability status.', pt: 'Configure sua localização atual para melhorar a precisão do seu status de disponibilidade.' },
+  'availability.scheduleTitle': { es: 'Programar Disponibilidad', en: 'Schedule Availability', pt: 'Programar Disponibilidade' },
+  'availability.scheduleDesc': { es: 'Programa tu disponibilidad para días específicos y horarios.', en: 'Schedule your availability for specific days and times.', pt: 'Programe sua disponibilidade para dias e horários específicos.' },
+  'availability.configure': { es: 'Configurar', en: 'Configure', pt: 'Configurar' },
+  'availability.schedule': { es: 'Programar', en: 'Schedule', pt: 'Programar' }
 };
 
 export class TranslationService {

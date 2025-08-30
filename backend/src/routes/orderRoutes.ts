@@ -295,7 +295,7 @@ export function createOrderRoutes(): Router {
    */
   router.get('/delivery', 
     roleMiddleware(['delivery']), 
-    orderController.getUserOrders
+    orderController.getDeliveryOrders
   );
 
   /**

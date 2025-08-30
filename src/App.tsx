@@ -80,14 +80,16 @@ import DeliveryMap from './pages/DeliveryMap';
 import DeliveryReport from './pages/DeliveryReport';
 import DeliveryRatings from './pages/DeliveryRatings';
 import DeliverySchedule from './pages/DeliverySchedule';
-import DeliveryStatus from './pages/DeliveryStatus';
+import DeliveryAvailabilityStatus from './pages/DeliveryAvailabilityStatus';
 import DeliveryProfile from './pages/DeliveryProfile';
 
 // Componentes de rutas protegidas
 import AdminRoute from './components/AdminRoute';
 import StoreManagerRoute from './components/StoreManagerRoute';
 import DeliveryRoute from './components/DeliveryRoute';
+import DeliveryLayout from './components/DeliveryLayout';
 import ClientRoute from './components/ClientRoute';
+import ClientLayout from './components/ClientLayout';
 import AdminLayout from './components/AdminLayout';
 import StoreManagerLayout from './components/StoreManagerLayout';
 import StoreManagerInitializer from './components/StoreManagerInitializer';
@@ -304,117 +306,6 @@ function AppContent() {
                    <Route path="/category/:id" element={<CategoryProducts />} />
                    <Route path="/nearby-products" element={<NearbyProducts />} />
                    <Route path="/store-registration" element={<StoreRegistration />} />
-
-                   {/* Rutas protegidas para clientes */}
-                   <Route path="/cart" element={
-                     <ClientRoute>
-                       <Cart />
-                     </ClientRoute>
-                   } />
-                   <Route path="/favorites" element={
-                     <ClientRoute>
-                       <Favorites />
-                     </ClientRoute>
-                   } />
-                   <Route path="/profile" element={
-                     <ClientRoute>
-                       <Profile />
-                     </ClientRoute>
-                   } />
-                   <Route path="/security" element={
-                     <ClientRoute>
-                       <Security />
-                     </ClientRoute>
-                   } />
-                   <Route path="/security-settings" element={
-                     <ClientRoute>
-                       <SecuritySettings />
-                     </ClientRoute>
-                   } />
-                   <Route path="/loyalty" element={
-                     <ClientRoute>
-                       <Loyalty />
-                     </ClientRoute>
-                   } />
-                   <Route path="/configuration" element={
-                     <ClientRoute>
-                       <Configuration />
-                     </ClientRoute>
-                   } />
-                   <Route path="/orders" element={
-                     <ClientRoute>
-                       <ClientOrders />
-                     </ClientRoute>
-                   } />
-                   <Route path="/notifications" element={
-                     <ClientRoute>
-                       <ClientNotifications />
-                     </ClientRoute>
-                   } />
-
-                   {/* Rutas de delivery */}
-                   <Route path="/delivery" element={
-                     <DeliveryRoute>
-                       <Navigate to="/delivery/dashboard" replace />
-                     </DeliveryRoute>
-                   } />
-                   <Route path="/delivery/dashboard" element={
-                     <DeliveryRoute>
-                       <DeliveryDashboard />
-                     </DeliveryRoute>
-                   } />
-                   <Route path="/delivery/orders" element={
-                     <DeliveryRoute>
-                       <DeliveryOrders />
-                     </DeliveryRoute>
-                   } />
-                   <Route path="/delivery/map" element={
-                     <DeliveryRoute>
-                       <DeliveryMap />
-                     </DeliveryRoute>
-                   } />
-                   <Route path="/delivery/report" element={
-                     <DeliveryRoute>
-                       <DeliveryReport />
-                     </DeliveryRoute>
-                   } />
-                   <Route path="/delivery/ratings" element={
-                     <DeliveryRoute>
-                       <DeliveryRatings />
-                     </DeliveryRoute>
-                   } />
-                   <Route path="/delivery/schedule" element={
-                     <DeliveryRoute>
-                       <DeliverySchedule />
-                     </DeliveryRoute>
-                   } />
-                   <Route path="/delivery/status" element={
-                     <DeliveryRoute>
-                       <DeliveryStatus />
-                     </DeliveryRoute>
-                   } />
-                   <Route path="/delivery/profile" element={
-                     <DeliveryRoute>
-                       <DeliveryProfile />
-                     </DeliveryRoute>
-                   } />
-                   
-                   {/* Rutas de perfil para delivery */}
-                   <Route path="/delivery/user-profile" element={
-                     <DeliveryRoute>
-                       <Profile />
-                     </DeliveryRoute>
-                   } />
-                   <Route path="/delivery/security" element={
-                     <DeliveryRoute>
-                       <Security />
-                     </DeliveryRoute>
-                   } />
-                   <Route path="/delivery/configuration" element={
-                     <DeliveryRoute>
-                       <Configuration />
-                     </DeliveryRoute>
-                   } />
                  </Routes>
                </div>
              </div>
@@ -422,6 +313,71 @@ function AppContent() {
              <Footer />
            </div>
          } />
+
+                   {/* Rutas específicas del cliente - SIN Header ni Sidebar general */}
+                   <Route path="/cart" element={
+                     <ClientRoute>
+                       <ClientLayout>
+                         <Cart />
+                       </ClientLayout>
+                     </ClientRoute>
+                   } />
+                   <Route path="/favorites" element={
+                     <ClientRoute>
+                       <ClientLayout>
+                         <Favorites />
+                       </ClientLayout>
+                     </ClientRoute>
+                   } />
+                   <Route path="/profile" element={
+                     <ClientRoute>
+                       <ClientLayout>
+                         <Profile />
+                       </ClientLayout>
+                     </ClientRoute>
+                   } />
+                   <Route path="/security" element={
+                     <ClientRoute>
+                       <ClientLayout>
+                         <Security />
+                       </ClientLayout>
+                     </ClientRoute>
+                   } />
+                   <Route path="/security-settings" element={
+                     <ClientRoute>
+                       <ClientLayout>
+                         <SecuritySettings />
+                       </ClientLayout>
+                     </ClientRoute>
+                   } />
+                   <Route path="/loyalty" element={
+                     <ClientRoute>
+                       <ClientLayout>
+                         <Loyalty />
+                       </ClientLayout>
+                     </ClientRoute>
+                   } />
+                   <Route path="/configuration" element={
+                     <ClientRoute>
+                       <ClientLayout>
+                         <Configuration />
+                       </ClientLayout>
+                     </ClientRoute>
+                   } />
+                   <Route path="/orders" element={
+                     <ClientRoute>
+                       <ClientLayout>
+                         <ClientOrders />
+                       </ClientLayout>
+                     </ClientRoute>
+                   } />
+                   <Route path="/notifications" element={
+                     <ClientRoute>
+                       <ClientLayout>
+                         <ClientNotifications />
+                       </ClientLayout>
+                     </ClientRoute>
+                   } />
 
                    {/* Rutas de gestor de tienda - SIN Header ni Sidebar principal */}
           <Route path="/store-manager/*" element={
@@ -553,12 +509,102 @@ function AppContent() {
            </Routes>
          } />
 
-                   {/* Ruta de store-setup separada */}
-          <Route path="/store-setup" element={
-            <StoreManagerRoute>
-              <StoreSetup />
-            </StoreManagerRoute>
-          } />
+                                       {/* Ruta de store-setup separada */}
+           <Route path="/store-setup" element={
+             <StoreManagerRoute>
+               <StoreSetup />
+             </StoreManagerRoute>
+           } />
+
+                    {/* Rutas de delivery - SIN Header ni Sidebar principal */}
+           <Route path="/delivery/*" element={
+             <Routes>
+               <Route path="/" element={
+                 <DeliveryRoute>
+                   <Navigate to="/delivery/dashboard" replace />
+                 </DeliveryRoute>
+               } />
+               <Route path="/dashboard" element={
+                 <DeliveryRoute>
+                   <DeliveryLayout>
+                     <DeliveryDashboard />
+                   </DeliveryLayout>
+                 </DeliveryRoute>
+               } />
+               <Route path="/orders" element={
+                 <DeliveryRoute>
+                   <DeliveryLayout>
+                     <DeliveryOrders />
+                   </DeliveryLayout>
+                 </DeliveryRoute>
+               } />
+               <Route path="/map" element={
+                 <DeliveryRoute>
+                   <DeliveryLayout>
+                     <DeliveryMap />
+                   </DeliveryLayout>
+                 </DeliveryRoute>
+               } />
+               <Route path="/report" element={
+                 <DeliveryRoute>
+                   <DeliveryLayout>
+                     <DeliveryReport />
+                   </DeliveryLayout>
+                 </DeliveryRoute>
+               } />
+               <Route path="/ratings" element={
+                 <DeliveryRoute>
+                   <DeliveryLayout>
+                     <DeliveryRatings />
+                   </DeliveryLayout>
+                 </DeliveryRoute>
+               } />
+               <Route path="/schedule" element={
+                 <DeliveryRoute>
+                   <DeliveryLayout>
+                     <DeliverySchedule />
+                   </DeliveryLayout>
+                 </DeliveryRoute>
+               } />
+               <Route path="/status" element={
+                 <DeliveryRoute>
+                   <DeliveryLayout>
+                     <DeliveryAvailabilityStatus />
+                   </DeliveryLayout>
+                 </DeliveryRoute>
+               } />
+               <Route path="/profile" element={
+                 <DeliveryRoute>
+                   <DeliveryLayout>
+                     <DeliveryProfile />
+                   </DeliveryLayout>
+                 </DeliveryRoute>
+               } />
+               
+               {/* Rutas de perfil para delivery */}
+               <Route path="/user-profile" element={
+                 <DeliveryRoute>
+                   <DeliveryLayout>
+                     <Profile />
+                   </DeliveryLayout>
+                 </DeliveryRoute>
+               } />
+               <Route path="/security" element={
+                 <DeliveryRoute>
+                   <DeliveryLayout>
+                     <Security />
+                   </DeliveryLayout>
+                 </DeliveryRoute>
+               } />
+               <Route path="/configuration" element={
+                 <DeliveryRoute>
+                   <DeliveryLayout>
+                     <Configuration />
+                   </DeliveryLayout>
+                 </DeliveryRoute>
+               } />
+             </Routes>
+           } />
       </Routes>
       
              

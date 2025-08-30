@@ -610,6 +610,40 @@ export class OrderService {
   }
 
   /**
+   * Obtener órdenes asignadas a un delivery
+   */
+  static async getDeliveryOrders(
+    deliveryId: mongoose.Types.ObjectId,
+    page: number = 1,
+    limit: number = 10
+  ) {
+    const skip = (page - 1) * limit;
+
+    const query = {
+      'deliveryInfo.assignedDelivery': deliveryId
+    };
+
+    const [orders, total] = await Promise.all([
+      Order.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('userId', 'name email phone')
+        .populate('storeId', 'name address')
+        .populate('items.productId', 'name image sku'),
+      Order.countDocuments(query)
+    ]);
+
+    return {
+      orders,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    };
+  }
+
+  /**
    * Exportar órdenes
    */
   static async exportOrders(

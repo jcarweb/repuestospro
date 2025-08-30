@@ -77,7 +77,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     } else if (user.role === 'delivery') {
       window.location.href = '/delivery/dashboard';
     } else {
-      window.location.href = '/';
+      // Para clientes, navegar a una ruta específica del cliente
+      window.location.href = '/profile';
     }
     
     onClose();

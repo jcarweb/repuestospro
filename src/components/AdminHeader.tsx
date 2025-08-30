@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import Logo from './Logo';
+import AvatarImageSimple from './AvatarImageSimple';
+import { profileService } from '../services/profileService';
 import { Package, User, LogOut, Bell, Settings, Shield } from 'lucide-react';
 
 const AdminHeader: React.FC = () => {
@@ -10,9 +12,30 @@ const AdminHeader: React.FC = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
   
   // Ref para detectar clicks fuera del menú
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Cargar perfil del usuario
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (user) {
+        try {
+          setLoadingProfile(true);
+          const profile = await profileService.getProfile();
+          setUserProfile(profile);
+        } catch (error) {
+          console.error('Error cargando perfil:', error);
+        } finally {
+          setLoadingProfile(false);
+        }
+      }
+    };
+
+    loadUserProfile();
+  }, [user]);
 
   // Cerrar menú cuando se hace click fuera
   useEffect(() => {
@@ -52,10 +75,10 @@ const AdminHeader: React.FC = () => {
 
   return (
     <header className="bg-white dark:bg-[#333333] shadow-sm border-b border-gray-200 dark:border-[#555555] h-16 flex items-center justify-between px-6">
-             {/* Logo */}
-       <div className="flex items-center">
-         <Logo className="h-12 w-auto" />
-       </div>
+      {/* Logo */}
+      <div className="flex items-center">
+        <Logo className="h-12 w-auto" />
+      </div>
 
       {/* Right side - User info and actions */}
       <div className="flex items-center space-x-4">
@@ -70,9 +93,18 @@ const AdminHeader: React.FC = () => {
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
             className="flex items-center space-x-3 p-2 text-[#333333] dark:text-white hover:text-[#FFC300] transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#444444]"
           >
-            <div className="w-8 h-8 bg-gray-200 dark:bg-[#555555] rounded-full flex items-center justify-center">
-              <User className="w-4 h-4 text-gray-600 dark:text-gray-200" />
-            </div>
+            {loadingProfile ? (
+              <div className="w-8 h-8 bg-gray-200 dark:bg-[#555555] rounded-full flex items-center justify-center">
+                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : (
+              <AvatarImageSimple
+                avatar={userProfile?.avatar}
+                alt={user?.name || 'Usuario'}
+                size="sm"
+                className="w-8 h-8"
+              />
+            )}
             <div className="hidden sm:block">
               <p className="text-sm font-medium text-[#333333] dark:text-white">{user?.name}</p>
               <p className="text-xs text-gray-500 dark:text-white">

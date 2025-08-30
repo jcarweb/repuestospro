@@ -40,7 +40,8 @@ const Login: React.FC = () => {
       } else if (userData.role === 'delivery') {
         navigate('/delivery/dashboard');
       } else {
-        navigate('/');
+        // Para clientes, navegar a una ruta específica del cliente
+        navigate('/profile');
       }
       
     } catch (error: any) {
@@ -89,7 +90,8 @@ const Login: React.FC = () => {
     } else if (user.role === 'delivery') {
       navigate('/delivery/dashboard');
     } else {
-      navigate('/');
+      // Para clientes, navegar a una ruta específica del cliente
+      navigate('/profile');
     }
   };
 

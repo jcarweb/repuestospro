@@ -68,7 +68,12 @@ const TwoFactorVerification: React.FC<TwoFactorVerificationProps> = ({
     }
   };
 
-  console.log('🔍 TwoFactorVerification renderizado:', { isOpen, email, tempToken: tempToken ? 'existe' : 'no existe' });
+  // Log solo cuando el componente se abre o cambia de estado
+  useEffect(() => {
+    if (isOpen) {
+      console.log('🔍 TwoFactorVerification abierto:', { email, tempToken: tempToken ? 'existe' : 'no existe' });
+    }
+  }, [isOpen, email, tempToken]);
   
   if (!isOpen) return null;
 

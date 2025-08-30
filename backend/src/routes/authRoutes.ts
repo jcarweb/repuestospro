@@ -8,6 +8,10 @@ const router = Router();
 // Rutas públicas
 router.post('/register', AuthController.register);
 router.post('/login', AuthController.login);
+router.post('/login/google', AuthController.loginWithGoogle);
+router.post('/check-email-verification', AuthController.checkEmailVerification);
+router.post('/verify-2fa', AuthController.verifyTwoFactorCode);
+router.post('/user-settings', AuthController.getUserAuthSettings); // Nuevo endpoint para app móvil
 router.post('/login/2fa/complete', AuthController.completeLoginWithTwoFactor);
 router.post('/login/pin', AuthController.loginWithPin);
 router.post('/login/fingerprint', AuthController.loginWithFingerprint);

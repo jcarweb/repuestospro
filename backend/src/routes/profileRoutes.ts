@@ -1,6 +1,7 @@
 import express from 'express';
 import { authMiddleware } from '../middleware/authMiddleware';
-import profileController, { profileUpload } from '../controllers/profileController';
+import profileController from '../controllers/profileController';
+import { profileUpload } from '../config/cloudinary';
 
 const router = express.Router();
 

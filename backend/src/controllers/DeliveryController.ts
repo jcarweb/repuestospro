@@ -3,6 +3,7 @@ import Delivery, { IDelivery } from '../models/Delivery';
 import Rider, { IRider } from '../models/Rider';
 import Order from '../models/Order';
 import Store from '../models/Store';
+import User from '../models/User';
 import DeliveryAssignmentService, { AssignmentConfig } from '../services/DeliveryAssignmentService';
 
 export class DeliveryController {
@@ -64,25 +65,13 @@ export class DeliveryController {
 
       // Generar código de tracking
       delivery.trackingCode = delivery.generateTrackingCode();
-      delivery.trackingUrl = `${process.env.FRONTEND_URL}/tracking/${delivery.trackingCode}`;
 
       await delivery.save();
-
-      // Intentar asignar automáticamente
-      const assignmentResult = await DeliveryAssignmentService.assignDelivery(
-        delivery._id.toString(),
-        delivery.assignmentConfig
-      );
-
-      if (assignmentResult.success) {
-        delivery.status = 'assigned';
-        await delivery.save();
-      }
 
       res.status(201).json({
         success: true,
         data: delivery,
-        assignment: assignmentResult
+        message: 'Delivery creado exitosamente'
       });
 
     } catch (error) {
@@ -92,53 +81,43 @@ export class DeliveryController {
   }
 
   /**
-   * Obtener todos los deliveries con filtros
+   * Obtener deliveries
    */
   static async getDeliveries(req: Request, res: Response) {
     try {
-      const {
-        status,
-        riderType,
-        storeId,
-        dateFrom,
-        dateTo,
-        page = 1,
-        limit = 20
-      } = req.query;
+      const { status, riderType, dateFrom, dateTo, limit = 50, page = 1 } = req.query;
 
       const filter: any = {};
-
       if (status) filter.status = status;
       if (riderType) filter.riderType = riderType;
-      if (storeId) filter.storeId = storeId;
-
       if (dateFrom || dateTo) {
         filter.createdAt = {};
         if (dateFrom) filter.createdAt.$gte = new Date(dateFrom as string);
         if (dateTo) filter.createdAt.$lte = new Date(dateTo as string);
       }
 
-      const skip = (Number(page) - 1) * Number(limit);
+      const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
 
-      const deliveries = await Delivery.find(filter)
-        .populate('orderId')
-        .populate('storeId')
-        .populate('customerId')
-        .populate('riderId')
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(Number(limit));
-
-      const total = await Delivery.countDocuments(filter);
+      const [deliveries, total] = await Promise.all([
+        Delivery.find(filter)
+          .populate('orderId')
+          .populate('storeId')
+          .populate('customerId')
+          .populate('riderId')
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(parseInt(limit as string)),
+        Delivery.countDocuments(filter)
+      ]);
 
       res.json({
         success: true,
         data: deliveries,
         pagination: {
-          page: Number(page),
-          limit: Number(limit),
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
           total,
-          pages: Math.ceil(total / Number(limit))
+          pages: Math.ceil(total / parseInt(limit as string))
         }
       });
 
@@ -149,7 +128,7 @@ export class DeliveryController {
   }
 
   /**
-   * Obtener un delivery específico
+   * Obtener delivery específico
    */
   static async getDelivery(req: Request, res: Response) {
     try {
@@ -177,7 +156,7 @@ export class DeliveryController {
   }
 
   /**
-   * Actualizar estado del delivery
+   * Actualizar estado de delivery
    */
   static async updateDeliveryStatus(req: Request, res: Response) {
     try {
@@ -189,151 +168,24 @@ export class DeliveryController {
         return res.status(404).json({ message: 'Delivery no encontrado' });
       }
 
-      // Actualizar estado
-      await delivery.updateStatus(status, notes, req.user?.email);
-
-      // Si el estado es 'picked_up', registrar tiempo de recogida
-      if (status === 'picked_up') {
-        delivery.actualPickupTime = new Date();
-      }
-
-      // Si el estado es 'delivered', registrar tiempo de entrega
-      if (status === 'delivered') {
-        delivery.actualDeliveryTime = new Date();
-      }
+      delivery.status = status;
+      delivery.statusHistory.push({
+        status,
+        timestamp: new Date(),
+        notes,
+        updatedBy: (req as any).user.id
+      });
 
       await delivery.save();
 
       res.json({
         success: true,
         data: delivery,
-        message: `Estado actualizado a: ${status}`
+        message: 'Estado actualizado exitosamente'
       });
 
     } catch (error) {
       console.error('Error actualizando estado:', error);
-      res.status(500).json({ message: 'Error interno del servidor' });
-    }
-  }
-
-  /**
-   * Asignar delivery manualmente
-   */
-  static async assignDelivery(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
-      const { riderId, assignmentConfig } = req.body;
-
-      const delivery = await Delivery.findById(id);
-      if (!delivery) {
-        return res.status(404).json({ message: 'Delivery no encontrado' });
-      }
-
-      const rider = await Rider.findById(riderId);
-      if (!rider) {
-        return res.status(404).json({ message: 'Rider no encontrado' });
-      }
-
-      // Verificar que el rider esté disponible
-      if (!rider.availability.isAvailable || !rider.availability.isOnline) {
-        return res.status(400).json({ message: 'Rider no está disponible' });
-      }
-
-      // Actualizar asignación
-      delivery.riderId = rider._id;
-      delivery.riderType = rider.type;
-      delivery.riderName = `${rider.firstName} ${rider.lastName}`;
-      delivery.riderPhone = rider.phone;
-      delivery.status = 'assigned';
-
-      if (rider.vehicle) {
-        delivery.riderVehicle = {
-          type: rider.vehicle.type,
-          plate: rider.vehicle.plate,
-          model: rider.vehicle.model
-        };
-      }
-
-      // Agregar al historial
-      delivery.statusHistory.push({
-        status: 'assigned',
-        timestamp: new Date(),
-        notes: `Asignado manualmente a ${rider.firstName} ${rider.lastName}`,
-        updatedBy: req.user?.email || 'admin'
-      });
-
-      await delivery.save();
-
-      res.json({
-        success: true,
-        data: delivery,
-        message: `Delivery asignado a ${rider.firstName} ${rider.lastName}`
-      });
-
-    } catch (error) {
-      console.error('Error asignando delivery:', error);
-      res.status(500).json({ message: 'Error interno del servidor' });
-    }
-  }
-
-  /**
-   * Reasignar delivery
-   */
-  static async reassignDelivery(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
-      const { newRiderId, reason } = req.body;
-
-      const result = await DeliveryAssignmentService.reassignDelivery(
-        id,
-        newRiderId,
-        reason
-      );
-
-      if (!result.success) {
-        return res.status(400).json({ message: result.message });
-      }
-
-      const delivery = await Delivery.findById(id)
-        .populate('riderId');
-
-      res.json({
-        success: true,
-        data: delivery,
-        message: result.message
-      });
-
-    } catch (error) {
-      console.error('Error reasignando delivery:', error);
-      res.status(500).json({ message: 'Error interno del servidor' });
-    }
-  }
-
-  /**
-   * Obtener riders disponibles
-   */
-  static async getAvailableRiders(req: Request, res: Response) {
-    try {
-      const { lat, lng, maxDistance = 10 } = req.query;
-
-      if (!lat || !lng) {
-        return res.status(400).json({ message: 'Coordenadas requeridas' });
-      }
-
-      const riders = await DeliveryAssignmentService.findAvailableRiders(
-        Number(lat),
-        Number(lng),
-        Number(maxDistance)
-      );
-
-      res.json({
-        success: true,
-        data: riders,
-        count: riders.length
-      });
-
-    } catch (error) {
-      console.error('Error obteniendo riders disponibles:', error);
       res.status(500).json({ message: 'Error interno del servidor' });
     }
   }
@@ -386,26 +238,30 @@ export class DeliveryController {
       let lateDeliveries = 0;
 
       for (const delivery of deliveredDeliveriesData) {
-        if (delivery.actualPickupTime && delivery.actualDeliveryTime) {
-          const pickup = new Date(delivery.actualPickupTime);
-          const delivery_time = new Date(delivery.actualDeliveryTime);
-          const timeDiff = (delivery_time.getTime() - pickup.getTime()) / (1000 * 60); // minutos
-          averageDeliveryTime += timeDiff;
-
-          if (delivery.estimatedDeliveryTime) {
-            const estimated = new Date(delivery.estimatedDeliveryTime);
-            if (delivery_time <= estimated) {
-              onTimeDeliveries++;
-            } else {
-              lateDeliveries++;
-            }
+        if (delivery.estimatedDeliveryTime && delivery.actualDeliveryTime) {
+          const estimated = new Date(delivery.estimatedDeliveryTime);
+          const actual = new Date(delivery.actualDeliveryTime);
+          
+          if (actual <= estimated) {
+            onTimeDeliveries++;
+          } else {
+            lateDeliveries++;
           }
         }
       }
 
-      if (deliveredDeliveriesData.length > 0) {
-        averageDeliveryTime = averageDeliveryTime / deliveredDeliveriesData.length;
-      }
+      const totalCompleted = onTimeDeliveries + lateDeliveries;
+      averageDeliveryTime = totalCompleted > 0 ? 
+        deliveredDeliveriesData.reduce((sum, d) => {
+          if (d.estimatedDeliveryTime && d.actualDeliveryTime) {
+            const estimated = new Date(d.estimatedDeliveryTime);
+            const actual = new Date(d.actualDeliveryTime);
+            return sum + (actual.getTime() - estimated.getTime()) / (1000 * 60); // minutos
+          }
+          return sum;
+        }, 0) / totalCompleted : 0;
+
+      const onTimeRate = totalCompleted > 0 ? (onTimeDeliveries / totalCompleted) * 100 : 0;
 
       res.json({
         success: true,
@@ -424,7 +280,7 @@ export class DeliveryController {
           averageDeliveryTime: Math.round(averageDeliveryTime),
           onTimeDeliveries,
           lateDeliveries,
-          onTimeRate: deliveredDeliveries > 0 ? (onTimeDeliveries / deliveredDeliveries) * 100 : 0
+          onTimeRate: Math.round(onTimeRate * 100) / 100
         }
       });
 
@@ -435,7 +291,206 @@ export class DeliveryController {
   }
 
   /**
-   * Obtener tracking de delivery
+   * Obtener estadísticas personales del delivery
+   */
+  static async getPersonalDeliveryStats(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user._id;
+
+      // Obtener deliveries asignados al usuario
+      const deliveries = await Delivery.find({ riderId: userId });
+
+      // Calcular estadísticas básicas
+      const totalDeliveries = deliveries.length;
+      const completedDeliveries = deliveries.filter(d => d.status === 'delivered').length;
+      const cancelledDeliveries = deliveries.filter(d => d.status === 'cancelled').length;
+
+      // Calcular ganancias
+      const totalEarnings = deliveries
+        .filter(d => d.status === 'delivered')
+        .reduce((sum, d) => sum + d.riderPayment, 0);
+
+      // Calcular distancia total
+      const totalDistance = deliveries
+        .filter(d => d.status === 'delivered')
+        .reduce((sum, d) => {
+          // Calcular distancia entre pickup y delivery
+          const distance = this.calculateDistance(
+            d.pickupLocation.coordinates.lat,
+            d.pickupLocation.coordinates.lng,
+            d.deliveryLocation.coordinates.lat,
+            d.deliveryLocation.coordinates.lng
+          );
+          return sum + distance;
+        }, 0);
+
+      // Calcular tiempo promedio y entregas a tiempo
+      let averageDeliveryTime = 0;
+      let onTimeDeliveries = 0;
+      let lateDeliveries = 0;
+
+      const completedDeliveriesData = deliveries.filter(d => d.status === 'delivered');
+      for (const delivery of completedDeliveriesData) {
+        if (delivery.estimatedDeliveryTime && delivery.actualDeliveryTime) {
+          const estimated = new Date(delivery.estimatedDeliveryTime);
+          const actual = new Date(delivery.actualDeliveryTime);
+          
+          if (actual <= estimated) {
+            onTimeDeliveries++;
+          } else {
+            lateDeliveries++;
+          }
+        }
+      }
+
+      const totalCompleted = onTimeDeliveries + lateDeliveries;
+      averageDeliveryTime = totalCompleted > 0 ? 
+        completedDeliveriesData.reduce((sum, d) => {
+          if (d.estimatedDeliveryTime && d.actualDeliveryTime) {
+            const estimated = new Date(d.estimatedDeliveryTime);
+            const actual = new Date(d.actualDeliveryTime);
+            return sum + (actual.getTime() - estimated.getTime()) / (1000 * 60); // minutos
+          }
+          return sum;
+        }, 0) / totalCompleted : 0;
+
+      const onTimeRate = totalCompleted > 0 ? (onTimeDeliveries / totalCompleted) * 100 : 0;
+
+      // Calcular estadísticas del mes actual
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+      const currentMonthDeliveries = deliveries.filter(d => {
+        const deliveryDate = new Date(d.createdAt);
+        return deliveryDate >= startOfMonth && deliveryDate <= endOfMonth;
+      }).length;
+
+      const currentMonthEarnings = deliveries
+        .filter(d => {
+          const deliveryDate = new Date(d.createdAt);
+          return deliveryDate >= startOfMonth && deliveryDate <= endOfMonth && d.status === 'delivered';
+        })
+        .reduce((sum, d) => sum + d.riderPayment, 0);
+
+      // Obtener calificación promedio del usuario
+      const user = await User.findById(userId);
+      const averageRating = user?.rating?.average || 0;
+      const totalReviews = user?.rating?.totalReviews || 0;
+
+      res.json({
+        success: true,
+        data: {
+          totalDeliveries,
+          completedDeliveries,
+          cancelledDeliveries,
+          totalEarnings,
+          totalDistance: Math.round(totalDistance * 100) / 100,
+          averageDeliveryTime: Math.round(averageDeliveryTime),
+          onTimeDeliveries,
+          lateDeliveries,
+          onTimeRate: Math.round(onTimeRate * 100) / 100,
+          currentMonthDeliveries,
+          currentMonthEarnings,
+          averageRating,
+          totalReviews
+        }
+      });
+
+    } catch (error) {
+      console.error('Error obteniendo estadísticas personales:', error);
+      res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  }
+
+  /**
+   * Actualizar estado de disponibilidad del delivery
+   */
+  static async updateDeliveryStatus(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user._id;
+      const { deliveryStatus, currentLocation } = req.body;
+
+      // Actualizar estado del usuario
+      await User.findByIdAndUpdate(userId, {
+        deliveryStatus,
+        ...(currentLocation && { location: currentLocation })
+      });
+
+      // Si hay ubicación actual, actualizar también en el perfil de rider
+      if (currentLocation) {
+        await Rider.findOneAndUpdate(
+          { userId },
+          {
+            'availability.currentLocation': {
+              lat: currentLocation.lat,
+              lng: currentLocation.lng,
+              timestamp: new Date()
+            }
+          }
+        );
+      }
+
+      res.json({
+        success: true,
+        message: 'Estado actualizado exitosamente'
+      });
+
+    } catch (error) {
+      console.error('Error actualizando estado:', error);
+      res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  }
+
+  /**
+   * Obtener perfil del delivery
+   */
+  static async getDeliveryProfile(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user._id;
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+
+      // Obtener información del rider si existe
+      const rider = await Rider.findOne({ userId });
+
+      const profile = {
+        _id: user._id,
+        firstName: user.name.split(' ')[0] || user.name,
+        lastName: user.name.split(' ').slice(1).join(' ') || '',
+        email: user.email,
+        phone: user.phone,
+        deliveryStatus: user.deliveryStatus || 'unavailable',
+        autoStatusMode: user.autoStatusMode || false,
+        currentOrder: user.currentOrder,
+        deliveryZone: user.deliveryZone || { center: [0, 0], radius: 10 },
+        vehicleInfo: user.vehicleInfo || { type: '', model: '', plate: '' },
+        workSchedule: user.workSchedule || { startTime: '08:00', endTime: '18:00', daysOfWeek: [1, 2, 3, 4, 5, 6, 0] },
+        rating: user.rating || { average: 0, totalReviews: 0 },
+        stats: rider?.stats || {
+          totalDeliveries: 0,
+          completedDeliveries: 0,
+          totalEarnings: 0,
+          averageDeliveryTime: 0
+        }
+      };
+
+      res.json({
+        success: true,
+        data: profile
+      });
+
+    } catch (error) {
+      console.error('Error obteniendo perfil:', error);
+      res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  }
+
+  /**
+   * Tracking público
    */
   static async getDeliveryTracking(req: Request, res: Response) {
     try {
@@ -444,6 +499,7 @@ export class DeliveryController {
       const delivery = await Delivery.findOne({ trackingCode })
         .populate('orderId')
         .populate('storeId')
+        .populate('customerId')
         .populate('riderId');
 
       if (!delivery) {
@@ -457,6 +513,30 @@ export class DeliveryController {
 
     } catch (error) {
       console.error('Error obteniendo tracking:', error);
+      res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  }
+
+  /**
+   * Obtener riders disponibles
+   */
+  static async getAvailableRiders(req: Request, res: Response) {
+    try {
+      const { lat, lng, maxDistance = 10 } = req.query;
+
+      const riders = await DeliveryAssignmentService.findAvailableRiders(
+        parseFloat(lat as string),
+        parseFloat(lng as string),
+        parseFloat(maxDistance as string)
+      );
+
+      res.json({
+        success: true,
+        data: riders
+      });
+
+    } catch (error) {
+      console.error('Error obteniendo riders disponibles:', error);
       res.status(500).json({ message: 'Error interno del servidor' });
     }
   }
@@ -533,6 +613,20 @@ export class DeliveryController {
       console.error('Error cancelando delivery:', error);
       res.status(500).json({ message: 'Error interno del servidor' });
     }
+  }
+
+  /**
+   * Calcular distancia entre dos puntos
+   */
+  private static calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371; // Radio de la Tierra en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
   }
 }
 

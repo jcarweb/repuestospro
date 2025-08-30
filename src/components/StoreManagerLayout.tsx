@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Menu } from 'lucide-react';
 import AdminHeader from './AdminHeader';
-import AdminSidebar from './AdminSidebar';
+import StoreManagerSidebar from './StoreManagerSidebar';
 import ActiveStoreSelector from './ActiveStoreSelector';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveStore } from '../contexts/ActiveStoreContext';
@@ -53,13 +53,13 @@ const StoreManagerLayout: React.FC<StoreManagerLayoutProps> = ({ children }) => 
 
       <div className="flex h-[calc(100vh-64px)]">
         {/* Sidebar - siempre visible en desktop */}
-        <div className="hidden lg:block w-64 bg-white dark:bg-[#333333] shadow-lg">
-          <AdminSidebar isOpen={true} onClose={() => {}} />
+        <div className="hidden lg:block">
+          <StoreManagerSidebar isOpen={true} onClose={() => {}} />
         </div>
 
         {/* Sidebar móvil */}
         <div className="lg:hidden">
-          <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+          <StoreManagerSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         </div>
 
         {/* Contenido principal */}

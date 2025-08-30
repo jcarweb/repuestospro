@@ -80,6 +80,8 @@ const StoreManagerAnalytics: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
+      console.log('🔑 Token encontrado:', token ? 'Sí' : 'No');
+      
       const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -92,6 +94,7 @@ const StoreManagerAnalytics: React.FC = () => {
       });
 
       console.log('📡 Respuesta de verificación:', analyticsAccessResponse.status);
+      console.log('📡 Headers de respuesta:', Object.fromEntries(analyticsAccessResponse.headers.entries()));
       
       if (analyticsAccessResponse.ok) {
         const accessData = await analyticsAccessResponse.json();

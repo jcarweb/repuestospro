@@ -38,6 +38,8 @@ const Loyalty: React.FC = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [trackingStats, setTrackingStats] = useState<any>(null);
+  const [availableRewards, setAvailableRewards] = useState<any[]>([]);
+  const [loadingRewards, setLoadingRewards] = useState(false);
   
   // Google Analytics hook
   const { trackReferral } = useGoogleAnalytics();
@@ -45,6 +47,7 @@ const Loyalty: React.FC = () => {
   useEffect(() => {
     fetchLoyaltyStats();
     fetchTrackingStats();
+    fetchAvailableRewards();
   }, []);
 
   const fetchLoyaltyStats = async () => {
@@ -80,6 +83,56 @@ const Loyalty: React.FC = () => {
       }
     } catch (error) {
       console.error('Error obteniendo estadísticas de tracking:', error);
+    }
+  };
+
+  const fetchAvailableRewards = async () => {
+    setLoadingRewards(true);
+    try {
+      const response = await fetch('http://localhost:5000/api/loyalty/available-rewards', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setAvailableRewards(result.data);
+      }
+    } catch (error) {
+      console.error('Error obteniendo premios disponibles:', error);
+    } finally {
+      setLoadingRewards(false);
+    }
+  };
+
+  const handleRedeemReward = async (rewardId: string) => {
+    if (!confirm('¿Estás seguro de que quieres canjear este premio?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/loyalty/redeem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ rewardId })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert('¡Premio canjeado exitosamente!');
+        // Recargar datos
+        fetchLoyaltyStats();
+        fetchAvailableRewards();
+      } else {
+        alert(result.message || 'Error al canjear el premio');
+      }
+    } catch (error) {
+      console.error('Error canjeando premio:', error);
+      alert('Error al canjear el premio');
     }
   };
 
@@ -328,14 +381,106 @@ const Loyalty: React.FC = () => {
             )}
 
             {activeTab === 'rewards' && (
-              <div className="text-center py-12">
-                <Gift className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Premios Disponibles
-                </h3>
-                <p className="text-gray-600">
-                  Próximamente podrás canjear increíbles premios con tus puntos
-                </p>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Premios Disponibles
+                  </h3>
+                  <button
+                    onClick={fetchAvailableRewards}
+                    disabled={loadingRewards}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {loadingRewards ? 'Cargando...' : 'Actualizar'}
+                  </button>
+                </div>
+
+                {loadingRewards ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Cargando premios...</p>
+                  </div>
+                ) : availableRewards.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Gift className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      No hay premios disponibles
+                    </h3>
+                    <p className="text-gray-600">
+                      Por el momento no hay premios disponibles para canjear
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {availableRewards.map((reward) => (
+                      <div key={reward._id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                        {reward.image && (
+                          <div className="h-48 bg-gray-100 flex items-center justify-center">
+                            <img
+                              src={reward.image}
+                              alt={reward.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="p-6">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                            {reward.name}
+                          </h4>
+                          <p className="text-gray-600 text-sm mb-4">
+                            {reward.description}
+                          </p>
+                          
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">Puntos requeridos:</span>
+                              <span className="font-semibold text-blue-600">
+                                {reward.pointsRequired.toLocaleString()}
+                              </span>
+                            </div>
+                            {reward.cashRequired > 0 && (
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-500">Efectivo adicional:</span>
+                                <span className="font-semibold text-green-600">
+                                  ${reward.cashRequired.toFixed(2)}
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">Stock disponible:</span>
+                              <span className="font-semibold text-gray-900">
+                                {reward.stock}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">Categoría:</span>
+                              <span className="text-sm bg-gray-100 px-2 py-1 rounded">
+                                {reward.category}
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => handleRedeemReward(reward._id)}
+                            disabled={!reward.canAfford || reward.stock <= 0}
+                            className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
+                              reward.canAfford && reward.stock > 0
+                                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
+                          >
+                            {!reward.canAfford
+                              ? 'Puntos insuficientes'
+                              : reward.stock <= 0
+                              ? 'Agotado'
+                              : 'Canjear Premio'
+                            }
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

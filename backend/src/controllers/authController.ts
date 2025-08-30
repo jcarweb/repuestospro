@@ -949,6 +949,111 @@ export class AuthController {
     });
   }
 
+  // Login con Google para app móvil
+  static async loginWithGoogle(req: Request, res: Response): Promise<void> {
+    try {
+      console.log('🔐 Iniciando login con Google para app móvil');
+      const { googleToken, userInfo } = req.body;
+
+      if (!googleToken || !userInfo) {
+        res.status(400).json({
+          success: false,
+          message: 'Token de Google y información del usuario requeridos'
+        });
+        return;
+      }
+
+      const { email, name, picture } = userInfo;
+
+      // Verificar si el usuario ya existe
+      let user = await User.findOne({ email });
+
+      if (!user) {
+        console.log('👤 Usuario no existe, creando nuevo usuario con Google');
+        
+        // Crear nuevo usuario
+        const userData: any = {
+          name,
+          email,
+          password: crypto.randomBytes(32).toString('hex'), // Contraseña aleatoria
+          isEmailVerified: true, // Google ya verifica el email
+          googleId: userInfo.id,
+          profilePicture: picture,
+          role: 'client' // Solo clientes pueden registrarse desde móvil
+        };
+
+        // Generar código de referido
+        try {
+          userData.referralCode = await LoyaltyService.generateReferralCode();
+        } catch (error) {
+          console.error('Error generando código de referido:', error);
+          userData.referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        user = await User.create(userData);
+        console.log('✅ Usuario creado exitosamente con Google:', user._id);
+
+        // Registrar actividad
+        await Activity.create({
+          userId: user._id,
+          type: 'user_registration',
+          description: 'Usuario registrado con Google',
+          metadata: { 
+            provider: 'google',
+            ip: req.ip 
+          }
+        });
+      } else {
+        console.log('👤 Usuario existente encontrado:', user._id);
+        
+        // Actualizar información de Google si es necesario
+        if (!user.googleId) {
+          user.googleId = userInfo.id;
+          user.profilePicture = picture;
+          await user.save();
+        }
+
+        // Registrar actividad
+        await Activity.create({
+          userId: user._id,
+          type: 'user_login',
+          description: 'Inicio de sesión con Google',
+          metadata: { 
+            provider: 'google',
+            ip: req.ip 
+          }
+        });
+      }
+
+      // Generar token JWT
+      const token = AuthController.generateToken(user._id);
+
+      console.log('✅ Login con Google exitoso para usuario:', user._id);
+
+      res.json({
+        success: true,
+        message: 'Inicio de sesión con Google exitoso',
+        data: {
+          token,
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            profilePicture: user.profilePicture,
+            isEmailVerified: user.isEmailVerified
+          }
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error en login con Google:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error en el inicio de sesión con Google'
+      });
+    }
+  }
+
   // Login con huella digital
   static async loginWithFingerprint(req: Request, res: Response): Promise<void> {
     try {
@@ -1572,6 +1677,109 @@ export class AuthController {
         success: false,
         message: 'Error interno del servidor'
       });
+    }
+  }
+
+  // Verificar estado de verificación de email
+  static async checkEmailVerification(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        res.status(400).json({ error: 'Email requerido' });
+        return;
+      }
+
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        res.status(404).json({ error: 'Usuario no encontrado' });
+        return;
+      }
+
+      res.json({
+        verified: user.isEmailVerified,
+        message: user.isEmailVerified ? 'Email verificado' : 'Email no verificado'
+      });
+    } catch (error) {
+      console.error('❌ Error verificando email:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
+
+  // Verificar código de doble factor
+  static async verifyTwoFactorCode(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, code } = req.body;
+
+      if (!email || !code) {
+        res.status(400).json({ error: 'Email y código requeridos' });
+        return;
+      }
+
+      const user = await User.findOne({ email }).select('+twoFactorSecret');
+
+      if (!user) {
+        res.status(404).json({ error: 'Usuario no encontrado' });
+        return;
+      }
+
+      if (!user.twoFactorEnabled) {
+        res.status(400).json({ error: '2FA no está habilitado para este usuario' });
+        return;
+      }
+
+      // Verificar el código usando la librería speakeasy
+      const verified = speakeasy.totp.verify({
+        secret: user.twoFactorSecret,
+        encoding: 'base32',
+        token: code,
+        window: 2 // Permitir 2 códigos antes y después
+      });
+
+      res.json({
+        valid: verified,
+        message: verified ? 'Código válido' : 'Código inválido'
+      });
+    } catch (error) {
+      console.error('❌ Error verificando código 2FA:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
+
+  // Obtener configuración de autenticación del usuario
+  static async getUserAuthSettings(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        res.status(400).json({ error: 'Email requerido' });
+        return;
+      }
+
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        res.status(404).json({ error: 'Usuario no encontrado' });
+        return;
+      }
+
+      // Configuración de autenticación del usuario
+      const settings = {
+        emailVerified: user.isEmailVerified,
+        gpsRequired: false, // Por defecto deshabilitado
+        biometricEnabled: user.fingerprintEnabled || false,
+        twoFactorEnabled: user.twoFactorEnabled || false,
+        pinEnabled: !!user.pin,
+      };
+
+      res.json({
+        success: true,
+        settings
+      });
+    } catch (error) {
+      console.error('❌ Error obteniendo configuración de usuario:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   }
 }

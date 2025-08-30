@@ -9,6 +9,8 @@ import AuthModal from './AuthModal';
 import Logo from './Logo';
 import LanguageSelector from './LanguageSelector';
 import ServerStatus from './ServerStatus';
+import AvatarImageSimple from './AvatarImageSimple';
+import { profileService } from '../services/profileService';
 import { 
   ShoppingCart, 
   User, 
@@ -32,11 +34,32 @@ const Header: React.FC = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
   const cartItemCount = getItemCount();
   const favoritesCount = getFavoritesCount();
   
   // Ref para detectar clicks fuera del menú
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Cargar perfil del usuario
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (user && isAuthenticated) {
+        try {
+          setLoadingProfile(true);
+          const profile = await profileService.getProfile();
+          setUserProfile(profile);
+        } catch (error) {
+          console.error('Error cargando perfil:', error);
+        } finally {
+          setLoadingProfile(false);
+        }
+      }
+    };
+
+    loadUserProfile();
+  }, [user, isAuthenticated]);
 
   // Cerrar menú cuando se hace click fuera
   useEffect(() => {
@@ -160,9 +183,18 @@ const Header: React.FC = () => {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center space-x-2 p-2 text-[#333333] dark:text-white hover:text-[#FFC300] transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#444444]"
                 >
-                  <div className="w-8 h-8 bg-gray-200 dark:bg-[#555555] rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-gray-600 dark:text-gray-200" />
-                  </div>
+                  {loadingProfile ? (
+                    <div className="w-8 h-8 bg-gray-200 dark:bg-[#555555] rounded-full flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  ) : (
+                    <AvatarImageSimple
+                      avatar={userProfile?.avatar}
+                      alt={user?.name || 'Usuario'}
+                      size="sm"
+                      className="w-8 h-8"
+                    />
+                  )}
                   <span className="hidden sm:block text-sm font-medium text-[#333333] dark:text-white">
                     {user?.name || t('common.user')}
                   </span>

@@ -62,6 +62,17 @@ router.get('/products/by-location', AdminController.findProductsByLocation);
 // Obtener estadísticas de productos
 router.get('/products/stats', AdminController.prototype.getProductStats);
 
+// ===== GESTIÓN DE CLOUDINARY =====
+
+// Limpiar todas las imágenes de productos de prueba
+router.delete('/cloudinary/cleanup-all-images', AdminController.cleanupAllTestImages);
+
+// Limpiar carpeta específica de Cloudinary
+router.delete('/cloudinary/cleanup-folder', AdminController.cleanupCloudinaryFolder);
+
+// Obtener estadísticas de uso de Cloudinary
+router.get('/cloudinary/stats', AdminController.getCloudinaryStats);
+
 // ===== GESTIÓN DE USUARIOS ADICIONALES =====
 
 // Obtener estadísticas de usuarios

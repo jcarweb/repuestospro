@@ -398,5 +398,252 @@ export class ChatController {
       });
     }
   }
+
+  // Obtener chats de una tienda específica
+  async getStoreChats(req: Request, res: Response) {
+    try {
+      const { storeId } = req.params;
+      const userId = (req as any).user._id;
+      const userRole = (req as any).user.role;
+
+      // Verificar que el usuario tiene acceso a la tienda
+      if (userRole === 'store_manager') {
+        const store = await Store.findOne({
+          _id: storeId,
+          $or: [
+            { owner: userId },
+            { managers: userId }
+          ],
+          isActive: true
+        });
+
+        if (!store) {
+          return res.status(403).json({
+            success: false,
+            message: 'No tienes acceso a esta tienda'
+          });
+        }
+      } else if (userRole !== 'admin') {
+        return res.status(403).json({
+          success: false,
+          message: 'No tienes permisos para acceder a los chats de la tienda'
+        });
+      }
+
+      // Obtener chats de la tienda con información adicional
+      const chats = await Chat.find({
+        'participants.store': storeId
+      })
+      .populate('lastMessage')
+      .populate('product', 'name sku images')
+      .populate('participants.client', 'name email')
+      .sort({ lastActivity: -1 });
+
+      // Enriquecer con información adicional
+      const enrichedChats = await Promise.all(chats.map(async (chat) => {
+        // Contar mensajes totales
+        const messageCount = await ChatMessage.countDocuments({ chatId: chat._id });
+        
+        // Contar mensajes sin leer (para la tienda)
+        const unreadCount = await ChatMessage.countDocuments({
+          chatId: chat._id,
+          'sender.userType': 'client',
+          readBy: { $not: { $elemMatch: { userId: storeId } } }
+        });
+
+        // Contar violaciones
+        const violationsCount = await ChatMessage.countDocuments({
+          chatId: chat._id,
+          'validation.isBlocked': true
+        });
+
+        return {
+          ...chat.toObject(),
+          messageCount,
+          unreadCount,
+          violationsCount
+        };
+      }));
+
+      res.json({
+        success: true,
+        data: {
+          chats: enrichedChats,
+          count: enrichedChats.length
+        }
+      });
+    } catch (error) {
+      console.error('Error obteniendo chats de la tienda:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Obtener estadísticas de chat de una tienda
+  async getStoreChatStats(req: Request, res: Response) {
+    try {
+      const { storeId } = req.params;
+      const userId = (req as any).user._id;
+      const userRole = (req as any).user.role;
+
+      // Verificar que el usuario tiene acceso a la tienda
+      if (userRole === 'store_manager') {
+        const store = await Store.findOne({
+          _id: storeId,
+          $or: [
+            { owner: userId },
+            { managers: userId }
+          ],
+          isActive: true
+        });
+
+        if (!store) {
+          return res.status(403).json({
+            success: false,
+            message: 'No tienes acceso a esta tienda'
+          });
+        }
+      } else if (userRole !== 'admin') {
+        return res.status(403).json({
+          success: false,
+          message: 'No tienes permisos para acceder a las estadísticas de la tienda'
+        });
+      }
+
+      // Obtener estadísticas de la tienda
+      const totalChats = await Chat.countDocuments({ 'participants.store': storeId });
+      const activeChats = await Chat.countDocuments({ 
+        'participants.store': storeId, 
+        status: 'active' 
+      });
+
+      // Obtener mensajes sin leer
+      const unreadMessages = await ChatMessage.countDocuments({
+        chatId: { $in: await Chat.find({ 'participants.store': storeId }).distinct('_id') },
+        'sender.userType': 'client',
+        readBy: { $not: { $elemMatch: { userId: storeId } } }
+      });
+
+      // Obtener violaciones hoy
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const violationsToday = await ChatMessage.countDocuments({
+        chatId: { $in: await Chat.find({ 'participants.store': storeId }).distinct('_id') },
+        'validation.isBlocked': true,
+        createdAt: { $gte: today }
+      });
+
+      // Calcular tiempo promedio de respuesta (últimos 30 días)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const storeMessages = await ChatMessage.find({
+        chatId: { $in: await Chat.find({ 'participants.store': storeId }).distinct('_id') },
+        'sender.userType': 'store_manager',
+        createdAt: { $gte: thirtyDaysAgo }
+      }).sort({ createdAt: 1 });
+
+      let totalResponseTime = 0;
+      let responseCount = 0;
+
+      for (const message of storeMessages) {
+        const chat = await Chat.findById(message.chatId);
+        if (chat) {
+          const clientMessages = await ChatMessage.find({
+            chatId: message.chatId,
+            'sender.userType': 'client',
+            createdAt: { $lt: message.createdAt }
+          }).sort({ createdAt: -1 }).limit(1);
+
+          if (clientMessages.length > 0) {
+            const responseTime = message.createdAt.getTime() - clientMessages[0].createdAt.getTime();
+            totalResponseTime += responseTime;
+            responseCount++;
+          }
+        }
+      }
+
+      const averageResponseTime = responseCount > 0 ? Math.round(totalResponseTime / responseCount / (1000 * 60)) : 0;
+
+      // Calcular satisfacción del cliente (simulado por ahora)
+      const customerSatisfaction = Math.floor(Math.random() * 20) + 80; // 80-100%
+
+      res.json({
+        success: true,
+        data: {
+          totalChats,
+          activeChats,
+          unreadMessages,
+          violationsToday,
+          averageResponseTime,
+          customerSatisfaction
+        }
+      });
+    } catch (error) {
+      console.error('Error obteniendo estadísticas de la tienda:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Bloquear un chat
+  async blockChat(req: Request, res: Response) {
+    try {
+      const { chatId } = req.params;
+      const userId = (req as any).user._id;
+      const userRole = (req as any).user.role;
+
+      const chat = await Chat.findById(chatId);
+      if (!chat) {
+        return res.status(404).json({
+          success: false,
+          message: 'Chat no encontrado'
+        });
+      }
+
+      // Verificar permisos
+      if (userRole === 'store_manager') {
+        const store = await Store.findOne({
+          _id: chat.participants.store,
+          $or: [
+            { owner: userId },
+            { managers: userId }
+          ],
+          isActive: true
+        });
+
+        if (!store) {
+          return res.status(403).json({
+            success: false,
+            message: 'No tienes acceso a este chat'
+          });
+        }
+      } else if (userRole !== 'admin') {
+        return res.status(403).json({
+          success: false,
+          message: 'No tienes permisos para bloquear chats'
+        });
+      }
+
+      // Bloquear el chat
+      chat.status = 'blocked';
+      await chat.save();
+
+      res.json({
+        success: true,
+        message: 'Chat bloqueado exitosamente'
+      });
+    } catch (error) {
+      console.error('Error bloqueando chat:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
 }
 

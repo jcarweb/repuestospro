@@ -14,6 +14,9 @@ export class AnalyticsController {
     try {
       const { storeId } = req.query;
       
+      console.log('🔍 AnalyticsController - storeId recibido:', storeId);
+      console.log('🔍 AnalyticsController - storeId type:', typeof storeId);
+      
       if (!storeId) {
         return res.status(400).json({ 
           success: false, 
@@ -22,10 +25,17 @@ export class AnalyticsController {
       }
 
       // Buscar suscripción de la tienda
+      console.log('🔍 AnalyticsController - Buscando suscripción con storeId:', storeId);
+      
       const subscription = await Subscription.findOne({ 
         storeId, 
         status: 'active' 
       }).sort({ createdAt: -1 });
+
+      console.log('🔍 AnalyticsController - Suscripción encontrada:', subscription ? 'Sí' : 'No');
+      if (subscription) {
+        console.log('🔍 AnalyticsController - Plan:', subscription.planName, 'Tipo:', subscription.planType);
+      }
 
       if (!subscription) {
         return res.json({

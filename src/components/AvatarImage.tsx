@@ -21,6 +21,12 @@ const AvatarImage: React.FC<AvatarImageProps> = ({
       return '/default-avatar.svg'; // Usar avatar del frontend
     }
     
+    // Si es una URL de Cloudinary, usarla directamente
+    if (avatar.includes('cloudinary.com')) {
+      console.log('AvatarImage - URL de Cloudinary:', avatar);
+      return avatar;
+    }
+    
     // Si es una URL completa, usarla directamente
     if (avatar.startsWith('http')) {
       return avatar;

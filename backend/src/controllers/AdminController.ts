@@ -8,6 +8,9 @@ import Promotion from '../models/Promotion';
 import { SubscriptionService } from '../services/subscriptionService';
 import emailService from '../services/emailService';
 import crypto from 'crypto';
+import { getRandomImages } from '../data/repuestoImages';
+import cloudinaryCleanupService from '../services/cloudinaryCleanupService';
+import imageService from '../services/imageService';
 
 // Datos de prueba
 const brands = [
@@ -141,8 +144,8 @@ const descriptions = {
   ]
 };
 
-// Función para generar un producto aleatorio
-function generateRandomProduct(storeId?: string) {
+// Función para generar un producto aleatorio con imágenes reales optimizadas
+async function generateRandomProduct(storeId?: string) {
   const category = categories[Math.floor(Math.random() * categories.length)];
   const brand = brands[Math.floor(Math.random() * brands.length)];
   const subcategoryList = (subcategories as any)[category];
@@ -163,16 +166,40 @@ function generateRandomProduct(storeId?: string) {
   // Generar SKU interno del gestor
   const sku = generateInternalSKU(brand, category);
   
+  // Obtener imágenes reales de repuestos para la categoría
+  const realImages = getRandomImages(category, 4);
+  
+  // Procesar imágenes y subirlas a Cloudinary optimizadas
+  const processedImages: string[] = [];
+  for (let i = 0; i < realImages.length; i++) {
+    try {
+      const imageUrl = realImages[i];
+      // Descargar la imagen y convertirla a base64
+      const response = await fetch(imageUrl);
+      const buffer = await response.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString('base64');
+      const dataUrl = `data:image/jpeg;base64,${base64}`;
+      
+      // Subir a Cloudinary con optimización
+      const uploadResult = await imageService.uploadBase64Image({
+        data: dataUrl,
+        format: 'jpg',
+        filename: `product_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`
+      }, 'piezasya/products');
+      
+      processedImages.push(uploadResult.secureUrl);
+    } catch (error) {
+      console.error(`Error procesando imagen ${i}:`, error);
+      // Usar imagen de respaldo si falla
+      processedImages.push(`https://via.placeholder.com/400x300/0066cc/ffffff?text=${encodeURIComponent(productName)}`);
+    }
+  }
+  
   const product: any = {
     name: `${productName} ${brand}`,
     description: `${description} compatible con vehículos ${brand}`,
     price: price,
-    images: [
-      `https://via.placeholder.com/400x300/0066cc/ffffff?text=${encodeURIComponent(productName)}`,
-      `https://via.placeholder.com/400x300/ff6600/ffffff?text=${encodeURIComponent(brand)}`,
-      `https://via.placeholder.com/400x300/00cc66/ffffff?text=${encodeURIComponent(category)}`,
-      `https://via.placeholder.com/400x300/cc0066/ffffff?text=${encodeURIComponent(subcategory)}`
-    ],
+    images: processedImages,
     category: category.toLowerCase(),
     brand: brand.toLowerCase(),
     subcategory: subcategory.toLowerCase(),
@@ -263,16 +290,27 @@ export class AdminController {
       
       console.log(`🏪 Generando productos para tienda: ${store.name} (${store.city})`);
       
-      // Limpiar productos existentes de esta tienda
+      // Limpiar productos existentes de esta tienda y sus imágenes de Cloudinary
       console.log('🗑️  Limpiando productos existentes de la tienda...');
+      
+      // Primero limpiar las imágenes de Cloudinary
+      console.log('🖼️  Limpiando imágenes de Cloudinary...');
+      const cleanupResult = await cloudinaryCleanupService.cleanupStoreImages(storeId);
+      console.log(`🖼️  Eliminadas ${cleanupResult.deleted} imágenes de Cloudinary`);
+      if (cleanupResult.errors.length > 0) {
+        console.warn('⚠️  Errores durante la limpieza de imágenes:', cleanupResult.errors);
+      }
+      
+      // Luego eliminar los productos de la base de datos
       const deleteResult = await Product.deleteMany({ store: storeId });
       console.log(`🗑️  Eliminados ${deleteResult.deletedCount} productos existentes de la tienda`);
       
-      // Generar 150 productos de prueba para esta tienda
-      console.log('🔧 Generando productos...');
+      // Generar 150 productos de prueba para esta tienda con imágenes optimizadas
+      console.log('🔧 Generando productos con imágenes reales optimizadas...');
       const products = [];
       for (let i = 0; i < 150; i++) {
-        const product = generateRandomProduct(storeId);
+        console.log(`📦 Generando producto ${i + 1}/150...`);
+        const product = await generateRandomProduct(storeId);
         products.push(product);
       }
       console.log(`📦 Generados ${products.length} productos en memoria para la tienda`);
@@ -1304,6 +1342,106 @@ export class AdminController {
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Limpiar todas las imágenes de productos de prueba de Cloudinary
+   */
+  static async cleanupAllTestImages(req: Request, res: Response): Promise<void> {
+    try {
+      console.log('🗑️ Iniciando limpieza de todas las imágenes de productos de prueba...');
+      
+      // Limpiar todas las imágenes de Cloudinary
+      const cleanupResult = await cloudinaryCleanupService.cleanupAllTestImages();
+      
+      console.log(`✅ Limpieza completada. Eliminadas ${cleanupResult.deleted} imágenes`);
+      
+      if (cleanupResult.errors.length > 0) {
+        console.warn('⚠️ Errores durante la limpieza:', cleanupResult.errors);
+      }
+
+      res.json({
+        success: true,
+        message: 'Limpieza de imágenes completada exitosamente',
+        data: {
+          deletedImages: cleanupResult.deleted,
+          errors: cleanupResult.errors
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error en limpieza de imágenes:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor durante la limpieza de imágenes',
+        error: error instanceof Error ? error.message : 'Error desconocido'
+      });
+    }
+  }
+
+  /**
+   * Limpiar carpeta específica de Cloudinary
+   */
+  static async cleanupCloudinaryFolder(req: Request, res: Response): Promise<void> {
+    try {
+      const { folderPath } = req.body;
+      
+      if (!folderPath) {
+        return res.status(400).json({
+          success: false,
+          message: 'Se requiere la ruta de la carpeta para limpiar'
+        });
+      }
+
+      console.log(`🗑️ Iniciando limpieza de carpeta: ${folderPath}`);
+      
+      const cleanupResult = await cloudinaryCleanupService.cleanupFolder(folderPath);
+      
+      console.log(`✅ Limpieza de carpeta completada. Eliminados ${cleanupResult.deleted} recursos`);
+      
+      if (cleanupResult.errors.length > 0) {
+        console.warn('⚠️ Errores durante la limpieza:', cleanupResult.errors);
+      }
+
+      res.json({
+        success: true,
+        message: 'Limpieza de carpeta completada exitosamente',
+        data: {
+          deletedResources: cleanupResult.deleted,
+          errors: cleanupResult.errors
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error en limpieza de carpeta:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor durante la limpieza de carpeta',
+        error: error instanceof Error ? error.message : 'Error desconocido'
+      });
+    }
+  }
+
+  /**
+   * Obtener estadísticas de uso de Cloudinary
+   */
+  static async getCloudinaryStats(req: Request, res: Response): Promise<void> {
+    try {
+      console.log('📊 Obteniendo estadísticas de Cloudinary...');
+      
+      const stats = await cloudinaryCleanupService.getUsageStats();
+      
+      res.json({
+        success: true,
+        message: 'Estadísticas de Cloudinary obtenidas exitosamente',
+        data: stats
+      });
+    } catch (error) {
+      console.error('❌ Error obteniendo estadísticas de Cloudinary:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor al obtener estadísticas de Cloudinary',
+        error: error instanceof Error ? error.message : 'Error desconocido'
       });
     }
   }

@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "PiezasYA",
+    "slug": "piezasya-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/piezasya.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFC300"
+    },
+    "assetBundlePatterns": [
+      "assets/*",
+      "src/assets/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.piezasya.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/piezasya.png",
+        "backgroundColor": "#FFC300"
+      },
+      "package": "com.piezasya.mobile"
+    },
+    "web": {
+      "favicon": "./assets/piezasya.png"
+    },
+    "scheme": "piezasya"
+  }
+}

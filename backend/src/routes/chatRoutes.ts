@@ -25,6 +25,15 @@ export default function createChatRoutes(chatController: ChatController) {
   // Cerrar chat
   router.put('/:chatId/close', chatController.closeChat.bind(chatController));
 
+  // Bloquear chat
+  router.put('/:chatId/block', chatController.blockChat.bind(chatController));
+
+  // Obtener chats de una tienda específica
+  router.get('/store/:storeId', storeManagerMiddleware, chatController.getStoreChats.bind(chatController));
+
+  // Obtener estadísticas de chat de una tienda
+  router.get('/store/:storeId/stats', storeManagerMiddleware, chatController.getStoreChatStats.bind(chatController));
+
   // Estadísticas de chat (solo admins)
   router.get('/admin/stats', adminMiddleware, chatController.getChatStats.bind(chatController));
 

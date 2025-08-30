@@ -13,7 +13,18 @@ router.use(authMiddleware);
 
 // Rutas para todos los usuarios autenticados
 router.get('/available-riders', DeliveryController.getAvailableRiders);
-router.post('/rate/:id', DeliveryController.rateDelivery);
+
+// Rutas específicas para delivery
+router.use(roleMiddleware(['delivery']));
+
+// Estadísticas personales del delivery
+router.get('/stats/personal', DeliveryController.getPersonalDeliveryStats);
+
+// Actualizar estado de disponibilidad del delivery
+router.put('/status', DeliveryController.updateDeliveryStatus);
+
+// Obtener perfil del delivery
+router.get('/profile', DeliveryController.getDeliveryProfile);
 
 // Rutas para gestores de tienda y admin
 router.use(roleMiddleware(['store_manager', 'admin']));
@@ -24,14 +35,5 @@ router.get('/', DeliveryController.getDeliveries);
 router.get('/stats', DeliveryController.getDeliveryStats);
 router.get('/:id', DeliveryController.getDelivery);
 router.put('/:id/status', DeliveryController.updateDeliveryStatus);
-router.put('/:id/assign', DeliveryController.assignDelivery);
-router.put('/:id/reassign', DeliveryController.reassignDelivery);
-router.put('/:id/cancel', DeliveryController.cancelDelivery);
-
-// Rutas específicas para admin
-router.use(roleMiddleware(['admin']));
-
-// Aquí se pueden agregar rutas adicionales específicas para admin
-// Por ejemplo: gestión de riders, configuración global, etc.
 
 export default router;

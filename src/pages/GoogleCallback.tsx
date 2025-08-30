@@ -45,7 +45,8 @@ const GoogleCallback: React.FC = () => {
           } else if (user.role === 'delivery') {
             navigate('/delivery/dashboard');
           } else {
-            navigate('/');
+            // Para clientes, navegar a una ruta específica del cliente
+            navigate('/profile');
           }
         }, 2000);
       } catch (error) {

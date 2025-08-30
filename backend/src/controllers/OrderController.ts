@@ -539,6 +539,35 @@ export class OrderController {
   };
 
   /**
+   * Obtener órdenes asignadas a un delivery
+   */
+  public getDeliveryOrders = async (req: Request, res: Response) => {
+    try {
+      const deliveryId = (req as any).user.id;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      const result = await OrderService.getDeliveryOrders(
+        new mongoose.Types.ObjectId(deliveryId), 
+        page, 
+        limit
+      );
+
+      res.json({
+        success: true,
+        data: result
+      });
+
+    } catch (error) {
+      console.error('Error al obtener órdenes del delivery:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  };
+
+  /**
    * Exportar órdenes
    */
   public exportOrders = async (req: Request, res: Response) => {

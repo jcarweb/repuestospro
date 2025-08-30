@@ -43,6 +43,7 @@ import notificationRoutes from './routes/notificationRoutes';
 import monetizationRoutes from './routes/monetizationRoutes';
 import administrativeDivisionRoutes from './routes/administrativeDivisionRoutes';
 import inventoryRoutes from './routes/inventoryRoutes';
+import reviewRoutes from './routes/reviewRoutes';
 
 const app = express();
 
@@ -86,8 +87,10 @@ app.use(helmet());
 
 // Configurar CORS
 app.use(cors({
-  origin: config.CORS_ORIGIN,
-  credentials: true
+  origin: true, // Permitir todos los orígenes en desarrollo
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 // Middleware de logging
@@ -181,6 +184,7 @@ app.use('/api/profile', profileLimiter, profileRoutes); // Rate limiter específ
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/monetization', monetizationRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/reviews', reviewRoutes);
 app.use('/api/warranties', createWarrantyRoutes());
 app.use('/api/claims', createClaimRoutes());
 app.use('/api/transactions', createTransactionRoutes());
@@ -260,10 +264,11 @@ const startServer = async () => {
     // Agregar rutas de chat
     app.use('/api/chat', createChatRoutes(chatController));
     
-    server.listen(availablePort, () => {
+    server.listen(availablePort, '0.0.0.0', () => {
       console.log(`🚀 Servidor iniciado en puerto ${availablePort}`);
       console.log(`📊 Ambiente: ${config.NODE_ENV}`);
       console.log(`🔗 URL: http://localhost:${availablePort}`);
+      console.log(`🌐 Red: http://192.168.31.122:${availablePort}`);
       console.log(`💬 WebSocket Chat habilitado`);
       console.log('✅ Server listening');
       

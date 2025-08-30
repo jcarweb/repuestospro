@@ -3,40 +3,7 @@ import User from '../models/User';
 import Activity from '../models/Activity';
 import * as argon2 from 'argon2';
 import { generateTwoFactorSecret, verifyTwoFactorCode, generateGoogleAuthenticatorUrl } from '../utils/twoFactorUtils';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-
-// Configuración de multer para subida de imágenes de perfil
-const profileStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = 'uploads/perfil/';
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, 'profile-' + uniqueSuffix + ext);
-  }
-});
-
-export const profileUpload = multer({ 
-  storage: profileStorage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB máximo
-  },
-  fileFilter: (req, file, cb) => {
-    // Verificar que sea una imagen
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Solo se permiten archivos de imagen'));
-    }
-  }
-});
+import { profileUpload, deleteImage } from '../config/cloudinary';
 
 // Extend Request interface to include user
 interface AuthenticatedRequest extends Request {
@@ -638,16 +605,27 @@ class ProfileController {
         });
       }
 
-      // Eliminar imagen anterior si existe y no es el avatar por defecto
-      if (user.avatar && user.avatar !== '/uploads/perfil/default-avatar.svg') {
-        const oldAvatarPath = path.join(process.cwd(), user.avatar);
-        if (fs.existsSync(oldAvatarPath)) {
-          fs.unlinkSync(oldAvatarPath);
+      // Eliminar imagen anterior de Cloudinary si existe y no es el avatar por defecto
+      if (user.avatar && 
+          user.avatar !== '/uploads/perfil/default-avatar.svg' && 
+          user.avatar.includes('cloudinary.com')) {
+        try {
+          // Extraer el public_id de la URL de Cloudinary
+          const urlParts = user.avatar.split('/');
+          const publicId = urlParts[urlParts.length - 1].split('.')[0];
+          const folder = 'piezasya/profiles/';
+          const fullPublicId = folder + publicId;
+          
+          await deleteImage(fullPublicId);
+          console.log('Avatar anterior eliminado de Cloudinary:', fullPublicId);
+        } catch (deleteError) {
+          console.warn('Error eliminando avatar anterior de Cloudinary:', deleteError);
+          // Continuar aunque falle la eliminación
         }
       }
 
-      // Actualizar avatar del usuario
-      const avatarUrl = `/uploads/perfil/${req.file.filename}`;
+      // Actualizar avatar del usuario con la URL de Cloudinary
+      const avatarUrl = req.file.path; // Cloudinary devuelve la URL completa
       user.avatar = avatarUrl;
       await user.save();
 
@@ -689,17 +667,22 @@ class ProfileController {
         });
       }
 
-      // Eliminar imagen anterior si existe y no es el avatar por defecto
-      if (user.avatar && user.avatar !== '/uploads/perfil/default-avatar.svg') {
+      // Eliminar imagen anterior de Cloudinary si existe y no es el avatar por defecto
+      if (user.avatar && 
+          user.avatar !== '/uploads/perfil/default-avatar.svg' && 
+          user.avatar.includes('cloudinary.com')) {
         try {
-          const oldAvatarPath = path.join(process.cwd(), user.avatar);
-          if (fs.existsSync(oldAvatarPath)) {
-            fs.unlinkSync(oldAvatarPath);
-            console.log('Archivo eliminado:', oldAvatarPath);
-          }
-        } catch (fileError) {
-          console.warn('Error eliminando archivo físico:', fileError);
-          // Continuar aunque falle la eliminación del archivo
+          // Extraer el public_id de la URL de Cloudinary
+          const urlParts = user.avatar.split('/');
+          const publicId = urlParts[urlParts.length - 1].split('.')[0];
+          const folder = 'piezasya/profiles/';
+          const fullPublicId = folder + publicId;
+          
+          await deleteImage(fullPublicId);
+          console.log('Avatar eliminado de Cloudinary:', fullPublicId);
+        } catch (deleteError) {
+          console.warn('Error eliminando avatar de Cloudinary:', deleteError);
+          // Continuar aunque falle la eliminación
         }
       }
 

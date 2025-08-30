@@ -16,7 +16,7 @@ export const config = {
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/repuestos-pro',
 
   // Configuración de CORS
-  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
 
   // Configuración de Rate Limiting
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutos
