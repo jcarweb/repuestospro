@@ -2,193 +2,220 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
   StyleSheet,
-  Alert,
-  ScrollView,
+  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import authVerificationService from '../../services/authVerification';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useToast } from '../../contexts/ToastContext';
 
 interface PINVerificationScreenProps {
   navigation: any;
   route: any;
 }
 
-const PINVerificationScreen: React.FC<PINVerificationScreenProps> = ({ navigation, route }) => {
+const PINVerificationScreen: React.FC<PINVerificationScreenProps> = ({ 
+  navigation, 
+  route 
+}) => {
+  const { colors } = useTheme();
+  const { showToast } = useToast();
   const [pin, setPin] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showPin, setShowPin] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const maxAttempts = 3;
+
   const onSuccess = route.params?.onSuccess;
 
-  const handleVerifyPIN = async () => {
-    if (!pin || pin.length !== 4) {
-      Alert.alert('Error', 'Por favor ingresa un PIN de 4 dígitos');
-      return;
+  useEffect(() => {
+    if (attempts >= maxAttempts) {
+      Alert.alert(
+        'Demasiados Intentos',
+        'Has excedido el número máximo de intentos. Por favor, usa el login tradicional.',
+        [
+          { 
+            text: 'OK', 
+            onPress: () => navigation.navigate('Login') 
+          }
+        ]
+      );
     }
+  }, [attempts]);
 
+  const handleNumberPress = (number: string) => {
+    if (pin.length < 4) {
+      const newPin = pin + number;
+      setPin(newPin);
+      
+      if (newPin.length === 4) {
+        verifyPIN(newPin);
+      }
+    }
+  };
+
+  const handleDelete = () => {
+    setPin(pin.slice(0, -1));
+  };
+
+  const verifyPIN = async (pinCode: string) => {
     try {
       setIsLoading(true);
-      const result = await authVerificationService.verifyPIN(pin);
       
-      if (result.success) {
-        Alert.alert(
-          'PIN Verificado',
-          'PIN verificado correctamente.',
-          [
-            {
-              text: 'Continuar',
-              onPress: () => {
-                if (onSuccess) {
-                  onSuccess();
-                }
-                navigation.goBack();
-              },
-            },
-          ]
-        );
+      // Simular verificación de PIN
+      // En una implementación real, aquí se verificaría con el backend
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Por ahora, simulamos que el PIN correcto es "1234"
+      if (pinCode === '1234') {
+        showToast('PIN verificado exitosamente', 'success');
+        
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          // Si no hay callback, navegar al login
+          navigation.navigate('Login');
+        }
       } else {
-        Alert.alert('Error', result.error || 'PIN incorrecto');
+        setAttempts(attempts + 1);
         setPin('');
+        showToast(`PIN incorrecto. Intentos restantes: ${maxAttempts - attempts - 1}`, 'error');
       }
-    } catch (error) {
-      console.error('❌ Error verificando PIN:', error);
-      Alert.alert('Error', 'Error al verificar el PIN');
+      
+    } catch (error: any) {
+      console.error('PIN verification error:', error);
+      showToast('Error al verificar PIN', 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const setupPIN = () => {
-    Alert.prompt(
-      'Configurar PIN',
-      'Ingresa un PIN de 4 dígitos para tu cuenta:',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Guardar',
-          onPress: async (newPin) => {
-            if (newPin && newPin.length === 4 && /^\d+$/.test(newPin)) {
-              try {
-                setIsLoading(true);
-                const result = await authVerificationService.savePIN(newPin);
-                
-                if (result.success) {
-                  Alert.alert('Éxito', 'PIN configurado correctamente');
-                } else {
-                  Alert.alert('Error', result.error || 'Error al guardar el PIN');
-                }
-              } catch (error) {
-                console.error('❌ Error guardando PIN:', error);
-                Alert.alert('Error', 'Error al guardar el PIN');
-              } finally {
-                setIsLoading(false);
-              }
-            } else {
-              Alert.alert('Error', 'El PIN debe tener exactamente 4 dígitos numéricos');
+  const renderNumberButton = (number: string) => (
+    <TouchableOpacity
+      key={number}
+      style={[styles.numberButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      onPress={() => handleNumberPress(number)}
+      disabled={isLoading}
+    >
+      <Text style={[styles.numberText, { color: colors.textPrimary }]}>{number}</Text>
+    </TouchableOpacity>
+  );
+
+  const renderPINDisplay = () => (
+    <View style={styles.pinDisplay}>
+      {[0, 1, 2, 3].map((index) => (
+        <View
+          key={index}
+          style={[
+            styles.pinDot,
+            { 
+              backgroundColor: index < pin.length ? colors.primary : colors.border,
+              borderColor: colors.border 
             }
-          },
-        },
-      ],
-      'secure-text',
-      '',
-      'numeric'
-    );
-  };
+          ]}
+        />
+      ))}
+    </View>
+  );
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.card}>
-          {/* Icono */}
-          <View style={styles.iconContainer}>
-            <Ionicons name="keypad" size={80} color="#FFC300" />
-          </View>
-
-          {/* Título */}
-          <Text style={styles.title}>Verificar PIN</Text>
-
-          {/* Descripción */}
-          <Text style={styles.description}>
-            Ingresa el PIN de 4 dígitos configurado para tu cuenta.
-          </Text>
-
-          {/* Input del PIN */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>PIN de seguridad</Text>
-            <View style={styles.pinInputContainer}>
-              <TextInput
-                style={styles.pinInput}
-                value={pin}
-                onChangeText={setPin}
-                placeholder="0000"
-                keyboardType="number-pad"
-                maxLength={4}
-                secureTextEntry={!showPin}
-                autoFocus
-                textAlign="center"
-                fontSize={24}
-                letterSpacing={8}
-              />
-              <TouchableOpacity
-                style={styles.eyeButton}
-                onPress={() => setShowPin(!showPin)}
-              >
-                <Ionicons
-                  name={showPin ? 'eye-off' : 'eye'}
-                  size={20}
-                  color="#9CA3AF"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Botón de verificación */}
+      <View style={styles.content}>
+        {/* Header */}
+        <View style={styles.header}>
           <TouchableOpacity
-            style={[styles.button, styles.primaryButton, (!pin || pin.length !== 4) && styles.buttonDisabled]}
-            onPress={handleVerifyPIN}
-            disabled={isLoading || !pin || pin.length !== 4}
-          >
-            <Text style={styles.buttonText}>
-              {isLoading ? 'Verificando...' : 'Verificar PIN'}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Botón para configurar PIN */}
-          <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
-            onPress={setupPIN}
-            disabled={isLoading}
-          >
-            <Text style={styles.secondaryButtonText}>Configurar PIN</Text>
-          </TouchableOpacity>
-
-          {/* Botón de volver */}
-          <TouchableOpacity
-            style={[styles.button, styles.backButton]}
+            style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.backButtonText}>Volver al Login</Text>
+            <Ionicons name="arrow-back" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
+        </View>
 
-          {/* Información adicional */}
-          <View style={styles.infoContainer}>
-            <Text style={styles.infoTitle}>¿Qué es el PIN?</Text>
-            <Text style={styles.infoText}>
-              • Es un código de 4 dígitos para acceso rápido{'\n'}
-              • Más seguro que una contraseña simple{'\n'}
-              • Se guarda localmente en tu dispositivo{'\n'}
-              • Puedes cambiarlo en cualquier momento
-            </Text>
+        {/* Icono */}
+        <View style={styles.iconContainer}>
+          <View style={[styles.iconCircle, { backgroundColor: colors.primary + '20' }]}>
+            <Ionicons name="keypad" size={60} color={colors.primary} />
           </View>
         </View>
-      </ScrollView>
+
+        {/* Título y descripción */}
+        <View style={styles.titleContainer}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>
+            Verificar PIN
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+            Ingresa tu PIN de 4 dígitos
+          </Text>
+          {attempts > 0 && (
+            <Text style={[styles.attemptsText, { color: colors.error }]}>
+              Intentos restantes: {maxAttempts - attempts}
+            </Text>
+          )}
+        </View>
+
+        {/* Display del PIN */}
+        {renderPINDisplay()}
+
+        {/* Teclado numérico */}
+        <View style={styles.keypad}>
+          <View style={styles.keypadRow}>
+            {renderNumberButton('1')}
+            {renderNumberButton('2')}
+            {renderNumberButton('3')}
+          </View>
+          <View style={styles.keypadRow}>
+            {renderNumberButton('4')}
+            {renderNumberButton('5')}
+            {renderNumberButton('6')}
+          </View>
+          <View style={styles.keypadRow}>
+            {renderNumberButton('7')}
+            {renderNumberButton('8')}
+            {renderNumberButton('9')}
+          </View>
+          <View style={styles.keypadRow}>
+            <View style={styles.emptyButton} />
+            {renderNumberButton('0')}
+            <TouchableOpacity
+              style={[styles.deleteButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              onPress={handleDelete}
+              disabled={isLoading || pin.length === 0}
+            >
+              <Ionicons 
+                name="backspace-outline" 
+                size={24} 
+                color={pin.length > 0 ? colors.textPrimary : colors.textTertiary} 
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Información adicional */}
+        <View style={styles.infoContainer}>
+          <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+            PIN de prueba: 1234
+          </Text>
+          <TouchableOpacity
+            style={styles.forgotPINButton}
+            onPress={() => {
+              Alert.alert(
+                'Olvidaste tu PIN',
+                'Por favor, usa el login tradicional con email y contraseña.',
+                [{ text: 'Entendido', style: 'default' }]
+              );
+            }}
+          >
+            <Text style={[styles.forgotPINText, { color: colors.primary }]}>
+              ¿Olvidaste tu PIN?
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </KeyboardAvoidingView>
   );
 };
@@ -196,126 +223,113 @@ const PINVerificationScreen: React.FC<PINVerificationScreenProps> = ({ navigatio
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   content: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 40,
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    flex: 1,
     padding: 24,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    justifyContent: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  backButton: {
+    padding: 8,
+    marginLeft: -8,
   },
   iconContainer: {
     alignItems: 'center',
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#111827',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  description: {
-    fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
-    lineHeight: 24,
     marginBottom: 32,
   },
-  inputContainer: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#374151',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  pinInputContainer: {
-    position: 'relative',
-  },
-  pinInput: {
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    paddingRight: 50,
-    fontSize: 24,
-    fontWeight: 'bold',
-    backgroundColor: '#FFFFFF',
-    color: '#111827',
-  },
-  eyeButton: {
-    position: 'absolute',
-    right: 15,
-    top: 16,
-    padding: 4,
-  },
-  button: {
-    borderRadius: 8,
-    paddingVertical: 14,
+  iconCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
     alignItems: 'center',
+  },
+  titleContainer: {
+    marginBottom: 32,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 16,
   },
-  primaryButton: {
-    backgroundColor: '#FFC300',
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  secondaryButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-  },
-  backButton: {
-    backgroundColor: '#6B7280',
-  },
-  buttonText: {
-    color: '#111827',
+  subtitle: {
     fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  attemptsText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 8,
     fontWeight: '600',
   },
-  secondaryButtonText: {
-    color: '#374151',
-    fontSize: 16,
-    fontWeight: '500',
+  pinDisplay: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 48,
+    gap: 16,
   },
-  backButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '500',
+  pinDot: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+  },
+  keypad: {
+    marginBottom: 32,
+  },
+  keypadRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 16,
+    gap: 16,
+  },
+  numberButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  numberText: {
+    fontSize: 24,
+    fontWeight: '600',
+  },
+  emptyButton: {
+    width: 70,
+    height: 70,
+  },
+  deleteButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
   },
   infoContainer: {
-    padding: 16,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
-  },
-  infoTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
+    alignItems: 'center',
   },
   infoText: {
     fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 20,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  forgotPINButton: {
+    paddingVertical: 8,
+  },
+  forgotPINText: {
+    fontSize: 14,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });
 

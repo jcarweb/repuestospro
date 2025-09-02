@@ -20,7 +20,7 @@ class BiometricAuthService {
       
       return hasHardware && isEnrolled;
     } catch (error) {
-      console.error('❌ Error verificando disponibilidad biométrica:', error);
+      console.error('Error checking biometric availability:', error);
       return false;
     }
   }
@@ -42,48 +42,55 @@ class BiometricAuthService {
   /**
    * Autentica al usuario usando biometría
    */
-  async authenticate(): Promise<BiometricResult> {
+  async authenticate(): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log('🔐 Iniciando autenticación biométrica...');
-      
       const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Autentícate con tu huella dactilar',
-        fallbackLabel: 'Usar contraseña',
+        promptMessage: 'Autenticación biométrica requerida',
+        fallbackLabel: 'Usar PIN',
         cancelLabel: 'Cancelar',
         disableDeviceFallback: false,
       });
 
-      console.log('🔐 Resultado de autenticación biométrica:', result);
-
       if (result.success) {
         return { success: true };
       } else {
-        let errorMessage = 'Autenticación cancelada';
+        // Manejar diferentes tipos de errores
+        let errorMessage = 'Autenticación fallida';
         
-        if (result.error === 'UserCancel') {
-          errorMessage = 'Autenticación cancelada por el usuario';
-        } else if (result.error === 'UserFallback') {
-          errorMessage = 'Usuario eligió usar contraseña';
-        } else if (result.error === 'SystemCancel') {
-          errorMessage = 'Autenticación cancelada por el sistema';
-        } else if (result.error === 'AuthenticationFailed') {
-          errorMessage = 'Autenticación fallida';
-        } else if (result.error === 'PasscodeNotSet') {
-          errorMessage = 'No hay código de acceso configurado';
-        } else if (result.error === 'NotEnrolled') {
-          errorMessage = 'No hay huellas dactilares registradas';
-        } else if (result.error === 'NotAvailable') {
-          errorMessage = 'Autenticación biométrica no disponible';
+        if (result.error) {
+          const errorType = result.error as string;
+          switch (errorType) {
+            case 'UserCancel':
+              errorMessage = 'Autenticación cancelada por el usuario';
+              break;
+            case 'UserFallback':
+              errorMessage = 'Usuario eligió método alternativo';
+              break;
+            case 'SystemCancel':
+              errorMessage = 'Autenticación cancelada por el sistema';
+              break;
+            case 'AuthenticationFailed':
+              errorMessage = 'Autenticación biométrica fallida';
+              break;
+            case 'PasscodeNotSet':
+              errorMessage = 'No se ha configurado un PIN';
+              break;
+            case 'NotEnrolled':
+              errorMessage = 'No hay biometría configurada';
+              break;
+            case 'NotAvailable':
+              errorMessage = 'Biometría no disponible';
+              break;
+            default:
+              errorMessage = 'Error de autenticación';
+          }
         }
-
+        
         return { success: false, error: errorMessage };
       }
     } catch (error) {
-      console.error('❌ Error en autenticación biométrica:', error);
-      return { 
-        success: false, 
-        error: 'Error inesperado en la autenticación biométrica' 
-      };
+      console.error('Error during biometric authentication:', error);
+      return { success: false, error: 'Error durante la autenticación' };
     }
   }
 
@@ -109,5 +116,4 @@ class BiometricAuthService {
   }
 }
 
-const biometricAuthService = new BiometricAuthService();
-export default biometricAuthService;
+export default new BiometricAuthService();

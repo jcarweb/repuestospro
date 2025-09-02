@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Solucionar Error Service Worker - PiezasYA</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .error {
+            border-left-color: #f44336;
+        }
+        
+        .warning {
+            border-left-color: #ff9800;
+        }
+        
+        .info {
+            border-left-color: #2196F3;
+        }
+        
+        .button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .button.danger {
+            background: #f44336;
+        }
+        
+        .button.danger:hover {
+            background: #da190b;
+        }
+        
+        .button.warning {
+            background: #ff9800;
+        }
+        
+        .button.warning:hover {
+            background: #e68900;
+        }
+        
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .step {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .step-number {
+            background: #2196F3;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            opacity: 0.8;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Solucionar Error Service Worker</h1>
+        
+        <div class="status info">
+            <strong>Problema:</strong> La aplicación móvil está presentando el error "Failed to download remote update"
+        </div>
+        
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>Descripción del Error:</strong> Este error ocurre cuando el Service Worker intenta actualizarse automáticamente y falla la descarga de la nueva versión.
+        </div>
+        
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>Solución Aplicada:</strong> Se ha deshabilitado completamente las actualizaciones automáticas del Service Worker para evitar este error.
+        </div>
+        
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>Acción Requerida:</strong> Ejecuta el script de limpieza para eliminar el Service Worker problemático y reinstalarlo correctamente.
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="button" onclick="runFix()">
+                🚀 Ejecutar Solución Automática
+            </button>
+            
+            <button class="button warning" onclick="clearCache()">
+                🗑️ Limpiar Cache Manualmente
+            </button>
+            
+            <button class="button danger" onclick="forceReload()">
+                🔄 Recargar Página
+            </button>
+        </div>
+        
+        <div class="log" id="log">
+            Esperando acción del usuario...
+        </div>
+        
+        <div class="status warning">
+            <strong>Nota:</strong> Después de ejecutar la solución, la aplicación debería funcionar sin errores de Service Worker. Si el problema persiste, contacta al equipo de desarrollo.
+        </div>
+        
+        <div class="footer">
+            PiezasYA - Sistema de Repuestos Automotrices<br>
+            Solución implementada para error de Service Worker
+        </div>
+    </div>
+
+    <script>
+        const logElement = document.getElementById('log');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            logElement.textContent += logMessage;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            // También mostrar en consola
+            if (type === 'error') {
+                console.error(message);
+            } else if (type === 'warning') {
+                console.warn(message);
+            } else {
+                console.log(message);
+            }
+        }
+        
+        async function runFix() {
+            log('🔧 Iniciando solución automática...', 'info');
+            
+            try {
+                log('1️⃣ Verificando Service Workers registrados...', 'info');
+                
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    
+                    if (registrations.length > 0) {
+                        log(`✅ Encontrados ${registrations.length} Service Worker(s)`, 'info');
+                        
+                        for (const registration of registrations) {
+                            log(`🗑️ Desregistrando: ${registration.scope}`, 'info');
+                            await registration.unregister();
+                        }
+                        
+                        log('✅ Todos los Service Workers desregistrados', 'info');
+                    } else {
+                        log('ℹ️ No hay Service Workers registrados', 'info');
+                    }
+                    
+                    log('2️⃣ Limpiando caches...', 'info');
+                    
+                    if ('caches' in window) {
+                        const cacheNames = await caches.keys();
+                        log(`📦 Encontrados ${cacheNames.length} caches`, 'info');
+                        
+                        for (const cacheName of cacheNames) {
+                            if (cacheName.includes('piezasya') || cacheName.includes('sw')) {
+                                log(`🗑️ Eliminando cache: ${cacheName}`, 'info');
+                                await caches.delete(cacheName);
+                            }
+                        }
+                        
+                        log('✅ Caches limpiados', 'info');
+                    }
+                    
+                    log('3️⃣ Limpiando almacenamiento local...', 'info');
+                    
+                    const keysToRemove = [
+                        'sw-update-available',
+                        'sw-update-installed',
+                        'sw-version',
+                        'sw-cache-version'
+                    ];
+                    
+                    for (const key of keysToRemove) {
+                        if (localStorage.getItem(key)) {
+                            localStorage.removeItem(key);
+                            log(`🗑️ Eliminado: ${key}`, 'info');
+                        }
+                        if (sessionStorage.getItem(key)) {
+                            sessionStorage.removeItem(key);
+                            log(`🗑️ Eliminado: ${key}`, 'info');
+                        }
+                    }
+                    
+                    log('✅ Almacenamiento limpiado', 'info');
+                    log('🎉 Solución completada exitosamente!', 'info');
+                    log('🔄 Recargando página en 5 segundos...', 'info');
+                    
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 5000);
+                    
+                } else {
+                    log('❌ Service Worker no soportado en este navegador', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Error durante la solución: ${error.message}`, 'error');
+                log('🔄 Intentando recargar de todas formas...', 'warning');
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            }
+        }
+        
+        async function clearCache() {
+            log('🗑️ Limpiando cache del navegador...', 'info');
+            
+            try {
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    for (const cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                        log(`🗑️ Cache eliminado: ${cacheName}`, 'info');
+                    }
+                    log('✅ Cache del navegador limpiado', 'info');
+                }
+                
+                // Limpiar localStorage
+                localStorage.clear();
+                sessionStorage.clear();
+                log('✅ Almacenamiento local limpiado', 'info');
+                
+            } catch (error) {
+                log(`❌ Error limpiando cache: ${error.message}`, 'error');
+            }
+        }
+        
+        function forceReload() {
+            log('🔄 Recargando página...', 'info');
+            window.location.reload();
+        }
+        
+        // Log inicial
+        log('🚀 Página de solución cargada correctamente', 'info');
+        log('📱 Error a resolver: "Failed to download remote update"', 'info');
+        log('💡 Presiona "Ejecutar Solución Automática" para resolver el problema', 'info');
+    </script>
+</body>
+</html>

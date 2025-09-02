@@ -6,12 +6,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useToast } from '../../contexts/ToastContext';
 import { Ionicons } from '@expo/vector-icons';
 
 interface RegisterScreenProps {
@@ -19,6 +20,8 @@ interface RegisterScreenProps {
 }
 
 const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
+  const { colors } = useTheme();
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -39,23 +42,23 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
   const validateForm = () => {
     if (!formData.name.trim()) {
-      Alert.alert('Error', 'Por favor ingresa tu nombre');
+      showToast('Por favor ingresa tu nombre', 'error');
       return false;
     }
     if (!formData.email.trim()) {
-      Alert.alert('Error', 'Por favor ingresa tu correo electrónico');
+      showToast('Por favor ingresa tu correo electrónico', 'error');
       return false;
     }
     if (!formData.password) {
-      Alert.alert('Error', 'Por favor ingresa una contraseña');
+      showToast('Por favor ingresa una contraseña', 'error');
       return false;
     }
     if (formData.password.length < 6) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      showToast('La contraseña debe tener al menos 6 caracteres', 'error');
       return false;
     }
     if (formData.password !== formData.confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
+      showToast('Las contraseñas no coinciden', 'error');
       return false;
     }
     return true;
@@ -71,19 +74,22 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
         password: formData.password,
         phone: formData.phone.trim() || undefined,
       });
-      // La navegación se manejará automáticamente en el AuthProvider
+      
+      // Navegar a la pantalla de verificación de email
+      navigation.navigate('EmailVerification', { email: formData.email.trim() });
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Error en el registro');
+      // El error ya se maneja en el AuthContext con toast
+      console.log('Registration error handled by AuthContext');
     }
   };
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.content}>
+        <View style={[styles.content, { backgroundColor: colors.surface }]}>
           {/* Logo */}
           <View style={styles.logoContainer}>
             <Image
@@ -95,8 +101,8 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Registrarse</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>Registrarse</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
               Crea tu cuenta en PiezasYA
             </Text>
           </View>
@@ -104,19 +110,20 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
           {/* Form */}
           <View style={styles.form}>
             {error && (
-              <View style={styles.errorContainer}>
-                <Ionicons name="alert-circle" size={20} color="#DC2626" />
-                <Text style={styles.errorText}>{error}</Text>
+              <View style={[styles.errorContainer, { backgroundColor: colors.error + '20', borderColor: colors.error }]}>
+                <Ionicons name="alert-circle" size={20} color={colors.error} />
+                <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
               </View>
             )}
 
             {/* Name Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Nombre completo</Text>
-              <View style={styles.inputWrapper}>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Nombre completo</Text>
+              <View style={[styles.inputWrapper, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.surface }]}
                   placeholder="Tu nombre completo"
+                  placeholderTextColor={colors.textTertiary}
                   value={formData.name}
                   onChangeText={(value) => handleInputChange('name', value)}
                   autoCapitalize="words"
@@ -124,7 +131,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                 <Ionicons
                   name="person-outline"
                   size={20}
-                  color="#9CA3AF"
+                  color={colors.textTertiary}
                   style={styles.inputIcon}
                 />
               </View>
@@ -132,11 +139,12 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
             {/* Email Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Correo electrónico</Text>
-              <View style={styles.inputWrapper}>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Correo electrónico</Text>
+              <View style={[styles.inputWrapper, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.surface }]}
                   placeholder="tu@email.com"
+                  placeholderTextColor={colors.textTertiary}
                   value={formData.email}
                   onChangeText={(value) => handleInputChange('email', value)}
                   keyboardType="email-address"
@@ -146,7 +154,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                 <Ionicons
                   name="mail-outline"
                   size={20}
-                  color="#9CA3AF"
+                  color={colors.textTertiary}
                   style={styles.inputIcon}
                 />
               </View>
@@ -154,11 +162,12 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
             {/* Phone Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Teléfono (opcional)</Text>
-              <View style={styles.inputWrapper}>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Teléfono (opcional)</Text>
+              <View style={[styles.inputWrapper, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.surface }]}
                   placeholder="+58 412 123 4567"
+                  placeholderTextColor={colors.textTertiary}
                   value={formData.phone}
                   onChangeText={(value) => handleInputChange('phone', value)}
                   keyboardType="phone-pad"
@@ -166,7 +175,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                 <Ionicons
                   name="call-outline"
                   size={20}
-                  color="#9CA3AF"
+                  color={colors.textTertiary}
                   style={styles.inputIcon}
                 />
               </View>
@@ -174,11 +183,12 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
             {/* Password Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Contraseña</Text>
-              <View style={styles.inputWrapper}>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Contraseña</Text>
+              <View style={[styles.inputWrapper, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.surface }]}
                   placeholder="••••••••"
+                  placeholderTextColor={colors.textTertiary}
                   value={formData.password}
                   onChangeText={(value) => handleInputChange('password', value)}
                   secureTextEntry={!showPassword}
@@ -191,13 +201,13 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                   <Ionicons
                     name={showPassword ? 'eye-off' : 'eye'}
                     size={20}
-                    color="#9CA3AF"
+                    color={colors.textTertiary}
                   />
                 </TouchableOpacity>
                 <Ionicons
                   name="lock-closed-outline"
                   size={20}
-                  color="#9CA3AF"
+                  color={colors.textTertiary}
                   style={styles.inputIcon}
                 />
               </View>
@@ -205,11 +215,12 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
             {/* Confirm Password Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Confirmar contraseña</Text>
-              <View style={styles.inputWrapper}>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Confirmar contraseña</Text>
+              <View style={[styles.inputWrapper, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.surface }]}
                   placeholder="••••••••"
+                  placeholderTextColor={colors.textTertiary}
                   value={formData.confirmPassword}
                   onChangeText={(value) => handleInputChange('confirmPassword', value)}
                   secureTextEntry={!showConfirmPassword}
@@ -222,13 +233,13 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                   <Ionicons
                     name={showConfirmPassword ? 'eye-off' : 'eye'}
                     size={20}
-                    color="#9CA3AF"
+                    color={colors.textTertiary}
                   />
                 </TouchableOpacity>
                 <Ionicons
                   name="lock-closed-outline"
                   size={20}
-                  color="#9CA3AF"
+                  color={colors.textTertiary}
                   style={styles.inputIcon}
                 />
               </View>
@@ -236,22 +247,22 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
             {/* Register Button */}
             <TouchableOpacity
-              style={[styles.registerButton, isLoading && styles.registerButtonDisabled]}
+              style={[styles.registerButton, { backgroundColor: colors.primary }, isLoading && styles.registerButtonDisabled]}
               onPress={handleRegister}
               disabled={isLoading}
             >
-              <Text style={styles.registerButtonText}>
+              <Text style={[styles.registerButtonText, { color: colors.textPrimary }]}>
                 {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
               </Text>
             </TouchableOpacity>
 
             {/* Terms */}
             <View style={styles.termsContainer}>
-              <Text style={styles.termsText}>
+              <Text style={[styles.termsText, { color: colors.textSecondary }]}>
                 Al registrarte, aceptas nuestros{' '}
-                <Text style={styles.termsLink}>Términos y Condiciones</Text>
+                <Text style={[styles.termsLink, { color: colors.primary }]}>Términos y Condiciones</Text>
                 {' '}y{' '}
-                <Text style={styles.termsLink}>Política de Privacidad</Text>
+                <Text style={[styles.termsLink, { color: colors.primary }]}>Política de Privacidad</Text>
               </Text>
             </View>
 
@@ -261,9 +272,9 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                 onPress={() => navigation.navigate('Login')}
                 style={styles.linkButton}
               >
-                <Text style={styles.linkText}>
+                <Text style={[styles.linkText, { color: colors.textSecondary }]}>
                   ¿Ya tienes cuenta?{' '}
-                  <Text style={styles.linkHighlight}>Inicia sesión</Text>
+                  <Text style={[styles.linkHighlight, { color: colors.primary }]}>Inicia sesión</Text>
                 </Text>
               </TouchableOpacity>
             </View>
@@ -277,7 +288,6 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -286,7 +296,6 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   content: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 24,
     shadowColor: '#000',
@@ -313,12 +322,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#111827',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
     textAlign: 'center',
   },
   form: {
@@ -327,15 +334,12 @@ const styles = StyleSheet.create({
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF2F2',
     borderWidth: 1,
-    borderColor: '#FECACA',
     borderRadius: 8,
     padding: 12,
     gap: 8,
   },
   errorText: {
-    color: '#DC2626',
     fontSize: 14,
     flex: 1,
   },
@@ -345,20 +349,17 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
   },
   inputWrapper: {
     position: 'relative',
-  },
-  input: {
     borderWidth: 1,
-    borderColor: '#D1D5DB',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 12,
     paddingRight: 40,
+  },
+  input: {
     fontSize: 16,
-    backgroundColor: '#FFFFFF',
   },
   inputIcon: {
     position: 'absolute',
@@ -371,7 +372,6 @@ const styles = StyleSheet.create({
     top: 12,
   },
   registerButton: {
-    backgroundColor: '#FFC300',
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
@@ -381,7 +381,6 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   registerButtonText: {
-    color: '#111827',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -389,13 +388,11 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   termsText: {
-    color: '#6B7280',
     fontSize: 12,
     textAlign: 'center',
     lineHeight: 18,
   },
   termsLink: {
-    color: '#FFC300',
     fontWeight: '600',
   },
   loginLinkContainer: {
@@ -405,12 +402,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   linkText: {
-    color: '#6B7280',
     fontSize: 14,
     textAlign: 'center',
   },
   linkHighlight: {
-    color: '#FFC300',
     fontWeight: '600',
   },
 });

@@ -765,6 +765,28 @@ export const translations: Translations = {
     pt: 'Escuro'
   },
 
+  // Tema
+  'theme.dark': {
+    es: 'Oscuro',
+    en: 'Dark',
+    pt: 'Escuro'
+  },
+  'theme.light': {
+    es: 'Claro',
+    en: 'Light',
+    pt: 'Claro'
+  },
+  'theme.switchToDark': {
+    es: 'Cambiar a modo oscuro',
+    en: 'Switch to dark mode',
+    pt: 'Mudar para modo escuro'
+  },
+  'theme.switchToLight': {
+    es: 'Cambiar a modo claro',
+    en: 'Switch to light mode',
+    pt: 'Mudar para modo claro'
+  },
+
   // Idioma
   'language.title': {
     es: 'Idioma',
@@ -857,6 +879,201 @@ export const translations: Translations = {
     es: 'Desuscrito de notificaciones push',
     en: 'Unsubscribed from push notifications',
     pt: 'Cancelado inscrição em notificações push'
+  },
+  'notifications.description': {
+    es: 'Gestiona todas tus notificaciones y alertas',
+    en: 'Manage all your notifications and alerts',
+    pt: 'Gerencie todas as suas notificações e alertas'
+  },
+  'notifications.noNotifications': {
+    es: 'No hay notificaciones',
+    en: 'No notifications',
+    pt: 'Nenhuma notificação'
+  },
+  'notifications.markAsRead': {
+    es: 'Marcar como leída',
+    en: 'Mark as read',
+    pt: 'Marcar como lida'
+  },
+  'notifications.markSelectedAsRead': {
+    es: 'Marcar seleccionadas como leídas',
+    en: 'Mark selected as read',
+    pt: 'Marcar selecionadas como lidas'
+  },
+  'notifications.markAllAsRead': {
+    es: 'Marcar todas como leídas',
+    en: 'Mark all as read',
+    pt: 'Marcar todas como lidas'
+  },
+  'notifications.archive': {
+    es: 'Archivar',
+    en: 'Archive',
+    pt: 'Arquivar'
+  },
+  'notifications.viewAll': {
+    es: 'Ver todas',
+    en: 'View all',
+    pt: 'Ver todas'
+  },
+  'notifications.filters': {
+    es: 'Filtros',
+    en: 'Filters',
+    pt: 'Filtros'
+  },
+  'notifications.search': {
+    es: 'Buscar notificaciones...',
+    en: 'Search notifications...',
+    pt: 'Buscar notificações...'
+  },
+  'notifications.clear': {
+    es: 'Limpiar',
+    en: 'Clear',
+    pt: 'Limpar'
+  },
+  'notifications.categories.all': {
+    es: 'Todas las categorías',
+    en: 'All categories',
+    pt: 'Todas as categorias'
+  },
+  'notifications.categories.order': {
+    es: 'Pedidos',
+    en: 'Orders',
+    pt: 'Pedidos'
+  },
+  'notifications.categories.delivery': {
+    es: 'Entrega',
+    en: 'Delivery',
+    pt: 'Entrega'
+  },
+  'notifications.categories.promotion': {
+    es: 'Promociones',
+    en: 'Promotions',
+    pt: 'Promoções'
+  },
+  'notifications.categories.security': {
+    es: 'Seguridad',
+    en: 'Security',
+    pt: 'Segurança'
+  },
+  'notifications.categories.system': {
+    es: 'Sistema',
+    en: 'System',
+    pt: 'Sistema'
+  },
+  'notifications.categories.marketing': {
+    es: 'Marketing',
+    en: 'Marketing',
+    pt: 'Marketing'
+  },
+  'notifications.status.all': {
+    es: 'Todas las notificaciones',
+    en: 'All notifications',
+    pt: 'Todas as notificações'
+  },
+  'notifications.status.unread': {
+    es: 'No leídas',
+    en: 'Unread',
+    pt: 'Não lidas'
+  },
+  'notifications.status.read': {
+    es: 'Leídas',
+    en: 'Read',
+    pt: 'Lidas'
+  },
+  'notifications.pagination.showing': {
+    es: 'Mostrando',
+    en: 'Showing',
+    pt: 'Mostrando'
+  },
+  'notifications.pagination.to': {
+    es: 'a',
+    en: 'to',
+    pt: 'a'
+  },
+  'notifications.pagination.of': {
+    es: 'de',
+    en: 'of',
+    pt: 'de'
+  },
+  'notifications.pagination.notifications': {
+    es: 'notificaciones',
+    en: 'notifications',
+    pt: 'notificações'
+  },
+  'notifications.pagination.previous': {
+    es: 'Anterior',
+    en: 'Previous',
+    pt: 'Anterior'
+  },
+  'notifications.pagination.next': {
+    es: 'Siguiente',
+    en: 'Next',
+    pt: 'Próximo'
+  },
+  'notifications.pagination.page': {
+    es: 'Página',
+    en: 'Page',
+    pt: 'Página'
+  },
+  'notifications.stats.total': {
+    es: 'Total',
+    en: 'Total',
+    pt: 'Total'
+  },
+  'notifications.stats.unread': {
+    es: 'No leídas',
+    en: 'Unread',
+    pt: 'Não lidas'
+  },
+  'notifications.stats.read': {
+    es: 'Leídas',
+    en: 'Read',
+    pt: 'Lidas'
+  },
+  'notifications.stats.categories': {
+    es: 'Categorías',
+    en: 'Categories',
+    pt: 'Categorias'
+  },
+  'notifications.actions.createTest': {
+    es: 'Crear Prueba',
+    en: 'Create Test',
+    pt: 'Criar Teste'
+  },
+  'notifications.actions.refresh': {
+    es: 'Actualizar',
+    en: 'Refresh',
+    pt: 'Atualizar'
+  },
+  'notifications.actions.search': {
+    es: 'Buscar',
+    en: 'Search',
+    pt: 'Buscar'
+  },
+  'notifications.actions.selectAll': {
+    es: 'Seleccionar todas',
+    en: 'Select all',
+    pt: 'Selecionar todas'
+  },
+  'notifications.actions.selected': {
+    es: 'seleccionada',
+    en: 'selected',
+    pt: 'selecionada'
+  },
+  'notifications.actions.selectedPlural': {
+    es: 'seleccionadas',
+    en: 'selected',
+    pt: 'selecionadas'
+  },
+  'notifications.empty.title': {
+    es: 'No hay notificaciones',
+    en: 'No notifications',
+    pt: 'Nenhuma notificação'
+  },
+  'notifications.empty.description': {
+    es: 'No se encontraron notificaciones con los filtros aplicados.',
+    en: 'No notifications found with the applied filters.',
+    pt: 'Nenhuma notificação encontrada com os filtros aplicados.'
   },
 
   // Privacidad

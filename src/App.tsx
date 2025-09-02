@@ -10,6 +10,8 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
+import InactivityProvider from './components/InactivityProvider';
+import EmailVerificationRoute from './components/EmailVerificationRoute';
 
 // Páginas públicas
 import Home from './pages/Home';
@@ -22,7 +24,9 @@ import ResetPassword from './pages/ResetPassword';
 import GoogleCallback from './pages/GoogleCallback';
 import ReferralLanding from './pages/ReferralLanding';
 import ProductDetail from './pages/ProductDetail';
+import Products from './pages/Products';
 import Categories from './pages/Categories';
+import SearchResults from './pages/SearchResults';
 import CategoryProducts from './pages/CategoryProducts';
 import NearbyProducts from './pages/NearbyProducts';
 import StoreRegistration from './pages/StoreRegistration';
@@ -117,7 +121,16 @@ function AppContent() {
 
   return (
     <Router>
-      <Routes>
+      <InactivityProvider timeoutMinutes={30} warningMinutes={5}>
+        <Routes>
+        {/* Rutas de verificación de email - completamente limpias, sin Header ni Sidebar */}
+        <Route path="/verify-email" element={<EmailVerificationRoute />} />
+        <Route path="/email-verification" element={<EmailVerificationRoute />} />
+        <Route path="/google-callback/verify-email" element={<EmailVerificationRoute />} />
+        
+        {/* Rutas de google-callback - completamente limpias, sin Header ni Sidebar */}
+        <Route path="/google-callback/register-with-code" element={<RegisterWithCode />} />
+        
         {/* Rutas de administrador - sin Header ni Sidebar normal */}
         <Route path="/admin/*" element={
           <Routes>
@@ -296,14 +309,15 @@ function AppContent() {
                    <Route path="/login" element={<Login />} />
                    <Route path="/register" element={<Register />} />
                    <Route path="/register-with-code" element={<RegisterWithCode />} />
-                   <Route path="/verify-email" element={<VerifyEmail />} />
-                   <Route path="/email-verification" element={<EmailVerification />} />
+
                    <Route path="/reset-password" element={<ResetPassword />} />
                    <Route path="/google-callback" element={<GoogleCallback />} />
                    <Route path="/referral/:code" element={<ReferralLanding />} />
+                   <Route path="/products" element={<Products />} />
                    <Route path="/product/:id" element={<ProductDetail />} />
-                   <Route path="/categories" element={<Categories />} />
-                   <Route path="/category/:id" element={<CategoryProducts />} />
+                    <Route path="/search-results" element={<SearchResults />} />
+                    <Route path="/categories" element={<Categories />} />
+                    <Route path="/category/:id" element={<CategoryProducts />} />
                    <Route path="/nearby-products" element={<NearbyProducts />} />
                    <Route path="/store-registration" element={<StoreRegistration />} />
                  </Routes>
@@ -605,9 +619,8 @@ function AppContent() {
                } />
              </Routes>
            } />
-      </Routes>
-      
-             
+        </Routes>
+      </InactivityProvider>
     </Router>
   );
 }

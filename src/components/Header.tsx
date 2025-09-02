@@ -10,6 +10,7 @@ import Logo from './Logo';
 import LanguageSelector from './LanguageSelector';
 import ServerStatus from './ServerStatus';
 import AvatarImageSimple from './AvatarImageSimple';
+import HeaderSearch from './HeaderSearch';
 import { profileService } from '../services/profileService';
 import { 
   ShoppingCart, 
@@ -136,23 +137,16 @@ const Header: React.FC = () => {
             >
               {t('common.nearbyProducts')}
             </Link>
-            <Link 
-              to="/" 
-              className="text-[#333333] dark:text-white hover:text-[#FFC300] transition-colors"
-            >
-              {t('nav.home')}
-            </Link>
+
           </nav>
 
           {/* Right side - Search, Cart, User */}
           <div className="flex items-center space-x-4">
             {/* Search */}
             <div className="hidden sm:flex relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
+              <HeaderSearch 
                 placeholder={t('common.search')}
-                className="pl-10 pr-4 py-2 border border-gray-300 dark:border-[#555555] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64 bg-white dark:bg-[#444444] text-gray-900 dark:text-white"
+                className="w-64"
               />
             </div>
 

@@ -152,30 +152,7 @@ const SimpleClientSidebar: React.FC<SimpleClientSidebarProps> = ({
               </div>
             )}
 
-            {/* Controles simples */}
-            <div className={`flex items-center space-x-2 ${isCollapsed ? 'justify-center' : ''}`}>
-              <button
-                className={`
-                  p-2 rounded-lg transition-colors
-                  ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
-                `}
-                title={t('sidebar.theme')}
-              >
-                {isDark ? '🌙' : '☀️'}
-              </button>
-              
-              {!isCollapsed && (
-                <button
-                  className={`
-                    p-2 rounded-lg transition-colors
-                    ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
-                  `}
-                  title={t('sidebar.language')}
-                >
-                  🌍
-                </button>
-              )}
-            </div>
+
           </div>
         </div>
       </div>

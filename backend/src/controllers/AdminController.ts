@@ -144,7 +144,7 @@ const descriptions = {
   ]
 };
 
-// Función para generar un producto aleatorio con imágenes reales optimizadas
+// Función para generar un producto aleatorio con imágenes reales
 async function generateRandomProduct(storeId?: string) {
   const category = categories[Math.floor(Math.random() * categories.length)];
   const brand = brands[Math.floor(Math.random() * brands.length)];
@@ -169,37 +169,18 @@ async function generateRandomProduct(storeId?: string) {
   // Obtener imágenes reales de repuestos para la categoría
   const realImages = getRandomImages(category, 4);
   
-  // Procesar imágenes y subirlas a Cloudinary optimizadas
-  const processedImages: string[] = [];
-  for (let i = 0; i < realImages.length; i++) {
-    try {
-      const imageUrl = realImages[i];
-      // Descargar la imagen y convertirla a base64
-      const response = await fetch(imageUrl);
-      const buffer = await response.arrayBuffer();
-      const base64 = Buffer.from(buffer).toString('base64');
-      const dataUrl = `data:image/jpeg;base64,${base64}`;
-      
-      // Subir a Cloudinary con optimización
-      const uploadResult = await imageService.uploadBase64Image({
-        data: dataUrl,
-        format: 'jpg',
-        filename: `product_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`
-      }, 'piezasya/products');
-      
-      processedImages.push(uploadResult.secureUrl);
-    } catch (error) {
-      console.error(`Error procesando imagen ${i}:`, error);
-      // Usar imagen de respaldo si falla
-      processedImages.push(`https://via.placeholder.com/400x300/0066cc/ffffff?text=${encodeURIComponent(productName)}`);
-    }
-  }
+  // Usar imágenes reales directamente sin procesar
+  const productImages = realImages.map((imageUrl, index) => {
+    // Si la imagen falla, usar un placeholder específico para la categoría
+    return imageUrl || `https://via.placeholder.com/400x300/0066cc/ffffff?text=${encodeURIComponent(category)}`;
+  });
   
   const product: any = {
     name: `${productName} ${brand}`,
     description: `${description} compatible con vehículos ${brand}`,
     price: price,
-    images: processedImages,
+    image: productImages[0], // Usar la primera imagen como imagen principal
+    images: productImages, // Mantener todas las imágenes
     category: category.toLowerCase(),
     brand: brand.toLowerCase(),
     subcategory: subcategory.toLowerCase(),
@@ -290,22 +271,14 @@ export class AdminController {
       
       console.log(`🏪 Generando productos para tienda: ${store.name} (${store.city})`);
       
-      // Limpiar productos existentes de esta tienda y sus imágenes de Cloudinary
+      // Limpiar productos existentes de esta tienda
       console.log('🗑️  Limpiando productos existentes de la tienda...');
       
-      // Primero limpiar las imágenes de Cloudinary
-      console.log('🖼️  Limpiando imágenes de Cloudinary...');
-      const cleanupResult = await cloudinaryCleanupService.cleanupStoreImages(storeId);
-      console.log(`🖼️  Eliminadas ${cleanupResult.deleted} imágenes de Cloudinary`);
-      if (cleanupResult.errors.length > 0) {
-        console.warn('⚠️  Errores durante la limpieza de imágenes:', cleanupResult.errors);
-      }
-      
-      // Luego eliminar los productos de la base de datos
+      // Eliminar los productos de la base de datos
       const deleteResult = await Product.deleteMany({ store: storeId });
       console.log(`🗑️  Eliminados ${deleteResult.deletedCount} productos existentes de la tienda`);
       
-      // Generar 150 productos de prueba para esta tienda con imágenes optimizadas
+      // Generar 150 productos de prueba para esta tienda con imágenes reales optimizadas
       console.log('🔧 Generando productos con imágenes reales optimizadas...');
       const products = [];
       for (let i = 0; i < 150; i++) {
@@ -318,28 +291,16 @@ export class AdminController {
       // Insertar productos en la base de datos
       console.log('💾 Insertando productos en la base de datos...');
       const result = await Product.insertMany(products);
-      console.log(`✅ Generados ${result.length} productos de prueba exitosamente para la tienda`);
+      console.log(`✅ Generados ${result.length} productos exitosamente para la tienda`);
       
-      // Mostrar ejemplo de producto generado
-      if (result.length > 0) {
-        const exampleProduct = result[0];
-        console.log('📋 Ejemplo de producto generado:');
-        console.log(`   Nombre: ${exampleProduct.name}`);
-        console.log(`   SKU Interno: ${exampleProduct.sku}`);
-        console.log(`   Código Original: ${exampleProduct.originalPartCode}`);
-        console.log(`   Categoría: ${exampleProduct.category}`);
-        console.log(`   Marca: ${exampleProduct.brand}`);
-        console.log(`   Precio: $${exampleProduct.price}`);
-        console.log(`   Stock: ${exampleProduct.stock}`);
-      }
-      
-      // Obtener estadísticas
-      console.log('📊 Obteniendo estadísticas...');
-      const totalProducts = await Product.countDocuments();
-      const featuredProducts = await Product.countDocuments({ isFeatured: true });
+      // Obtener estadísticas de los productos generados
+      console.log('📊 Obteniendo estadísticas de productos generados...');
+      const totalProducts = await Product.countDocuments({ store: storeId });
+      const featuredProducts = await Product.countDocuments({ store: storeId, isFeatured: true });
       
       // Estadísticas por categoría
       const categoryStats = await Product.aggregate([
+        { $match: { store: storeId } },
         {
           $group: {
             _id: '$category',
@@ -350,9 +311,10 @@ export class AdminController {
         },
         { $sort: { count: -1 } }
       ]);
-
+      
       // Estadísticas por marca
       const brandStats = await Product.aggregate([
+        { $match: { store: storeId } },
         {
           $group: {
             _id: '$brand',
@@ -361,9 +323,7 @@ export class AdminController {
         },
         { $sort: { count: -1 } }
       ]);
-
-      // Obtener categorías únicas
-      const categories = await Product.distinct('category');
+      
       const brands = await Product.distinct('brand');
 
       const stats = {
@@ -399,6 +359,94 @@ export class AdminController {
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor al generar productos',
+        error: error instanceof Error ? error.message : 'Error desconocido'
+      });
+    }
+  }
+
+  // Regenerar productos con imágenes reales (método de prueba)
+  async regenerateProductsWithRealImages(req: Request, res: Response) {
+    try {
+      console.log('🔄 Iniciando regeneración de productos con imágenes reales...');
+      
+      const { storeId } = req.body;
+      
+      if (!storeId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Se requiere el ID de la tienda para regenerar productos'
+        });
+      }
+      
+      // Verificar que la tienda existe
+      const store = await Store.findById(storeId);
+      if (!store) {
+        return res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada'
+        });
+      }
+      
+      console.log(`🏪 Regenerando productos para tienda: ${store.name} (${store.city})`);
+      
+      // Limpiar productos existentes de esta tienda
+      console.log('🗑️  Limpiando productos existentes de la tienda...');
+      const deleteResult = await Product.deleteMany({ store: storeId });
+      console.log(`🗑️  Eliminados ${deleteResult.deletedCount} productos existentes de la tienda`);
+      
+      // Generar productos con imágenes reales verificadas
+      console.log('🔧 Generando productos con imágenes reales verificadas...');
+      const products = [];
+      const maxProducts = 50; // Reducir para pruebas
+      
+      for (let i = 0; i < maxProducts; i++) {
+        console.log(`📦 Generando producto ${i + 1}/${maxProducts}...`);
+        const product = await generateRandomProduct(storeId);
+        
+        // Verificar que las imágenes sean válidas
+        if (product.images && product.images.length > 0) {
+          console.log(`🖼️  Producto ${i + 1} tiene ${product.images.length} imágenes`);
+        }
+        
+        products.push(product);
+      }
+      
+      console.log(`📦 Generados ${products.length} productos en memoria para la tienda`);
+      
+      // Insertar productos en la base de datos
+      console.log('💾 Insertando productos en la base de datos...');
+      const result = await Product.insertMany(products);
+      console.log(`✅ Regenerados ${result.length} productos exitosamente para la tienda`);
+      
+      // Obtener estadísticas básicas
+      const totalProducts = await Product.countDocuments({ store: storeId });
+      const productsWithImages = await Product.countDocuments({ 
+        store: storeId, 
+        images: { $exists: true, $ne: [] } 
+      });
+      
+      const stats = {
+        totalProducts,
+        productsWithImages,
+        productsWithoutImages: totalProducts - productsWithImages,
+        message: 'Productos regenerados con imágenes reales'
+      };
+      
+      console.log('📈 Estadísticas de regeneración:', stats);
+      
+      return res.json({
+        success: true,
+        data: {
+          count: result.length,
+          stats: stats
+        },
+        message: 'Productos regenerados exitosamente con imágenes reales'
+      });
+    } catch (error) {
+      console.error('❌ Error regenerando productos:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor al regenerar productos',
         error: error instanceof Error ? error.message : 'Error desconocido'
       });
     }

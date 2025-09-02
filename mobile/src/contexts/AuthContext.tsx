@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../types';
 import apiService from '../services/api';
 import authVerificationService from '../services/authVerification';
+import { useToast } from './ToastContext';
 
 interface AuthContextType {
   user: User | null;
@@ -18,6 +19,8 @@ interface AuthContextType {
   }) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<void>;
+  resendVerificationEmail: (email: string) => Promise<void>;
+  verifyEmail: (token: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
   error: string | null;
@@ -33,71 +36,63 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
-    // Limpiar tokens al inicio para asegurar estado limpio
-    const cleanStart = async () => {
+    // Inicialización simple sin llamadas al backend
+    const initializeAuth = async () => {
       try {
-        await AsyncStorage.removeItem('authToken');
-        await AsyncStorage.removeItem('user');
-      } catch (error) {
-        console.error('Error cleaning storage:', error);
-      }
-    };
-    
-    cleanStart().then(() => {
-      checkAuthStatus();
-    });
-  }, []);
-
-  const checkAuthStatus = async () => {
-    try {
-      setIsLoading(true);
-      
-      // Primero verificar si hay token local
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        // No hay token, usuario no autenticado
-        setUser(null);
-        return;
-      }
-      
-      // Hay token, verificar si es válido
-      const isAuth = await apiService.isAuthenticated();
-      
-      if (isAuth) {
-        try {
-          const currentUser = await apiService.getCurrentUser();
-          if (currentUser) {
-            setUser(currentUser);
-          } else {
-            // Token inválido, limpiar
+        setIsLoading(true);
+        
+        // Solo verificar datos locales
+        const userData = await AsyncStorage.getItem('user');
+        
+        if (userData) {
+          try {
+            const user = JSON.parse(userData);
+            setUser(user);
+          } catch (error) {
+            console.log('Error parsing user data, cleaning...');
+            await AsyncStorage.removeItem('user');
             await AsyncStorage.removeItem('authToken');
             setUser(null);
           }
-        } catch (error) {
-          // Error al obtener usuario, token probablemente inválido
-          console.log('Token inválido, limpiando...');
-          await AsyncStorage.removeItem('authToken');
+        } else {
           setUser(null);
         }
-      } else {
+      } catch (error) {
+        console.error('Error initializing auth:', error);
         setUser(null);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error checking auth status:', error);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+
+    initializeAuth();
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
       setError(null);
       
+      // Primero verificar si hay un usuario verificado localmente
+      const localUserData = await AsyncStorage.getItem('user');
+      if (localUserData) {
+        try {
+          const localUser = JSON.parse(localUserData);
+          if (localUser.email === email && localUser.emailVerified === true) {
+            // Usuario ya verificado localmente, permitir login
+            setUser(localUser);
+            showToast('Inicio de sesión exitoso', 'success');
+            return;
+          }
+        } catch (error) {
+          console.log('Error parsing local user data');
+        }
+      }
+      
+      // Si no hay usuario verificado localmente, intentar login normal
       const response = await apiService.login({ email, password });
       
       if (response.success && response.data) {
@@ -108,7 +103,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      setError(error.message || 'Error en el inicio de sesión');
+      const errorMessage = error.message || 'Error en el inicio de sesión';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
       throw error;
     } finally {
       setIsLoading(false);
@@ -131,14 +128,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
       
       if (response.success && response.data) {
-        setUser(response.data.user);
-        await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+        // No establecer el usuario como autenticado hasta que verifique su email
+        // setUser(response.data.user);
+        // await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        // En su lugar, mostrar mensaje de éxito
+        showToast('Cuenta creada exitosamente. Por favor verifica tu email.', 'success');
       } else {
         throw new Error(response.message || 'Error en el registro');
       }
     } catch (error: any) {
       console.error('Register error:', error);
-      setError(error.message || 'Error en el registro');
+      const errorMessage = error.message || 'Error en el registro';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
       throw error;
     } finally {
       setIsLoading(false);
@@ -160,7 +163,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error: any) {
       console.error('Google login error:', error);
-      setError(error.message || 'Error en el inicio de sesión con Google');
+      const errorMessage = error.message || 'Error en el inicio de sesión con Google';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
       throw error;
     } finally {
       setIsLoading(false);
@@ -195,6 +200,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const resendVerificationEmail = async (email: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await apiService.resendVerificationEmail(email);
+      setError('Se ha enviado un nuevo enlace de verificación a tu correo electrónico.');
+    } catch (error: any) {
+      console.error('Resend verification email error:', error);
+      setError(error.message || 'Error al reenviar el enlace de verificación.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyEmail = async (token: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await apiService.verifyEmail(token);
+      
+      if (response.success) {
+        showToast('Email verificado con éxito. Por favor, inicia sesión.', 'success');
+      } else {
+        throw new Error(response.message || 'Error al verificar el email');
+      }
+    } catch (error: any) {
+      console.error('Verify email error:', error);
+      const errorMessage = error.message || 'Error al verificar el email.';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       setIsLoading(true);
@@ -221,6 +262,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     forgotPassword,
     resetPassword,
+    resendVerificationEmail,
+    verifyEmail,
     logout,
     clearError,
     error,

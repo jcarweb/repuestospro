@@ -13,10 +13,13 @@ import {
   ScrollView,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import googleAuthService from '../../services/googleAuth';
 import biometricAuthService from '../../services/biometricAuth';
 import authVerificationService from '../../services/authVerification';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import mobileVerificationService from '../../services/mobileVerification';
 
 interface LoginScreenProps {
   navigation: any;
@@ -30,6 +33,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [isBiometricLoading, setIsBiometricLoading] = useState(false);
   const [userAuthSettings, setUserAuthSettings] = useState<any>(null);
   const { login, loginWithGoogle, isLoading, error, clearError } = useAuth();
+  const { colors, isDark } = useTheme();
 
   // Verificar disponibilidad de autenticación biométrica al cargar
   useEffect(() => {
@@ -66,17 +70,21 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     }
 
     try {
-      // Primero obtener la configuración de autenticación del usuario
-      const settings = await getUserAuthSettings(email);
+      // Verificar si el email está verificado en la app móvil
+      const isVerified = await mobileVerificationService.isEmailVerifiedInMobile(email);
       
-      if (!settings) {
-        // Si no se puede obtener la configuración, intentar login normal
+      if (isVerified) {
+        // Usuario ya verificado en móvil, hacer login directamente
         await login(email, password);
         return;
       }
 
-      // Verificar si el email está verificado
-      if (settings.emailVerified === false) {
+      // Si no está verificado, intentar login normal
+      await login(email, password);
+      
+    } catch (error: any) {
+      // Si el error es de email no verificado, mostrar opción de verificación
+      if (error.message && error.message.includes('verificado')) {
         Alert.alert(
           'Email No Verificado',
           'Tu email no ha sido verificado. Debes verificar tu email antes de continuar.',
@@ -88,25 +96,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             }
           ]
         );
-        return;
+      } else {
+        Alert.alert('Error', error.message || 'Error en el inicio de sesión');
       }
-
-      // Verificar GPS si está habilitado
-      if (settings.gpsRequired) {
-        navigation.navigate('GPSVerification', {
-          onSuccess: () => {
-            // Continuar con las siguientes verificaciones
-            continueWithLogin(email, password, settings);
-          }
-        });
-        return;
-      }
-
-      // Si no requiere GPS, continuar directamente
-      continueWithLogin(email, password, settings);
-      
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Error en el inicio de sesión');
     }
   };
 
@@ -245,11 +237,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.content}>
+        <View style={[styles.content, { backgroundColor: colors.surface }]}>
           {/* Logo */}
           <View style={styles.logoContainer}>
             <Image
@@ -261,8 +253,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Iniciar Sesión</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>Iniciar Sesión</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
               Accede a tu cuenta de PiezasYA
             </Text>
           </View>
@@ -270,19 +262,24 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           {/* Form */}
           <View style={styles.form}>
             {error && (
-              <View style={styles.errorContainer}>
-                <Ionicons name="alert-circle" size={20} color="#DC2626" />
-                <Text style={styles.errorText}>{error}</Text>
+              <View style={[styles.errorContainer, { backgroundColor: colors.error + '20', borderColor: colors.error }]}>
+                <Ionicons name="alert-circle" size={20} color={colors.error} />
+                <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
               </View>
             )}
 
             {/* Email Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Correo electrónico</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Correo electrónico</Text>
               <View style={styles.inputWrapper}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { 
+                    borderColor: colors.border, 
+                    backgroundColor: colors.surface,
+                    color: colors.textPrimary 
+                  }]}
                   placeholder="admin@piezasyaya.com"
+                  placeholderTextColor={colors.textTertiary}
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -292,7 +289,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 <Ionicons
                   name="person-outline"
                   size={20}
-                  color="#9CA3AF"
+                  color={colors.textTertiary}
                   style={styles.inputIcon}
                 />
               </View>
@@ -300,11 +297,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
             {/* Password Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Contraseña</Text>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Contraseña</Text>
               <View style={styles.inputWrapper}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { 
+                    borderColor: colors.border, 
+                    backgroundColor: colors.surface,
+                    color: colors.textPrimary 
+                  }]}
                   placeholder="••••••••"
+                  placeholderTextColor={colors.textTertiary}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -317,13 +319,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   <Ionicons
                     name={showPassword ? 'eye-off' : 'eye'}
                     size={20}
-                    color="#9CA3AF"
+                    color={colors.textTertiary}
                   />
                 </TouchableOpacity>
                 <Ionicons
                   name="lock-closed-outline"
                   size={20}
-                  color="#9CA3AF"
+                  color={colors.textTertiary}
                   style={styles.inputIcon}
                 />
               </View>
@@ -331,11 +333,15 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
             {/* Login Button */}
             <TouchableOpacity
-              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+              style={[
+                styles.loginButton, 
+                { backgroundColor: colors.primary },
+                isLoading && styles.loginButtonDisabled
+              ]}
               onPress={handleLogin}
               disabled={isLoading}
             >
-              <Text style={styles.loginButtonText}>
+              <Text style={[styles.loginButtonText, { color: isDark ? '#000000' : '#111827' }]}>
                 {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
               </Text>
             </TouchableOpacity>
@@ -343,15 +349,15 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             {/* Alternative Login Options */}
             <View style={styles.alternativeContainer}>
               <View style={styles.divider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>o continúa con</Text>
-                <View style={styles.dividerLine} />
+                <View style={[styles.dividerLine, { backgroundColor: colors.borderSecondary }]} />
+                <Text style={[styles.dividerText, { color: colors.textSecondary }]}>o continúa con</Text>
+                <View style={[styles.dividerLine, { backgroundColor: colors.borderSecondary }]} />
               </View>
 
               <View style={styles.alternativeButtons}>
-                {/* Google Login Button */}
+                {/* Google Login Button - Full Width */}
                 <TouchableOpacity
-                  style={[styles.socialButton, styles.googleButton]}
+                  style={[styles.socialButton, { backgroundColor: '#4285F4' }]}
                   onPress={handleGoogleLogin}
                   disabled={isLoading}
                 >
@@ -359,24 +365,33 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   <Text style={styles.socialButtonText}>Continuar con Google</Text>
                 </TouchableOpacity>
 
-                                                          <TouchableOpacity
-                          style={styles.alternativeButton}
-                          onPress={handleBiometricLogin}
-                          disabled={isBiometricLoading}
-                        >
-                          <Ionicons name="finger-print" size={20} color="#10B981" />
-                          <Text style={styles.alternativeButtonText}>
-                            {isBiometricLoading ? 'Verificando...' : 'Huella'}
-                          </Text>
-                        </TouchableOpacity>
+                {/* Biometric and PIN Buttons - Side by Side */}
+                <View style={styles.secondaryButtonsRow}>
+                  <TouchableOpacity
+                    style={[styles.alternativeButton, { 
+                      borderColor: colors.border, 
+                      backgroundColor: colors.surface 
+                    }]}
+                    onPress={handleBiometricLogin}
+                    disabled={isBiometricLoading}
+                  >
+                    <Ionicons name="finger-print" size={20} color={colors.success} />
+                    <Text style={[styles.alternativeButtonText, { color: colors.textPrimary }]}>
+                      {isBiometricLoading ? 'Verificando...' : 'Huella'}
+                    </Text>
+                  </TouchableOpacity>
 
-                        <TouchableOpacity
-                          style={styles.alternativeButton}
-                          onPress={() => navigation.navigate('PINVerification')}
-                        >
-                          <Ionicons name="keypad" size={20} color="#8B5CF6" />
-                          <Text style={styles.alternativeButtonText}>PIN</Text>
-                        </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.alternativeButton, { 
+                      borderColor: colors.border, 
+                      backgroundColor: colors.surface 
+                    }]}
+                    onPress={() => navigation.navigate('PINVerification')}
+                  >
+                    <Ionicons name="keypad" size={20} color="#8B5CF6" />
+                    <Text style={[styles.alternativeButtonText, { color: colors.textPrimary }]}>PIN</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
 
@@ -386,9 +401,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 onPress={() => navigation.navigate('Register')}
                 style={styles.linkButton}
               >
-                <Text style={styles.linkText}>
+                <Text style={[styles.linkText, { color: colors.textSecondary }]}>
                   ¿No tienes cuenta?{' '}
-                  <Text style={styles.linkHighlight}>Regístrate</Text>
+                  <Text style={[styles.linkHighlight, { color: colors.primary }]}>Regístrate</Text>
                 </Text>
               </TouchableOpacity>
 
@@ -398,9 +413,26 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   style={styles.helpLink}
                   onPress={() => navigation.navigate('ForgotPassword')}
                 >
-                  <Text style={styles.helpLinkText}>¿Olvidaste tu contraseña?</Text>
+                  <Text style={[styles.helpLinkText, { color: colors.primary }]}>¿Olvidaste tu contraseña?</Text>
                 </TouchableOpacity>
               </View>
+
+              {/* Botón temporal para limpiar verificación móvil (solo para testing) */}
+              <TouchableOpacity
+                style={styles.clearDataButton}
+                onPress={async () => {
+                  try {
+                    await mobileVerificationService.clearMobileVerification();
+                    Alert.alert('Datos Limpiados', 'La verificación móvil ha sido limpiada. Puedes probar el flujo completo nuevamente.');
+                  } catch (error) {
+                    console.error('Error clearing mobile verification:', error);
+                  }
+                }}
+              >
+                <Text style={[styles.clearDataText, { color: colors.error }]}>
+                  🧹 Limpiar Verificación Móvil (Testing)
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -412,18 +444,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 40,
+    paddingVertical: 20, // Reducido de 40 a 20
   },
   content: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    padding: 24,
+    padding: 20, // Reducido de 24 a 20
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -435,111 +465,104 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 24, // Reducido de 40 a 24
   },
   logo: {
-    width: 200,
-    height: 100,
+    width: 160, // Reducido de 200 a 160
+    height: 80, // Reducido de 100 a 80
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 20, // Reducido de 32 a 20
   },
   title: {
-    fontSize: 28,
+    fontSize: 24, // Reducido de 28 a 24
     fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 8,
+    marginBottom: 6, // Reducido de 8 a 6
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
+    fontSize: 14, // Reducido de 16 a 14
     textAlign: 'center',
   },
   form: {
-    gap: 20,
+    gap: 16, // Reducido de 20 a 16
   },
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF2F2',
     borderWidth: 1,
-    borderColor: '#FECACA',
     borderRadius: 8,
-    padding: 12,
+    padding: 10, // Reducido de 12 a 10
     gap: 8,
   },
   errorText: {
-    color: '#DC2626',
     fontSize: 14,
     flex: 1,
   },
   inputContainer: {
-    gap: 8,
+    gap: 6, // Reducido de 8 a 6
   },
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
   },
   inputWrapper: {
     position: 'relative',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#D1D5DB',
     borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 12,
+    paddingVertical: 10, // Reducido de 12 a 10
     paddingRight: 40,
     fontSize: 16,
-    backgroundColor: '#FFFFFF',
   },
   inputIcon: {
     position: 'absolute',
     right: 12,
-    top: 12,
+    top: 10, // Ajustado para el nuevo padding
   },
   passwordToggle: {
     position: 'absolute',
     right: 40,
-    top: 12,
+    top: 10, // Ajustado para el nuevo padding
   },
   loginButton: {
-    backgroundColor: '#FFC300',
     borderRadius: 8,
-    paddingVertical: 14,
+    paddingVertical: 12, // Reducido de 14 a 12
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 6, // Reducido de 8 a 6
   },
   loginButtonDisabled: {
     opacity: 0.6,
   },
   loginButtonText: {
-    color: '#111827',
     fontSize: 16,
     fontWeight: '600',
   },
   alternativeContainer: {
-    marginTop: 24,
+    marginTop: 16, // Reducido de 24 a 16
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16, // Reducido de 20 a 16
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E5E7EB',
   },
   dividerText: {
     marginHorizontal: 16,
-    color: '#6B7280',
     fontSize: 14,
   },
   alternativeButtons: {
+    flexDirection: 'column',
+    gap: 12, // Reducido de 16 a 12
+  },
+  secondaryButtonsRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     gap: 12,
   },
   alternativeButton: {
@@ -548,59 +571,66 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#D1D5DB',
     borderRadius: 8,
-    paddingVertical: 12,
+    paddingVertical: 12, // Reducido de 14 a 12
+    paddingHorizontal: 16,
     gap: 8,
   },
   alternativeButtonText: {
-    color: '#374151',
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 15,
+    fontWeight: '600',
   },
   socialButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    paddingVertical: 12,
+    paddingVertical: 10, // Reducido de 12 a 10
+    paddingHorizontal: 16,
     gap: 8,
-  },
-  googleButton: {
-    backgroundColor: '#4285F4',
-    borderColor: '#4285F4',
+    width: '100%',
   },
   socialButtonText: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 15,
+    fontWeight: '600',
   },
   linksContainer: {
-    marginTop: 24,
-    gap: 12,
+    marginTop: 16, // Reducido de 24 a 16
+    gap: 8, // Reducido de 12 a 8
   },
   linkButton: {
     alignItems: 'center',
   },
   linkText: {
-    color: '#6B7280',
     fontSize: 14,
     textAlign: 'center',
   },
   linkHighlight: {
-    color: '#FFC300',
     fontWeight: '600',
   },
   helpLinks: {
-    marginTop: 12,
+    marginTop: 8, // Reducido de 12 a 8
   },
   helpLink: {
     alignItems: 'center',
   },
   helpLinkText: {
-    color: '#FFC300',
     fontSize: 14,
     textDecorationLine: 'underline',
+  },
+  clearDataButton: {
+    marginTop: 12,
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FF0000', // Color rojo para indicar que es un botón de limpieza
+  },
+  clearDataText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

@@ -56,6 +56,9 @@ router.get('/stores-needing-renewal', AdminController.getStoresNeedingRenewal);
 // Generar productos de prueba
 router.post('/products/generate', AdminController.prototype.generateProducts);
 
+// Regenerar productos con imágenes reales (método de prueba)
+router.post('/products/regenerate-images', AdminController.prototype.regenerateProductsWithRealImages);
+
 // Buscar productos por ubicación
 router.get('/products/by-location', AdminController.findProductsByLocation);
 

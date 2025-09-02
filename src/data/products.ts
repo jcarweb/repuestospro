@@ -166,21 +166,21 @@ export const categories = [
   {
     id: 'car',
     name: 'Automóviles',
-    icon: '🚗',
+    icon: 'car',
     description: 'Repuestos para autos y vehículos ligeros',
     productCount: 45
   },
   {
     id: 'motorcycle',
     name: 'Motocicletas',
-    icon: '🏍️',
+    icon: 'bike',
     description: 'Repuestos para motos y scooters',
     productCount: 32
   },
   {
     id: 'truck',
     name: 'Camiones',
-    icon: '🚛',
+    icon: 'truck',
     description: 'Repuestos para camiones y vehículos pesados',
     productCount: 28
   }

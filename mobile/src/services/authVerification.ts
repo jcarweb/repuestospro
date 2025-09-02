@@ -25,6 +25,42 @@ class AuthVerificationService {
   };
 
   /**
+   * Verifica el email usando un token de verificación
+   */
+  async verifyEmail(token: string): Promise<AuthVerificationResult> {
+    try {
+      const response = await fetch('http://192.168.31.122:5000/api/auth/verify-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          success: data.success,
+          error: data.success ? undefined : data.message || 'Error al verificar email',
+          data: data,
+        };
+      } else {
+        const errorData = await response.json();
+        return {
+          success: false,
+          error: errorData.message || 'Error al verificar email',
+        };
+      }
+    } catch (error) {
+      console.error('❌ Error verificando email:', error);
+      return {
+        success: false,
+        error: 'Error de conexión al verificar email',
+      };
+    }
+  }
+
+  /**
    * Verifica si el email del usuario está verificado
    */
   async checkEmailVerification(userEmail: string): Promise<AuthVerificationResult> {

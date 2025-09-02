@@ -13,12 +13,14 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface ForgotPasswordScreenProps {
   navigation: any;
 }
 
 const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation }) => {
+  const { colors } = useTheme();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
@@ -72,7 +74,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -83,7 +85,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
               style={styles.backButton}
               onPress={handleBackToLogin}
             >
-              <Ionicons name="arrow-back" size={24} color="#6B7280" />
+              <Ionicons name="arrow-back" size={24} color={colors.textTertiary} />
             </TouchableOpacity>
           </View>
 
@@ -98,8 +100,8 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
 
           {/* Título y descripción */}
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>Recuperar Contraseña</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>Recuperar Contraseña</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
               Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña
             </Text>
           </View>
@@ -107,19 +109,20 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
           {/* Formulario */}
           <View style={styles.form}>
             {error && (
-              <View style={styles.errorContainer}>
-                <Ionicons name="alert-circle" size={20} color="#DC2626" />
-                <Text style={styles.errorText}>{error}</Text>
+              <View style={[styles.errorContainer, { backgroundColor: colors.error + '20' }]}>
+                <Ionicons name="alert-circle" size={20} color={colors.error} />
+                <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
               </View>
             )}
 
             {/* Email Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Correo electrónico</Text>
-              <View style={styles.inputWrapper}>
+              <Text style={[styles.label, { color: colors.textPrimary }]}>Correo electrónico</Text>
+              <View style={[styles.inputWrapper, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.textPrimary }]}
                   placeholder="tu@email.com"
+                  placeholderTextColor={colors.textTertiary}
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -130,7 +133,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
                 <Ionicons
                   name="mail-outline"
                   size={20}
-                  color="#9CA3AF"
+                  color={colors.textTertiary}
                   style={styles.inputIcon}
                 />
               </View>
@@ -138,17 +141,17 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
 
             {/* Botón de envío */}
             <TouchableOpacity
-              style={[styles.sendButton, isLoading && styles.sendButtonDisabled]}
+              style={[styles.sendButton, { backgroundColor: colors.primary }, isLoading && styles.sendButtonDisabled]}
               onPress={handleSendResetEmail}
               disabled={isLoading}
             >
               {isLoading ? (
                 <View style={styles.loadingContainer}>
-                  <Ionicons name="hourglass-outline" size={20} color="#FFFFFF" />
-                  <Text style={styles.sendButtonText}>Enviando...</Text>
+                  <Ionicons name="hourglass-outline" size={20} color={colors.textPrimary} />
+                  <Text style={[styles.sendButtonText, { color: colors.textPrimary }]}>Enviando...</Text>
                 </View>
               ) : (
-                <Text style={styles.sendButtonText}>Enviar Email de Recuperación</Text>
+                <Text style={[styles.sendButtonText, { color: colors.textPrimary }]}>Enviar Email de Recuperación</Text>
               )}
             </TouchableOpacity>
 
@@ -158,7 +161,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
               onPress={handleBackToLogin}
               disabled={isLoading}
             >
-              <Text style={styles.backToLoginText}>
+              <Text style={[styles.backToLoginText, { color: colors.primary }]}>
                 ¿Recordaste tu contraseña? Iniciar sesión
               </Text>
             </TouchableOpacity>
@@ -172,7 +175,6 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -204,13 +206,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#111827',
     textAlign: 'center',
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -223,14 +223,11 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#D1D5DB',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -238,13 +235,11 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#111827',
   },
   inputIcon: {
     marginLeft: 12,
   },
   sendButton: {
-    backgroundColor: '#FFC300',
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
@@ -268,7 +263,6 @@ const styles = StyleSheet.create({
   sendButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
   },
   backToLoginButton: {
     alignItems: 'center',
@@ -276,13 +270,11 @@ const styles = StyleSheet.create({
   },
   backToLoginText: {
     fontSize: 14,
-    color: '#FFC300',
     fontWeight: '600',
   },
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEE2E2',
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -290,7 +282,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 14,
-    color: '#DC2626',
     marginLeft: 8,
     flexShrink: 1,
   },

@@ -9,39 +9,11 @@ import {
   Tag, 
   ShoppingCart, 
   Award, 
-  Users, 
-  Search, 
-  Truck,
-  Store,
-  Settings,
   User,
-  CreditCard,
-  MapPin,
-  Clock,
-  Star,
-  MessageSquare,
-  FileText,
   Bell,
   Shield,
-  Key,
-  Smartphone,
-  Navigation,
-  Calendar,
-  TrendingUp,
-  DollarSign,
-  Gift,
   Heart,
   ShoppingBag,
-  Building2,
-  LayoutDashboard,
-  Map,
-  Eye,
-  EyeOff,
-  Sun,
-  Moon,
-  Globe,
-  ChevronDown,
-  ChevronUp,
   X,
   ChevronLeft,
   ChevronRight
@@ -63,12 +35,9 @@ const ClientSidebar: React.FC<ClientSidebarProps> = ({
   onToggleCollapse
 }) => {
   const { user } = useAuth();
-  const { t, currentLanguage, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const { isDark } = useTheme();
   const location = useLocation();
-  
-  const [showThemeMenu, setShowThemeMenu] = React.useState(false);
-  const [showLanguageMenu, setShowLanguageMenu] = React.useState(false);
 
   const isActive = (path: string) => {
     const isExactMatch = location.pathname === path;
@@ -140,94 +109,7 @@ const ClientSidebar: React.FC<ClientSidebarProps> = ({
     }
   ];
 
-  // Componente de selector de tema
-  const ThemeSelector = () => (
-    <div className="relative">
-      <button
-        onClick={() => setShowThemeMenu(!showThemeMenu)}
-        className={`
-          flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-          ${isDark 
-            ? 'bg-gray-700 text-white hover:bg-gray-600' 
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }
-        `}
-      >
-        {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-        {!isCollapsed && <span>{isDark ? t('theme.dark') : t('theme.light')}</span>}
-        {!isCollapsed && (showThemeMenu ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
-      </button>
-      
-      {showThemeMenu && !isCollapsed && (
-        <div className={`
-          absolute top-full left-0 mt-1 w-48 rounded-lg shadow-lg z-50
-          ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}
-        `}>
-          <button
-            onClick={() => {
-              // Aquí conectarías con tu contexto de tema
-              setShowThemeMenu(false);
-            }}
-            className={`
-              w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700
-              ${isDark ? 'text-white' : 'text-gray-700'}
-            `}
-          >
-            <div className="flex items-center space-x-2">
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              <span>{isDark ? t('theme.switchToLight') : t('theme.switchToDark')}</span>
-            </div>
-          </button>
-        </div>
-      )}
-    </div>
-  );
 
-  // Componente de selector de idioma
-  const LanguageSelector = () => (
-    <div className="relative">
-      <button
-        onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-        className={`
-          flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-          ${isDark 
-            ? 'bg-gray-700 text-white hover:bg-gray-600' 
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }
-        `}
-      >
-        <Globe className="w-4 h-4" />
-        {!isCollapsed && <span>{t(`language.${currentLanguage}`)}</span>}
-        {!isCollapsed && (showLanguageMenu ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
-      </button>
-      
-      {showLanguageMenu && !isCollapsed && (
-        <div className={`
-          absolute top-full left-0 mt-1 w-48 rounded-lg shadow-lg z-50
-          ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}
-        `}>
-          {(['es', 'en', 'pt'] as const).map((lang) => (
-            <button
-              key={lang}
-              onClick={() => {
-                // Aquí conectarías con tu contexto de idioma
-                setShowLanguageMenu(false);
-              }}
-              className={`
-                w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700
-                ${currentLanguage === lang 
-                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                  : isDark ? 'text-white' : 'text-gray-700'
-                }
-              `}
-            >
-              {t(`language.${lang}`)}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <>
@@ -326,11 +208,7 @@ const ClientSidebar: React.FC<ClientSidebarProps> = ({
               </div>
             )}
 
-            {/* Controles de tema e idioma */}
-            <div className={`flex items-center space-x-2 ${isCollapsed ? 'justify-center' : ''}`}>
-              <ThemeSelector />
-              <LanguageSelector />
-            </div>
+
           </div>
         </div>
       </div>

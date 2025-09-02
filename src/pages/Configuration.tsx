@@ -378,7 +378,7 @@ const Configuration: React.FC = () => {
                         </div>
                       </div>
                       <LanguageSelector 
-                        onChange={updateLanguageSetting}
+                        onChange={(language: string) => updateLanguageSetting(language as 'es' | 'en' | 'pt')}
                         className="px-3 py-2 border border-gray-300 dark:border-dark rounded-lg focus:ring-2 focus:ring-racing-500 focus:border-transparent bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark"
                         showLabel={false}
                       />

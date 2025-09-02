@@ -35,10 +35,10 @@ class EmailService {
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .header { background: linear-gradient(135deg, #FFC300 0%, #E6B800 100%); color: #333; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
           .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-          .feature { background: white; margin: 10px 0; padding: 15px; border-radius: 5px; border-left: 4px solid #667eea; }
-          .cta { background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; }
+          .feature { background: white; margin: 10px 0; padding: 15px; border-radius: 5px; border-left: 4px solid #FFC300; }
+          .cta { background: #FFC300; color: #333; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; font-weight: bold; }
           .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
         </style>
       </head>
@@ -99,10 +99,10 @@ class EmailService {
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .header { background: linear-gradient(135deg, #FFC300 0%, #E6B800 100%); color: #333; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
           .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-          .code { background: #667eea; color: white; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; border-radius: 5px; margin: 20px 0; letter-spacing: 3px; }
-          .cta { background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; }
+          .code { background: #FFC300; color: #333; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; border-radius: 5px; margin: 20px 0; letter-spacing: 3px; }
+          .cta { background: #FFC300; color: #333; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; font-weight: bold; }
           .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
           .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
         </style>
@@ -172,9 +172,9 @@ class EmailService {
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .header { background: linear-gradient(135deg, #FFC300 0%, #E6B800 100%); color: #333; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
           .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-          .cta { background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; }
+          .cta { background: #FFC300; color: #333; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; font-weight: bold; }
           .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
           .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
         </style>
@@ -198,7 +198,7 @@ class EmailService {
             </div>
             
             <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
-            <p style="word-break: break-all; color: #667eea;">${resetUrl}</p>
+            <p style="word-break: break-all; color: #FFC300;">${resetUrl}</p>
             
             <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
@@ -231,9 +231,9 @@ class EmailService {
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .header { background: linear-gradient(135deg, #FFC300 0%, #E6B800 100%); color: #333; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
           .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-          .cta { background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; }
+          .cta { background: #FFC300; color: #333; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; font-weight: bold; }
           .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
         </style>
       </head>
@@ -252,7 +252,7 @@ class EmailService {
             <a href="${verificationUrl}" class="cta">Verificar Email</a>
             
             <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
-            <p style="word-break: break-all; color: #667eea;">${verificationUrl}</p>
+            <p style="word-break: break-all; color: #FFC300;">${verificationUrl}</p>
             
             <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
@@ -443,9 +443,9 @@ class EmailService {
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .header { background: linear-gradient(135deg, #FFC300 0%, #E6B800 100%); color: #333; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
           .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-          .estimate-box { background: white; margin: 20px 0; padding: 20px; border-radius: 5px; border: 2px solid #667eea; }
+          .estimate-box { background: white; margin: 20px 0; padding: 20px; border-radius: 5px; border: 2px solid #FFC300; }
           .estimate-item { display: flex; justify-content: space-between; margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; }
           .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
         </style>
@@ -520,10 +520,10 @@ class EmailService {
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .header { background: linear-gradient(135deg, #FFC300 0%, #E6B800 100%); color: #333; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
           .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
           .alert { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
-          .cta { background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; }
+          .cta { background: #FFC300; color: #333; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; font-weight: bold; }
           .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
         </style>
       </head>
@@ -740,11 +740,11 @@ class EmailService {
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .header { background: linear-gradient(135deg, #FFC300 0%, #E6B800 100%); color: #333; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
           .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
           .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
-          .metric-box { background: white; padding: 15px; border-radius: 5px; border-left: 4px solid #667eea; text-align: center; }
-          .metric-value { font-size: 24px; font-weight: bold; color: #667eea; }
+          .metric-box { background: white; padding: 15px; border-radius: 5px; border-left: 4px solid #FFC300; text-align: center; }
+          .metric-value { font-size: 24px; font-weight: bold; color: #FFC300; }
           .metric-label { font-size: 12px; color: #666; margin-top: 5px; }
           .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
         </style>

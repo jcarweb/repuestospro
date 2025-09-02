@@ -1,182 +1,293 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, StyleSheet } from 'react-native';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { linking } from '../config/linking';
 
 // Auth Screens
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
-import ResetPasswordScreen from '../screens/auth/ResetPasswordScreen';
 import EmailVerificationScreen from '../screens/auth/EmailVerificationScreen';
-import GPSVerificationScreen from '../screens/auth/GPSVerificationScreen';
-import TwoFactorScreen from '../screens/auth/TwoFactorScreen';
+import EmailVerificationCallbackScreen from '../screens/auth/EmailVerificationCallbackScreen';
+import EmailVerificationSuccessScreen from '../screens/auth/EmailVerificationSuccessScreen';
 import PINVerificationScreen from '../screens/auth/PINVerificationScreen';
 
-// Main Screens
-import HomeScreen from '../screens/main/HomeScreen';
-import CategoriesScreen from '../screens/main/CategoriesScreen';
-import CartScreen from '../screens/main/CartScreen';
-import ProfileScreen from '../screens/main/ProfileScreen';
+// Client Screens
+import ClientHomeScreen from '../screens/client/ClientHomeScreen';
+import ProductsScreen from '../screens/client/ProductsScreen';
+import CartScreen from '../screens/client/CartScreen';
+import FavoritesScreen from '../screens/client/FavoritesScreen';
+import OrdersScreen from '../screens/client/OrdersScreen';
+import ProfileScreen from '../screens/client/ProfileScreen';
+import ProductDetailScreen from '../screens/client/ProductDetailScreen';
+import ChatScreen from '../screens/client/ChatScreen';
+import ChatEvaluationScreen from '../screens/client/ChatEvaluationScreen';
+import EditProfileScreen from '../screens/client/EditProfileScreen';
+import SettingsScreen from '../screens/client/SettingsScreen';
 
-// Context
-import { useAuth } from '../contexts/AuthContext';
+// Admin Screens
+import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
 
-// Placeholder screens for other tabs
-const PlaceholderScreen = ({ title }: { title: string }) => (
-  <View style={styles.placeholder}>
-    <Text style={styles.placeholderText}>{title}</Text>
-    <Text style={styles.placeholderSubtext}>Esta funcionalidad estará disponible próximamente</Text>
-  </View>
-);
+// Store Manager Screens
+import StoreManagerDashboardScreen from '../screens/store-manager/StoreManagerDashboardScreen';
 
-const SearchScreen = () => <PlaceholderScreen title="Búsqueda" />;
-const ProductDetailScreen = () => <PlaceholderScreen title="Detalle del Producto" />;
+// Delivery Screens
+import DeliveryDashboardScreen from '../screens/delivery/DeliveryDashboardScreen';
+
+// Components
+import SplashScreen from '../components/SplashScreen';
+import Toast from '../components/Toast';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Auth Stack
-const AuthStack = () => (
-  <Stack.Navigator
-    screenOptions={{
-      headerShown: false,
-    }}
-  >
-    <Stack.Screen name="Login" component={LoginScreen} />
-    <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-        <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
-        <Stack.Screen name="GPSVerification" component={GPSVerificationScreen} />
-        <Stack.Screen name="TwoFactor" component={TwoFactorScreen} />
-        <Stack.Screen name="PINVerification" component={PINVerificationScreen} />
-  </Stack.Navigator>
-);
-
-// Main Tab Navigator
-const MainTabNavigator = () => (
-  <Tab.Navigator
-    screenOptions={({ route }) => ({
-      tabBarIcon: ({ focused, color, size }) => {
-        let iconName: keyof typeof Ionicons.glyphMap;
-
-        if (route.name === 'Home') {
-          iconName = focused ? 'home' : 'home-outline';
-        } else if (route.name === 'Categories') {
-          iconName = focused ? 'grid' : 'grid-outline';
-        } else if (route.name === 'Cart') {
-          iconName = focused ? 'cart' : 'cart-outline';
-        } else if (route.name === 'Profile') {
-          iconName = focused ? 'person' : 'person-outline';
-        } else {
-          iconName = 'help-outline';
-        }
-
-        return <Ionicons name={iconName} size={size} color={color} />;
-      },
-      tabBarActiveTintColor: '#FFC300',
-      tabBarInactiveTintColor: '#6B7280',
-      tabBarStyle: {
-        backgroundColor: '#FFFFFF',
-        borderTopWidth: 1,
-        borderTopColor: '#E5E7EB',
-        paddingBottom: 8,
-        paddingTop: 8,
-        height: 60,
-      },
-      tabBarLabelStyle: {
-        fontSize: 12,
-        fontWeight: '500',
-      },
-      headerShown: false,
-    })}
-  >
-    <Tab.Screen 
-      name="Home" 
-      component={HomeScreen}
-      options={{ tabBarLabel: 'Inicio' }}
-    />
-    <Tab.Screen 
-      name="Categories" 
-      component={CategoriesScreen}
-      options={{ tabBarLabel: 'Categorías' }}
-    />
-    <Tab.Screen 
-      name="Cart" 
-      component={CartScreen}
-      options={{ tabBarLabel: 'Carrito' }}
-    />
-    <Tab.Screen 
-      name="Profile" 
-      component={ProfileScreen}
-      options={{ tabBarLabel: 'Perfil' }}
-    />
-  </Tab.Navigator>
-);
-
-// Main Stack Navigator
-const MainStack = () => (
-  <Stack.Navigator
-    screenOptions={{
-      headerShown: false,
-    }}
-  >
-    <Stack.Screen name="MainTabs" component={MainTabNavigator} />
-    <Stack.Screen name="Search" component={SearchScreen} />
-    <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
-  </Stack.Navigator>
-);
-
-// Root Navigator
-const AppNavigator = () => {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Cargando...</Text>
-      </View>
-    );
-  }
+// Client Tab Navigator
+const ClientTabNavigator = () => {
+  const { colors } = useTheme();
 
   return (
-    <NavigationContainer>
-      {isAuthenticated ? <MainStack /> : <AuthStack />}
-    </NavigationContainer>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName: keyof typeof Ionicons.glyphMap;
+
+          switch (route.name) {
+            case 'ClientHome':
+              iconName = focused ? 'home' : 'home-outline';
+              break;
+            case 'Products':
+              iconName = focused ? 'grid' : 'grid-outline';
+              break;
+            case 'Cart':
+              iconName = focused ? 'cart' : 'cart-outline';
+              break;
+            case 'Favorites':
+              iconName = focused ? 'heart' : 'heart-outline';
+              break;
+            case 'Orders':
+              iconName = focused ? 'list' : 'list-outline';
+              break;
+            case 'Profile':
+              iconName = focused ? 'person' : 'person-outline';
+              break;
+            case 'Chat':
+              iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
+              break;
+            default:
+              iconName = 'help-outline';
+          }
+
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textTertiary,
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
+        headerShown: false,
+      })}
+    >
+      <Tab.Screen 
+        name="ClientHome" 
+        component={ClientHomeScreen}
+        options={{ tabBarLabel: 'Inicio' }}
+      />
+      <Tab.Screen 
+        name="Products" 
+        component={ProductsScreen}
+        options={{ tabBarLabel: 'Productos' }}
+      />
+      <Tab.Screen 
+        name="Cart" 
+        component={CartScreen}
+        options={{ tabBarLabel: 'Carrito' }}
+      />
+      <Tab.Screen 
+        name="Favorites" 
+        component={FavoritesScreen}
+        options={{ tabBarLabel: 'Favoritos' }}
+      />
+      <Tab.Screen 
+        name="Orders" 
+        component={OrdersScreen}
+        options={{ tabBarLabel: 'Pedidos' }}
+      />
+      <Tab.Screen 
+        name="Chat" 
+        component={ChatScreen}
+        options={{ tabBarLabel: 'Chat' }}
+      />
+      <Tab.Screen 
+        name="Profile" 
+        component={ProfileScreen}
+        options={{ tabBarLabel: 'Perfil' }}
+      />
+    </Tab.Navigator>
   );
 };
 
-const styles = StyleSheet.create({
-  placeholder: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  placeholderText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  placeholderSubtext: {
-    fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  loadingText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-});
+const AppNavigator = () => {
+  const { user, isLoading } = useAuth();
+  const { colors } = useTheme();
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    // Mostrar splash screen por 2 segundos
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (showSplash || isLoading) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
+
+  return (
+    <NavigationContainer linking={linking}>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: colors.surface,
+          },
+          headerTintColor: colors.textPrimary,
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+          cardStyle: {
+            backgroundColor: colors.background,
+          },
+        }}
+      >
+        {!user ? (
+          // Auth Stack
+          <>
+            <Stack.Screen 
+              name="Login" 
+              component={LoginScreen} 
+              options={{ headerShown: false }} 
+            />
+            <Stack.Screen 
+              name="Register" 
+              component={RegisterScreen} 
+              options={{ headerShown: false }} 
+            />
+            <Stack.Screen 
+              name="ForgotPassword" 
+              component={ForgotPasswordScreen} 
+              options={{ headerShown: false }} 
+            />
+            <Stack.Screen 
+              name="EmailVerification" 
+              component={EmailVerificationScreen} 
+              options={{ headerShown: false }} 
+            />
+            <Stack.Screen 
+              name="EmailVerificationCallback" 
+              component={EmailVerificationCallbackScreen} 
+              options={{ headerShown: false }} 
+            />
+            <Stack.Screen 
+              name="EmailVerificationSuccess" 
+              component={EmailVerificationSuccessScreen} 
+              options={{ headerShown: false }} 
+            />
+            <Stack.Screen 
+              name="PINVerification" 
+              component={PINVerificationScreen} 
+              options={{ headerShown: false }} 
+            />
+          </>
+        ) : (
+          // Role-based navigation
+          <>
+            {user.role === 'client' && (
+              <>
+                <Stack.Screen 
+                  name="ClientTabs" 
+                  component={ClientTabNavigator} 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="ProductDetail" 
+                  component={ProductDetailScreen} 
+                  options={{ 
+                    headerShown: true,
+                    headerTitle: 'Detalle del Producto',
+                    headerBackTitle: 'Atrás'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="ChatEvaluation" 
+                  component={ChatEvaluationScreen} 
+                  options={{ 
+                    headerShown: true,
+                    headerTitle: 'Evaluar Chat',
+                    headerBackTitle: 'Atrás'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="EditProfile" 
+                  component={EditProfileScreen} 
+                  options={{ 
+                    headerShown: true,
+                    headerTitle: 'Editar Perfil',
+                    headerBackTitle: 'Atrás'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="Settings" 
+                  component={SettingsScreen} 
+                  options={{ 
+                    headerShown: true,
+                    headerTitle: 'Configuración',
+                    headerBackTitle: 'Atrás'
+                  }} 
+                />
+              </>
+            )}
+            
+            {user.role === 'admin' && (
+              <Stack.Screen 
+                name="AdminDashboard" 
+                component={AdminDashboardScreen} 
+                options={{ headerShown: false }} 
+              />
+            )}
+            
+            {user.role === 'store_manager' && (
+              <Stack.Screen 
+                name="StoreManagerDashboard" 
+                component={StoreManagerDashboardScreen} 
+                options={{ headerShown: false }} 
+              />
+            )}
+            
+            {user.role === 'delivery' && (
+              <Stack.Screen 
+                name="DeliveryDashboard" 
+                component={DeliveryDashboardScreen} 
+                options={{ headerShown: false }} 
+              />
+            )}
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
 
 export default AppNavigator;

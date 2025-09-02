@@ -40,6 +40,7 @@ import storeRoutes from './routes/storeRoutes';
 import activityRoutes from './routes/activityRoutes';
 import profileRoutes from './routes/profileRoutes';
 import notificationRoutes from './routes/notificationRoutes';
+import clientNotificationRoutes from './routes/clientNotificationRoutes';
 import monetizationRoutes from './routes/monetizationRoutes';
 import administrativeDivisionRoutes from './routes/administrativeDivisionRoutes';
 import inventoryRoutes from './routes/inventoryRoutes';
@@ -182,6 +183,7 @@ app.use('/api', storeRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/profile', profileLimiter, profileRoutes); // Rate limiter específico para perfil
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/client/notifications', clientNotificationRoutes);
 app.use('/api/monetization', monetizationRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/reviews', reviewRoutes);

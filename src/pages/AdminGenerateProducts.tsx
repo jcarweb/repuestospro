@@ -107,7 +107,7 @@ const AdminGenerateProducts: React.FC = () => {
     setMessage(null);
     
     try {
-      const response = await fetch('http://localhost:5000/api/admin/generate-products', {
+      const response = await fetch('http://localhost:5000/api/admin/products/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,6 +127,44 @@ const AdminGenerateProducts: React.FC = () => {
     } catch (error) {
       console.error('Error generando productos:', error);
       setMessage({ type: 'error', text: t('adminGenerateProducts.connectionErrorProducts') });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const regenerateProductsWithImages = async () => {
+    if (!selectedStore) {
+      setMessage({ type: 'error', text: t('adminGenerateProducts.selectStoreRequired') });
+      return;
+    }
+
+    setIsGenerating(true);
+    setMessage(null);
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/admin/products/regenerate-images', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ storeId: selectedStore })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setMessage({ 
+          type: 'success', 
+          text: `Productos regenerados exitosamente: ${result.data.count} productos con imágenes reales verificadas` 
+        });
+        setStats(result.data.stats);
+      } else {
+        setMessage({ type: 'error', text: result.message || 'Error regenerando productos con imágenes' });
+      }
+    } catch (error) {
+      console.error('Error regenerando productos con imágenes:', error);
+      setMessage({ type: 'error', text: 'Error de conexión al regenerar productos' });
     } finally {
       setIsGenerating(false);
     }
@@ -298,6 +336,24 @@ const AdminGenerateProducts: React.FC = () => {
                 <>
                   <Database className="w-5 h-5" />
                   <span>{t('adminGenerateProducts.generate150Products')}</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={regenerateProductsWithImages}
+              disabled={isGenerating || !selectedStore}
+              className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isGenerating ? (
+                <>
+                  <RefreshCw className="w-5 h-5 animate-spin" />
+                  <span>{t('adminGenerateProducts.regeneratingProducts')}</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5" />
+                  <span>{t('adminGenerateProducts.regenerateProducts')}</span>
                 </>
               )}
             </button>

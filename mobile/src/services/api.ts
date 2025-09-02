@@ -64,7 +64,18 @@ class ApiService {
 
     try {
       console.log('🌐 Making request to:', url);
-      const response = await fetch(url, config);
+      
+      // Agregar timeout a la petición
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
+      
+      const response = await fetch(url, {
+        ...config,
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
       const data = await response.json();
 
       if (!response.ok) {
@@ -74,6 +85,17 @@ class ApiService {
       return data;
     } catch (error) {
       console.error('API Error:', error);
+      
+      // Si es un error de timeout o conexión, devolver un error más específico
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new Error('Timeout: El servidor no respondió en el tiempo esperado');
+        }
+        if (error.message.includes('Network request failed')) {
+          throw new Error('Error de conexión: No se pudo conectar al servidor');
+        }
+      }
+      
       throw error;
     }
   }
@@ -122,6 +144,20 @@ class ApiService {
     return this.request<ApiResponse<any>>('/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email }),
+    });
+  }
+
+  async resendVerificationEmail(email: string): Promise<ApiResponse<any>> {
+    return this.request<ApiResponse<any>>('/auth/resend-verification', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async verifyEmail(token: string): Promise<ApiResponse<any>> {
+    return this.request<ApiResponse<any>>('/auth/verify-email', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
     });
   }
 

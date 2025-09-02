@@ -5,7 +5,9 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import Logo from './Logo';
 import AvatarImageSimple from './AvatarImageSimple';
+import NotificationDropdown from './NotificationDropdown';
 import { profileService } from '../services/profileService';
+import { notificationService } from '../services/notificationService';
 import { 
   ShoppingCart, 
   User, 
@@ -43,6 +45,7 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   // Cargar perfil del usuario
   useEffect(() => {
@@ -61,6 +64,22 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({
     };
 
     loadUserProfile();
+  }, [user]);
+
+  // Cargar conteo de notificaciones no leídas
+  useEffect(() => {
+    const loadNotificationCount = async () => {
+      if (user) {
+        try {
+          const response = await notificationService.getUnreadNotifications(1);
+          setNotificationCount(response.data.unreadCount);
+        } catch (error) {
+          console.error('Error loading notification count:', error);
+        }
+      }
+    };
+
+    loadNotificationCount();
   }, [user]);
 
   const handleLogout = async () => {
@@ -189,7 +208,11 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({
           >
             <Bell className="w-5 h-5" />
             {/* Badge de notificaciones */}
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+            {notificationCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                {notificationCount > 99 ? '99+' : notificationCount}
+              </span>
+            )}
           </button>
 
           {/* Carrito de Compras */}
@@ -261,6 +284,13 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Dropdown de notificaciones */}
+      <NotificationDropdown
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+        onNotificationCountChange={setNotificationCount}
+      />
     </header>
   );
 };
