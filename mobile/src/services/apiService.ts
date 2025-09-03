@@ -72,10 +72,12 @@ export class APIService {
         const baseURL = await getBaseURL();
         const url = `${baseURL}${endpoint}`;
 
-        console.log(`API Request [${attempt + 1}/${retryAttempts}]:`, {
+        console.log(`🌐 API Request [${attempt + 1}/${retryAttempts}]:`, {
           method,
           url,
           endpoint,
+          body: body ? JSON.stringify(body).substring(0, 200) + '...' : undefined,
+          headers: requestOptions.headers,
         });
 
         const controller = new AbortController();
@@ -96,6 +98,17 @@ export class APIService {
 
         const response = await fetch(url, requestOptions);
         clearTimeout(timeoutId);
+
+        console.log(`📡 Response status: ${response.status} ${response.statusText}`);
+        
+        // Verificar que response y headers existan antes de acceder
+        if (response && response.headers) {
+          try {
+            console.log(`📡 Response headers:`, Object.fromEntries(response.headers.entries()));
+          } catch (headerError) {
+            console.log(`📡 Response headers: Error reading headers -`, headerError);
+          }
+        }
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);

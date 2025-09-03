@@ -33,7 +33,7 @@ export class DynamicAPIConfig {
       this.currentConfig = {
         baseUrl: 'http://192.168.150.104:3001/api',
         isLocal: true,
-        networkName: 'Fallback',
+        networkName: 'Backend Principal',
         lastTested: Date.now(),
         isWorking: false,
       };

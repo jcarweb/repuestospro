@@ -24,8 +24,8 @@ const NETWORK_CONFIGS = {
     '172.24.0',
   ],
   
-  // Puerto por defecto
-  defaultPort: 5000,
+     // Puerto por defecto
+   defaultPort: 3001,
   
   // Timeouts
   scanTimeout: 5000,
@@ -84,17 +84,23 @@ export class NetworkDetector {
     this.isScanning = true;
 
     try {
+      console.log('🔍 Iniciando escaneo de red...');
+      
       // 1. Intentar con configuraciones guardadas primero
       const savedConfig = await this.loadSavedConfig();
       if (savedConfig && await this.testConnection(savedConfig.baseUrl)) {
+        console.log('✅ Usando configuración guardada:', savedConfig.baseUrl);
         this.currentConfig = savedConfig;
         this.isScanning = false;
         return savedConfig;
       }
 
       // 2. Intentar con redes conocidas
+      console.log('🔍 Probando redes conocidas...');
       for (const [ip, url] of Object.entries(NETWORK_CONFIGS.knownNetworks)) {
+        console.log(`🔍 Probando: ${url}`);
         if (await this.testConnection(url)) {
+          console.log('✅ Conexión exitosa con:', url);
           const config: NetworkConfig = {
             baseUrl: url,
             isLocal: true,
@@ -119,14 +125,14 @@ export class NetworkDetector {
         return localConfig;
       }
 
-      // 4. Fallback a configuración por defecto
-      const fallbackConfig: NetworkConfig = {
-        baseUrl: 'http://localhost:5000/api',
-        isLocal: true,
-        networkName: 'Localhost (Fallback)',
-        lastTested: Date.now(),
-        isWorking: false,
-      };
+             // 4. Fallback a configuración por defecto
+       const fallbackConfig: NetworkConfig = {
+         baseUrl: 'http://192.168.150.104:3001/api',
+         isLocal: true,
+         networkName: 'Backend Principal (Fallback)',
+         lastTested: Date.now(),
+         isWorking: false,
+       };
 
       this.currentConfig = fallbackConfig;
       this.isScanning = false;
@@ -135,13 +141,13 @@ export class NetworkDetector {
     } catch (error) {
       console.error('Error scanning network:', error);
       
-      const errorConfig: NetworkConfig = {
-        baseUrl: 'http://localhost:5000/api',
-        isLocal: true,
-        networkName: 'Error de Red',
-        lastTested: Date.now(),
-        isWorking: false,
-      };
+             const errorConfig: NetworkConfig = {
+         baseUrl: 'http://192.168.150.104:3001/api',
+         isLocal: true,
+         networkName: 'Error de Red',
+         lastTested: Date.now(),
+         isWorking: false,
+       };
 
       this.currentConfig = errorConfig;
       this.isScanning = false;
@@ -196,20 +202,58 @@ export class NetworkDetector {
   // Testear conexión a una URL
   private async testConnection(url: string): Promise<boolean> {
     try {
+      console.log(`🔍 Probando conexión a: ${url}`);
+      
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), NETWORK_CONFIGS.connectionTimeout);
 
-      const response = await fetch(`${url}/health`, {
-        method: 'GET',
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      // Primero probar endpoint de health
+      try {
+        const healthResponse = await fetch(`${url}/health`, {
+          method: 'GET',
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-      clearTimeout(timeoutId);
-      return response.ok;
+        clearTimeout(timeoutId);
+        
+        if (healthResponse.ok) {
+          console.log(`✅ Health check exitoso para: ${url}`);
+          return true;
+        }
+      } catch (healthError) {
+        console.log(`⚠️ Health check falló para: ${url}`, healthError);
+      }
+
+      // Si health falla, probar endpoint raíz de la API
+      try {
+        const controller2 = new AbortController();
+        const timeoutId2 = setTimeout(() => controller2.abort(), NETWORK_CONFIGS.connectionTimeout);
+
+        const apiResponse = await fetch(`${url}`, {
+          method: 'GET',
+          signal: controller2.signal,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        clearTimeout(timeoutId2);
+        
+        if (apiResponse.ok || apiResponse.status === 404) {
+          console.log(`✅ API endpoint accesible para: ${url}`);
+          return true;
+        }
+      } catch (apiError) {
+        console.log(`⚠️ API endpoint falló para: ${url}`, apiError);
+      }
+
+      console.log(`❌ Conexión falló para: ${url}`);
+      return false;
     } catch (error) {
+      console.log(`❌ Error general de conexión para: ${url}`, error);
       return false;
     }
   }

@@ -140,6 +140,18 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Ruta de salud para la API
+app.get('/api/health', (req, res) => {
+  res.json({
+    success: true,
+    message: 'API funcionando correctamente',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: config.NODE_ENV,
+    version: '1.0.0'
+  });
+});
+
 // Ruta de prueba de base de datos
 app.get('/api/db-status', async (req, res) => {
   try {
