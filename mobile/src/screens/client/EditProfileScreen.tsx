@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -33,6 +34,8 @@ const EditProfileScreen: React.FC = () => {
     address: string;
   } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const saveAttemptRef = useRef(0);
 
   useEffect(() => {
     requestPermissions();
@@ -46,16 +49,55 @@ const EditProfileScreen: React.FC = () => {
     }
   };
 
+  const resetSaveState = useCallback(() => {
+    setIsSaving(false);
+    saveAttemptRef.current = 0;
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+  }, []);
+
   const handleSave = async () => {
     if (!name.trim() || !email.trim()) {
       showToast('Por favor completa todos los campos obligatorios', 'error');
       return;
     }
 
-    if (isSaving) return; // Evitar múltiples envíos
+    if (isSaving) {
+      Alert.alert(
+        'Guardado en Progreso',
+        '¿Deseas cancelar el guardado actual e intentar de nuevo?',
+        [
+          {
+            text: 'Continuar Esperando',
+            style: 'cancel'
+          },
+          {
+            text: 'Cancelar y Reintentar',
+            style: 'destructive',
+            onPress: () => {
+              resetSaveState();
+              // Llamar handleSave de nuevo después de un pequeño delay
+              setTimeout(handleSave, 500);
+            }
+          }
+        ]
+      );
+      return;
+    }
 
     try {
       setIsSaving(true);
+      saveAttemptRef.current += 1;
+      
+      // Establecer un timeout de 30 segundos para el guardado
+      saveTimeoutRef.current = setTimeout(() => {
+        if (isSaving) {
+          setIsSaving(false);
+          showToast('El guardado está tomando demasiado tiempo. Intenta de nuevo.', 'error');
+        }
+      }, 30000);
+
       showToast('Guardando perfil...', 'info');
       
       const apiService = APIService.getInstance();
@@ -81,22 +123,64 @@ const EditProfileScreen: React.FC = () => {
         retryAttempts: 2
       });
 
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+
       if (response.success) {
         showToast('Perfil actualizado correctamente', 'success');
-        
-        // Actualizar el usuario en el contexto de autenticación
-        // Aquí podrías actualizar el contexto si es necesario
-        
         console.log('Perfil actualizado:', response.data);
+        resetSaveState();
       } else {
-        showToast(`Error al actualizar perfil: ${response.error}`, 'error');
-        console.error('Error en respuesta de API:', response);
+        throw new Error(response.error || 'Error al actualizar perfil');
       }
     } catch (error) {
       console.error('Error al guardar perfil:', error);
-      showToast('Error de conexión. Verifica tu conexión a internet.', 'error');
-    } finally {
-      setIsSaving(false);
+      
+      if (saveAttemptRef.current < 3) {
+        Alert.alert(
+          'Error al Guardar',
+          '¿Deseas intentar guardar nuevamente?',
+          [
+            {
+              text: 'Cancelar',
+              style: 'cancel',
+              onPress: resetSaveState
+            },
+            {
+              text: 'Reintentar',
+              onPress: () => {
+                resetSaveState();
+                setTimeout(handleSave, 1000);
+              }
+            }
+          ]
+        );
+      } else {
+        Alert.alert(
+          'Error al Guardar',
+          'Se ha alcanzado el límite de intentos. Por favor, verifica tu conexión e intenta más tarde.',
+          [
+            {
+              text: 'Entendido',
+              onPress: resetSaveState
+            }
+          ]
+        );
+      }
+      
+      // Mostrar mensaje específico según el tipo de error
+      if (error instanceof Error) {
+        if (error.message.includes('fetch') || error.message.includes('network')) {
+          showToast('Error de conexión. Verifica tu conexión a internet.', 'error');
+        } else if (error.message.includes('timeout')) {
+          showToast('La operación tardó demasiado. Intenta de nuevo.', 'error');
+        } else {
+          showToast(`Error: ${error.message}`, 'error');
+        }
+      } else {
+        showToast('Ocurrió un error inesperado. Intenta de nuevo.', 'error');
+      }
     }
   };
 
@@ -272,7 +356,7 @@ const EditProfileScreen: React.FC = () => {
         >
           {isSaving ? (
             <>
-              <Ionicons name="hourglass" size={20} color="#000000" />
+              <ActivityIndicator size="small" color="#000000" style={styles.saveButtonSpinner} />
               <Text style={[styles.saveButtonText, { color: '#000000' }]}>
                 Guardando...
               </Text>
@@ -369,6 +453,9 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
+  },
+  saveButtonSpinner: {
+    marginRight: 8,
   },
 
 });

@@ -77,7 +77,7 @@ export class APIService {
           url,
           endpoint,
           body: body ? JSON.stringify(body).substring(0, 200) + '...' : undefined,
-          headers: requestOptions.headers,
+          headers,
         });
 
         const controller = new AbortController();
