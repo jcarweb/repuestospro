@@ -45,6 +45,7 @@ import monetizationRoutes from './routes/monetizationRoutes';
 import administrativeDivisionRoutes from './routes/administrativeDivisionRoutes';
 import inventoryRoutes from './routes/inventoryRoutes';
 import reviewRoutes from './routes/reviewRoutes';
+import testProfileRoutes from './routes/testProfileRoutes';
 
 const app = express();
 
@@ -207,6 +208,7 @@ app.use('/api/sales-reports', createSalesReportRoutes());
 app.use('/api/delivery', deliveryRoutes);
 app.use('/api/riders', riderRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/test-profile', testProfileRoutes);
 
 // Variables globales para chat
 let chatService: ChatService;

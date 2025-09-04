@@ -5,11 +5,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const NETWORK_CONFIGS = {
   // Redes conocidas (para desarrollo rápido)
   knownNetworks: {
+    '192.168.0.110': 'http://192.168.0.110:3001/api', // IP real del backend según netstat
+    '192.168.150.104': 'http://192.168.150.104:3001/api',
     '192.168.31.122': 'http://192.168.31.122:3001/api',
     '192.168.1.100': 'http://192.168.1.100:3001/api',
     '10.0.0.100': 'http://10.0.0.100:3001/api',
     '172.20.10.1': 'http://172.20.10.1:3001/api',
-    '192.168.150.104': 'http://192.168.150.104:3001/api', // IP actual
   },
   
   // Rangos de IPs comunes para redes locales

@@ -7,6 +7,7 @@ import { ToastProvider } from './src/contexts/ToastContext';
 import { NetworkProvider } from './src/contexts/NetworkContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import SplashScreen from './src/components/SplashScreen';
+import OfflineIndicator from './src/components/OfflineIndicator';
 
 // Componente de carga simple
 const LoadingScreen = () => (
@@ -46,9 +47,10 @@ export default function App() {
   return (
     <ThemeProvider>
       <ToastProvider>
-        <NetworkProvider autoScan={true} scanInterval={30000}>
+        <NetworkProvider autoScan={false} scanInterval={60000}>
           <AuthProvider>
             <StatusBar style="light" />
+            <OfflineIndicator />
             <AppNavigator />
           </AuthProvider>
         </NetworkProvider>
