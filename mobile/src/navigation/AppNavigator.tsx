@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { linking } from '../config/linking';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Auth Screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -28,6 +29,9 @@ import ChatScreen from '../screens/client/ChatScreen';
 import ChatEvaluationScreen from '../screens/client/ChatEvaluationScreen';
 import EditProfileScreen from '../screens/client/EditProfileScreen';
 import SettingsScreen from '../screens/client/SettingsScreen';
+import ReviewsScreen from '../screens/client/ReviewsScreen';
+import SecuritySettingsScreen from '../screens/client/SecuritySettingsScreen';
+import PrivacySettingsScreen from '../screens/client/PrivacySettingsScreen';
 
 // Admin Screens
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
@@ -141,19 +145,55 @@ const ClientTabNavigator = () => {
 const AppNavigator = () => {
   const { user, isLoading } = useAuth();
   const { colors } = useTheme();
-  const [showSplash, setShowSplash] = useState(true);
+  const [showPinVerification, setShowPinVerification] = useState(false);
+  const [pinEnabled, setPinEnabled] = useState(false);
 
   useEffect(() => {
-    // Mostrar splash screen por 2 segundos
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 2000);
+    const checkPinStatus = async () => {
+      try {
+        const pinStatus = await AsyncStorage.getItem('pinEnabled');
+        const isPinEnabled = pinStatus === 'true';
+        setPinEnabled(isPinEnabled);
+        
+        console.log('🔐 PIN Status Check:', {
+          user: !!user,
+          pinStatus,
+          isPinEnabled,
+          showPinVerification: showPinVerification
+        });
+        
+        // Si el usuario está logueado y tiene PIN habilitado, mostrar verificación
+        if (user && isPinEnabled) {
+          console.log('🔐 Mostrando verificación de PIN');
+          setShowPinVerification(true);
+        }
+      } catch (error) {
+        console.error('Error checking PIN status:', error);
+      }
+    };
 
-    return () => clearTimeout(timer);
-  }, []);
+    if (user) {
+      checkPinStatus();
+    }
+  }, [user]);
 
-  if (showSplash || isLoading) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  const handlePinSuccess = () => {
+    setShowPinVerification(false);
+  };
+
+  const handlePinCancel = () => {
+    // Opcional: cerrar sesión si el usuario cancela la verificación de PIN
+    setShowPinVerification(false);
+  };
+
+  // Mostrar verificación de PIN si está habilitada
+  if (showPinVerification && user) {
+    return (
+      <PINVerificationScreen
+        navigation={{ goBack: handlePinCancel }}
+        route={{ params: { onSuccess: handlePinSuccess } }}
+      />
+    );
   }
 
   return (
@@ -254,6 +294,33 @@ const AppNavigator = () => {
                   options={{ 
                     headerShown: true,
                     headerTitle: 'Configuración',
+                    headerBackTitle: 'Atrás'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="Reviews" 
+                  component={ReviewsScreen} 
+                  options={{ 
+                    headerShown: true,
+                    headerTitle: 'Mis Reseñas',
+                    headerBackTitle: 'Atrás'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="SecuritySettings" 
+                  component={SecuritySettingsScreen} 
+                  options={{ 
+                    headerShown: true,
+                    headerTitle: 'Configuración de Seguridad',
+                    headerBackTitle: 'Atrás'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="PrivacySettings" 
+                  component={PrivacySettingsScreen} 
+                  options={{ 
+                    headerShown: true,
+                    headerTitle: 'Configuración de Privacidad',
                     headerBackTitle: 'Atrás'
                   }} 
                 />

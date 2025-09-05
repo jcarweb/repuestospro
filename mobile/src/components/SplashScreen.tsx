@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Image, Animated, StyleSheet, Dimensions } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Image, StyleSheet, Dimensions } from 'react-native';
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -8,79 +8,25 @@ interface SplashScreenProps {
 const { width, height } = Dimensions.get('window');
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
-  const logoFadeAnim = useRef(new Animated.Value(0)).current;
-
   useEffect(() => {
-    // Animación de entrada del fondo
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 800,
-      useNativeDriver: true,
-    }).start();
-
-    // Animación del logo con delay
-    setTimeout(() => {
-      Animated.parallel([
-        Animated.timing(logoFadeAnim, {
-          toValue: 1,
-          duration: 1200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 1,
-          duration: 1200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, 300);
-
-    // Mostrar splash por 3 segundos
+    // Mostrar splash por 2 segundos (reducido para evitar problemas)
     const timer = setTimeout(() => {
-      // Animación de salida
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(logoFadeAnim, {
-          toValue: 0,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 0.9,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        onFinish();
-      });
-    }, 3000);
+      onFinish();
+    }, 2000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [onFinish]);
 
   return (
-    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-      <Animated.View
-        style={[
-          styles.logoContainer,
-          {
-            opacity: logoFadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
-      >
+    <View style={styles.container}>
+      <View style={styles.logoContainer}>
         <Image
           source={require('../../assets/piezasya.png')}
           style={styles.logo}
           resizeMode="contain"
         />
-      </Animated.View>
-    </Animated.View>
+      </View>
+    </View>
   );
 };
 

@@ -21,6 +21,7 @@
     "expo-linear-gradient": "^14.1.5",
     "expo-local-authentication": "^16.0.5",
     "expo-location": "^18.1.6",
+    "expo-notifications": "^0.31.4",
     "expo-router": "^5.1.4",
     "expo-status-bar": "~2.2.3",
     "expo-web-browser": "^14.2.0",

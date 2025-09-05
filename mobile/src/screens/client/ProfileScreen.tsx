@@ -5,7 +5,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  Image,
+  ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -17,14 +21,17 @@ const ProfileScreen: React.FC = () => {
   const { user, logout } = useAuth();
   const { showToast } = useToast();
   const navigation = useNavigation();
-  const [isLoaded, setIsLoaded] = useState(false);
+  
+  // Estado para controlar si el componente está listo para renderizar
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    console.log('ProfileScreen useEffect ejecutado');
-    setTimeout(() => {
-      console.log('ProfileScreen carga completada');
-      setIsLoaded(true);
-    }, 1000);
+    // Pequeño delay para asegurar que el contexto esté estable
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleEditProfile = () => {
@@ -45,7 +52,7 @@ const ProfileScreen: React.FC = () => {
   };
 
   const handleRatingPress = () => {
-    showToast('Funcionalidad de reseñas próximamente', 'info');
+    navigation.navigate('Reviews' as never);
   };
 
   const handleSettingsPress = () => {
@@ -61,37 +68,43 @@ const ProfileScreen: React.FC = () => {
         {
           text: 'Cerrar sesión',
           style: 'destructive',
-          onPress: () => {
-            logout();
+          onPress: async () => {
+            try {
+              showToast('Cerrando sesión...', 'info');
+              await logout();
+              showToast('Sesión cerrada correctamente', 'success');
+            } catch (error) {
+              showToast('Error al cerrar sesión', 'error');
+            }
           },
         },
       ]
     );
   };
 
-  console.log('ProfileScreen render - isLoaded:', isLoaded, 'user:', user);
+  console.log('ProfileScreen render - user:', user, 'isReady:', isReady);
 
-  if (!isLoaded) {
-    console.log('Mostrando loading...');
-    return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={styles.loadingContainer}>
-          <Text style={[styles.loadingText, { color: colors.textPrimary }]}>
-            Cargando perfil...
-          </Text>
-        </View>
-      </View>
-    );
+  // Si no está listo o no hay usuario, no renderizar nada
+  if (!isReady || !user) {
+    return null;
   }
 
-  console.log('Renderizando perfil principal');
-
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-
-
-      {/* Header simple */}
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Header simple */}
       <View style={[styles.header, { backgroundColor: colors.surface }]}>
+        {/* Foto de perfil */}
+        <View style={styles.profileImageContainer}>
+          {user?.profileImage ? (
+            <Image source={{ uri: user.profileImage }} style={styles.profileImage} />
+          ) : (
+            <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.primary }]}>
+              <Ionicons name="person" size={40} color="#000000" />
+            </View>
+          )}
+        </View>
+        
         <Text style={[styles.userName, { color: colors.textPrimary }]}>
           {user?.name || 'Juan Carlos Hernandez'}
         </Text>
@@ -124,7 +137,11 @@ const ProfileScreen: React.FC = () => {
               Miembro desde:
             </Text>
             <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
-              31 de diciembre de 2023
+              {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }) : 'No disponible'}
             </Text>
           </View>
           
@@ -133,7 +150,11 @@ const ProfileScreen: React.FC = () => {
               Último acceso:
             </Text>
             <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
-              15 de enero de 2024
+              {user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }) : 'No disponible'}
             </Text>
           </View>
           
@@ -142,7 +163,10 @@ const ProfileScreen: React.FC = () => {
               Tipo de cuenta:
             </Text>
             <Text style={[styles.infoValue, { color: colors.primary }]}>
-              Cliente
+              {user?.role === 'client' ? 'Cliente' : 
+               user?.role === 'admin' ? 'Administrador' :
+               user?.role === 'store_manager' ? 'Gestor de Tienda' :
+               user?.role === 'delivery' ? 'Repartidor' : 'Usuario'}
             </Text>
           </View>
         </View>
@@ -221,28 +245,39 @@ const ProfileScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
-  loadingContainer: {
+  scrollView: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 18,
-    fontWeight: '600',
+    padding: 16,
   },
   header: {
     padding: 20,
     marginBottom: 16,
     borderRadius: 12,
+    alignItems: 'center',
+  },
+  profileImageContainer: {
+    marginBottom: 16,
+  },
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  profileImagePlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   userName: {
     fontSize: 24,

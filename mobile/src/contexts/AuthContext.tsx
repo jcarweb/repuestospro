@@ -21,6 +21,8 @@ interface AuthContextType {
   resetPassword: (token: string, password: string) => Promise<void>;
   resendVerificationEmail: (email: string) => Promise<void>;
   verifyEmail: (token: string) => Promise<void>;
+  updateUser: (userData: Partial<User>) => Promise<void>;
+  refreshUser: () => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
   error: string | null;
@@ -249,6 +251,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const updateUser = async (userData: Partial<User>) => {
+    try {
+      if (user) {
+        const updatedUser = { ...user, ...userData };
+        setUser(updatedUser);
+        await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+        console.log('👤 Usuario actualizado en contexto:', updatedUser);
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };
+
+  const refreshUser = async () => {
+    try {
+      // No cambiar isLoading para evitar parpadeos
+      // Solo recargar desde AsyncStorage sin mostrar loading
+      const userData = await AsyncStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        setUser(user);
+        console.log('🔄 Usuario refrescado desde storage:', user);
+      }
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+    }
+  };
+
   const clearError = () => {
     setError(null);
   };
@@ -264,6 +294,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     resetPassword,
     resendVerificationEmail,
     verifyEmail,
+    updateUser,
+    refreshUser,
     logout,
     clearError,
     error,

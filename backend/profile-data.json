@@ -1,0 +1,21 @@
+{
+  "id": "68b3667c391eb9a20750d0aa",
+  "name": "Juan Carlos Hernández",
+  "email": "somoselson@gmail.com",
+  "phone": "+57 300 1236533",
+  "role": "client",
+  "isEmailVerified": true,
+  "twoFactorEnabled": false,
+  "fingerprintEnabled": false,
+  "stores": [],
+  "address": "Prueba de edicion 1",
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      -66.9843057,
+      10.4632045
+    ],
+    "address": "Calle Atras de Antímano, Caracas, Distrito Capital, Venezuela"
+  },
+  "profileImage": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252Fpiezasya-mobile-178edffe-916b-4b4d-85f4-5eb9cc79970a/ImagePicker/c2d43636-7b99-4d25-b983-e312e157133c.jpeg"
+}

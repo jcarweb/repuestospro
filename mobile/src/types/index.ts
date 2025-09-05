@@ -6,6 +6,13 @@ export interface User {
   role: 'admin' | 'client' | 'store_manager' | 'delivery';
   referralCode?: string;
   isEmailVerified?: boolean;
+  profileImage?: string;
+  address?: string;
+  location?: {
+    type: 'Point';
+    coordinates: [number, number];
+    address: string;
+  };
   createdAt: string;
   updatedAt: string;
 }

@@ -15,24 +15,28 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import LocationPicker from '../../components/LocationPicker';
+import InteractiveMap from '../../components/InteractiveMap';
 import { APIService } from '../../services/apiService';
 
 const EditProfileScreen: React.FC = () => {
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { showToast } = useToast();
   
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState('+57 300 123 4567');
-  const [address, setAddress] = useState('Calle 123 #45-67, Bogotá');
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [phone, setPhone] = useState(user?.phone || '+57 300 123 4567');
+  const [address, setAddress] = useState(user?.address || 'Calle 123 #45-67, Bogotá');
+  const [profileImage, setProfileImage] = useState<string | null>(user?.profileImage || null);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
     address: string;
-  } | null>(null);
+  } | null>(user?.location ? {
+    latitude: user.location.coordinates[1],
+    longitude: user.location.coordinates[0],
+    address: user.location.address
+  } : null);
   const [isSaving, setIsSaving] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const saveAttemptRef = useRef(0);
@@ -40,6 +44,25 @@ const EditProfileScreen: React.FC = () => {
   useEffect(() => {
     requestPermissions();
   }, []);
+
+  // Actualizar campos cuando el usuario cambie
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setEmail(user.email || '');
+      setPhone(user.phone || '+57 300 123 4567');
+      setAddress(user.address || 'Calle 123 #45-67, Bogotá');
+      setProfileImage(user.profileImage || null);
+      
+      if (user.location) {
+        setLocation({
+          latitude: user.location.coordinates[1],
+          longitude: user.location.coordinates[0],
+          address: user.location.address
+        });
+      }
+    }
+  }, [user]);
 
   const requestPermissions = async () => {
     // Solicitar permisos de cámara
@@ -108,6 +131,7 @@ const EditProfileScreen: React.FC = () => {
         email: email.trim(),
         phone: phone.trim(),
         address: address.trim(),
+        profileImage: profileImage,
         location: location ? {
           type: 'Point',
           coordinates: [location.longitude, location.latitude],
@@ -130,6 +154,12 @@ const EditProfileScreen: React.FC = () => {
       if (response.success) {
         showToast('Perfil actualizado correctamente', 'success');
         console.log('Perfil actualizado:', response.data);
+        
+        // Actualizar el contexto de autenticación con los nuevos datos
+        if (response.data) {
+          await updateUser(response.data);
+        }
+        
         resetSaveState();
       } else {
         throw new Error(response.error || 'Error al actualizar perfil');
@@ -336,7 +366,7 @@ const EditProfileScreen: React.FC = () => {
       </View>
 
       {/* Ubicación y Mapa */}
-      <LocationPicker
+      <InteractiveMap
         onLocationSelect={(newLocation) => setLocation(newLocation)}
         initialLocation={location}
       />
