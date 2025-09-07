@@ -45,7 +45,9 @@ import monetizationRoutes from './routes/monetizationRoutes';
 import administrativeDivisionRoutes from './routes/administrativeDivisionRoutes';
 import inventoryRoutes from './routes/inventoryRoutes';
 import reviewRoutes from './routes/reviewRoutes';
-import testProfileRoutes from './routes/testProfileRoutes';
+import cryptoAuthRoutes from './routes/cryptoAuthRoutes';
+import storePhotoRoutes from './routes/storePhotoRoutes';
+import { enrichmentWorker } from './services/enrichmentWorker';
 
 const app = express();
 
@@ -208,7 +210,8 @@ app.use('/api/sales-reports', createSalesReportRoutes());
 app.use('/api/delivery', deliveryRoutes);
 app.use('/api/riders', riderRoutes);
 app.use('/api/analytics', analyticsRoutes);
-app.use('/api/test-profile', testProfileRoutes);
+app.use('/api/crypto-auth', cryptoAuthRoutes);
+app.use('/api/store-photos', storePhotoRoutes);
 
 // Variables globales para chat
 let chatService: ChatService;
@@ -312,6 +315,10 @@ const initializeApp = async () => {
     
     // Iniciar servidor
     const server = await startServer();
+    
+    // Iniciar worker de enriquecimiento
+    await enrichmentWorker.startWorker();
+    console.log('🔍 Worker de enriquecimiento iniciado');
 
     // Manejo de señales de terminación
     const gracefulShutdown = async (signal: string) => {
@@ -321,6 +328,10 @@ const initializeApp = async () => {
         console.log('✅ Servidor HTTP cerrado');
         
         try {
+          // Detener worker de enriquecimiento
+          enrichmentWorker.stopWorker();
+          console.log('✅ Worker de enriquecimiento detenido');
+          
           await dbService.disconnectFromDatabase();
           console.log('✅ Base de datos desconectada');
         } catch (error) {

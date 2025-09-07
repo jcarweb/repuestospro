@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Modal,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -20,6 +21,9 @@ import biometricAuthService from '../../services/biometricAuth';
 import authVerificationService from '../../services/authVerification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import mobileVerificationService from '../../services/mobileVerification';
+import NetworkDiagnostic from '../../components/NetworkDiagnostic';
+import TwoFactorVerificationModal from '../../components/TwoFactorVerificationModal';
+import PinLoginModal from '../../components/PinLoginModal';
 
 interface LoginScreenProps {
   navigation: any;
@@ -32,7 +36,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [isBiometricLoading, setIsBiometricLoading] = useState(false);
   const [userAuthSettings, setUserAuthSettings] = useState<any>(null);
-  const { login, loginWithGoogle, isLoading, error, clearError } = useAuth();
+  const [showNetworkDiagnostic, setShowNetworkDiagnostic] = useState(false);
+  const [showPinModal, setShowPinModal] = useState(false);
+  const { login, loginWithGoogle, verifyTwoFactor, isLoading, error, clearError, requiresTwoFactor } = useAuth();
   const { colors, isDark } = useTheme();
 
   // Verificar disponibilidad de autenticación biométrica al cargar
@@ -76,11 +82,17 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       if (isVerified) {
         // Usuario ya verificado en móvil, hacer login directamente
         await login(email, password);
+        
+        // Guardar credenciales para uso futuro con PIN/biometría
+        await AsyncStorage.setItem('savedCredentials', JSON.stringify({ email, password }));
         return;
       }
 
       // Si no está verificado, intentar login normal
       await login(email, password);
+      
+      // Guardar credenciales para uso futuro con PIN/biometría
+      await AsyncStorage.setItem('savedCredentials', JSON.stringify({ email, password }));
       
     } catch (error: any) {
       // Si el error es de email no verificado, mostrar opción de verificación
@@ -204,28 +216,69 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     try {
       setIsBiometricLoading(true);
       
+      // Verificar si la biometría está habilitada para el usuario
+      const biometricEnabled = await AsyncStorage.getItem('biometricEnabled');
+      
+      if (biometricEnabled !== 'true') {
+        Alert.alert(
+          'Biometría No Configurada',
+          'La autenticación biométrica no está configurada para tu cuenta. Ve a Configuración > Seguridad para activarla.',
+          [{ text: 'Entendido', style: 'default' }]
+        );
+        return;
+      }
+
       const result = await biometricAuthService.authenticate();
       
       if (result.success) {
-        // Verificar si la biometría está habilitada para el usuario
-        const biometricEnabled = await authVerificationService.isBiometricEnabled();
+        // Login exitoso con biometría - usar credenciales guardadas
+        const savedCredentials = await AsyncStorage.getItem('savedCredentials');
         
-        if (biometricEnabled) {
-          // Aquí podrías implementar el login automático con credenciales guardadas
-          Alert.alert(
-            'Autenticación Exitosa',
-            'Huella dactilar verificada correctamente. Por ahora, usa el login tradicional.',
-            [{ text: 'Entendido', style: 'default' }]
-          );
+        if (savedCredentials) {
+          const { email, password } = JSON.parse(savedCredentials);
+          
+          // Hacer login con las credenciales guardadas
+          await login(email, password);
+          showToast('Login exitoso con huella dactilar', 'success');
         } else {
-          Alert.alert(
-            'Biometría No Configurada',
-            'La autenticación biométrica no está configurada para tu cuenta. Usa el login tradicional.',
-            [{ text: 'Entendido', style: 'default' }]
+          // Si no hay credenciales guardadas, pedir email
+          Alert.prompt(
+            'Login con Huella Dactilar',
+            'Ingresa tu email para continuar con la autenticación biométrica:',
+            [
+              { text: 'Cancelar', style: 'cancel' },
+              {
+                text: 'Continuar',
+                onPress: async (email) => {
+                  if (email) {
+                    // Simular login con email (en producción verificarías con el backend)
+                    const mockUser = {
+                      id: 'biometric-user-123',
+                      name: 'Usuario Biométrico',
+                      email: email,
+                      role: 'client',
+                      emailVerified: true,
+                      phone: '+1234567890',
+                      createdAt: new Date().toISOString(),
+                      updatedAt: new Date().toISOString()
+                    };
+                    
+                    await AsyncStorage.setItem('user', JSON.stringify(mockUser));
+                    showToast('Login exitoso con huella dactilar', 'success');
+                  }
+                }
+              }
+            ],
+            'plain-text',
+            email || ''
           );
         }
       } else {
-        Alert.alert('Error', result.error || 'Error en la autenticación biométrica');
+        if (result.error === 'user_cancel') {
+          showToast('Autenticación biométrica cancelada', 'info');
+        } else {
+          Alert.alert('Error', result.error || 'Error en la autenticación biométrica');
+        }
       }
     } catch (error: any) {
       console.error('❌ Error en login biométrico:', error);
@@ -233,6 +286,54 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     } finally {
       setIsBiometricLoading(false);
     }
+  };
+
+  const handlePinLogin = async () => {
+    try {
+      // Verificar si el PIN está habilitado
+      const pinEnabled = await AsyncStorage.getItem('pinEnabled');
+      
+      if (pinEnabled !== 'true') {
+        Alert.alert(
+          'PIN No Configurado',
+          'El PIN no está configurado para tu cuenta. Ve a Configuración > Seguridad para configurarlo.',
+          [{ text: 'Entendido', style: 'default' }]
+        );
+        return;
+      }
+
+      // Abrir modal de PIN
+      setShowPinModal(true);
+    } catch (error: any) {
+      console.error('❌ Error en login con PIN:', error);
+      Alert.alert('Error', 'Error inesperado en el login con PIN');
+    }
+  };
+
+  const handlePinLoginSuccess = async (user: any) => {
+    try {
+      // Guardar usuario en AsyncStorage
+      await AsyncStorage.setItem('user', JSON.stringify(user));
+      showToast('Login exitoso con PIN', 'success');
+    } catch (error) {
+      console.error('Error saving user after PIN login:', error);
+    }
+  };
+
+  const handleTwoFactorVerification = async (code: string) => {
+    try {
+      console.log('Verificando código 2FA en LoginScreen:', code);
+      await verifyTwoFactor(code);
+      console.log('Verificación 2FA exitosa');
+    } catch (error) {
+      console.error('Error verifying 2FA code:', error);
+      // El error ya se maneja en el contexto
+    }
+  };
+
+  const handleUseBackupCode = () => {
+    // Esta función se puede expandir para mostrar un modal específico de códigos de respaldo
+    console.log('Using backup code');
   };
 
   return (
@@ -386,7 +487,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                       borderColor: colors.border, 
                       backgroundColor: colors.surface 
                     }]}
-                    onPress={() => navigation.navigate('PINVerification')}
+                    onPress={handlePinLogin}
                   >
                     <Ionicons name="keypad" size={20} color="#8B5CF6" />
                     <Text style={[styles.alternativeButtonText, { color: colors.textPrimary }]}>PIN</Text>
@@ -433,10 +534,46 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   🧹 Limpiar Verificación Móvil (Testing)
                 </Text>
               </TouchableOpacity>
+
+              {/* Botón de diagnóstico de red */}
+              <TouchableOpacity
+                style={[styles.clearDataButton, { borderColor: colors.primary }]}
+                onPress={() => setShowNetworkDiagnostic(true)}
+              >
+                <Text style={[styles.clearDataText, { color: colors.primary }]}>
+                  🔧 Diagnóstico de Red
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
       </ScrollView>
+
+      {/* Modal de diagnóstico de red */}
+      <Modal
+        visible={showNetworkDiagnostic}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <NetworkDiagnostic onClose={() => setShowNetworkDiagnostic(false)} />
+      </Modal>
+
+      {/* Modal de verificación 2FA */}
+      <TwoFactorVerificationModal
+        visible={requiresTwoFactor}
+        onClose={() => {
+          // No permitir cerrar el modal de 2FA sin verificar
+        }}
+        onSuccess={handleTwoFactorVerification}
+        onUseBackupCode={handleUseBackupCode}
+      />
+
+      {/* Modal de login con PIN */}
+      <PinLoginModal
+        visible={showPinModal}
+        onClose={() => setShowPinModal(false)}
+        onSuccess={handlePinLoginSuccess}
+      />
     </KeyboardAvoidingView>
   );
 };

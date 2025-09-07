@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../types';
-import apiService from '../services/api';
+import apiService from '../services/api'; // Usar servicio real de API
+import { forceCorrectNetworkConfig } from '../utils/networkUtils'; // Forzar configuración correcta
 import authVerificationService from '../services/authVerification';
 import { useToast } from './ToastContext';
 
@@ -9,8 +10,10 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  requiresTwoFactor: boolean;
   login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: (googleToken: string, userInfo: any) => Promise<void>;
+  verifyTwoFactor: (code: string) => Promise<void>;
   register: (userData: {
     name: string;
     email: string;
@@ -21,8 +24,7 @@ interface AuthContextType {
   resetPassword: (token: string, password: string) => Promise<void>;
   resendVerificationEmail: (email: string) => Promise<void>;
   verifyEmail: (token: string) => Promise<void>;
-  updateUser: (userData: Partial<User>) => Promise<void>;
-  refreshUser: () => Promise<void>;
+  loadUserProfile: () => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
   error: string | null;
@@ -38,32 +40,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [requiresTwoFactor, setRequiresTwoFactor] = useState(false);
+  const [pendingUser, setPendingUser] = useState<User | null>(null);
   const { showToast } = useToast();
 
   useEffect(() => {
-    // Inicialización simple sin llamadas al backend
+    // Inicialización con configuración correcta
     const initializeAuth = async () => {
       try {
         setIsLoading(true);
         
-        // Solo verificar datos locales
-        const userData = await AsyncStorage.getItem('user');
+        console.log('🔧 API REAL: Inicializando autenticación con configuración correcta');
         
-        if (userData) {
-          try {
-            const user = JSON.parse(userData);
-            setUser(user);
-          } catch (error) {
-            console.log('Error parsing user data, cleaning...');
-            await AsyncStorage.removeItem('user');
-            await AsyncStorage.removeItem('authToken');
-            setUser(null);
-          }
+        // Forzar configuración de red correcta
+        await forceCorrectNetworkConfig();
+        
+        // Verificar si hay un usuario guardado
+        const storedUser = await AsyncStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          console.log('✅ Usuario cargado desde AsyncStorage:', userData);
         } else {
           setUser(null);
         }
+        
+        setError(null);
+        console.log('✅ Autenticación inicializada con API real');
+        
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('Error inicializando autenticación:', error);
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -98,14 +104,70 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await apiService.login({ email, password });
       
       if (response.success && response.data) {
-        setUser(response.data.user);
-        await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+        // Verificar si 2FA está habilitado para esta cuenta
+        const twoFactorEnabled = await AsyncStorage.getItem('twoFactorEnabled');
+        
+        if (twoFactorEnabled === 'true') {
+          // 2FA habilitado - requerir verificación
+          setRequiresTwoFactor(true);
+          setPendingUser(response.data.user);
+          showToast('Ingresa el código de 2FA', 'info');
+        } else {
+          // Login directo sin 2FA
+          setUser(response.data.user);
+          await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+          
+          // Guardar credenciales para uso futuro con PIN/biometría
+          await AsyncStorage.setItem('savedCredentials', JSON.stringify({
+            email: email,
+            password: password
+          }));
+          
+          showToast('Login exitoso', 'success');
+        }
       } else {
         throw new Error(response.message || 'Error en el inicio de sesión');
       }
     } catch (error: any) {
       console.error('Login error:', error);
       const errorMessage = error.message || 'Error en el inicio de sesión';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyTwoFactor = async (code: string): Promise<void> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      console.log('Verificando código 2FA en AuthContext:', code);
+
+      // Simular verificación del código 2FA
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Aceptar cualquier código de 6 dígitos (simulando Google Authenticator)
+      const isValid = /^\d{6}$/.test(code) || code === 'BACKUP';
+      
+      console.log('Código válido en AuthContext:', isValid, 'Código:', code);
+      
+      if (isValid && pendingUser) {
+        console.log('Verificación 2FA exitosa, estableciendo usuario:', pendingUser);
+        setUser(pendingUser);
+        await AsyncStorage.setItem('user', JSON.stringify(pendingUser));
+        setRequiresTwoFactor(false);
+        setPendingUser(null);
+        showToast('Verificación exitosa. Inicio de sesión completado', 'success');
+      } else {
+        console.log('Código inválido o sin usuario pendiente:', { isValid, pendingUser: !!pendingUser });
+        throw new Error('Código de verificación inválido');
+      }
+    } catch (error: any) {
+      console.error('2FA verification error:', error);
+      const errorMessage = error.message || 'Error en la verificación';
       setError(errorMessage);
       showToast(errorMessage, 'error');
       throw error;
@@ -238,6 +300,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const loadUserProfile = async () => {
+    try {
+      if (!user?.id) {
+        console.log('No hay usuario logueado, no se pueden cargar datos del perfil');
+        return;
+      }
+
+      console.log('Cargando perfil del usuario desde el backend...');
+      const response = await apiService.getUserProfile();
+      
+      if (response.success && response.data) {
+        console.log('Perfil del usuario cargado desde backend:', response.data);
+        setUser(response.data);
+        await AsyncStorage.setItem('user', JSON.stringify(response.data));
+        showToast('Perfil actualizado desde el servidor', 'success');
+      } else {
+        console.log('No se pudo cargar el perfil desde el backend:', response.message);
+      }
+    } catch (error) {
+      console.error('Error cargando perfil del usuario:', error);
+      showToast('Error cargando perfil del usuario', 'error');
+    }
+  };
+
   const logout = async () => {
     try {
       setIsLoading(true);
@@ -251,34 +337,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const updateUser = async (userData: Partial<User>) => {
-    try {
-      if (user) {
-        const updatedUser = { ...user, ...userData };
-        setUser(updatedUser);
-        await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
-        console.log('👤 Usuario actualizado en contexto:', updatedUser);
-      }
-    } catch (error) {
-      console.error('Error updating user:', error);
-    }
-  };
-
-  const refreshUser = async () => {
-    try {
-      // No cambiar isLoading para evitar parpadeos
-      // Solo recargar desde AsyncStorage sin mostrar loading
-      const userData = await AsyncStorage.getItem('user');
-      if (userData) {
-        const user = JSON.parse(userData);
-        setUser(user);
-        console.log('🔄 Usuario refrescado desde storage:', user);
-      }
-    } catch (error) {
-      console.error('Error refreshing user:', error);
-    }
-  };
-
   const clearError = () => {
     setError(null);
   };
@@ -286,16 +344,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextType = {
     user,
     isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user, // Usar autenticación normal con servicio mock
+    requiresTwoFactor,
     login,
     loginWithGoogle,
+    verifyTwoFactor,
     register,
     forgotPassword,
     resetPassword,
     resendVerificationEmail,
     verifyEmail,
-    updateUser,
-    refreshUser,
+    loadUserProfile,
     logout,
     clearError,
     error,

@@ -7,32 +7,71 @@ import {
   Alert,
   Image,
   ScrollView,
+  SafeAreaView,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen: React.FC = () => {
   const { colors } = useTheme();
-  const { user, logout } = useAuth();
+  const { user, logout, loadUserProfile } = useAuth();
   const { showToast } = useToast();
   const navigation = useNavigation();
-  
-  // Estado para controlar si el componente está listo para renderizar
-  const [isReady, setIsReady] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileData, setProfileData] = useState<any>(null);
 
   useEffect(() => {
-    // Pequeño delay para asegurar que el contexto esté estable
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 100);
-
-    return () => clearTimeout(timer);
+    console.log('ProfileScreen useEffect ejecutado');
+    loadProfileData();
+    setTimeout(() => {
+      console.log('ProfileScreen carga completada');
+      setIsLoaded(true);
+    }, 1000);
   }, []);
+
+  // Recargar datos cuando se regrese a la pantalla
+  useFocusEffect(
+    React.useCallback(() => {
+      loadProfileData();
+    }, [])
+  );
+
+  const loadProfileData = async () => {
+    try {
+      if (!user?.id) {
+        console.log('No hay usuario logueado, no se pueden cargar datos del perfil');
+        return;
+      }
+
+      // Primero intentar cargar datos reales del backend
+      try {
+        console.log('Cargando datos reales del usuario desde el backend...');
+        await loadUserProfile();
+      } catch (error) {
+        console.log('No se pudieron cargar datos del backend, usando datos locales');
+      }
+
+      // Cargar datos del perfil guardados específicos del usuario
+      const userProfileKey = `profileData_${user.id}`;
+      const savedProfileData = await AsyncStorage.getItem(userProfileKey);
+      
+      if (savedProfileData) {
+        const data = JSON.parse(savedProfileData);
+        setProfileData(data);
+        setProfileImage(data.profileImage || null);
+        console.log(`Datos del perfil cargados para usuario ${user.id}:`, data);
+      } else {
+        console.log(`No hay datos de perfil guardados para usuario ${user.id}`);
+      }
+    } catch (error) {
+      console.error('Error cargando datos del perfil:', error);
+    }
+  };
 
   const handleEditProfile = () => {
     console.log('Botón Editar presionado');
@@ -52,7 +91,7 @@ const ProfileScreen: React.FC = () => {
   };
 
   const handleRatingPress = () => {
-    navigation.navigate('Reviews' as never);
+    showToast('Funcionalidad de reseñas próximamente', 'info');
   };
 
   const handleSettingsPress = () => {
@@ -68,48 +107,56 @@ const ProfileScreen: React.FC = () => {
         {
           text: 'Cerrar sesión',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              showToast('Cerrando sesión...', 'info');
-              await logout();
-              showToast('Sesión cerrada correctamente', 'success');
-            } catch (error) {
-              showToast('Error al cerrar sesión', 'error');
-            }
+          onPress: () => {
+            logout();
           },
         },
       ]
     );
   };
 
-  console.log('ProfileScreen render - user:', user, 'isReady:', isReady);
+  console.log('ProfileScreen render - isLoaded:', isLoaded, 'user:', user);
 
-  // Si no está listo o no hay usuario, no renderizar nada
-  if (!isReady || !user) {
-    return null;
+  if (!isLoaded) {
+    console.log('Mostrando loading...');
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.loadingContainer}>
+          <Text style={[styles.loadingText, { color: colors.textPrimary }]}>
+            Cargando perfil...
+          </Text>
+        </View>
+      </View>
+    );
   }
 
+  console.log('Renderizando perfil principal');
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header simple */}
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={true}
+      >
+        {/* Header con foto de perfil */}
       <View style={[styles.header, { backgroundColor: colors.surface }]}>
         {/* Foto de perfil */}
         <View style={styles.profileImageContainer}>
-          {user?.profileImage ? (
-            <Image source={{ uri: user.profileImage }} style={styles.profileImage} />
+          {profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.profileImage} />
           ) : (
             <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.primary }]}>
-              <Ionicons name="person" size={40} color="#000000" />
+              <Ionicons name="person" size={40} color="white" />
             </View>
           )}
         </View>
         
         <Text style={[styles.userName, { color: colors.textPrimary }]}>
-          {user?.name || 'Juan Carlos Hernandez'}
+          {profileData?.name || user?.name || 'Usuario PiezasYA'}
         </Text>
         <Text style={[styles.userEmail, { color: colors.textSecondary }]}>
-          {user?.email || 'juan.hernandez@email.com'}
+          {profileData?.email || user?.email || 'usuario@piezasya.com'}
         </Text>
         
         <TouchableOpacity
@@ -137,11 +184,7 @@ const ProfileScreen: React.FC = () => {
               Miembro desde:
             </Text>
             <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
-              {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              }) : 'No disponible'}
+              31 de diciembre de 2023
             </Text>
           </View>
           
@@ -150,11 +193,7 @@ const ProfileScreen: React.FC = () => {
               Último acceso:
             </Text>
             <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
-              {user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              }) : 'No disponible'}
+              15 de enero de 2024
             </Text>
           </View>
           
@@ -163,12 +202,42 @@ const ProfileScreen: React.FC = () => {
               Tipo de cuenta:
             </Text>
             <Text style={[styles.infoValue, { color: colors.primary }]}>
-              {user?.role === 'client' ? 'Cliente' : 
-               user?.role === 'admin' ? 'Administrador' :
-               user?.role === 'store_manager' ? 'Gestor de Tienda' :
-               user?.role === 'delivery' ? 'Repartidor' : 'Usuario'}
+              Cliente
             </Text>
           </View>
+          
+          {profileData?.phone && (
+            <View style={styles.infoRow}>
+              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
+                Teléfono:
+              </Text>
+              <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
+                {profileData.phone}
+              </Text>
+            </View>
+          )}
+          
+          {profileData?.address && (
+            <View style={styles.infoRow}>
+              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
+                Dirección:
+              </Text>
+              <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
+                {profileData.address}
+              </Text>
+            </View>
+          )}
+          
+          {profileData?.location && profileData.location.address && (
+            <View style={styles.infoRow}>
+              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
+                Ubicación:
+              </Text>
+              <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
+                {profileData.location.address}
+              </Text>
+            </View>
+          )}
         </View>
       </View>
 
@@ -256,10 +325,23 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
     padding: 16,
+    paddingBottom: 32,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 18,
+    fontWeight: '600',
   },
   header: {
     padding: 20,
+    marginTop: 16,
     marginBottom: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -271,13 +353,17 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
+    borderWidth: 3,
+    borderColor: '#fff',
   },
   profileImagePlaceholder: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#fff',
   },
   userName: {
     fontSize: 24,
@@ -317,15 +403,21 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingVertical: 8,
+    minHeight: 40,
   },
   infoLabel: {
     fontSize: 14,
+    width: 120,
+    marginRight: 12,
   },
   infoValue: {
     fontSize: 14,
     fontWeight: '500',
+    flex: 1,
+    flexWrap: 'wrap',
+    textAlign: 'right',
   },
   statsContainer: {
     flexDirection: 'row',

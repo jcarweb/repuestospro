@@ -5,8 +5,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const NETWORK_CONFIGS = {
   // Redes conocidas (para desarrollo rápido)
   knownNetworks: {
-    '192.168.0.110': 'http://192.168.0.110:3001/api', // IP real del backend según netstat
-    '192.168.150.104': 'http://192.168.150.104:3001/api',
+    'localhost': 'http://localhost:3001/api', // Localhost como prioridad
+    '127.0.0.1': 'http://127.0.0.1:3001/api', // IP local
+    '192.168.150.104': 'http://192.168.150.104:3001/api', // IP ACTUAL del backend (PRIORIDAD)
+    '192.168.0.110': 'http://192.168.0.110:3001/api', // IP anterior del backend
     '192.168.31.122': 'http://192.168.31.122:3001/api',
     '192.168.1.100': 'http://192.168.1.100:3001/api',
     '10.0.0.100': 'http://10.0.0.100:3001/api',
@@ -15,6 +17,7 @@ const NETWORK_CONFIGS = {
   
   // Rangos de IPs comunes para redes locales
   localRanges: [
+    '192.168.150', // IP actual del backend (PRIORIDAD)
     '192.168.1',
     '192.168.0',
     '192.168.31',
@@ -215,6 +218,7 @@ export class NetworkDetector {
           signal: controller.signal,
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
           },
         });
 
@@ -223,9 +227,11 @@ export class NetworkDetector {
         if (healthResponse.ok) {
           console.log(`✅ Health check exitoso para: ${url}`);
           return true;
+        } else {
+          console.log(`⚠️ Health check falló con status: ${healthResponse.status}`);
         }
       } catch (healthError) {
-        console.log(`⚠️ Health check falló para: ${url}`, healthError);
+        console.log(`⚠️ Health check falló para: ${url}`, healthError.message);
       }
 
       // Si health falla, probar endpoint raíz de la API
@@ -238,6 +244,7 @@ export class NetworkDetector {
           signal: controller2.signal,
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
           },
         });
 
@@ -246,15 +253,17 @@ export class NetworkDetector {
         if (apiResponse.ok || apiResponse.status === 404) {
           console.log(`✅ API endpoint accesible para: ${url}`);
           return true;
+        } else {
+          console.log(`⚠️ API endpoint falló con status: ${apiResponse.status}`);
         }
       } catch (apiError) {
-        console.log(`⚠️ API endpoint falló para: ${url}`, apiError);
+        console.log(`⚠️ API endpoint falló para: ${url}`, apiError.message);
       }
 
       console.log(`❌ Conexión falló para: ${url}`);
       return false;
     } catch (error) {
-      console.log(`❌ Error general de conexión para: ${url}`, error);
+      console.log(`❌ Error general de conexión para: ${url}`, error.message);
       return false;
     }
   }
@@ -315,6 +324,29 @@ export const rescanNetwork = async (): Promise<NetworkConfig> => {
 // Función helper para obtener el estado de la red
 export const getNetworkStatus = () => {
   return NetworkDetector.getInstance().getNetworkStatus();
+};
+
+// Función para forzar la configuración correcta (evita problemas de IP)
+export const forceCorrectNetworkConfig = async (): Promise<NetworkConfig> => {
+  console.log('🔧 Forzando configuración de red correcta...');
+  
+  const correctConfig: NetworkConfig = {
+    baseUrl: 'http://192.168.150.104:3001/api',
+    isLocal: true,
+    networkName: 'Backend Principal (Forzado)',
+    lastTested: Date.now(),
+    isWorking: true,
+  };
+  
+  // Guardar en AsyncStorage para persistencia
+  try {
+    await AsyncStorage.setItem('networkConfig', JSON.stringify(correctConfig));
+    console.log('✅ Configuración de red correcta guardada:', correctConfig);
+  } catch (error) {
+    console.error('❌ Error guardando configuración:', error);
+  }
+  
+  return correctConfig;
 };
 
 export default NetworkDetector;

@@ -6,57 +6,11 @@
  */
 
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
 const { startServerWithNetwork } = require('./config/network');
 
 // IP específica para tu red actual
 const SPECIFIC_IP = '192.168.150.104';
 const PORT = process.env.PORT || 3001; // Cambiado a 3001 para evitar conflictos
-
-// Archivo para persistir datos del perfil
-const PROFILE_DATA_FILE = path.join(__dirname, 'profile-data.json');
-
-// Datos iniciales del perfil
-const initialProfileData = {
-  id: '68b3667c391eb9a20750d0aa',
-  name: 'Juan Carlos Hernández',
-  email: 'somoselson@gmail.com',
-  phone: '+57 300 123 4567',
-  role: 'client',
-  isEmailVerified: true,
-  twoFactorEnabled: false,
-  fingerprintEnabled: false,
-  stores: [],
-  address: '',
-  location: null,
-  profileImage: null
-};
-
-// Función para cargar datos del perfil
-function loadProfileData() {
-  try {
-    if (fs.existsSync(PROFILE_DATA_FILE)) {
-      const data = fs.readFileSync(PROFILE_DATA_FILE, 'utf8');
-      return JSON.parse(data);
-    }
-  } catch (error) {
-    console.error('Error cargando datos del perfil:', error);
-  }
-  return initialProfileData;
-}
-
-// Función para guardar datos del perfil
-function saveProfileData(profileData) {
-  try {
-    fs.writeFileSync(PROFILE_DATA_FILE, JSON.stringify(profileData, null, 2));
-    console.log('💾 Datos del perfil guardados correctamente');
-    return true;
-  } catch (error) {
-    console.error('Error guardando datos del perfil:', error);
-    return false;
-  }
-}
 
 // Crear la aplicación Express
 const app = express();
@@ -132,50 +86,6 @@ app.get('/api/health', (req, res) => {
       serverTime: new Date().toISOString(),
     }
   });
-});
-
-// Rutas de perfil con persistencia real
-app.get('/api/profile', (req, res) => {
-  const profileData = loadProfileData();
-  res.json({
-    success: true,
-    data: profileData
-  });
-});
-
-app.put('/api/profile', (req, res) => {
-  console.log('📝 Actualizando perfil:', req.body);
-  
-  // Cargar datos actuales
-  const currentData = loadProfileData();
-  
-  // Actualizar con los nuevos datos
-  const updatedData = {
-    ...currentData,
-    ...req.body,
-    id: currentData.id, // Mantener el ID original
-    role: currentData.role, // Mantener el rol original
-    isEmailVerified: currentData.isEmailVerified, // Mantener verificación
-    twoFactorEnabled: currentData.twoFactorEnabled, // Mantener 2FA
-    fingerprintEnabled: currentData.fingerprintEnabled, // Mantener huella
-    stores: currentData.stores // Mantener tiendas
-  };
-  
-  // Guardar los datos actualizados
-  const saved = saveProfileData(updatedData);
-  
-  if (saved) {
-    res.json({
-      success: true,
-      message: 'Perfil actualizado correctamente',
-      data: updatedData
-    });
-  } else {
-    res.status(500).json({
-      success: false,
-      message: 'Error guardando el perfil'
-    });
-  }
 });
 
 // Manejar rutas no encontradas

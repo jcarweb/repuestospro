@@ -1,13 +1,12 @@
 import express from 'express';
 import { authMiddleware } from '../middleware/authMiddleware';
-import { devAuthMiddleware } from '../middleware/devAuthMiddleware';
 import profileController from '../controllers/profileController';
 import { profileUpload } from '../config/cloudinary';
 
 const router = express.Router();
 
-// Usar middleware de desarrollo en lugar de autenticación real
-router.use(devAuthMiddleware);
+// Todas las rutas requieren autenticación
+router.use(authMiddleware);
 
 // Obtener perfil del usuario
 router.get('/', profileController.getProfile);

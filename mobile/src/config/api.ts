@@ -1,5 +1,4 @@
 import { getNetworkConfig, rescanNetwork, NetworkConfig } from '../utils/networkUtils';
-import { getFixedNetworkConfig } from './fixed-network';
 
 // Configuración base de la API
 const BASE_API_CONFIG = {
@@ -25,19 +24,18 @@ export class DynamicAPIConfig {
     if (this.isInitialized) return;
 
     try {
-      // Usar configuración fija para evitar escaneo automático
-      this.currentConfig = getFixedNetworkConfig();
+      this.currentConfig = await getNetworkConfig();
       this.isInitialized = true;
-      console.log('API Config initialized with fixed network:', this.currentConfig);
+      console.log('API Config initialized:', this.currentConfig);
     } catch (error) {
       console.error('Error initializing API config:', error);
       // Fallback a configuración por defecto
       this.currentConfig = {
-        baseUrl: 'http://192.168.0.110:3001/api', // IP real del backend
+        baseUrl: 'http://192.168.150.104:3001/api',
         isLocal: true,
         networkName: 'Backend Principal',
         lastTested: Date.now(),
-        isWorking: true, // Cambiar a true ya que el backend está funcionando
+        isWorking: false,
       };
       this.isInitialized = true;
     }

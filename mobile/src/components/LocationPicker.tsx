@@ -45,6 +45,13 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     requestLocationPermission();
   }, []);
 
+  // Actualizar ubicación cuando cambie initialLocation
+  useEffect(() => {
+    if (initialLocation) {
+      setLocation(initialLocation);
+    }
+  }, [initialLocation]);
+
   const requestLocationPermission = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();

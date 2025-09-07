@@ -13,56 +13,87 @@ import {
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import InteractiveMap from '../../components/InteractiveMap';
-import { APIService } from '../../services/apiService';
+import LocationPicker from '../../components/LocationPicker';
+import apiService from '../../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const EditProfileScreen: React.FC = () => {
   const { colors } = useTheme();
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const { showToast } = useToast();
   
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState(user?.phone || '+57 300 123 4567');
-  const [address, setAddress] = useState(user?.address || 'Calle 123 #45-67, Bogotá');
-  const [profileImage, setProfileImage] = useState<string | null>(user?.profileImage || null);
+  const [phone, setPhone] = useState('+57 300 123 4567');
+  const [address, setAddress] = useState('Calle 123 #45-67, Bogotá');
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
     address: string;
-  } | null>(user?.location ? {
-    latitude: user.location.coordinates[1],
-    longitude: user.location.coordinates[0],
-    address: user.location.address
-  } : null);
+  } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const saveAttemptRef = useRef(0);
 
   useEffect(() => {
     requestPermissions();
+    loadProfileData();
   }, []);
 
-  // Actualizar campos cuando el usuario cambie
-  useEffect(() => {
-    if (user) {
-      setName(user.name || '');
-      setEmail(user.email || '');
-      setPhone(user.phone || '+57 300 123 4567');
-      setAddress(user.address || 'Calle 123 #45-67, Bogotá');
-      setProfileImage(user.profileImage || null);
-      
-      if (user.location) {
-        setLocation({
-          latitude: user.location.coordinates[1],
-          longitude: user.location.coordinates[0],
-          address: user.location.address
-        });
+  // Recargar datos cuando se regrese a la pantalla
+  useFocusEffect(
+    React.useCallback(() => {
+      loadProfileData();
+    }, [])
+  );
+
+  const loadProfileData = async () => {
+    try {
+      if (!user?.id) {
+        console.log('No hay usuario logueado, no se pueden cargar datos del perfil');
+        return;
       }
+
+      // Cargar datos guardados del perfil específicos del usuario
+      const userProfileKey = `profileData_${user.id}`;
+      const savedProfileData = await AsyncStorage.getItem(userProfileKey);
+      
+      if (savedProfileData) {
+        const profileData = JSON.parse(savedProfileData);
+        console.log(`Datos del perfil cargados para usuario ${user.id}:`, profileData);
+        
+        setName(profileData.name || user?.name || '');
+        setEmail(profileData.email || user?.email || '');
+        setPhone(profileData.phone || '+57 300 123 4567');
+        setAddress(profileData.address || 'Calle 123 #45-67, Bogotá');
+        setProfileImage(profileData.profileImage || null);
+        
+        // Cargar ubicación GPS
+        if (profileData.location && profileData.location.coordinates && profileData.location.coordinates.length === 2) {
+          const locationData = {
+            latitude: profileData.location.coordinates[1],
+            longitude: profileData.location.coordinates[0],
+            address: profileData.location.address || 'Ubicación guardada'
+          };
+          setLocation(locationData);
+          console.log('Ubicación GPS cargada:', locationData);
+        } else {
+          console.log('No hay datos de ubicación GPS guardados');
+        }
+      } else {
+        // Usar datos del usuario actual
+        setName(user?.name || '');
+        setEmail(user?.email || '');
+        console.log(`No hay datos de perfil guardados para usuario ${user.id}, usando datos del usuario:`, user);
+      }
+    } catch (error) {
+      console.error('Error cargando datos del perfil:', error);
     }
-  }, [user]);
+  };
 
   const requestPermissions = async () => {
     // Solicitar permisos de cámara
@@ -123,47 +154,44 @@ const EditProfileScreen: React.FC = () => {
 
       showToast('Guardando perfil...', 'info');
       
-      const apiService = APIService.getInstance();
-      
       // Preparar datos del perfil
       const profileData = {
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
         address: address.trim(),
-        profileImage: profileImage,
         location: location ? {
           type: 'Point',
           coordinates: [location.longitude, location.latitude],
           address: location.address
-        } : undefined
+        } : undefined,
+        profileImage: profileImage
       };
 
-      // Llamar a la API para actualizar el perfil
-      const response = await apiService.request('/profile', {
-        method: 'PUT',
-        body: profileData,
-        timeout: 15000,
-        retryAttempts: 2
-      });
+      // Guardar en el backend real
+      const response = await apiService.updateUserProfile(profileData);
+      
+      if (response.success && response.data) {
+        // Actualizar el usuario en el contexto
+        const updatedUser = response.data;
+        await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        // Guardar datos del perfil específicos del usuario localmente también
+        const userProfileKey = `profileData_${user.id}`;
+        await AsyncStorage.setItem(userProfileKey, JSON.stringify(profileData));
+        
+        console.log('Perfil actualizado en backend:', updatedUser);
+      } else {
+        throw new Error(response.message || 'Error al actualizar perfil en el servidor');
+      }
 
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
 
-      if (response.success) {
-        showToast('Perfil actualizado correctamente', 'success');
-        console.log('Perfil actualizado:', response.data);
-        
-        // Actualizar el contexto de autenticación con los nuevos datos
-        if (response.data) {
-          await updateUser(response.data);
-        }
-        
-        resetSaveState();
-      } else {
-        throw new Error(response.error || 'Error al actualizar perfil');
-      }
+      showToast('Perfil actualizado correctamente', 'success');
+      console.log('Perfil actualizado:', updatedUser);
+      resetSaveState();
     } catch (error) {
       console.error('Error al guardar perfil:', error);
       
@@ -366,7 +394,7 @@ const EditProfileScreen: React.FC = () => {
       </View>
 
       {/* Ubicación y Mapa */}
-      <InteractiveMap
+      <LocationPicker
         onLocationSelect={(newLocation) => setLocation(newLocation)}
         initialLocation={location}
       />

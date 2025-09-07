@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthResponse, LoginRequest, RegisterRequest, ApiResponse, User } from '../types';
 import API_CONFIG from '../config/api';
-import { OFFLINE_MODE, mockApiResponse, simulateNetworkDelay, mockUser } from '../config/offline-mode';
 
 const API_BASE_URL = API_CONFIG.BASE_URL;
 
@@ -103,21 +102,6 @@ class ApiService {
 
   // Auth endpoints
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    if (OFFLINE_MODE) {
-      console.log('🔌 Modo offline: Simulando login');
-      await simulateNetworkDelay(1500);
-      const mockResponse = {
-        success: true,
-        data: {
-          token: 'mock-token-12345',
-          user: mockUser
-        },
-        message: 'Login exitoso (modo offline)'
-      };
-      await this.saveToken(mockResponse.data.token);
-      return mockResponse;
-    }
-
     const response = await this.request<AuthResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
@@ -131,21 +115,6 @@ class ApiService {
   }
 
   async register(userData: RegisterRequest): Promise<AuthResponse> {
-    if (OFFLINE_MODE) {
-      console.log('🔌 Modo offline: Simulando registro');
-      await simulateNetworkDelay(2000);
-      const mockResponse = {
-        success: true,
-        data: {
-          token: 'mock-token-12345',
-          user: { ...mockUser, ...userData }
-        },
-        message: 'Registro exitoso (modo offline)'
-      };
-      await this.saveToken(mockResponse.data.token);
-      return mockResponse;
-    }
-
     const response = await this.request<AuthResponse>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(userData),
@@ -307,6 +276,18 @@ class ApiService {
 
   async getOrder(id: string): Promise<ApiResponse<any>> {
     return this.request<ApiResponse<any>>(`/orders/${id}`);
+  }
+
+  // User profile endpoints
+  async getUserProfile(): Promise<ApiResponse<User>> {
+    return this.request<ApiResponse<User>>('/auth/profile');
+  }
+
+  async updateUserProfile(profileData: any): Promise<ApiResponse<User>> {
+    return this.request<ApiResponse<User>>('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
   }
 
   // Check if user is authenticated

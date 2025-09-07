@@ -16,6 +16,10 @@ import { useToast } from '../../contexts/ToastContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as LocalAuthentication from 'expo-local-authentication';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import TwoFactorSetupModal from '../../components/TwoFactorSetupModal';
+import BiometricSetupModal from '../../components/BiometricSetupModal';
+import SecurityHistoryModal from '../../components/SecurityHistoryModal';
+import EncryptionStatusModal from '../../components/EncryptionStatusModal';
 
 const SecuritySettingsScreen: React.FC = () => {
   const { colors } = useTheme();
@@ -29,6 +33,10 @@ const SecuritySettingsScreen: React.FC = () => {
   const [currentPin, setCurrentPin] = useState('');
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
+  const [twoFactorSetupVisible, setTwoFactorSetupVisible] = useState(false);
+  const [biometricSetupVisible, setBiometricSetupVisible] = useState(false);
+  const [securityHistoryVisible, setSecurityHistoryVisible] = useState(false);
+  const [encryptionStatusVisible, setEncryptionStatusVisible] = useState(false);
 
   useEffect(() => {
     checkBiometricAvailability();
@@ -65,50 +73,34 @@ const SecuritySettingsScreen: React.FC = () => {
   };
 
   const handleBiometricToggle = async (value: boolean) => {
-    if (value && !biometricAvailable) {
-      showToast('Autenticación biométrica no disponible en este dispositivo', 'error');
-      return;
-    }
-
     if (value) {
-      try {
-        // Siempre intentar autenticación real primero
-        const result = await LocalAuthentication.authenticateAsync({
-          promptMessage: 'Autentica para activar la autenticación biométrica',
-          cancelLabel: 'Cancelar',
-          fallbackLabel: 'Usar PIN',
-        });
-
-        if (result.success) {
-          setBiometricEnabled(true);
-          await AsyncStorage.setItem('biometricEnabled', 'true');
-          showToast('Autenticación biométrica activada', 'success');
-        } else {
-          // En desarrollo, si falla la autenticación real, activar de todas formas
-          if (__DEV__ && result.error === 'user_cancel') {
-            setBiometricEnabled(true);
-            await AsyncStorage.setItem('biometricEnabled', 'true');
-            showToast('Autenticación biométrica activada (modo desarrollo)', 'success');
-          } else {
-            showToast('Autenticación cancelada', 'info');
-          }
-        }
-      } catch (error) {
-        console.error('Error with biometric authentication:', error);
-        // En desarrollo, activar de todas formas si hay error
-        if (__DEV__) {
-          setBiometricEnabled(true);
-          await AsyncStorage.setItem('biometricEnabled', 'true');
-          showToast('Autenticación biométrica activada (modo desarrollo)', 'success');
-        } else {
-          showToast('Error al activar autenticación biométrica', 'error');
-        }
-      }
+      setBiometricSetupVisible(true);
     } else {
-      setBiometricEnabled(false);
-      await AsyncStorage.setItem('biometricEnabled', 'false');
-      showToast('Autenticación biométrica desactivada', 'info');
+      Alert.alert(
+        'Desactivar Autenticación Biométrica',
+        '¿Estás seguro de que quieres desactivar la autenticación biométrica? Esto reducirá la seguridad de tu cuenta.',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          {
+            text: 'Desactivar',
+            style: 'destructive',
+            onPress: async () => {
+              setBiometricEnabled(false);
+              await AsyncStorage.setItem('biometricEnabled', 'false');
+              await AsyncStorage.removeItem('biometricType');
+              await AsyncStorage.removeItem('biometricSetupDate');
+              showToast('Autenticación biométrica desactivada', 'info');
+            },
+          },
+        ]
+      );
     }
+  };
+
+  const handleBiometricSetupSuccess = async () => {
+    setBiometricEnabled(true);
+    setBiometricSetupVisible(false);
+    showToast('Autenticación biométrica configurada exitosamente', 'success');
   };
 
   const handlePinToggle = (value: boolean) => {
@@ -137,26 +129,33 @@ const SecuritySettingsScreen: React.FC = () => {
 
   const handleTwoFactorToggle = async (value: boolean) => {
     if (value) {
+      setTwoFactorSetupVisible(true);
+    } else {
       Alert.alert(
-        'Activar Verificación en Dos Pasos',
-        'Se enviará un código de verificación a tu email para activar la verificación en dos pasos.',
+        'Desactivar Verificación en Dos Pasos',
+        '¿Estás seguro de que quieres desactivar la verificación en dos pasos? Esto reducirá la seguridad de tu cuenta.',
         [
           { text: 'Cancelar', style: 'cancel' },
           {
-            text: 'Activar',
+            text: 'Desactivar',
+            style: 'destructive',
             onPress: async () => {
-              setTwoFactorEnabled(true);
-              await AsyncStorage.setItem('twoFactorEnabled', 'true');
-              showToast('Código de verificación enviado a tu email', 'info');
+              setTwoFactorEnabled(false);
+              await AsyncStorage.setItem('twoFactorEnabled', 'false');
+              await AsyncStorage.removeItem('twoFactorSecret');
+              await AsyncStorage.removeItem('twoFactorBackupCodes');
+              showToast('Verificación en dos pasos desactivada', 'info');
             },
           },
         ]
       );
-    } else {
-      setTwoFactorEnabled(false);
-      await AsyncStorage.setItem('twoFactorEnabled', 'false');
-      showToast('Verificación en dos pasos desactivada', 'info');
     }
+  };
+
+  const handleTwoFactorSetupSuccess = async () => {
+    setTwoFactorEnabled(true);
+    setTwoFactorSetupVisible(false);
+    showToast('2FA configurado exitosamente', 'success');
   };
 
   const handleSetPin = async () => {
@@ -192,7 +191,11 @@ const SecuritySettingsScreen: React.FC = () => {
   };
 
   const handleLoginHistory = () => {
-    showToast('Mostrando historial de inicios de sesión...', 'info');
+    setSecurityHistoryVisible(true);
+  };
+
+  const handleEncryptionStatus = () => {
+    setEncryptionStatusVisible(true);
   };
 
   const renderPinModal = () => (
@@ -398,10 +401,54 @@ const SecuritySettingsScreen: React.FC = () => {
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            onPress={handleEncryptionStatus}
+          >
+            <View style={styles.settingLeft}>
+              <Ionicons name="lock-closed-outline" size={24} color={colors.primary} />
+              <View style={styles.settingText}>
+                <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
+                  Estado de Encriptación
+                </Text>
+                <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
+                  Verificar seguridad de datos sensibles
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+          </TouchableOpacity>
         </View>
       </ScrollView>
       
       {renderPinModal()}
+      
+      {/* Modal de configuración 2FA */}
+      <TwoFactorSetupModal
+        visible={twoFactorSetupVisible}
+        onClose={() => setTwoFactorSetupVisible(false)}
+        onSuccess={handleTwoFactorSetupSuccess}
+      />
+      
+      {/* Modal de configuración biométrica */}
+      <BiometricSetupModal
+        visible={biometricSetupVisible}
+        onClose={() => setBiometricSetupVisible(false)}
+        onSuccess={handleBiometricSetupSuccess}
+      />
+      
+      {/* Modal de historial de seguridad */}
+      <SecurityHistoryModal
+        visible={securityHistoryVisible}
+        onClose={() => setSecurityHistoryVisible(false)}
+      />
+      
+      {/* Modal de estado de encriptación */}
+      <EncryptionStatusModal
+        visible={encryptionStatusVisible}
+        onClose={() => setEncryptionStatusVisible(false)}
+      />
     </SafeAreaView>
   );
 };
