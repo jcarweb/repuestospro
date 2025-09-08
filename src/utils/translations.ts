@@ -1408,9 +1408,9 @@ export const translations: Translations = {
     pt: 'Contato'
   },
   'footer.copyright': {
-    es: '© 2024 PiezasYA. Todos los derechos reservados.',
-    en: '© 2024 PiezasYA. All rights reserved.',
-    pt: '© 2024 PiezasYA. Todos os direitos reservados.'
+    es: '© 2025 PiezasYA. Todos los derechos reservados.',
+    en: '© 2025 PiezasYA. All rights reserved.',
+    pt: '© 2025 PiezasYA. Todos os direitos reservados.'
   },
   'footer.privacy': {
     es: 'Política de Privacidad',
@@ -1543,6 +1543,11 @@ export const translations: Translations = {
     es: 'Configuración Global',
     en: 'Global Settings',
     pt: 'Configurações Globais'
+  },
+  'sidebar.admin.dataEnrichment': {
+    es: 'Enriquecimiento de Datos',
+    en: 'Data Enrichment',
+    pt: 'Enriquecimento de Dados'
   },
   'sidebar.admin.monetization': {
     es: 'Monetización',

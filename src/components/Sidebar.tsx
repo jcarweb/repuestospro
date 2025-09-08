@@ -33,7 +33,9 @@ import {
   DollarSign,
   Gift,
   Heart,
-  ShoppingBag
+  ShoppingBag,
+  Camera,
+  Image
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -141,6 +143,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       path: '/admin/generate-products',
       icon: Database,
       description: 'Generar productos de prueba'
+    },
+    {
+      title: t('sidebar.admin.dataEnrichment'),
+      path: '/admin/data-enrichment',
+      icon: Camera,
+      description: 'Enriquecimiento de datos de locales con OCR y APIs'
     },
     {
       title: t('sidebar.admin.globalSettings'),
@@ -341,7 +349,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     if (hasRole('admin')) {
       return adminMenuItems;
     } else if (hasRole('store_manager')) {
-      return storeManagerMenuItems;
+      return storeManagerMenuItems
     } else if (hasRole('delivery')) {
       return deliveryMenuItems;
     } else if (hasRole('client')) {

@@ -5,19 +5,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const NETWORK_CONFIGS = {
   // Redes conocidas (para desarrollo rápido)
   knownNetworks: {
-    'localhost': 'http://localhost:3001/api', // Localhost como prioridad
-    '127.0.0.1': 'http://127.0.0.1:3001/api', // IP local
-    '192.168.150.104': 'http://192.168.150.104:3001/api', // IP ACTUAL del backend (PRIORIDAD)
-    '192.168.0.110': 'http://192.168.0.110:3001/api', // IP anterior del backend
-    '192.168.31.122': 'http://192.168.31.122:3001/api',
-    '192.168.1.100': 'http://192.168.1.100:3001/api',
-    '10.0.0.100': 'http://10.0.0.100:3001/api',
-    '172.20.10.1': 'http://172.20.10.1:3001/api',
+    'localhost': 'http://localhost:5000/api', // Localhost como prioridad MÁXIMA
+    '127.0.0.1': 'http://127.0.0.1:5000/api', // IP local
+    '192.168.150.104': 'http://192.168.150.104:5000/api', // IP del backend
+    '192.168.0.110': 'http://192.168.0.110:5000/api', // IP anterior del backend
+    '192.168.31.122': 'http://192.168.31.122:5000/api',
+    '192.168.1.100': 'http://192.168.1.100:5000/api',
+    '10.0.0.100': 'http://10.0.0.100:5000/api',
+    '172.20.10.1': 'http://172.20.10.1:5000/api',
   },
   
   // Rangos de IPs comunes para redes locales
   localRanges: [
-    '192.168.150', // IP actual del backend (PRIORIDAD)
+    '127.0.0.1', // Localhost como prioridad MÁXIMA
+    '192.168.150', // IP del backend
     '192.168.1',
     '192.168.0',
     '192.168.31',
@@ -29,7 +30,7 @@ const NETWORK_CONFIGS = {
   ],
   
      // Puerto por defecto
-   defaultPort: 3001,
+   defaultPort: 5000,
   
   // Timeouts
   scanTimeout: 5000,
@@ -131,7 +132,7 @@ export class NetworkDetector {
 
              // 4. Fallback a configuración por defecto
        const fallbackConfig: NetworkConfig = {
-         baseUrl: 'http://192.168.150.104:3001/api',
+         baseUrl: 'http://192.168.0.110:5000/api',
          isLocal: true,
          networkName: 'Backend Principal (Fallback)',
          lastTested: Date.now(),
@@ -146,7 +147,7 @@ export class NetworkDetector {
       console.error('Error scanning network:', error);
       
              const errorConfig: NetworkConfig = {
-         baseUrl: 'http://192.168.150.104:3001/api',
+         baseUrl: 'http://192.168.0.110:5000/api',
          isLocal: true,
          networkName: 'Error de Red',
          lastTested: Date.now(),
@@ -331,7 +332,7 @@ export const forceCorrectNetworkConfig = async (): Promise<NetworkConfig> => {
   console.log('🔧 Forzando configuración de red correcta...');
   
   const correctConfig: NetworkConfig = {
-    baseUrl: 'http://192.168.150.104:3001/api',
+    baseUrl: 'http://192.168.0.110:5000/api',
     isLocal: true,
     networkName: 'Backend Principal (Forzado)',
     lastTested: Date.now(),

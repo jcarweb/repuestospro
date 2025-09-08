@@ -35,7 +35,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
         try {
           const { profileService } = await import('../services/profileService');
           const userProfile = await profileService.getProfile();
-          if (userProfile.language) {
+          if (userProfile && userProfile.language) {
             setCurrentLanguage(userProfile.language);
             translationService.setLanguage(userProfile.language);
             localStorage.setItem('language', userProfile.language);

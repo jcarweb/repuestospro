@@ -5,7 +5,7 @@ dotenv.config();
 
 export const config = {
   // Configuración del servidor
-  PORT: process.env.PORT || 5000,
+  PORT: process.env.PORT || 3001,
   NODE_ENV: process.env.NODE_ENV || 'development',
 
   // Configuración de JWT
@@ -41,7 +41,7 @@ export const config = {
   // Configuración de Google OAuth
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-  GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback',
+  GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3001/api/auth/google/callback',
 
   // Configuración de Cloudinary (para imágenes)
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,

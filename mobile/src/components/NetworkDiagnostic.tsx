@@ -55,9 +55,9 @@ const NetworkDiagnostic: React.FC<NetworkDiagnosticProps> = ({ onClose }) => {
     setTestResults([]);
 
     const testUrls = [
-      'http://192.168.0.110:3001/api',
-      'http://localhost:3001/api',
-      'http://192.168.1.1:3001/api',
+      'http://192.168.0.110:5000/api',
+      'http://192.168.0.110:5000/api',
+      'http://192.168.1.1:5000/api',
     ];
 
     const results = [];
@@ -255,7 +255,7 @@ const NetworkDiagnostic: React.FC<NetworkDiagnosticProps> = ({ onClose }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Información de Red</Text>
           <Text style={styles.testResultText}>
-            • Backend esperado: http://192.168.0.110:3001/api{'\n'}
+            • Backend esperado: http://192.168.0.110:5000/api{'\n'}
             • Asegúrate de estar en la misma red WiFi{'\n'}
             • Verifica que el firewall no bloquee la conexión{'\n'}
             • Si persiste, prueba con datos móviles

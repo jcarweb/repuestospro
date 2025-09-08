@@ -60,8 +60,8 @@ const ProductsScreen: React.FC = () => {
       
       // Cargar productos y categorías en paralelo
       const [productsResponse, categoriesResponse] = await Promise.all([
-        fetch('http://localhost:5000/api/products'),
-        fetch('http://localhost:5000/api/categories')
+        fetch('http://192.168.0.110:5000/api/products'),
+        fetch('http://192.168.0.110:5000/api/categories')
       ]);
 
       const productsResult = await productsResponse.json();

@@ -21,7 +21,8 @@ import {
   Megaphone,
   DollarSign,
   Star,
-  Building2
+  Building2,
+  Camera
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -188,6 +189,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
           name: t('sidebar.admin.generateProducts'),
           path: '/admin/generate-products',
           icon: Package
+        },
+        {
+          name: t('sidebar.admin.dataEnrichment'),
+          path: '/admin/data-enrichment',
+          icon: Camera
         },
         {
           name: t('sidebar.admin.globalSettings'),

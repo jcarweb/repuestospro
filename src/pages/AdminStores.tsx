@@ -183,11 +183,35 @@ const AdminStores: React.FC = () => {
       });
 
       const data = await response.json();
+      console.log('🏪 Stores data:', data);
       
       if (data.success) {
-        setStores(data.data.stores);
-        setTotalPages(data.data.pagination.totalPages);
-        setTotalStores(data.data.pagination.total);
+        // Manejar tanto la estructura nueva (con paginación) como la antigua (sin paginación)
+        if (data.data && data.data.stores) {
+          setStores(data.data.stores);
+          if (data.data.pagination) {
+            setTotalPages(data.data.pagination.totalPages);
+            setTotalStores(data.data.pagination.total);
+          } else {
+            setTotalPages(1);
+            setTotalStores(data.data.stores.length);
+          }
+        } else if (data.data && Array.isArray(data.data)) {
+          // Estructura alternativa donde data.data es directamente el array
+          setStores(data.data);
+          setTotalPages(1);
+          setTotalStores(data.data.length);
+        } else {
+          console.error('Estructura de datos inesperada:', data);
+          setStores([]);
+          setTotalPages(0);
+          setTotalStores(0);
+        }
+      } else {
+        console.error('Error en respuesta:', data);
+        setStores([]);
+        setTotalPages(0);
+        setTotalStores(0);
       }
     } catch (error) {
       console.error('Error cargando tiendas:', error);
@@ -631,7 +655,7 @@ const AdminStores: React.FC = () => {
                     </div>
                   </td>
                 </tr>
-              ) : stores.length === 0 ? (
+              ) : !stores || stores.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-4 text-center text-gray-500 dark:text-gray-300">
                     {t('adminStores.table.noData')}

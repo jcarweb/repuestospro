@@ -1,8 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthResponse, LoginRequest, RegisterRequest, ApiResponse, User } from '../types';
-import API_CONFIG from '../config/api';
-
-const API_BASE_URL = API_CONFIG.BASE_URL;
+import API_CONFIG, { getBaseURL } from '../config/api';
 
 class ApiService {
   private token: string | null = null;
@@ -53,7 +51,8 @@ class ApiService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
+    const baseUrl = await getBaseURL();
+    const url = `${baseUrl}${endpoint}`;
     const config: RequestInit = {
       ...options,
       headers: {

@@ -54,6 +54,10 @@ import AdminAdvertisements from './pages/AdminAdvertisements';
 import AdminSales from './pages/AdminSales';
 import AdminSalesReports from './pages/AdminSalesReports';
 import AdminLoyalty from './pages/AdminLoyalty';
+import AdminStorePhotos from './pages/AdminStorePhotos';
+import AdminStorePhotoUpload from './pages/AdminStorePhotoUpload';
+import AdminDataEnrichment from './pages/AdminDataEnrichment';
+import AdminDataEnrichmentUpload from './pages/AdminDataEnrichmentUpload';
 import AdminAnalytics from './pages/AdminAnalytics';
 import AdminRegistrationCodes from './pages/AdminRegistrationCodes';
 import AdminSearchConfig from './pages/AdminSearchConfig';
@@ -255,6 +259,34 @@ function AppContent() {
               <AdminRoute>
                 <AdminLayout>
                   <AdminMonetization />
+                </AdminLayout>
+              </AdminRoute>
+            } />
+            <Route path="/admin/store-photos" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <AdminStorePhotos />
+                </AdminLayout>
+              </AdminRoute>
+            } />
+            <Route path="/admin/store-photos/upload" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <AdminStorePhotoUpload />
+                </AdminLayout>
+              </AdminRoute>
+            } />
+            <Route path="/data-enrichment" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <AdminDataEnrichment />
+                </AdminLayout>
+              </AdminRoute>
+            } />
+            <Route path="/data-enrichment/upload" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <AdminDataEnrichmentUpload />
                 </AdminLayout>
               </AdminRoute>
             } />

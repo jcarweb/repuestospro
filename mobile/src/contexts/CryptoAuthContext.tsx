@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { User } from '../types';
 import cryptoAuthService from '../services/cryptoAuthService';
 import { useToast } from './ToastContext';

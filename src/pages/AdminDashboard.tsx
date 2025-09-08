@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useLanguageChange } from '../hooks/useLanguageChange';
-import { Users, Package, TrendingUp, DollarSign, Settings, BarChart3 } from 'lucide-react';
+import { Users, Package, TrendingUp, DollarSign, Settings, BarChart3, Camera, MapPin } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -63,6 +63,76 @@ const AdminDashboard: React.FC = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600 dark:text-white">{t('adminDashboard.stats.orders')}</p>
               <p className="text-2xl font-semibold text-[#333333] dark:text-[#FFC300]">892</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Enriquecimiento de Datos - Nueva Sección */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-[#333333] dark:text-[#FFC300] mb-6">🔍 Sistema de Enriquecimiento de Datos</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white dark:bg-[#333333] rounded-lg shadow p-6 border-l-4 border-[#10B981]">
+            <div className="flex items-center mb-4">
+              <div className="p-3 rounded-full bg-[#10B981] bg-opacity-20">
+                <Camera className="w-6 h-6 text-[#10B981]" />
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-[#333333] dark:text-[#FFC300]">Fotos de Locales</h3>
+                <p className="text-sm text-gray-600 dark:text-white">Captura y enriquecimiento automático</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <button 
+                onClick={() => window.location.href = '/admin/store-photos'}
+                className="w-full flex items-center justify-between p-3 text-left hover:bg-[#10B981] hover:bg-opacity-10 rounded-lg transition-colors"
+              >
+                <div className="flex items-center">
+                  <MapPin className="w-5 h-5 text-[#10B981] mr-3" />
+                  <span className="text-[#333333] dark:text-white">Ver Fotos de Locales</span>
+                </div>
+                <span className="text-[#10B981]">→</span>
+              </button>
+              <button 
+                onClick={() => window.location.href = '/admin/store-photos/upload'}
+                className="w-full flex items-center justify-between p-3 text-left hover:bg-[#10B981] hover:bg-opacity-10 rounded-lg transition-colors"
+              >
+                <div className="flex items-center">
+                  <Camera className="w-5 h-5 text-[#10B981] mr-3" />
+                  <span className="text-[#333333] dark:text-white">Subir Nueva Foto</span>
+                </div>
+                <span className="text-[#10B981]">→</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-[#333333] rounded-lg shadow p-6 border-l-4 border-[#8B5CF6]">
+            <div className="flex items-center mb-4">
+              <div className="p-3 rounded-full bg-[#8B5CF6] bg-opacity-20">
+                <BarChart3 className="w-6 h-6 text-[#8B5CF6]" />
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-[#333333] dark:text-[#FFC300]">Enriquecimiento Automático</h3>
+                <p className="text-sm text-gray-600 dark:text-white">OCR, APIs externas y análisis</p>
+              </div>
+            </div>
+            <div className="space-y-2 text-sm text-gray-600 dark:text-white">
+              <div className="flex items-center">
+                <span className="w-2 h-2 bg-[#8B5CF6] rounded-full mr-2"></span>
+                OCR con Tesseract.js
+              </div>
+              <div className="flex items-center">
+                <span className="w-2 h-2 bg-[#8B5CF6] rounded-full mr-2"></span>
+                Búsqueda en MercadoLibre
+              </div>
+              <div className="flex items-center">
+                <span className="w-2 h-2 bg-[#8B5CF6] rounded-full mr-2"></span>
+                Consultas a DuckDuckGo
+              </div>
+              <div className="flex items-center">
+                <span className="w-2 h-2 bg-[#8B5CF6] rounded-full mr-2"></span>
+                Análisis de Instagram
+              </div>
             </div>
           </div>
         </div>

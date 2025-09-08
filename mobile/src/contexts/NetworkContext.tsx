@@ -31,7 +31,7 @@ const defaultContext: NetworkContextType = {
   checkConnection: async () => false,
   clearError: () => {},
   networkName: 'Desconocida',
-  baseUrl: 'http://localhost:5000/api',
+  baseUrl: 'http://192.168.0.110:5000/api',
   connectionStatus: 'disconnected',
 };
 
@@ -173,7 +173,7 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({
     checkConnection,
     clearError,
     networkName: networkConfig?.networkName || 'Desconocida',
-    baseUrl: networkConfig?.baseUrl || 'http://localhost:5000/api',
+    baseUrl: networkConfig?.baseUrl || 'http://192.168.0.110:5000/api',
     connectionStatus,
   };
 

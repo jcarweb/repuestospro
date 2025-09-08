@@ -35,6 +35,10 @@ import PrivacySettingsScreen from '../screens/client/PrivacySettingsScreen';
 
 // Admin Screens
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
+import AdminUsersScreen from '../screens/admin/AdminUsersScreen';
+import AdminCreateUserScreen from '../screens/admin/AdminCreateUserScreen';
+import StorePhotoCaptureScreen from '../screens/admin/StorePhotoCaptureScreen';
+import StorePhotosListScreen from '../screens/admin/StorePhotosListScreen';
 
 // Store Manager Screens
 import StoreManagerDashboardScreen from '../screens/store-manager/StoreManagerDashboardScreen';
@@ -328,11 +332,49 @@ const AppNavigator = () => {
             )}
             
             {user.role === 'admin' && (
-              <Stack.Screen 
-                name="AdminDashboard" 
-                component={AdminDashboardScreen} 
-                options={{ headerShown: false }} 
-              />
+              <>
+                <Stack.Screen 
+                  name="AdminDashboard" 
+                  component={AdminDashboardScreen} 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="StorePhotoCapture" 
+                  component={StorePhotoCaptureScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Capturar Foto de Local',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="StorePhotosList" 
+                  component={StorePhotosListScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Fotos de Locales',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="AdminUsers" 
+                  component={AdminUsersScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Gestión de Usuarios',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="AdminCreateUser" 
+                  component={AdminCreateUserScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Crear Usuario',
+                    headerBackTitle: 'Usuarios'
+                  }} 
+                />
+              </>
             )}
             
             {user.role === 'store_manager' && (

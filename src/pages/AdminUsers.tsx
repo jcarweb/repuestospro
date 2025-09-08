@@ -16,11 +16,17 @@ const AdminUsers: React.FC = () => {
   const { forceUpdate } = useLanguageChange(); // Para asegurar re-renders
   
   const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [hasIdFilter, setHasIdFilter] = useState(false);
+  
+  // Estados de paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -32,15 +38,10 @@ const AdminUsers: React.FC = () => {
     role: 'client'
   });
 
-  // Cargar usuarios al montar el componente
+  // Cargar usuarios cuando cambien los filtros o paginación
   useEffect(() => {
     fetchUsers();
-  }, []);
-
-  // Filtrar usuarios cuando cambien los filtros
-  useEffect(() => {
-    filterUsers();
-  }, [users, searchTerm, roleFilter, statusFilter]);
+  }, [currentPage, itemsPerPage, searchTerm, roleFilter, statusFilter, hasIdFilter]);
 
   const fetchUsers = async () => {
     try {
@@ -54,7 +55,17 @@ const AdminUsers: React.FC = () => {
 
       console.log('🔐 Token encontrado, haciendo petición a usuarios...');
       
-      const response = await fetch('http://localhost:5000/api/admin/users', {
+      // Construir parámetros de consulta
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: itemsPerPage.toString(),
+        ...(searchTerm && { search: searchTerm }),
+        ...(roleFilter && { role: roleFilter }),
+        ...(statusFilter && { status: statusFilter }),
+        ...(hasIdFilter && { hasId: 'true' })
+      });
+      
+      const response = await fetch(`http://localhost:5000/api/users?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -71,51 +82,57 @@ const AdminUsers: React.FC = () => {
 
       const data = await response.json();
       console.log('📄 Users data:', data);
+      console.log('📄 Pagination data:', data.pagination);
+      console.log('📄 Query params:', params.toString());
+      console.log('📄 First user sample:', data.data?.[0]);
       
-      if (data.success && data.users) {
-        setUsers(data.users);
+      if (data.success && data.data) {
+        setUsers(data.data);
+        
+        // Manejar tanto la estructura nueva (con paginación) como la antigua (sin paginación)
+        if (data.pagination) {
+          setTotalUsers(data.pagination.totalUsers);
+          setTotalPages(data.pagination.totalPages);
+        } else {
+          // Estructura antigua sin paginación
+          setTotalUsers(data.total || data.data.length);
+          setTotalPages(1);
+        }
       } else {
         console.error('Respuesta inesperada:', data);
         setUsers([]);
+        setTotalUsers(0);
+        setTotalPages(0);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
-      // En caso de error, mostrar mensaje pero no usar datos de ejemplo
       setUsers([]);
+      setTotalUsers(0);
+      setTotalPages(0);
       alert(t('adminUsers.errors.loadUsers') + ': ' + (error instanceof Error ? error.message : 'Error desconocido'));
     } finally {
       setLoading(false);
     }
   };
 
-  const filterUsers = () => {
-    let filtered = users;
+  // Función para cambiar página
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
-    // Filtro por búsqueda
-    if (searchTerm) {
-      filtered = filtered.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+  // Función para cambiar elementos por página
+  const handleItemsPerPageChange = (items: number) => {
+    setItemsPerPage(items);
+    setCurrentPage(1); // Resetear a la primera página
+  };
 
-    // Filtro por rol
-    if (roleFilter) {
-      filtered = filtered.filter(user => user.role === roleFilter);
-    }
-
-    // Filtro por estado
-    if (statusFilter) {
-      if (statusFilter === 'active') {
-        filtered = filtered.filter(user => user.isActive);
-      } else if (statusFilter === 'inactive') {
-        filtered = filtered.filter(user => !user.isActive);
-      } else if (statusFilter === 'pending') {
-        filtered = filtered.filter(user => !user.isEmailVerified);
-      }
-    }
-
-    setFilteredUsers(filtered);
+  // Función para resetear filtros
+  const resetFilters = () => {
+    setSearchTerm('');
+    setRoleFilter('');
+    setStatusFilter('');
+    setHasIdFilter(false);
+    setCurrentPage(1);
   };
 
   const handleCreateUser = async () => {
@@ -129,7 +146,7 @@ const AdminUsers: React.FC = () => {
 
       console.log('📤 Enviando datos desde frontend:', formData);
 
-      const response = await fetch('http://localhost:5000/api/admin/users', {
+      const response = await fetch('http://localhost:5000/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -166,7 +183,7 @@ const AdminUsers: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/users/${selectedUser.id}`, {
+      const response = await fetch(`http://localhost:5000/api/users/${selectedUser.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -205,7 +222,7 @@ const AdminUsers: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/deactivate`, {
+      const response = await fetch(`http://localhost:5000/api/users/${userId}/deactivate`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -239,7 +256,7 @@ const AdminUsers: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/reset-password`, {
+      const response = await fetch(`http://localhost:5000/api/users/${userId}/reset-password`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -380,6 +397,21 @@ const AdminUsers: React.FC = () => {
               <option value="inactive">{t('adminUsers.filters.inactive')}</option>
               <option value="pending">{t('adminUsers.filters.pending')}</option>
             </select>
+            <label className="flex items-center space-x-2 px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] rounded-lg">
+              <input
+                type="checkbox"
+                checked={hasIdFilter}
+                onChange={(e) => setHasIdFilter(e.target.checked)}
+                className="rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300]"
+              />
+              <span className="text-sm text-gray-700 dark:text-white">Solo con ID</span>
+            </label>
+            <button
+              onClick={resetFilters}
+              className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
+            >
+              Limpiar
+            </button>
           </div>
         </div>
       </div>
@@ -388,7 +420,7 @@ const AdminUsers: React.FC = () => {
       <div className="bg-white dark:bg-[#333333] rounded-lg shadow overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-[#555555]">
           <h3 className="text-lg font-semibold text-[#333333] dark:text-[#FFC300]">
-            {t('adminUsers.table.title')} ({filteredUsers.length})
+            {t('adminUsers.table.title')} ({totalUsers})
           </h3>
         </div>
         <div className="overflow-x-auto">
@@ -416,7 +448,7 @@ const AdminUsers: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-[#333333] divide-y divide-gray-200 dark:divide-[#555555]">
-              {filteredUsers.map((user) => (
+              {users.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-[#444444]">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -427,7 +459,7 @@ const AdminUsers: React.FC = () => {
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-[#333333] dark:text-white">{user.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-300">ID: {user.id}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-300">ID: {user._id}</div>
                       </div>
                     </div>
                   </td>
@@ -483,6 +515,72 @@ const AdminUsers: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="bg-white dark:bg-[#333333] rounded-lg shadow p-6 mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          {/* Items per page selector */}
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-600 dark:text-white">Mostrar:</span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+              className="px-3 py-1 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span className="text-sm text-gray-600 dark:text-white">por página</span>
+          </div>
+
+          {/* Pagination info */}
+          <div className="text-sm text-gray-600 dark:text-white">
+            Mostrando {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalUsers)} de {totalUsers} usuarios
+          </div>
+
+          {/* Pagination buttons */}
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded hover:bg-gray-50 dark:hover:bg-[#555555] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Anterior
+            </button>
+            
+            {/* Page numbers */}
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+              if (pageNum > totalPages) return null;
+              
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`px-3 py-1 border rounded ${
+                    pageNum === currentPage
+                      ? 'bg-[#FFC300] text-[#333333] border-[#FFC300]'
+                      : 'border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white hover:bg-gray-50 dark:hover:bg-[#555555]'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+            
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded hover:bg-gray-50 dark:hover:bg-[#555555] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Siguiente
+            </button>
+          </div>
         </div>
       </div>
 

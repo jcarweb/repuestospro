@@ -123,7 +123,7 @@ export class APIService {
 
         return {
           success: true,
-          data: responseData.data || responseData,
+          data: responseData,
           statusCode: response.status,
         };
 

@@ -198,7 +198,7 @@ const ClientHomeScreen: React.FC = () => {
 
     try {
       setSearching(true);
-      const response = await fetch('http://localhost:5000/api/search/products', {
+      const response = await fetch('http://192.168.0.110:5000/api/search/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -10,6 +10,10 @@ import { useTheme } from '../contexts/ThemeContext';
 import CryptoLoginScreen from '../screens/auth/CryptoLoginScreen';
 
 // Admin Screens
+import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
+import AdminUsersScreen from '../screens/admin/AdminUsersScreen';
+import AdminProductsScreen from '../screens/admin/AdminProductsScreen';
+import AdminStoresScreen from '../screens/admin/AdminStoresScreen';
 import StorePhotoCaptureScreen from '../screens/admin/StorePhotoCaptureScreen';
 import StorePhotosListScreen from '../screens/admin/StorePhotosListScreen';
 
@@ -31,6 +35,18 @@ const AdminTabNavigator = () => {
           let iconName: keyof typeof Ionicons.glyphMap;
 
           switch (route.name) {
+            case 'AdminDashboard':
+              iconName = focused ? 'grid' : 'grid-outline';
+              break;
+            case 'AdminUsers':
+              iconName = focused ? 'people' : 'people-outline';
+              break;
+            case 'AdminProducts':
+              iconName = focused ? 'cube' : 'cube-outline';
+              break;
+            case 'AdminStores':
+              iconName = focused ? 'business' : 'business-outline';
+              break;
             case 'StorePhotoCapture':
               iconName = focused ? 'camera' : 'camera-outline';
               break;
@@ -60,6 +76,26 @@ const AdminTabNavigator = () => {
       })}
     >
       <Tab.Screen 
+        name="AdminDashboard" 
+        component={AdminDashboardScreen}
+        options={{ tabBarLabel: 'Dashboard' }}
+      />
+      <Tab.Screen 
+        name="AdminUsers" 
+        component={AdminUsersScreen}
+        options={{ tabBarLabel: 'Usuarios' }}
+      />
+      <Tab.Screen 
+        name="AdminProducts" 
+        component={AdminProductsScreen}
+        options={{ tabBarLabel: 'Productos' }}
+      />
+      <Tab.Screen 
+        name="AdminStores" 
+        component={AdminStoresScreen}
+        options={{ tabBarLabel: 'Tiendas' }}
+      />
+      <Tab.Screen 
         name="StorePhotoCapture" 
         component={StorePhotoCaptureScreen}
         options={{ tabBarLabel: 'Capturar' }}
@@ -73,16 +109,18 @@ const AdminTabNavigator = () => {
   );
 };
 
-const CryptoAppNavigator = () => {
-  const { user, isLoading, isAdmin } = useCryptoAuth();
-  const { colors } = useTheme();
+// Wrapper component to ensure context is available
+const CryptoAppNavigatorWrapper = () => {
+  try {
+    const { user, isLoading, isAdmin } = useCryptoAuth();
+    const { colors } = useTheme();
 
-  if (isLoading) {
-    return <SplashScreen />;
-  }
+    if (isLoading) {
+      return <SplashScreen />;
+    }
 
-  return (
-    <NavigationContainer>
+    return (
+      <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
           headerStyle: {
@@ -143,7 +181,16 @@ const CryptoAppNavigator = () => {
       </Stack.Navigator>
       <Toast />
     </NavigationContainer>
-  );
+    );
+  } catch (error) {
+    console.error('Error in CryptoAppNavigator:', error);
+    return <SplashScreen />;
+  }
+};
+
+// Main navigator component
+const CryptoAppNavigator = () => {
+  return <CryptoAppNavigatorWrapper />;
 };
 
 export default CryptoAppNavigator;

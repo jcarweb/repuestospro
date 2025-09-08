@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "removeComments": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false,
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": [
+    "src/index.ts",
+    "src/models/StorePhoto.ts",
+    "src/utils/cryptoAuth.ts",
+    "src/middleware/cryptoAuthMiddleware.ts",
+    "src/services/enrichmentWorker.ts",
+    "src/controllers/storePhotoController.ts",
+    "src/controllers/cryptoAuthController.ts",
+    "src/routes/storePhotoRoutes.ts",
+    "src/routes/cryptoAuthRoutes.ts",
+    "src/config/cloudinary.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

@@ -6,9 +6,14 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  StatusBar,
+  Platform,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 
 interface DashboardStats {
   totalUsers: number;
@@ -21,6 +26,9 @@ interface DashboardStats {
 
 const AdminDashboardScreen: React.FC = () => {
   const { colors } = useTheme();
+  const { user } = useAuth();
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -109,7 +117,19 @@ const AdminDashboardScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <StatusBar 
+        barStyle={colors.textPrimary === '#000000' ? 'dark-content' : 'light-content'} 
+        backgroundColor={colors.surface}
+        translucent={false}
+      />
+      <ScrollView 
+        style={styles.content} 
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: Platform.OS === 'ios' ? insets.top + 10 : insets.top + 20 }
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={[styles.header, { backgroundColor: colors.surface }]}>
           <Text style={[styles.title, { color: colors.textPrimary }]}>
@@ -166,6 +186,87 @@ const AdminDashboardScreen: React.FC = () => {
           </View>
         </View>
 
+        {/* Sistema de Enriquecimiento de Datos - Nueva Sección */}
+        <View style={styles.enrichmentSection}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+            🔍 Sistema de Enriquecimiento de Datos
+          </Text>
+          
+          <View style={styles.enrichmentGrid}>
+            <TouchableOpacity
+              style={[styles.enrichmentCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              onPress={() => {
+                navigation.navigate('StorePhotoCapture' as never);
+              }}
+            >
+              <View style={[styles.enrichmentIcon, { backgroundColor: '#10B981' }]}>
+                <Ionicons name="camera" size={24} color="white" />
+              </View>
+              <View style={styles.enrichmentContent}>
+                <Text style={[styles.enrichmentTitle, { color: colors.textPrimary }]}>
+                  Capturar Fotos
+                </Text>
+                <Text style={[styles.enrichmentSubtitle, { color: colors.textSecondary }]}>
+                  Tomar fotos de locales con GPS
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.enrichmentCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              onPress={() => {
+                navigation.navigate('StorePhotosList' as never);
+              }}
+            >
+              <View style={[styles.enrichmentIcon, { backgroundColor: '#8B5CF6' }]}>
+                <Ionicons name="list" size={24} color="white" />
+              </View>
+              <View style={styles.enrichmentContent}>
+                <Text style={[styles.enrichmentTitle, { color: colors.textPrimary }]}>
+                  Ver Fotos
+                </Text>
+                <Text style={[styles.enrichmentSubtitle, { color: colors.textSecondary }]}>
+                  Gestionar fotos y resultados
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.enrichmentFeatures}>
+            <Text style={[styles.featuresTitle, { color: colors.textPrimary }]}>
+              Funcionalidades Automáticas:
+            </Text>
+            <View style={styles.featuresList}>
+              <View style={styles.featureItem}>
+                <Ionicons name="eye" size={16} color="#8B5CF6" />
+                <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+                  OCR con Tesseract.js
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Ionicons name="search" size={16} color="#8B5CF6" />
+                <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+                  Búsqueda en MercadoLibre
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Ionicons name="globe" size={16} color="#8B5CF6" />
+                <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+                  Consultas a DuckDuckGo
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Ionicons name="logo-instagram" size={16} color="#8B5CF6" />
+                <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+                  Análisis de Instagram
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
         {/* Menú de funciones */}
         <View style={styles.menuSection}>
           <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
@@ -177,8 +278,7 @@ const AdminDashboardScreen: React.FC = () => {
             'Gestión de Usuarios',
             'Administrar usuarios, roles y permisos',
             () => {
-              // Navegar a gestión de usuarios
-              // navigation.navigate('UserManagement');
+              navigation.navigate('AdminUsers' as never);
             }
           )}
           
@@ -325,6 +425,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: 20,
+  },
   header: {
     padding: 20,
     marginBottom: 16,
@@ -450,6 +553,67 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     textAlign: 'center',
+  },
+  // Estilos para la sección de enriquecimiento
+  enrichmentSection: {
+    marginBottom: 24,
+  },
+  enrichmentGrid: {
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  enrichmentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  enrichmentIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  enrichmentContent: {
+    flex: 1,
+  },
+  enrichmentTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  enrichmentSubtitle: {
+    fontSize: 14,
+  },
+  enrichmentFeatures: {
+    marginTop: 16,
+    paddingHorizontal: 16,
+  },
+  featuresTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  featuresList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginBottom: 8,
+  },
+  featureText: {
+    fontSize: 12,
+    marginLeft: 6,
   },
 });
 
