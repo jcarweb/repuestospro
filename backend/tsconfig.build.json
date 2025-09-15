@@ -11,9 +11,9 @@
     "allowJs": true,
     "strict": false,
     "noImplicitThis": false,
-    "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "suppressExcessPropertyErrors": true
   },
   "include": [
     "src/**/*"
