@@ -23,9 +23,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowJs": true,
-    "noEmitOnError": false,
-    "suppressImplicitAnyIndexErrors": true,
-    "suppressExcessPropertyErrors": true
+    "noEmitOnError": false
   },
   "include": [
     "src/**/*"

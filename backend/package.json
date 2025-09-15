@@ -4,7 +4,7 @@
   "description": "Backend reactivo para ecommerce de repuestos de vehículos - PiezasYA",
   "main": "dist/index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "cd dist && node index.js",
     "dev": "nodemon --exec ts-node --transpile-only ./src/index.ts src/index.ts",
     "dev:network": "node start-with-specific-ip.js",
     "dev:simple": "ts-node --transpile-only ./src/index.ts",

@@ -13,7 +13,7 @@ try {
   // Compilar solo el archivo principal con configuración mínima
   console.log('📦 Compilando archivo principal...');
   
-  const tscCommand = 'npx tsc --noEmitOnError false --skipLibCheck true --allowJs --target ES2020 --module commonjs --outDir dist --rootDir src --isolatedModules false --allowSyntheticDefaultImports --esModuleInterop --resolveJsonModule --declaration false --sourceMap false --removeComments true --noImplicitAny false --strictNullChecks false --strictFunctionTypes false --noImplicitReturns false --noFallthroughCasesInSwitch false --moduleResolution node --experimentalDecorators true --emitDecoratorMetadata true --suppressImplicitAnyIndexErrors true --suppressExcessPropertyErrors true src/index.ts';
+  const tscCommand = 'npx tsc --noEmitOnError false --skipLibCheck true --allowJs --target ES2020 --module commonjs --outDir dist --rootDir src --isolatedModules false --allowSyntheticDefaultImports --esModuleInterop --resolveJsonModule --declaration false --sourceMap false --removeComments true --noImplicitAny false --strictNullChecks false --strictFunctionTypes false --noImplicitReturns false --noFallthroughCasesInSwitch false --moduleResolution node --experimentalDecorators true --emitDecoratorMetadata true src/index.ts';
   
   try {
     execSync(tscCommand, { stdio: 'inherit' });
@@ -22,10 +22,19 @@ try {
     console.log('⚠️  Error en archivo principal, continuando...');
   }
 
-  // Copiar package.json
+  // Copiar package.json y instalar dependencias
   if (fs.existsSync('package.json')) {
     fs.copyFileSync('package.json', path.join('dist', 'package.json'));
     console.log('📋 Copiado package.json a dist/');
+    
+    // Instalar dependencias en el directorio dist
+    console.log('📦 Instalando dependencias en dist/...');
+    try {
+      execSync('npm install --production', { cwd: 'dist', stdio: 'inherit' });
+      console.log('✅ Dependencias instaladas en dist/');
+    } catch (error) {
+      console.log('⚠️  Error instalando dependencias, continuando...');
+    }
   }
 
   // Crear un index.js básico si no se compiló
