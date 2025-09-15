@@ -9,7 +9,7 @@
     "dev:network": "node start-with-specific-ip.js",
     "dev:simple": "ts-node --transpile-only ./src/index.ts",
     "dev:windows": "ts-node --transpile-only ./src/index.ts",
-    "build": "node build-fix.js",
+    "build": "node build-specific.js",
     "build:simple": "tsc --project tsconfig.build.json --noEmitOnError false",
     "build:force": "tsc --project tsconfig.build.json --noEmitOnError false --skipLibCheck true",
     "build:tsnode": "ts-node --transpile-only src/index.ts --build",
