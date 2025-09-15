@@ -12,6 +12,8 @@
     "build": "tsc --project tsconfig.build.json",
     "build:simple": "tsc --project tsconfig.build.json --noEmitOnError false",
     "build:force": "tsc --project tsconfig.build.json --noEmitOnError false --skipLibCheck true",
+    "build:tsnode": "ts-node --transpile-only src/index.ts --build",
+    "build:ignore": "tsc --noEmitOnError false --skipLibCheck true --allowJs --target ES2020 --module commonjs --outDir dist --rootDir src src/**/*.ts",
     "build:watch": "tsc --watch",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
