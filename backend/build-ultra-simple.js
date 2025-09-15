@@ -39,7 +39,12 @@ const PORT = process.env.PORT || 5000;
 // Middleware básico
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: [
+    'https://piezasya.vercel.app',
+    'https://piezasya.vercel.app/',
+    'http://localhost:3000',
+    'http://localhost:3000/'
+  ],
   credentials: true
 }));
 app.use(morgan('combined'));
