@@ -11,6 +11,7 @@
     "dev:windows": "ts-node --transpile-only ./src/index.ts",
     "build": "tsc --project tsconfig.build.json",
     "build:simple": "tsc --project tsconfig.build.json --noEmitOnError false",
+    "build:force": "tsc --project tsconfig.build.json --noEmitOnError false --skipLibCheck true",
     "build:watch": "tsc --watch",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
