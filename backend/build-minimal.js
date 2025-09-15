@@ -13,7 +13,7 @@ try {
   // Compilar solo el archivo principal con configuración mínima
   console.log('📦 Compilando archivo principal...');
   
-  const tscCommand = 'npx tsc --noEmitOnError false --skipLibCheck true --allowJs --target ES2020 --module commonjs --outDir dist --rootDir src --isolatedModules false --allowSyntheticDefaultImports --esModuleInterop --resolveJsonModule --declaration false --sourceMap false --removeComments true --noImplicitAny false --strictNullChecks false --strictFunctionTypes false --noImplicitReturns false --noFallthroughCasesInSwitch false --moduleResolution node --experimentalDecorators true --emitDecoratorMetadata true --suppressImplicitAnyIndexErrors true --suppressExcessPropertyErrors true src/index.ts';
+  const tscCommand = 'npx tsc --noEmitOnError false --skipLibCheck true --allowJs --target ES2020 --module commonjs --outDir dist --rootDir src --isolatedModules false --allowSyntheticDefaultImports --esModuleInterop --resolveJsonModule --declaration false --sourceMap false --removeComments true --noImplicitAny false --strictNullChecks false --strictFunctionTypes false --noImplicitReturns false --noFallthroughCasesInSwitch false --moduleResolution node --experimentalDecorators true --emitDecoratorMetadata true src/index.ts';
   
   try {
     execSync(tscCommand, { stdio: 'inherit' });
