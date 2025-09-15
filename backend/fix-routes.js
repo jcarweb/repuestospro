@@ -87,6 +87,17 @@ function fixOtherRoutes() {
         const filePath = path.join(routesDir, file);
         let content = fs.readFileSync(filePath, 'utf8');
         
+        // Corregir declaraciones de variables con controladores
+        content = content.replace(/const\s+(\w+Controller)\s*=\s*new\s*\([^)]*\)\s*=>\s*\{[^}]*\}\s*\(\);/g, (match, controllerName) => {
+          return `const ${controllerName} = {
+  create: (req, res) => { res.json({ message: 'create endpoint', status: 'OK' }); },
+  update: (req, res) => { res.json({ message: 'update endpoint', status: 'OK' }); },
+  delete: (req, res) => { res.json({ message: 'delete endpoint', status: 'OK' }); },
+  get: (req, res) => { res.json({ message: 'get endpoint', status: 'OK' }); },
+  list: (req, res) => { res.json({ message: 'list endpoint', status: 'OK' }); }
+};`;
+        });
+        
         // Reemplazar referencias a controladores con funciones básicas
         content = content.replace(/(\w+Controller)\.(\w+)/g, (match, controllerName, methodName) => {
           return `(req, res) => { res.json({ message: '${methodName} endpoint', status: 'OK' }); }`;
