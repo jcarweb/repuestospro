@@ -165,7 +165,7 @@
   }
   
   /* Hover para texto blanco en modo oscuro */
-  .dark .hover\:text-\[#333333\]:hover {
+  .dark .hover\\:text-\\[#333333\\]:hover {
     color: #333333 !important;
   }
 }
