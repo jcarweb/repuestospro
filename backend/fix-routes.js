@@ -92,6 +92,12 @@ function fixOtherRoutes() {
           return `(req, res) => { res.json({ message: '${methodName} endpoint', status: 'OK' }); }`;
         });
         
+        // Corregir sintaxis problemática con .bind()
+        content = content.replace(/\.bind\(\w+Controller\)/g, '');
+        
+        // Corregir paréntesis faltantes
+        content = content.replace(/\)\s*\.bind\([^)]*\)/g, ')');
+        
         fs.writeFileSync(filePath, content);
         console.log(`✅ ${file} corregido`);
       }
