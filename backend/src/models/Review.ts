@@ -11,6 +11,17 @@ export interface IReview extends Document {
   pointsEarned: number;
   isVerified: boolean;
   helpful: number;
+  reply?: {
+    text: string;
+    authorId: mongoose.Types.ObjectId;
+    createdAt: Date;
+  };
+  reports?: Array<{
+    userId: mongoose.Types.ObjectId;
+    reason: string;
+    description?: string;
+    createdAt: Date;
+  }>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -66,7 +77,41 @@ const reviewSchema = new Schema<IReview>({
   helpful: {
     type: Number,
     default: 0
-  }
+  },
+  reply: {
+    text: {
+      type: String,
+      maxlength: 1000
+    },
+    authorId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  },
+  reports: [{
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    reason: {
+      type: String,
+      required: true,
+      enum: ['inappropriate', 'spam', 'fake', 'offensive', 'other']
+    },
+    description: {
+      type: String,
+      maxlength: 500
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });

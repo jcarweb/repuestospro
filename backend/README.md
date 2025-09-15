@@ -1,4 +1,4 @@
-# Backend Reactivo - RepuestosPro
+# Backend Reactivo - PiezasYA
 
 Backend para el ecommerce de repuestos de vehículos construido con **programación reactiva** usando Express.js, RxJS y MongoDB Atlas.
 
@@ -270,7 +270,7 @@ Este proyecto está bajo la Licencia MIT.
 
 ## 📞 Soporte
 
-- **Email**: backend@repuestospro.com
+- **Email**: backend@PiezasYA.com
 - **Documentación**: `/docs`
 - **Issues**: GitHub Issues
 

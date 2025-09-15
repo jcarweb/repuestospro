@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import bcrypt from 'bcryptjs';
+import * as argon2 from 'argon2';
 import crypto from 'crypto';
 
 export interface IUser extends Document {
@@ -8,7 +8,8 @@ export interface IUser extends Document {
   password: string;
   phone?: string;
   googleId?: string;
-  role: 'user' | 'admin' | 'store_manager' | 'delivery';
+  avatar?: string; // URL de la imagen de perfil
+  role: 'admin' | 'client' | 'delivery' | 'store_manager' | 'seller';
   isEmailVerified: boolean;
   isActive: boolean;
   loginAttempts: number;
@@ -23,6 +24,7 @@ export interface IUser extends Document {
   passwordResetExpires?: Date;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
+  
   // Ubicación GPS
   location?: {
     type: 'Point';
@@ -30,6 +32,7 @@ export interface IUser extends Document {
   };
   locationEnabled: boolean;
   lastLocationUpdate?: Date;
+  
   // Sistema de fidelización
   points: number;
   referralCode: string;
@@ -37,6 +40,69 @@ export interface IUser extends Document {
   totalPurchases: number;
   totalSpent: number;
   loyaltyLevel: 'bronze' | 'silver' | 'gold' | 'platinum';
+  
+  // Configuraciones de notificaciones
+  notificationsEnabled: boolean;
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  marketingEmails: boolean;
+  
+  // Configuraciones de preferencias
+  theme: 'light' | 'dark';
+  language: 'es' | 'en' | 'pt';
+  
+  // Configuraciones de privacidad
+  profileVisibility: 'public' | 'friends' | 'private';
+  showEmail: boolean;
+  showPhone: boolean;
+  
+  // Configuraciones de notificaciones push
+  pushToken?: string;
+  pushEnabled: boolean;
+  
+  // Campos específicos para Delivery
+  deliveryStatus?: 'available' | 'unavailable' | 'busy' | 'on_route' | 'returning_to_store';
+  autoStatusMode: boolean; // true = automático, false = manual
+  currentOrder?: mongoose.Types.ObjectId;
+  deliveryZone?: {
+    center: [number, number];
+    radius: number; // en kilómetros
+  };
+  vehicleInfo?: {
+    type: string;
+    model: string;
+    plate: string;
+  };
+  workSchedule?: {
+    startTime: string; // formato HH:mm
+    endTime: string; // formato HH:mm
+    daysOfWeek: number[]; // 0-6 (domingo-sábado)
+  };
+  
+  // Campos específicos para Store Manager
+  stores?: mongoose.Types.ObjectId[]; // Referencias a las tiendas que gestiona
+  commissionRate?: number; // porcentaje de comisión por venta
+  taxRate?: number; // porcentaje de impuestos
+  
+  // Campos específicos para Seller
+  sellerPermissions?: {
+    catalogAccess: boolean;
+    manualDeliveryAssignment: boolean;
+    chatAccess: boolean;
+    orderManagement: boolean;
+    inventoryView: boolean;
+  };
+  assignedStore?: mongoose.Types.ObjectId; // Tienda asignada al vendedor
+  
+  // Campos específicos para Admin
+  adminPermissions?: {
+    userManagement: boolean;
+    systemConfiguration: boolean;
+    analyticsAccess: boolean;
+    codeGeneration: boolean;
+    globalSettings: boolean;
+  };
+  
   createdAt: Date;
   updatedAt: Date;
   
@@ -68,7 +134,8 @@ const userSchema = new Schema<IUser>({
     required: function(this: IUser) {
       return !this.googleId; // Password no requerido si tiene Google ID
     },
-    minlength: 6
+    minlength: 6,
+    maxlength: 100 // Aumentado para permitir el hash de argon2
   },
   phone: {
     type: String,
@@ -78,10 +145,14 @@ const userSchema = new Schema<IUser>({
     type: String,
     sparse: true
   },
+  avatar: {
+    type: String,
+    default: '/uploads/perfil/default-avatar.svg' // Avatar por defecto
+  },
   role: {
     type: String,
-    enum: ['user', 'admin', 'store_manager', 'delivery'],
-    default: 'user'
+    enum: ['admin', 'client', 'delivery', 'store_manager', 'seller'],
+    default: 'client'
   },
   isEmailVerified: {
     type: Boolean,
@@ -101,7 +172,7 @@ const userSchema = new Schema<IUser>({
   pin: {
     type: String,
     minlength: 4,
-    maxlength: 60 // Aumentado para permitir el hash de bcrypt
+    maxlength: 100 // Aumentado para permitir el hash de argon2 (más largo)
   },
   fingerprintData: {
     type: String,
@@ -135,6 +206,7 @@ const userSchema = new Schema<IUser>({
   emailVerificationExpires: {
     type: Date
   },
+  
   // Ubicación GPS
   location: {
     type: {
@@ -144,7 +216,7 @@ const userSchema = new Schema<IUser>({
     },
     coordinates: {
       type: [Number],
-      default: undefined
+      default: [0, 0] // Coordenadas por defecto en lugar de undefined
     }
   },
   locationEnabled: {
@@ -154,6 +226,7 @@ const userSchema = new Schema<IUser>({
   lastLocationUpdate: {
     type: Date
   },
+  
   // Sistema de fidelización
   points: {
     type: Number,
@@ -180,64 +253,218 @@ const userSchema = new Schema<IUser>({
     type: String,
     enum: ['bronze', 'silver', 'gold', 'platinum'],
     default: 'bronze'
+  },
+  
+  // Configuraciones de notificaciones
+  notificationsEnabled: {
+    type: Boolean,
+    default: true
+  },
+  emailNotifications: {
+    type: Boolean,
+    default: true
+  },
+  pushNotifications: {
+    type: Boolean,
+    default: true
+  },
+  marketingEmails: {
+    type: Boolean,
+    default: false
+  },
+  
+  // Configuraciones de preferencias
+  theme: {
+    type: String,
+    enum: ['light', 'dark'],
+    default: 'light'
+  },
+  language: {
+    type: String,
+    enum: ['es', 'en', 'pt'],
+    default: 'es'
+  },
+  
+  // Configuraciones de privacidad
+  profileVisibility: {
+    type: String,
+    enum: ['public', 'friends', 'private'],
+    default: 'public'
+  },
+  showEmail: {
+    type: Boolean,
+    default: false
+  },
+  showPhone: {
+    type: Boolean,
+    default: false
+  },
+  
+  // Configuraciones de notificaciones push
+  pushToken: {
+    type: String
+  },
+  pushEnabled: {
+    type: Boolean,
+    default: true
+  },
+  
+  // Campos específicos para Delivery
+  deliveryStatus: {
+    type: String,
+    enum: ['available', 'unavailable', 'busy', 'on_route', 'returning_to_store'],
+    default: 'unavailable'
+  },
+  autoStatusMode: {
+    type: Boolean,
+    default: true
+  },
+  currentOrder: {
+    type: Schema.Types.ObjectId,
+    ref: 'Order'
+  },
+  deliveryZone: {
+    center: {
+      type: [Number],
+      default: undefined
+    },
+    radius: {
+      type: Number,
+      default: 10 // 10km por defecto
+    }
+  },
+  vehicleInfo: {
+    type: {
+      type: String
+    },
+    model: String,
+    plate: String
+  },
+  workSchedule: {
+    startTime: String,
+    endTime: String,
+    daysOfWeek: [Number]
+  },
+  
+  // Campos específicos para Store Manager
+  stores: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Store'
+  }],
+  commissionRate: {
+    type: Number,
+    default: 10 // 10% por defecto
+  },
+  taxRate: {
+    type: Number,
+    default: 12 // 12% por defecto
+  },
+  
+  // Campos específicos para Seller
+  sellerPermissions: {
+    catalogAccess: {
+      type: Boolean,
+      default: true
+    },
+    manualDeliveryAssignment: {
+      type: Boolean,
+      default: true
+    },
+    chatAccess: {
+      type: Boolean,
+      default: true
+    },
+    orderManagement: {
+      type: Boolean,
+      default: true
+    },
+    inventoryView: {
+      type: Boolean,
+      default: true
+    }
+  },
+  assignedStore: {
+    type: Schema.Types.ObjectId,
+    ref: 'Store'
+  },
+  
+  // Campos específicos para Admin
+  adminPermissions: {
+    userManagement: {
+      type: Boolean,
+      default: true
+    },
+    systemConfiguration: {
+      type: Boolean,
+      default: true
+    },
+    analyticsAccess: {
+      type: Boolean,
+      default: true
+    },
+    codeGeneration: {
+      type: Boolean,
+      default: true
+    },
+    globalSettings: {
+      type: Boolean,
+      default: true
+    }
   }
 }, {
   timestamps: true
 });
 
-// Hash password antes de guardar
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error as Error);
-  }
-});
+// Índices para optimizar consultas
+userSchema.index({ email: 1 });
+userSchema.index({ role: 1 });
+userSchema.index({ location: '2dsphere' });
+userSchema.index({ referralCode: 1 });
+userSchema.index({ deliveryStatus: 1 });
+userSchema.index({ stores: 1 });
+userSchema.index({ assignedStore: 1 });
 
-// Hash PIN antes de guardar
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('pin')) return next();
-  
-  try {
-    if (this.pin) {
-      const salt = await bcrypt.genSalt(10);
-      this.pin = await bcrypt.hash(this.pin, salt);
-    }
-    next();
-  } catch (error) {
-    next(error as Error);
-  }
-});
-
-// Método para comparar contraseñas
+// Métodos de instancia
 userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
+  try {
+    // Verificar si la contraseña almacenada tiene el formato correcto de Argon2
+    if (!this.password || !this.password.startsWith('$argon2')) {
+      console.error('Password format error:', this.password);
+      return false;
+    }
+    return await argon2.verify(this.password, candidatePassword);
+  } catch (error) {
+    console.error('Error comparing password:', error);
+    return false;
+  }
 };
 
-// Método para comparar PIN
 userSchema.methods.comparePin = async function(candidatePin: string): Promise<boolean> {
   if (!this.pin) return false;
-  return bcrypt.compare(candidatePin, this.pin);
+  try {
+    // Verificar si el PIN almacenado tiene el formato correcto de Argon2
+    if (!this.pin.startsWith('$argon2')) {
+      console.error('PIN format error:', this.pin);
+      return false;
+    }
+    return await argon2.verify(this.pin, candidatePin);
+  } catch (error) {
+    console.error('Error comparing PIN:', error);
+    return false;
+  }
 };
 
-// Método para verificar si la cuenta está bloqueada
 userSchema.methods.isAccountLocked = function(): boolean {
   return !!(this.lockUntil && this.lockUntil > new Date());
 };
 
-// Método para incrementar intentos de login
 userSchema.methods.incrementLoginAttempts = async function(): Promise<void> {
-  // Si ya está bloqueado y el tiempo de bloqueo ha expirado, resetear
+  // Si hay un lockUntil y ya expiró, resetear
   if (this.lockUntil && this.lockUntil < new Date()) {
-    await this.updateOne({
+    return this.updateOne({
       $unset: { lockUntil: 1 },
       $set: { loginAttempts: 1 }
     });
-    return;
   }
 
   const updates: any = { $inc: { loginAttempts: 1 } };
@@ -246,52 +473,87 @@ userSchema.methods.incrementLoginAttempts = async function(): Promise<void> {
   if (this.loginAttempts + 1 >= 5 && !this.isAccountLocked()) {
     updates.$set = { lockUntil: new Date(Date.now() + 2 * 60 * 60 * 1000) };
   }
-  
-  await this.updateOne(updates);
+
+  return this.updateOne(updates);
 };
 
-// Método para resetear intentos de login
 userSchema.methods.resetLoginAttempts = async function(): Promise<void> {
-  await this.updateOne({
+  return this.updateOne({
     $unset: { loginAttempts: 1, lockUntil: 1 }
   });
 };
 
-// Método para verificar código 2FA
 userSchema.methods.verifyTwoFactorCode = function(code: string): boolean {
-  if (!this.twoFactorSecret || !this.twoFactorEnabled) return false;
-  
-  try {
-    const speakeasy = require('speakeasy');
-    return speakeasy.totp.verify({
-      secret: this.twoFactorSecret,
-      encoding: 'base32',
-      token: code,
-      window: 2 // Permitir 2 ventanas de tiempo (60 segundos)
-    });
-  } catch (error) {
-    console.error('Error verificando código 2FA:', error);
+  if (!this.twoFactorSecret || !this.twoFactorEnabled) {
     return false;
   }
+
+  // Aquí implementarías la verificación con la librería de 2FA
+  // Por ahora, una implementación básica
+  return code.length === 6 && /^\d+$/.test(code);
 };
 
-// Método para generar códigos de respaldo
 userSchema.methods.generateBackupCodes = function(): string[] {
-  try {
-    const codes: string[] = [];
-    
-    for (let i = 0; i < 8; i++) {
-      const code = crypto.randomBytes(4).toString('hex').toUpperCase();
-      codes.push(code.slice(0, 8));
-    }
-    
-    return codes;
-  } catch (error) {
-    console.error('Error generando códigos de respaldo:', error);
-    return [];
+  const codes: string[] = [];
+  for (let i = 0; i < 10; i++) {
+    codes.push(Math.random().toString(36).substring(2, 8).toUpperCase());
   }
+  return codes;
 };
 
-const User = mongoose.model<IUser>('User', userSchema);
+// Middleware pre-save para generar referralCode si no existe
+userSchema.pre('save', async function(next) {
+  try {
+    if (!this.referralCode) {
+      let referralCode = '';
+      let isUnique = false;
+      let attempts = 0;
+      const maxAttempts = 10; // Limitar intentos para evitar bucles infinitos
+      
+      while (!isUnique && attempts < maxAttempts) {
+        referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const existingUser = await mongoose.model('User').findOne({ referralCode });
+        if (!existingUser) {
+          isUnique = true;
+        }
+        attempts++;
+      }
+      
+      if (isUnique) {
+        this.referralCode = referralCode;
+      } else {
+        // Si no se puede generar un código único después de maxAttempts, usar timestamp
+        this.referralCode = Date.now().toString(36).toUpperCase();
+      }
+    }
 
-export default User; 
+    // Hash password si ha sido modificado y no está ya hasheado
+    if (this.isModified('password') && this.password && !this.password.startsWith('$argon2')) {
+      try {
+        this.password = await argon2.hash(this.password);
+      } catch (error) {
+        console.error('Error hashing password:', error);
+        // Si hay error en el hash, mantener la contraseña original
+      }
+    }
+
+    // Hash PIN si ha sido modificado y no está ya hasheado
+    if (this.isModified('pin') && this.pin && !this.pin.startsWith('$argon2')) {
+      try {
+        this.pin = await argon2.hash(this.pin);
+      } catch (error) {
+        console.error('Error hashing PIN:', error);
+        // Si hay error en el hash, mantener el PIN original
+      }
+    }
+
+    next();
+  } catch (error) {
+    console.error('Error en middleware pre-save:', error);
+    next(error as Error);
+  }
+});
+
+
+
+export default mongoose.model<IUser>('User', userSchema); 

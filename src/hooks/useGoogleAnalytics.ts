@@ -28,28 +28,27 @@ export const useGoogleAnalytics = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [config, setConfig] = useState<GoogleAnalyticsConfig | null>(null);
 
-  // Cargar configuración de Google Analytics
+  // Cargar configuración de Google Analytics (solo si es necesario)
   useEffect(() => {
-    const loadAnalyticsConfig = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/analytics/custom-config');
-        const result = await response.json();
-        
-        if (result.success && result.data) {
-          setConfig(result.data);
-          setIsLoaded(true);
-        } else {
-          // Si no hay configuración, marcar como cargado para evitar errores
-          setIsLoaded(true);
-        }
-      } catch (error) {
-        console.error('Error cargando configuración de GA:', error);
-        // Marcar como cargado para evitar errores
-        setIsLoaded(true);
-      }
-    };
-
-    loadAnalyticsConfig();
+    // Por ahora, marcar como cargado sin hacer peticiones
+    // para evitar errores en desarrollo
+    setIsLoaded(true);
+    
+    // TODO: Implementar carga de configuración cuando sea necesario
+    // const loadAnalyticsConfig = async () => {
+    //   try {
+    //     const response = await fetch('http://localhost:5000/api/analytics/custom-config');
+    //     const result = await response.json();
+    //     if (result.success && result.data) {
+    //       setConfig(result.data);
+    //     }
+    //   } catch (error) {
+    //     console.log('Google Analytics no configurado');
+    //   } finally {
+    //     setIsLoaded(true);
+    //   }
+    // };
+    // loadAnalyticsConfig();
   }, []);
 
   // Funciones específicas para eventos del sistema (simplificadas)

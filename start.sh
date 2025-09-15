@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "========================================"
-echo "   RepuestosPro - Ecommerce"
+echo "   PiezasYA - Ecommerce"
 echo "========================================"
 echo
 

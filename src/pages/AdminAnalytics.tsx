@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import {
   BarChart3,
   Settings,
@@ -44,6 +45,7 @@ interface AnalyticsConfig {
 
 const AdminAnalytics: React.FC = () => {
   const { token, user } = useAuth();
+  const { t } = useLanguage();
   const [config, setConfig] = useState<AnalyticsConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -78,7 +80,7 @@ const AdminAnalytics: React.FC = () => {
 
   useEffect(() => {
     if (user?.role !== 'admin') {
-      setMessage({ type: 'error', text: 'Acceso denegado. Solo administradores pueden acceder a esta página.' });
+      setMessage({ type: 'error', text: t('adminAnalytics.accessDeniedMessage') });
       return;
     }
     
@@ -110,7 +112,7 @@ const AdminAnalytics: React.FC = () => {
       }
     } catch (error) {
       console.error('Error obteniendo configuración:', error);
-      setMessage({ type: 'error', text: 'Error cargando configuración' });
+      setMessage({ type: 'error', text: t('adminAnalytics.errorLoading') });
     } finally {
       setLoading(false);
     }
@@ -151,13 +153,13 @@ const AdminAnalytics: React.FC = () => {
 
       const result = await response.json();
       if (result.success) {
-        setMessage({ type: 'success', text: 'Configuración guardada exitosamente' });
+        setMessage({ type: 'success', text: t('adminAnalytics.configurationSaved') });
         fetchConfiguration(); // Recargar configuración
       } else {
-        setMessage({ type: 'error', text: result.message || 'Error guardando configuración' });
+        setMessage({ type: 'error', text: result.message || t('adminAnalytics.errorSaving') });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Error de conexión' });
+      setMessage({ type: 'error', text: t('adminAnalytics.connectionError') });
     } finally {
       setSaving(false);
     }
@@ -176,13 +178,13 @@ const AdminAnalytics: React.FC = () => {
 
       const result = await response.json();
       if (result.success) {
-        setMessage({ type: 'success', text: `Google Analytics ${enabled ? 'habilitado' : 'deshabilitado'} exitosamente` });
+        setMessage({ type: 'success', text: enabled ? t('adminAnalytics.analyticsEnabled') : t('adminAnalytics.analyticsDisabled') });
         fetchConfiguration();
       } else {
-        setMessage({ type: 'error', text: result.message || 'Error cambiando estado' });
+        setMessage({ type: 'error', text: result.message || t('adminAnalytics.errorChangingStatus') });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Error de conexión' });
+      setMessage({ type: 'error', text: t('adminAnalytics.connectionError') });
     }
   };
 
@@ -194,6 +196,39 @@ const AdminAnalytics: React.FC = () => {
     }));
   };
 
+  // Funciones para obtener traducciones de eventos, dimensiones y métricas
+  const getEventLabel = (key: string) => {
+    const eventLabels: { [key: string]: string } = {
+      userRegistration: t('adminAnalytics.events.userRegistration'),
+      userLogin: t('adminAnalytics.events.userLogin'),
+      purchase: t('adminAnalytics.events.purchase'),
+      review: t('adminAnalytics.events.review'),
+      referral: t('adminAnalytics.events.referral'),
+      rewardRedemption: t('adminAnalytics.events.rewardRedemption'),
+      locationUpdate: t('adminAnalytics.events.locationUpdate')
+    };
+    return eventLabels[key] || key.replace(/([A-Z])/g, ' $1').trim();
+  };
+
+  const getDimensionLabel = (key: string) => {
+    const dimensionLabels: { [key: string]: string } = {
+      userId: t('adminAnalytics.dimensions.userId'),
+      userRole: t('adminAnalytics.dimensions.userRole'),
+      loyaltyLevel: t('adminAnalytics.dimensions.loyaltyLevel'),
+      locationEnabled: t('adminAnalytics.dimensions.locationEnabled')
+    };
+    return dimensionLabels[key] || key.replace(/([A-Z])/g, ' $1').trim();
+  };
+
+  const getMetricLabel = (key: string) => {
+    const metricLabels: { [key: string]: string } = {
+      pointsEarned: t('adminAnalytics.metrics.pointsEarned'),
+      totalSpent: t('adminAnalytics.metrics.totalSpent'),
+      referralCount: t('adminAnalytics.metrics.referralCount')
+    };
+    return metricLabels[key] || key.replace(/([A-Z])/g, ' $1').trim();
+  };
+
   if (user?.role !== 'admin') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -202,10 +237,10 @@ const AdminAnalytics: React.FC = () => {
             <AlertCircle className="w-12 h-12 text-red-500" />
           </div>
           <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">
-            Acceso Denegado
+            {t('adminAnalytics.accessDenied')}
           </h2>
           <p className="text-gray-600 text-center">
-            Solo los administradores pueden acceder a esta página.
+            {t('adminAnalytics.accessDeniedMessage')}
           </p>
         </div>
       </div>
@@ -216,8 +251,8 @@ const AdminAnalytics: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando configuración...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FFC300] mx-auto"></div>
+          <p className="mt-4 text-gray-600">{t('adminAnalytics.loading')}</p>
         </div>
       </div>
     );
@@ -229,13 +264,13 @@ const AdminAnalytics: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center mb-4">
-            <BarChart3 className="w-8 h-8 text-blue-600 mr-3" />
+            <BarChart3 className="w-8 h-8 text-[#FFC300] mr-3" />
             <h1 className="text-3xl font-bold text-gray-900">
-              Configuración de Google Analytics
+              {t('adminAnalytics.title')}
             </h1>
           </div>
           <p className="text-gray-600">
-            Configura Google Analytics para rastrear el comportamiento de los usuarios en tu aplicación.
+            {t('adminAnalytics.subtitle')}
           </p>
         </div>
 
@@ -259,12 +294,12 @@ const AdminAnalytics: React.FC = () => {
         {config && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Estado Actual</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('adminAnalytics.currentStatus')}</h2>
               <div className="flex items-center space-x-4">
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                   config.isConfigured ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                 }`}>
-                  {config.isConfigured ? 'Configurado' : 'No Configurado'}
+                  {config.isConfigured ? t('adminAnalytics.configured') : t('adminAnalytics.notConfigured')}
                 </span>
                 <button
                   onClick={() => handleToggleAnalytics(!config.isEnabled)}
@@ -277,12 +312,12 @@ const AdminAnalytics: React.FC = () => {
                   {config.isEnabled ? (
                     <>
                       <ToggleLeft className="w-4 h-4 mr-2" />
-                      Deshabilitar
+                      {t('adminAnalytics.disable')}
                     </>
                   ) : (
                     <>
                       <ToggleRight className="w-4 h-4 mr-2" />
-                      Habilitar
+                      {t('adminAnalytics.enable')}
                     </>
                   )}
                 </button>
@@ -292,15 +327,15 @@ const AdminAnalytics: React.FC = () => {
             {config.isConfigured && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div>
-                  <span className="font-medium text-gray-700">Measurement ID:</span>
+                  <span className="font-medium text-gray-700">{t('adminAnalytics.measurementId')}</span>
                   <p className="text-gray-900">{config.measurementId}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Property ID:</span>
+                  <span className="font-medium text-gray-700">{t('adminAnalytics.propertyId')}</span>
                   <p className="text-gray-900">{config.propertyId}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Última configuración:</span>
+                  <span className="font-medium text-gray-700">{t('adminAnalytics.lastConfiguration')}</span>
                   <p className="text-gray-900">
                     {config.lastConfiguredBy} - {new Date(config.lastConfiguredAt!).toLocaleDateString()}
                   </p>
@@ -312,38 +347,38 @@ const AdminAnalytics: React.FC = () => {
 
         {/* Formulario de configuración */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Configuración</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('adminAnalytics.configuration')}</h2>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Información básica */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Measurement ID (G-XXXXXXXXXX)
+                  {t('adminAnalytics.measurementIdLabel')}
                 </label>
                 <input
                   type="text"
                   value={formData.measurementId}
                   onChange={(e) => handleMeasurementIdChange(e.target.value)}
-                  placeholder="G-XXXXXXXXXX"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder={t('adminAnalytics.measurementIdPlaceholder')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                   required
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Encuentra esto en tu cuenta de Google Analytics
+                  {t('adminAnalytics.measurementIdHelp')}
                 </p>
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Property ID
+                  {t('adminAnalytics.propertyIdLabel')}
                 </label>
                 <input
                   type="text"
                   value={formData.propertyId}
                   onChange={(e) => setFormData(prev => ({ ...prev, propertyId: e.target.value }))}
-                  placeholder="123456789"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder={t('adminAnalytics.propertyIdPlaceholder')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
                   required
                 />
               </div>
@@ -351,7 +386,7 @@ const AdminAnalytics: React.FC = () => {
 
             {/* Eventos personalizados */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Eventos Personalizados</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">{t('adminAnalytics.customEvents')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(formData.customEvents).map(([key, value]) => (
                   <label key={key} className="flex items-center">
@@ -367,8 +402,8 @@ const AdminAnalytics: React.FC = () => {
                       }))}
                       className="mr-3"
                     />
-                    <span className="text-sm text-gray-700 capitalize">
-                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                    <span className="text-sm text-gray-700">
+                      {getEventLabel(key)}
                     </span>
                   </label>
                 ))}
@@ -377,7 +412,7 @@ const AdminAnalytics: React.FC = () => {
 
             {/* Dimensiones personalizadas */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Dimensiones Personalizadas</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">{t('adminAnalytics.customDimensions')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(formData.customDimensions).map(([key, value]) => (
                   <label key={key} className="flex items-center">
@@ -393,8 +428,8 @@ const AdminAnalytics: React.FC = () => {
                       }))}
                       className="mr-3"
                     />
-                    <span className="text-sm text-gray-700 capitalize">
-                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                    <span className="text-sm text-gray-700">
+                      {getDimensionLabel(key)}
                     </span>
                   </label>
                 ))}
@@ -403,7 +438,7 @@ const AdminAnalytics: React.FC = () => {
 
             {/* Métricas personalizadas */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Métricas Personalizadas</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">{t('adminAnalytics.customMetrics')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(formData.customMetrics).map(([key, value]) => (
                   <label key={key} className="flex items-center">
@@ -419,8 +454,8 @@ const AdminAnalytics: React.FC = () => {
                       }))}
                       className="mr-3"
                     />
-                    <span className="text-sm text-gray-700 capitalize">
-                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                    <span className="text-sm text-gray-700">
+                      {getMetricLabel(key)}
                     </span>
                   </label>
                 ))}
@@ -429,14 +464,14 @@ const AdminAnalytics: React.FC = () => {
 
             {/* Código de seguimiento generado */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Código de Seguimiento</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">{t('adminAnalytics.trackingCode')}</h3>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <pre className="text-sm text-gray-700 whitespace-pre-wrap overflow-x-auto">
                   {formData.trackingCode}
                 </pre>
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                Este código debe ser incluido en el &lt;head&gt; de tu aplicación
+                {t('adminAnalytics.trackingCodeHelp')}
               </p>
             </div>
 
@@ -445,17 +480,17 @@ const AdminAnalytics: React.FC = () => {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center px-6 py-3 bg-[#FFC300] text-white rounded-lg hover:bg-[#E6B000] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {saving ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Guardando...
+                    {t('adminAnalytics.saving')}
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4 mr-2" />
-                    Guardar Configuración
+                    {t('adminAnalytics.saveConfiguration')}
                   </>
                 )}
               </button>

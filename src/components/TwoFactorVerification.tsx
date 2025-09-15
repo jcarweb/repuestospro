@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface TwoFactorVerificationProps {
   isOpen: boolean;
@@ -19,6 +19,11 @@ const TwoFactorVerification: React.FC<TwoFactorVerificationProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Log cuando el componente se monta/desmonta
+  useEffect(() => {
+    console.log('🔍 TwoFactorVerification useEffect:', { isOpen, email, tempToken: tempToken ? 'existe' : 'no existe' });
+  }, [isOpen, email, tempToken]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -31,6 +36,8 @@ const TwoFactorVerification: React.FC<TwoFactorVerificationProps> = ({
     setError('');
 
     try {
+      console.log('🔐 Enviando verificación 2FA...', { email, code: code.trim(), tempToken: tempToken.substring(0, 20) + '...' });
+      
       const response = await fetch('http://localhost:5000/api/auth/login/2fa/complete', {
         method: 'POST',
         headers: {
@@ -44,20 +51,30 @@ const TwoFactorVerification: React.FC<TwoFactorVerificationProps> = ({
       });
 
       const result = await response.json();
+      console.log('📡 Respuesta verificación 2FA:', result);
 
       if (result.success) {
+        console.log('✅ Verificación 2FA exitosa');
         onSuccess(result.data.user, result.data.token);
       } else {
+        console.error('❌ Error en verificación 2FA:', result);
         setError(result.message || 'Error verificando código');
       }
     } catch (error) {
-      console.error('Error en verificación 2FA:', error);
+      console.error('❌ Error en verificación 2FA:', error);
       setError('Error de conexión');
     } finally {
       setLoading(false);
     }
   };
 
+  // Log solo cuando el componente se abre o cambia de estado
+  useEffect(() => {
+    if (isOpen) {
+      console.log('🔍 TwoFactorVerification abierto:', { email, tempToken: tempToken ? 'existe' : 'no existe' });
+    }
+  }, [isOpen, email, tempToken]);
+  
   if (!isOpen) return null;
 
   return (
@@ -69,6 +86,9 @@ const TwoFactorVerification: React.FC<TwoFactorVerificationProps> = ({
           </h2>
           <p className="text-gray-600">
             Ingresa el código de 6 dígitos de tu autenticador
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            Email: {email}
           </p>
         </div>
 
@@ -118,6 +138,9 @@ const TwoFactorVerification: React.FC<TwoFactorVerificationProps> = ({
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500">
             El código cambia cada 30 segundos
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            Código de prueba: 612927
           </p>
         </div>
       </div>

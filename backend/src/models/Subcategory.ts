@@ -1,61 +1,54 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ISubcategory extends Document {
   name: string;
   description?: string;
-  categoryId: mongoose.Types.ObjectId;
-  vehicleType: 'car' | 'motorcycle' | 'truck' | 'bus';
+  category: mongoose.Types.ObjectId;
   isActive: boolean;
-  order: number;
-  icon?: string;
-  image?: string;
+  sortOrder?: number;
   createdAt: Date;
   updatedAt: Date;
+  createdBy?: mongoose.Types.ObjectId;
+  updatedBy?: mongoose.Types.ObjectId;
 }
 
-const subcategorySchema = new Schema<ISubcategory>({
+const SubcategorySchema = new Schema<ISubcategory>({
   name: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    lowercase: true
   },
   description: {
     type: String,
     trim: true
   },
-  categoryId: {
+  category: {
     type: Schema.Types.ObjectId,
     ref: 'Category',
     required: true
-  },
-  vehicleType: {
-    type: String,
-    required: true,
-    enum: ['car', 'motorcycle', 'truck', 'bus'],
-    default: 'car'
   },
   isActive: {
     type: Boolean,
     default: true
   },
-  order: {
+  sortOrder: {
     type: Number,
     default: 0
   },
-  icon: {
-    type: String,
-    trim: true
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
   },
-  image: {
-    type: String,
-    trim: true
+  updatedBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
   }
 }, {
   timestamps: true
 });
 
-// Índices para optimizar consultas
-subcategorySchema.index({ categoryId: 1, vehicleType: 1, isActive: 1 });
-subcategorySchema.index({ order: 1 });
+// Índice compuesto para evitar subcategorías duplicadas por categoría
+SubcategorySchema.index({ name: 1, category: 1 }, { unique: true });
 
-export default mongoose.model<ISubcategory>('Subcategory', subcategorySchema); 
+export default mongoose.model<ISubcategory>('Subcategory', SubcategorySchema);

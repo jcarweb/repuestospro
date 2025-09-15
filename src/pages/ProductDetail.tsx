@@ -9,47 +9,39 @@ import {
   Truck, 
   Shield, 
   Heart,
-  Share2,
   Tag,
-  Hash
+  Hash,
+  ZoomIn
 } from 'lucide-react';
-
-interface Product {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  images: string[];
-  category: string;
-  brand: string;
-  subcategory: string;
-  stock: number;
-  isFeatured: boolean;
-  popularity: number;
-  sku: string;
-  originalPartCode?: string;
-  specifications: Record<string, any>;
-  tags: string[];
-}
-
-interface RelatedProduct {
-  _id: string;
-  name: string;
-  price: number;
-  images: string[];
-  category: string;
-  brand: string;
-}
+import { useCart } from '../contexts/CartContext';
+import { useFavorites } from '../contexts/FavoritesContext';
+import { useAuth } from '../contexts/AuthContext';
+import { productService, type Product, type RelatedProduct } from '../services/productService';
+import ShareButtons from '../components/ShareButtons';
+import ImageTest from '../components/ImageTest';
+import AuthModal from '../components/AuthModal';
+// import ImageDiagnostic from '../components/ImageDiagnostic'; // OCULTO TEMPORALMENTE
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { addItem, isInCart, updateQuantity } = useCart();
+  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
+  const { user } = useAuth();
+  
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [showZoom, setShowZoom] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | 'info';
+    message: string;
+    show: boolean;
+  } | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -57,15 +49,19 @@ const ProductDetail: React.FC = () => {
     }
   }, [id]);
 
+  const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
+    setNotification({ type, message, show: true });
+    setTimeout(() => setNotification(null), 5000);
+  };
+
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/products/${id}`);
-      const data = await response.json();
+      const data = await productService.getProductById(id!);
       
       if (data.success) {
-        setProduct(data.data.product);
-        setRelatedProducts(data.data.relatedProducts);
+        setProduct(data.data.product!);
+        setRelatedProducts(data.data.relatedProducts || []);
       } else {
         setError('Producto no encontrado');
       }
@@ -106,12 +102,70 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleAddToCart = () => {
-    // TODO: Implementar lógica del carrito
-    console.log('Agregar al carrito:', product?.name, quantity);
+    if (!product) return;
+
+    if (!user) {
+      showNotification('info', 'Debes iniciar sesión para agregar productos al carrito');
+      setShowAuthModal(true);
+      return;
+    }
+
+    if (product.stock === 0) {
+      showNotification('error', 'El producto no tiene stock disponible');
+      return;
+    }
+
+    const cartItem = {
+      id: product._id,
+      name: product.name,
+      price: product.price,
+      quantity: quantity,
+      image: product.images[0],
+      category: product.category,
+      brand: product.brand
+    };
+
+    if (isInCart(product._id)) {
+      // Si ya está en el carrito, actualizar cantidad
+      updateQuantity(product._id, quantity);
+      showNotification('success', 'Cantidad actualizada en el carrito');
+    } else {
+      // Si no está en el carrito, agregarlo
+      addItem(cartItem);
+      showNotification('success', 'Producto agregado al carrito');
+    }
   };
+
+  const handleToggleFavorite = () => {
+    if (!user) {
+      showNotification('info', 'Debes iniciar sesión para agregar favoritos');
+      setShowAuthModal(true);
+      return;
+    }
+
+    if (!product) return;
+
+    if (isFavorite(product._id)) {
+      removeFromFavorites(product._id);
+      showNotification('success', 'Producto removido de favoritos');
+    } else {
+      addToFavorites({
+        id: product._id,
+        name: product.name,
+        price: product.price,
+        image: product.images[0],
+        category: product.category,
+        brand: product.brand
+      });
+      showNotification('success', 'Producto agregado a favoritos');
+    }
+  };
+
 
   const handleRelatedProductClick = (productId: string) => {
     navigate(`/product/${productId}`);
+    // Scroll to top
+    window.scrollTo(0, 0);
   };
 
   if (loading) {
@@ -145,23 +199,39 @@ const ProductDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Notificación */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
+          notification.type === 'success' ? 'bg-green-500 text-white' :
+          notification.type === 'error' ? 'bg-red-500 text-white' :
+          'bg-blue-500 text-white'
+        }`}>
+          <div className="flex items-center space-x-2">
+            {notification.type === 'success' && <span>✅</span>}
+            {notification.type === 'error' && <span>❌</span>}
+            {notification.type === 'info' && <span>ℹ️</span>}
+            <span>{notification.message}</span>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 hover:bg-gray-100 rounded-lg"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <ChevronLeft className="w-5 h-5 text-gray-600" />
             </button>
             <div className="flex-1">
               <nav className="flex space-x-2 text-sm text-gray-500">
-                <span onClick={() => navigate('/categories')} className="hover:text-blue-600 cursor-pointer">
+                <span onClick={() => navigate('/categories')} className="hover:text-blue-600 cursor-pointer transition-colors">
                   Categorías
                 </span>
                 <span>/</span>
-                <span onClick={() => navigate(`/category/${product.category}`)} className="hover:text-blue-600 cursor-pointer capitalize">
+                <span onClick={() => navigate(`/category/${product.category}`)} className="hover:text-blue-600 cursor-pointer capitalize transition-colors">
                   {product.category}
                 </span>
                 <span>/</span>
@@ -180,11 +250,17 @@ const ProductDetail: React.FC = () => {
             <div className="relative bg-white rounded-lg shadow-md overflow-hidden">
               <div className="aspect-w-1 aspect-h-1">
                 {product.images && product.images.length > 0 ? (
-                  <img
-                    src={product.images[currentImageIndex]}
-                    alt={product.name}
-                    className="w-full h-96 object-cover"
-                  />
+                  <div className="relative group">
+                    <img
+                      src={product.images[currentImageIndex]}
+                      alt={product.name}
+                      className="w-full h-96 object-cover cursor-zoom-in transition-transform group-hover:scale-105"
+                      onClick={() => setShowZoom(true)}
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all flex items-center justify-center">
+                      <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </div>
                 ) : (
                   <div className="w-full h-96 flex items-center justify-center text-gray-400 bg-gray-100">
                     <Package className="w-24 h-24" />
@@ -197,13 +273,13 @@ const ProductDetail: React.FC = () => {
                 <>
                   <button
                     onClick={handlePreviousImage}
-                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md"
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-colors"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
                     onClick={handleNextImage}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-colors"
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
@@ -217,8 +293,8 @@ const ProductDetail: React.FC = () => {
                     <button
                       key={index}
                       onClick={() => handleImageChange(index)}
-                      className={`w-3 h-3 rounded-full ${
-                        index === currentImageIndex ? 'bg-blue-600' : 'bg-white/60'
+                      className={`w-3 h-3 rounded-full transition-colors ${
+                        index === currentImageIndex ? 'bg-blue-600' : 'bg-white/60 hover:bg-white/80'
                       }`}
                     />
                   ))}
@@ -232,7 +308,9 @@ const ProductDetail: React.FC = () => {
                     Destacado
                   </span>
                 )}
-                <span className="bg-green-400 text-green-900 px-2 py-1 rounded-full text-xs font-medium">
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  product.stock > 0 ? 'bg-green-400 text-green-900' : 'bg-red-400 text-red-900'
+                }`}>
                   {product.stock > 0 ? 'En stock' : 'Sin stock'}
                 </span>
               </div>
@@ -245,8 +323,8 @@ const ProductDetail: React.FC = () => {
                   <button
                     key={index}
                     onClick={() => handleImageChange(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                      index === currentImageIndex ? 'border-blue-600' : 'border-gray-200'
+                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                      index === currentImageIndex ? 'border-blue-600 scale-105' : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     <img
@@ -291,6 +369,22 @@ const ProductDetail: React.FC = () => {
               </p>
             </div>
 
+            {/* Información de la tienda */}
+            {product.store && (
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h4 className="font-medium text-blue-900 mb-2">Vendido por:</h4>
+                <div className="flex items-center space-x-2">
+                  <span className="text-blue-800 font-medium">{product.store.name}</span>
+                  {product.store.location && (
+                    <>
+                      <span className="text-blue-400">•</span>
+                      <span className="text-blue-600 text-sm">{product.store.location}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Códigos */}
             <div className="bg-gray-50 rounded-lg p-4 space-y-3">
               <div className="flex items-center space-x-2">
@@ -318,6 +412,22 @@ const ProductDetail: React.FC = () => {
                 </span>
               </div>
 
+              {/* Tipo de Despacho */}
+              {product.deliveryType && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Tipo de despacho:</span>
+                  <span className={`font-medium ${
+                    product.deliveryType === 'delivery_motorizado' ? 'text-blue-600' : 'text-orange-600'
+                  }`}>
+                    {product.deliveryType === 'delivery_motorizado' ? (
+                      <>🚚 Delivery motorizado</>
+                    ) : (
+                      <>📦 Recogida (Pick up)</>
+                    )}
+                  </span>
+                </div>
+              )}
+
               {product.stock > 0 && (
                 <div className="flex items-center space-x-4">
                   <label className="text-sm font-medium text-gray-700">
@@ -326,16 +436,18 @@ const ProductDetail: React.FC = () => {
                   <div className="flex items-center border border-gray-300 rounded-lg">
                     <button
                       onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                      className="px-3 py-2 hover:bg-gray-100"
+                      className="px-3 py-2 hover:bg-gray-100 transition-colors"
+                      disabled={quantity <= 1}
                     >
                       -
                     </button>
-                    <span className="px-4 py-2 border-x border-gray-300">
+                    <span className="px-4 py-2 border-x border-gray-300 min-w-[3rem] text-center">
                       {quantity}
                     </span>
                     <button
                       onClick={() => setQuantity(prev => Math.min(product.stock, prev + 1))}
-                      className="px-3 py-2 hover:bg-gray-100"
+                      className="px-3 py-2 hover:bg-gray-100 transition-colors"
+                      disabled={quantity >= product.stock}
                     >
                       +
                     </button>
@@ -349,19 +461,30 @@ const ProductDetail: React.FC = () => {
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center space-x-2 bg-[#FFC300] text-[#333333] py-3 px-6 rounded-lg hover:bg-[#FFB800] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ShoppingCart className="w-5 h-5" />
-                <span>Agregar al carrito</span>
+                <span>{isInCart(product._id) ? 'Actualizar carrito' : 'Agregar al carrito'}</span>
               </button>
               
-              <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <Heart className="w-5 h-5 text-gray-600" />
+              <button 
+                onClick={handleToggleFavorite}
+                className={`p-3 border rounded-lg transition-all ${
+                  isFavorite(product._id) 
+                    ? 'border-red-300 bg-red-50 text-red-600 hover:bg-red-100' 
+                    : 'border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <Heart className={`w-5 h-5 ${isFavorite(product._id) ? 'fill-current' : ''}`} />
               </button>
               
-              <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <Share2 className="w-5 h-5 text-gray-600" />
-              </button>
+              <ShareButtons
+                productId={product._id}
+                productName={product.name}
+                productPrice={product.price}
+                productImage={product.images && product.images.length > 0 ? product.images[0] : undefined}
+                className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              />
             </div>
 
             {/* Información adicional */}
@@ -399,6 +522,23 @@ const ProductDetail: React.FC = () => {
           </div>
         )}
 
+        {/* Tags */}
+        {product.tags && product.tags.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Etiquetas</h3>
+            <div className="flex flex-wrap gap-2">
+              {product.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors cursor-pointer"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Productos relacionados */}
         {relatedProducts.length > 0 && (
           <div className="mt-12">
@@ -408,24 +548,30 @@ const ProductDetail: React.FC = () => {
                 <div
                   key={relatedProduct._id}
                   onClick={() => handleRelatedProductClick(relatedProduct._id)}
-                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 overflow-hidden"
+                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer border border-gray-200 overflow-hidden group"
                 >
-                  <div className="h-48 bg-gray-200">
+                  <div className="h-48 bg-gray-200 overflow-hidden">
                     {relatedProduct.images && relatedProduct.images.length > 0 ? (
                       <img
                         src={relatedProduct.images[0]}
                         alt={relatedProduct.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center';
+                        }}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <Package className="w-12 h-12" />
-                      </div>
+                      <img
+                        src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center"
+                        alt={relatedProduct.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
                     )}
                   </div>
                   
                   <div className="p-4">
-                    <h4 className="font-medium text-gray-900 mb-2 line-clamp-2">
+                    <h4 className="font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
                       {relatedProduct.name}
                     </h4>
                     <div className="flex items-center justify-between">
@@ -442,7 +588,45 @@ const ProductDetail: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Diagnóstico de imágenes (solo para desarrollo) - OCULTO TEMPORALMENTE */}
+        {/* {process.env.NODE_ENV === 'development' && product && (
+          <div className="mt-8">
+            <ImageDiagnostic 
+              productImages={product.images || []}
+              productName={product.name}
+            />
+          </div>
+        )} */}
       </div>
+
+      {/* Modal de zoom de imagen */}
+      {showZoom && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowZoom(false)}
+        >
+          <div className="relative max-w-4xl max-h-full">
+            <img
+              src={product.images[currentImageIndex]}
+              alt={product.name}
+              className="max-w-full max-h-full object-contain"
+            />
+            <button
+              onClick={() => setShowZoom(false)}
+              className="absolute top-4 right-4 text-white hover:text-gray-300 text-4xl"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de autenticación */}
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+      />
     </div>
   );
 };

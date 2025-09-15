@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { SubcategoryController } from '../controllers/subcategoryController';
-import { authMiddleware } from '../middleware/authMiddleware';
-import { adminMiddleware } from '../middleware/adminMiddleware';
+import { authMiddleware, adminMiddleware } from '../middleware/authMiddleware';
 
 const router = Router();
 
@@ -14,5 +13,8 @@ router.post('/subcategories', authMiddleware, adminMiddleware, SubcategoryContro
 router.put('/subcategories/:id', authMiddleware, adminMiddleware, SubcategoryController.updateSubcategory);
 router.delete('/subcategories/:id', authMiddleware, adminMiddleware, SubcategoryController.deleteSubcategory);
 router.patch('/subcategories/:id/toggle-status', authMiddleware, adminMiddleware, SubcategoryController.toggleSubcategoryStatus);
+
+// Ruta para estadísticas (solo admin)
+router.get('/admin/subcategories/stats', authMiddleware, adminMiddleware, SubcategoryController.getSubcategoryStats);
 
 export default router; 

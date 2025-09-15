@@ -14,15 +14,15 @@ const ShareModal: React.FC<ShareModalProps> = ({
   isOpen,
   onClose,
   referralCode,
-  shareUrl = 'https://repuestospro.com',
-  shareText = '¡Únete a RepuestosPro y gana puntos con mi código de referido!'
+  shareUrl = 'https://PiezasYA.com',
+  shareText = '¡Únete a PiezasYA y gana puntos con mi código de referido!'
 }) => {
   const { token } = useAuth();
   const [copied, setCopied] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
 
   const shareData = {
-    title: 'RepuestosPro - Sistema de Fidelización',
+    title: 'PiezasYA - Sistema de Fidelización',
     text: `${shareText} Código: ${referralCode}`,
     url: `${shareUrl}/referral?ref=${referralCode}`
   };
@@ -90,7 +90,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
   };
 
   const shareToEmail = () => {
-    const subject = encodeURIComponent('¡Únete a RepuestosPro!');
+    const subject = encodeURIComponent('¡Únete a PiezasYA!');
     const body = encodeURIComponent(`${shareText}\n\nCódigo de referido: ${referralCode}\n\nEnlace: ${shareData.url}`);
     const url = `mailto:?subject=${subject}&body=${body}`;
     window.location.href = url;

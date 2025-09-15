@@ -1,7 +1,6 @@
 import express from 'express';
 import { GoogleAnalyticsController } from '../controllers/googleAnalyticsController';
-import { authMiddleware } from '../middleware/authMiddleware';
-import { adminMiddleware } from '../middleware/adminMiddleware';
+import { authMiddleware, adminMiddleware } from '../middleware/authMiddleware';
 
 const router = express.Router();
 

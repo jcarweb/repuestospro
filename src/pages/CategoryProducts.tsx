@@ -1,6 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Package, Filter, Grid, List, ChevronLeft, Star, ShoppingCart } from 'lucide-react';
+import { 
+  Package, 
+  Filter, 
+  Grid, 
+  List, 
+  ChevronLeft, 
+  Star, 
+  ShoppingCart,
+  Car,
+  Wrench,
+  Zap,
+  Shield,
+  Settings,
+  Gauge,
+  Fuel,
+  Cpu,
+  Wind,
+  Circle
+} from 'lucide-react';
+import ProductCard from '../components/ProductCard';
+import { getBrandsByVehicleType } from '../data/vehicleBrands';
 
 interface Product {
   _id: string;
@@ -9,13 +29,18 @@ interface Product {
   price: number;
   images: string[];
   category: string;
-  brand: string;
+  vehicleType?: string;
   subcategory: string;
+  brand: string;
   stock: number;
-  isFeatured: boolean;
   popularity: number;
   sku: string;
-  originalPartCode?: string;
+  specifications: Record<string, any>;
+  tags: string[];
+  isFeatured: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface CategoryProductsProps {
@@ -33,9 +58,83 @@ interface CategoryProductsProps {
 const CategoryProducts: React.FC = () => {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
+  
+  console.log('🚀 CategoryProducts component mounted with category:', category);
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Función para obtener el icono según la categoría
+  const getCategoryIcon = (categoryName: string) => {
+    const name = categoryName.toLowerCase();
+    switch (name) {
+      case 'motor':
+      case 'engine':
+        return <Settings className="w-8 h-8" />;
+      case 'frenos':
+      case 'brakes':
+        return <Circle className="w-8 h-8" />;
+      case 'eléctrico':
+      case 'electrical':
+        return <Zap className="w-8 h-8" />;
+      case 'refrigeración':
+      case 'cooling':
+        return <Wind className="w-8 h-8" />;
+      case 'transmisión':
+      case 'transmission':
+        return <Gauge className="w-8 h-8" />;
+      case 'combustible':
+      case 'fuel':
+        return <Fuel className="w-8 h-8" />;
+      case 'dirección':
+      case 'steering':
+        return <Car className="w-8 h-8" />;
+      case 'escape':
+      case 'exhaust':
+        return <Cpu className="w-8 h-8" />;
+      case 'accesorios':
+      case 'accessories':
+        return <Package className="w-8 h-8" />;
+      default:
+        return <Wrench className="w-8 h-8" />;
+    }
+  };
+
+  // Función para obtener el color del icono según la categoría
+  const getCategoryColor = (categoryName: string) => {
+    const name = categoryName.toLowerCase();
+    switch (name) {
+      case 'motor':
+      case 'engine':
+        return 'text-red-600 bg-red-100';
+      case 'frenos':
+      case 'brakes':
+        return 'text-orange-600 bg-orange-100';
+      case 'eléctrico':
+      case 'electrical':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'refrigeración':
+      case 'cooling':
+        return 'text-blue-600 bg-blue-100';
+      case 'transmisión':
+      case 'transmission':
+        return 'text-purple-600 bg-purple-100';
+      case 'combustible':
+      case 'fuel':
+        return 'text-green-600 bg-green-100';
+      case 'dirección':
+      case 'steering':
+        return 'text-indigo-600 bg-indigo-100';
+      case 'escape':
+      case 'exhaust':
+        return 'text-gray-600 bg-gray-100';
+      case 'accesorios':
+      case 'accessories':
+        return 'text-pink-600 bg-pink-100';
+      default:
+        return 'text-[#FFC300] bg-[#FFC300]/20';
+    }
+  };
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 12,
@@ -43,6 +142,7 @@ const CategoryProducts: React.FC = () => {
     totalPages: 0
   });
   const [filters, setFilters] = useState({
+    vehicleType: '',
     brand: '',
     subcategory: '',
     minPrice: '',
@@ -51,41 +151,156 @@ const CategoryProducts: React.FC = () => {
     sortOrder: 'desc'
   });
   const [subcategories, setSubcategories] = useState<string[]>([]);
+  const [availableBrands, setAvailableBrands] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
+    console.log('🔄 useEffect triggered - category:', category);
+    console.log('🔄 Current filters:', filters);
+    console.log('🔄 Current pagination:', pagination);
     if (category) {
+      console.log('✅ Category exists, calling fetchProducts');
       fetchProducts();
+    } else {
+      console.log('❌ No category found in params');
     }
   }, [category, pagination.page, filters]);
+
+  // Actualizar marcas disponibles cuando cambie el tipo de vehículo
+  useEffect(() => {
+    const fetchBrands = async () => {
+      if (filters.vehicleType && filters.vehicleType.trim() !== '') {
+        try {
+          const response = await fetch(`http://localhost:5000/api/products/brands/vehicle-type/${filters.vehicleType}`);
+          const data = await response.json();
+          
+          if (data.success) {
+            setAvailableBrands(data.data);
+            console.log('🔍 Marcas disponibles para', filters.vehicleType, ':', data.data);
+            
+            // Limpiar filtro de marca si no está disponible en el nuevo tipo de vehículo
+            if (filters.brand && !data.data.includes(filters.brand)) {
+              setFilters(prev => ({ ...prev, brand: '' }));
+            }
+          } else {
+            // Fallback a datos estáticos
+            const brands = getBrandsByVehicleType(filters.vehicleType);
+            setAvailableBrands(brands);
+            console.log('🔄 Usando marcas estáticas para', filters.vehicleType, ':', brands);
+          }
+        } catch (error) {
+          console.error('Error obteniendo marcas:', error);
+          // Fallback a datos estáticos
+          const brands = getBrandsByVehicleType(filters.vehicleType);
+          setAvailableBrands(brands);
+          console.log('🔄 Usando marcas estáticas para', filters.vehicleType, ':', brands);
+        }
+      } else {
+        // Si no hay tipo de vehículo seleccionado, obtener todas las marcas de la base de datos
+        try {
+          const response = await fetch('http://localhost:5000/api/products/brands');
+          const data = await response.json();
+          
+          if (data.success) {
+            const allBrands = data.data.map((brand: any) => brand.name || brand._id).filter(Boolean);
+            setAvailableBrands(allBrands);
+            console.log('🔍 Todas las marcas disponibles:', allBrands);
+          } else {
+            setAvailableBrands([]);
+          }
+        } catch (error) {
+          console.error('Error obteniendo todas las marcas:', error);
+          setAvailableBrands([]);
+        }
+      }
+    };
+
+    fetchBrands();
+  }, [filters.vehicleType]);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-        sortBy: filters.sortBy,
-        sortOrder: filters.sortOrder,
-        ...(filters.brand && { brand: filters.brand }),
-        ...(filters.subcategory && { subcategory: filters.subcategory }),
-        ...(filters.minPrice && { minPrice: filters.minPrice }),
-        ...(filters.maxPrice && { maxPrice: filters.maxPrice })
-      });
+      setError(null);
+      
+      // Construir parámetros de manera más explícita
+      const params = new URLSearchParams();
+      params.append('page', pagination.page.toString());
+      params.append('limit', pagination.limit.toString());
+      params.append('sortBy', filters.sortBy);
+      params.append('sortOrder', filters.sortOrder);
+      
+      // Agregar filtros solo si tienen valor
+      if (filters.vehicleType && filters.vehicleType.trim() !== '') {
+        params.append('vehicleType', filters.vehicleType);
+        console.log('🔍 Agregando filtro vehicleType:', filters.vehicleType);
+      }
+      if (filters.brand && filters.brand.trim() !== '') {
+        params.append('brand', filters.brand);
+        console.log('🔍 Agregando filtro brand:', filters.brand);
+      }
+      if (filters.subcategory && filters.subcategory.trim() !== '') {
+        params.append('subcategory', filters.subcategory);
+        console.log('🔍 Agregando filtro subcategory:', filters.subcategory);
+      }
+      if (filters.minPrice && filters.minPrice.trim() !== '' && filters.minPrice !== '0') {
+        params.append('minPrice', filters.minPrice);
+        console.log('🔍 Agregando filtro minPrice:', filters.minPrice);
+      }
+      if (filters.maxPrice && filters.maxPrice.trim() !== '' && filters.maxPrice !== '1000000') {
+        params.append('maxPrice', filters.maxPrice);
+        console.log('🔍 Agregando filtro maxPrice:', filters.maxPrice);
+      }
+      
+      console.log('🔍 Filtros actuales:', filters);
+      console.log('🔍 Parámetros construidos:', params.toString());
 
-      const response = await fetch(`http://localhost:5000/api/products/category/${category}?${params}`);
+      const url = `http://localhost:5000/api/products/category/${category}?${params}`;
+      console.log('🔍 Cargando productos desde:', url);
+      console.log('📋 Categoría:', category);
+      console.log('📋 Parámetros:', params.toString());
+
+      // Agregar timeout de 10 segundos
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      console.log('📡 Response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
+      console.log('📊 Respuesta del servidor:', data);
       
       if (data.success) {
-        setProducts(data.data.products);
-        setPagination(data.data.pagination);
-        setSubcategories(data.data.subcategories);
+        console.log('✅ Productos cargados:', data.data.products?.length || 0);
+        console.log('📄 Datos completos:', data.data);
+        setProducts(data.data.products || []);
+        setPagination(data.data.pagination || { page: 1, limit: 12, total: 0, totalPages: 0 });
+        setSubcategories(data.data.subcategories || []);
       } else {
-        setError('Error al cargar los productos');
+        console.error('❌ Error en respuesta:', data.message);
+        setError(data.message || 'Error al cargar los productos');
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('Error de conexión');
+      console.error('❌ Error fetching products:', error);
+      
+      if (error.name === 'AbortError') {
+        setError('Tiempo de espera agotado. Verifica que el servidor esté ejecutándose.');
+      } else if (error.message.includes('Failed to fetch')) {
+        setError('No se pudo conectar al servidor. Verifica que el backend esté ejecutándose en el puerto 5000.');
+      } else {
+        setError(`Error de conexión: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -112,7 +327,7 @@ const CategoryProducts: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FFC300] mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando productos...</p>
         </div>
       </div>
@@ -128,7 +343,7 @@ const CategoryProducts: React.FC = () => {
           <p className="text-gray-600">{error}</p>
           <button
             onClick={fetchProducts}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 px-4 py-2 bg-[#FFC300] text-[#333333] rounded-lg hover:bg-[#FFB800] transition-colors"
           >
             Reintentar
           </button>
@@ -150,9 +365,11 @@ const CategoryProducts: React.FC = () => {
               <ChevronLeft className="w-5 h-5 text-gray-600" />
             </button>
             <div className="flex items-center space-x-3">
-              <Package className="w-8 h-8 text-blue-600" />
+              <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${getCategoryColor(category || '')}`}>
+                {getCategoryIcon(category || '')}
+              </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 capitalize">
+                <h1 className="text-3xl font-bold text-[#333333] capitalize">
                   {category}
                 </h1>
                 <p className="text-gray-600">
@@ -169,7 +386,7 @@ const CategoryProducts: React.FC = () => {
         <div className="mb-6">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="flex items-center space-x-2 px-4 py-2 bg-[#FFC300] text-[#333333] border border-[#FFC300] rounded-lg hover:bg-[#FFB800] transition-colors"
           >
             <Filter className="w-4 h-4" />
             <span>Filtros</span>
@@ -177,7 +394,25 @@ const CategoryProducts: React.FC = () => {
 
           {showFilters && (
             <div className="mt-4 p-4 bg-white rounded-lg shadow-md">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tipo de Vehículo
+                  </label>
+                  <select
+                    value={filters.vehicleType}
+                    onChange={(e) => handleFilterChange('vehicleType', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-[#FFC300]"
+                  >
+                    <option value="">Todos los tipos</option>
+                    <option value="automovil">Automóviles</option>
+                    <option value="motocicleta">Motocicletas</option>
+                    <option value="camion">Camiones</option>
+                    <option value="maquinaria_industrial">Maquinaria Industrial</option>
+                    <option value="maquinaria_agricola">Maquinaria Agrícola</option>
+                  </select>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Marca
@@ -185,14 +420,16 @@ const CategoryProducts: React.FC = () => {
                   <select
                     value={filters.brand}
                     onChange={(e) => handleFilterChange('brand', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-[#FFC300]"
                   >
-                    <option value="">Todas las marcas</option>
-                    <option value="toyota">Toyota</option>
-                    <option value="honda">Honda</option>
-                    <option value="ford">Ford</option>
-                    <option value="chevrolet">Chevrolet</option>
-                    <option value="nissan">Nissan</option>
+                    <option value="">
+                      Todas las marcas
+                    </option>
+                    {availableBrands.map((brand) => (
+                      <option key={brand} value={brand.toLowerCase()}>
+                        {brand}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -203,7 +440,7 @@ const CategoryProducts: React.FC = () => {
                   <select
                     value={filters.subcategory}
                     onChange={(e) => handleFilterChange('subcategory', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-[#FFC300]"
                   >
                     <option value="">Todas las subcategorías</option>
                     {subcategories.map(sub => (
@@ -221,7 +458,7 @@ const CategoryProducts: React.FC = () => {
                     value={filters.minPrice}
                     onChange={(e) => handleFilterChange('minPrice', e.target.value)}
                     placeholder="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-[#FFC300]"
                   />
                 </div>
 
@@ -234,7 +471,7 @@ const CategoryProducts: React.FC = () => {
                     value={filters.maxPrice}
                     onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
                     placeholder="1000000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-[#FFC300]"
                   />
                 </div>
               </div>
@@ -244,77 +481,9 @@ const CategoryProducts: React.FC = () => {
 
         {/* Productos Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {console.log('🎨 Renderizando productos:', products.length, products)}
           {products.map((product) => (
-            <div
-              key={product._id}
-              onClick={() => handleProductClick(product._id)}
-              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 overflow-hidden"
-            >
-              {/* Imagen del producto */}
-              <div className="relative h-48 bg-gray-200">
-                {product.images && product.images.length > 0 ? (
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <Package className="w-12 h-12" />
-                  </div>
-                )}
-                
-                {product.isFeatured && (
-                  <div className="absolute top-2 left-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-medium">
-                    Destacado
-                  </div>
-                )}
-              </div>
-
-              {/* Información del producto */}
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                  {product.name}
-                </h3>
-                
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-sm text-gray-500 capitalize">
-                    {product.brand}
-                  </span>
-                  <span className="text-gray-300">•</span>
-                  <span className="text-sm text-gray-500 capitalize">
-                    {product.subcategory}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-lg font-bold text-blue-600">
-                    {formatPrice(product.price)}
-                  </span>
-                  <div className="flex items-center space-x-1">
-                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span className="text-sm text-gray-600">
-                      {product.popularity}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between text-sm">
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    product.stock > 0 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {product.stock > 0 ? `${product.stock} disponibles` : 'Sin stock'}
-                  </span>
-                  
-                  <button className="flex items-center space-x-1 text-blue-600 hover:text-blue-700">
-                    <ShoppingCart className="w-4 h-4" />
-                    <span>Ver</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <ProductCard key={product._id} product={product} />
           ))}
         </div>
 

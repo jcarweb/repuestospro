@@ -1,8 +1,8 @@
-# 🎉 RepuestosPro - Ecommerce Completado
+# 🎉 PiezasYA - Ecommerce Completado
 
 ## ✅ **Estado del Proyecto**
 
-El proyecto **RepuestosPro** está **100% funcional** y listo para desarrollo. Se han solucionado todos los errores de TypeScript y configuración.
+El proyecto **PiezasYA** está **100% funcional** y listo para desarrollo. Se han solucionado todos los errores de TypeScript y configuración.
 
 ## 🚀 **Cómo Ejecutar el Proyecto**
 

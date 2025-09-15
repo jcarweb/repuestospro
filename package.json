@@ -1,12 +1,13 @@
 {
-  "name": "repuestos-ecommerce",
+  "name": "piezasyaya-ecommerce",
   "version": "1.0.0",
-  "description": "Ecommerce multiplataforma para repuestos de vehículos",
+  "description": "Ecommerce multiplataforma para repuestos de vehículos - PiezasYA",
   "scripts": {
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend:network\"",
     "dev:frontend": "vite --port 3000",
     "dev:backend": "cd backend && npm run dev",
-    "dev:fast": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" --kill-others",
+    "dev:backend:network": "cd backend && npm run dev:network",
+    "dev:fast": "concurrently \"npm run dev:frontend\" \"npm run dev:backend:network\" --kill-others",
     "build": "npm run build:frontend && npm run build:backend",
     "build:frontend": "vite build",
     "build:backend": "cd backend && npm run build",
@@ -18,18 +19,31 @@
   "keywords": [
     "ecommerce",
     "repuestos",
+    "piezasyaya",
     "react",
     "express",
     "mongodb"
   ],
-  "author": "RepuestosPro Team",
+  "author": "PiezasYA Team",
   "license": "MIT",
   "dependencies": {
+    "@googlemaps/js-api-loader": "^1.16.10",
     "@tailwindcss/forms": "^0.5.10",
+    "@types/google.maps": "^3.58.1",
+    "@types/leaflet": "^1.9.8",
+    "@types/qrcode": "^1.5.5",
+    "axios": "^1.11.0",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.263.1",
+    "node-fetch": "^2.7.0",
+    "otplib": "^12.0.1",
+    "qrcode": "^1.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.8.0"
+    "react-hot-toast": "^2.6.0",
+    "react-leaflet": "^4.2.1",
+    "react-router-dom": "^6.8.0",
+    "recharts": "^3.1.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

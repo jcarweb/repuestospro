@@ -1,46 +1,36 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IBrand extends Document {
   name: string;
   description?: string;
-  vehicleType: 'car' | 'motorcycle' | 'truck' | 'bus';
-  isActive: boolean;
-  order: number;
-  logo?: string;
+  vehicleTypes: mongoose.Types.ObjectId[];
   country?: string;
   website?: string;
+  logo?: string;
+  history?: string;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  createdBy?: mongoose.Types.ObjectId;
+  updatedBy?: mongoose.Types.ObjectId;
 }
 
-const brandSchema = new Schema<IBrand>({
+const BrandSchema = new Schema<IBrand>({
   name: {
     type: String,
     required: true,
+    unique: true,
     trim: true
   },
   description: {
     type: String,
     trim: true
   },
-  vehicleType: {
-    type: String,
-    required: true,
-    enum: ['car', 'motorcycle', 'truck', 'bus'],
-    default: 'car'
-  },
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  order: {
-    type: Number,
-    default: 0
-  },
-  logo: {
-    type: String,
-    trim: true
-  },
+  vehicleTypes: [{
+    type: Schema.Types.ObjectId,
+    ref: 'VehicleType',
+    required: true
+  }],
   country: {
     type: String,
     trim: true
@@ -48,14 +38,29 @@ const brandSchema = new Schema<IBrand>({
   website: {
     type: String,
     trim: true
+  },
+  logo: {
+    type: String,
+    trim: true
+  },
+  history: {
+    type: String,
+    trim: true
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  updatedBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
   }
 }, {
   timestamps: true
 });
 
-// Índices para optimizar consultas
-brandSchema.index({ vehicleType: 1, isActive: 1 });
-brandSchema.index({ order: 1 });
-brandSchema.index({ name: 1 });
-
-export default mongoose.model<IBrand>('Brand', brandSchema); 
+export default mongoose.model<IBrand>('Brand', BrandSchema);

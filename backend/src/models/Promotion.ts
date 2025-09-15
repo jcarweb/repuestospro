@@ -11,6 +11,13 @@ export interface IPromotion extends Document {
   customText?: string;
   products: mongoose.Types.ObjectId[];
   categories?: mongoose.Types.ObjectId[];
+  store: mongoose.Types.ObjectId; // Referencia a la tienda
+  // Alcance de la promoción
+  scope: 'store' | 'all_branches' | 'specific_branches';
+  // Sucursales específicas (solo si scope es 'specific_branches')
+  targetBranches?: mongoose.Types.ObjectId[];
+  // Indica si es una promoción creada por la tienda principal
+  isMainStorePromotion: boolean;
   startDate: Date;
   startTime: String; // HH:mm format
   endDate: Date;
@@ -111,6 +118,28 @@ const PromotionSchema = new Schema<IPromotion>({
     type: Schema.Types.ObjectId,
     ref: 'Category'
   }],
+  store: {
+    type: Schema.Types.ObjectId,
+    ref: 'Store',
+    required: true
+  },
+  // Alcance de la promoción
+  scope: {
+    type: String,
+    enum: ['store', 'all_branches', 'specific_branches'],
+    default: 'store',
+    required: true
+  },
+  // Sucursales específicas (solo si scope es 'specific_branches')
+  targetBranches: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Store'
+  }],
+  // Indica si es una promoción creada por la tienda principal
+  isMainStorePromotion: {
+    type: Boolean,
+    default: false
+  },
   startDate: {
     type: Date,
     required: true
@@ -194,6 +223,8 @@ PromotionSchema.index({ isActive: 1, startDate: 1, endDate: 1 });
 PromotionSchema.index({ products: 1 });
 PromotionSchema.index({ categories: 1 });
 PromotionSchema.index({ createdBy: 1 });
+PromotionSchema.index({ store: 1 }); // Índice para consultas por tienda
+PromotionSchema.index({ store: 1, isActive: 1 }); // Índice compuesto para tienda y estado
 
 // Método para verificar si la promoción está vigente
 PromotionSchema.methods.isValid = function(): boolean {

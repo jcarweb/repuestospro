@@ -69,6 +69,13 @@ class DatabaseService {
       }
 
       // Verificar que podemos hacer una operación simple
+      if (!mongoose.connection.db) {
+        return {
+          status: 'unhealthy',
+          message: 'Conexión a la base de datos no disponible'
+        };
+      }
+
       const adminDb = mongoose.connection.db.admin();
       const result = await adminDb.ping();
       

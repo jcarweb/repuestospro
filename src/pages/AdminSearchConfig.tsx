@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { 
   Search, 
   Settings, 
@@ -42,6 +43,7 @@ interface SearchConfig {
 
 const AdminSearchConfig: React.FC = () => {
   const { user, token } = useAuth();
+  const { t } = useLanguage();
   const [config, setConfig] = useState<SearchConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -65,7 +67,7 @@ const AdminSearchConfig: React.FC = () => {
       }
     } catch (error) {
       console.error('Error obteniendo configuración:', error);
-      setMessage({ type: 'error', text: 'Error cargando configuración' });
+      setMessage({ type: 'error', text: t('adminSearchConfig.errorLoading') });
     } finally {
       setLoading(false);
     }
@@ -87,13 +89,13 @@ const AdminSearchConfig: React.FC = () => {
 
       const result = await response.json();
       if (result.success) {
-        setMessage({ type: 'success', text: 'Configuración guardada exitosamente' });
+        setMessage({ type: 'success', text: t('adminSearchConfig.configurationSaved') });
       } else {
-        setMessage({ type: 'error', text: result.message || 'Error guardando configuración' });
+        setMessage({ type: 'error', text: result.message || t('adminSearchConfig.errorSaving') });
       }
     } catch (error) {
       console.error('Error guardando configuración:', error);
-      setMessage({ type: 'error', text: 'Error guardando configuración' });
+      setMessage({ type: 'error', text: t('adminSearchConfig.errorSaving') });
     } finally {
       setSaving(false);
     }
@@ -162,8 +164,8 @@ const AdminSearchConfig: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Acceso Denegado</h2>
-          <p className="text-gray-600">Solo los administradores pueden acceder a esta página.</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('adminSearchConfig.accessDenied')}</h2>
+          <p className="text-gray-600">{t('adminSearchConfig.accessDeniedMessage')}</p>
         </div>
       </div>
     );
@@ -172,7 +174,7 @@ const AdminSearchConfig: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FFC300]"></div>
       </div>
     );
   }
@@ -182,8 +184,8 @@ const AdminSearchConfig: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
-          <p className="text-gray-600">No se pudo cargar la configuración de búsqueda.</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('adminSearchConfig.accessDenied')}</h2>
+          <p className="text-gray-600">{t('adminSearchConfig.errorLoadingConfig')}</p>
         </div>
       </div>
     );
@@ -194,11 +196,11 @@ const AdminSearchConfig: React.FC = () => {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center space-x-3 mb-2">
-          <Search className="w-8 h-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Configuración de Búsqueda</h1>
+          <Search className="w-8 h-8 text-[#FFC300]" />
+          <h1 className="text-3xl font-bold text-gray-900">{t('adminSearchConfig.title')}</h1>
         </div>
         <p className="text-gray-600">
-          Configura los parámetros del sistema de búsqueda inteligente similar a Algolia
+          {t('adminSearchConfig.subtitle')}
         </p>
       </div>
 
@@ -222,26 +224,26 @@ const AdminSearchConfig: React.FC = () => {
         {/* Búsqueda Semántica */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center space-x-2 mb-4">
-            <Brain className="w-5 h-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Búsqueda Semántica</h2>
+            <Brain className="w-5 h-5 text-[#FFC300]" />
+            <h2 className="text-lg font-semibold text-gray-900">{t('adminSearchConfig.semanticSearch')}</h2>
           </div>
           
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-gray-700">
-                Habilitar búsqueda semántica
+                {t('adminSearchConfig.enableSemanticSearch')}
               </label>
               <input
                 type="checkbox"
                 checked={config.semanticSearchEnabled}
                 onChange={(e) => handleConfigChange('semanticSearchEnabled', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300]"
               />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Umbral semántico (0-1)
+                {t('adminSearchConfig.semanticThreshold')}
               </label>
               <input
                 type="number"
@@ -250,7 +252,7 @@ const AdminSearchConfig: React.FC = () => {
                 step="0.1"
                 value={config.semanticThreshold}
                 onChange={(e) => handleConfigChange('semanticThreshold', parseFloat(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
               />
             </div>
           </div>
@@ -260,25 +262,25 @@ const AdminSearchConfig: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center space-x-2 mb-4">
             <Zap className="w-5 h-5 text-green-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Corrección de Errores</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('adminSearchConfig.errorCorrection')}</h2>
           </div>
           
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-gray-700">
-                Habilitar corrección de errores
+                {t('adminSearchConfig.enableErrorCorrection')}
               </label>
               <input
                 type="checkbox"
                 checked={config.typoCorrectionEnabled}
                 onChange={(e) => handleConfigChange('typoCorrectionEnabled', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300]"
               />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Distancia máxima de edición
+                {t('adminSearchConfig.maxEditDistance')}
               </label>
               <input
                 type="number"
@@ -286,13 +288,13 @@ const AdminSearchConfig: React.FC = () => {
                 max="5"
                 value={config.maxEditDistance}
                 onChange={(e) => handleConfigChange('maxEditDistance', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
               />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Longitud mínima de palabra
+                {t('adminSearchConfig.minWordLength')}
               </label>
               <input
                 type="number"
@@ -300,7 +302,7 @@ const AdminSearchConfig: React.FC = () => {
                 max="10"
                 value={config.minWordLength}
                 onChange={(e) => handleConfigChange('minWordLength', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
               />
             </div>
           </div>
@@ -310,26 +312,26 @@ const AdminSearchConfig: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center space-x-2 mb-4">
             <Target className="w-5 h-5 text-purple-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Campos de Búsqueda</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('adminSearchConfig.searchFields')}</h2>
           </div>
           
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Campos buscables (separados por comas)
+                {t('adminSearchConfig.searchableFields')}
               </label>
               <input
                 type="text"
                 value={config.searchableFields.join(', ')}
                 onChange={(e) => handleConfigChange('searchableFields', e.target.value.split(',').map(f => f.trim()))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
                 placeholder="name, description, category, brand"
               />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Peso de campos (JSON)
+                {t('adminSearchConfig.fieldWeights')}
               </label>
               <textarea
                 value={JSON.stringify(config.fieldWeights, null, 2)}
@@ -342,7 +344,7 @@ const AdminSearchConfig: React.FC = () => {
                   }
                 }}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent font-mono text-sm"
               />
             </div>
           </div>
@@ -352,13 +354,13 @@ const AdminSearchConfig: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center space-x-2 mb-4">
             <Filter className="w-5 h-5 text-orange-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Resultados y Filtros</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('adminSearchConfig.resultsAndFilters')}</h2>
           </div>
           
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Máximo de resultados
+                {t('adminSearchConfig.maxResults')}
               </label>
               <input
                 type="number"
@@ -366,13 +368,13 @@ const AdminSearchConfig: React.FC = () => {
                 max="200"
                 value={config.maxResults}
                 onChange={(e) => handleConfigChange('maxResults', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
               />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Puntuación mínima de relevancia (0-1)
+                {t('adminSearchConfig.minRelevanceScore')}
               </label>
               <input
                 type="number"
@@ -381,7 +383,7 @@ const AdminSearchConfig: React.FC = () => {
                 step="0.1"
                 value={config.minRelevanceScore}
                 onChange={(e) => handleConfigChange('minRelevanceScore', parseFloat(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
               />
             </div>
           </div>
@@ -392,16 +394,16 @@ const AdminSearchConfig: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
               <Sparkles className="w-5 h-5 text-yellow-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Grupos de Sinónimos</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('adminSearchConfig.synonymGroups')}</h2>
             </div>
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={config.synonymsEnabled}
                 onChange={(e) => handleConfigChange('synonymsEnabled', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300]"
               />
-              <span className="text-sm text-gray-600">Habilitar sinónimos</span>
+              <span className="text-sm text-gray-600">{t('adminSearchConfig.enableSynonyms')}</span>
             </div>
           </div>
           
@@ -410,19 +412,19 @@ const AdminSearchConfig: React.FC = () => {
               <div key={index} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Palabras (separadas por comas)
+                    {t('adminSearchConfig.words')}
                   </label>
                   <input
                     type="text"
                     value={group.words.join(', ')}
                     onChange={(e) => updateSynonymGroup(index, 'words', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
                     placeholder="freno, frenos, pastilla"
                   />
                 </div>
                 <div className="w-24">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Peso
+                    {t('adminSearchConfig.weight')}
                   </label>
                   <input
                     type="number"
@@ -431,23 +433,23 @@ const AdminSearchConfig: React.FC = () => {
                     step="0.1"
                     value={group.weight}
                     onChange={(e) => updateSynonymGroup(index, 'weight', parseFloat(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
                   />
                 </div>
                 <button
                   onClick={() => removeSynonymGroup(index)}
                   className="px-3 py-2 text-red-600 hover:text-red-800"
                 >
-                  Eliminar
+                  {t('adminSearchConfig.remove')}
                 </button>
               </div>
             ))}
             
             <button
               onClick={addSynonymGroup}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-[#FFC300] text-white rounded-lg hover:bg-[#E6B000] transition-colors"
             >
-              Agregar Grupo de Sinónimos
+              {t('adminSearchConfig.addSynonymGroup')}
             </button>
           </div>
         </div>
@@ -457,20 +459,20 @@ const AdminSearchConfig: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
               <Search className="w-5 h-5 text-indigo-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Autocompletado</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('adminSearchConfig.autocomplete')}</h2>
             </div>
             <input
               type="checkbox"
               checked={config.autocompleteEnabled}
               onChange={(e) => handleConfigChange('autocompleteEnabled', e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300]"
             />
           </div>
           
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Longitud mínima para autocompletado
+                {t('adminSearchConfig.minLengthForAutocomplete')}
               </label>
               <input
                 type="number"
@@ -478,13 +480,13 @@ const AdminSearchConfig: React.FC = () => {
                 max="5"
                 value={config.autocompleteMinLength}
                 onChange={(e) => handleConfigChange('autocompleteMinLength', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
               />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Máximo de sugerencias
+                {t('adminSearchConfig.maxSuggestions')}
               </label>
               <input
                 type="number"
@@ -492,7 +494,7 @@ const AdminSearchConfig: React.FC = () => {
                 max="20"
                 value={config.autocompleteMaxSuggestions}
                 onChange={(e) => handleConfigChange('autocompleteMaxSuggestions', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
               />
             </div>
           </div>
@@ -502,31 +504,31 @@ const AdminSearchConfig: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center space-x-2 mb-4">
             <Brain className="w-5 h-5 text-teal-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Análisis de Consultas</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('adminSearchConfig.queryAnalysis')}</h2>
           </div>
           
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-gray-700">
-                Habilitar análisis de consultas
+                {t('adminSearchConfig.enableQueryAnalysis')}
               </label>
               <input
                 type="checkbox"
                 checked={config.queryAnalysisEnabled}
                 onChange={(e) => handleConfigChange('queryAnalysisEnabled', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300]"
               />
             </div>
             
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-gray-700">
-                Reconocimiento de intención
+                {t('adminSearchConfig.intentRecognition')}
               </label>
               <input
                 type="checkbox"
                 checked={config.intentRecognitionEnabled}
                 onChange={(e) => handleConfigChange('intentRecognitionEnabled', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300]"
               />
             </div>
           </div>
@@ -538,17 +540,17 @@ const AdminSearchConfig: React.FC = () => {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center space-x-2 px-6 py-3 bg-[#FFC300] text-white rounded-lg hover:bg-[#E6B000] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              <span>Guardando...</span>
+              <span>{t('adminSearchConfig.saving')}</span>
             </>
           ) : (
             <>
               <Save className="w-4 h-4" />
-              <span>Guardar Configuración</span>
+              <span>{t('adminSearchConfig.saveConfiguration')}</span>
             </>
           )}
         </button>

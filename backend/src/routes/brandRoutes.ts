@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { BrandController } from '../controllers/brandController';
-import { authMiddleware } from '../middleware/authMiddleware';
-import { adminMiddleware } from '../middleware/adminMiddleware';
+import { authMiddleware, adminMiddleware } from '../middleware/authMiddleware';
 
 const router = Router();
 

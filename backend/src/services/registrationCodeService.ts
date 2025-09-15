@@ -14,7 +14,7 @@ export class RegistrationCodeService {
   static async createRegistrationCode(
     adminId: string,
     email: string,
-    role: 'admin' | 'store_manager' | 'delivery',
+    role: 'admin' | 'store_manager' | 'delivery' | 'seller',
     expiresInDays: number = 7
   ): Promise<IRegistrationCode> {
     try {
@@ -71,12 +71,11 @@ export class RegistrationCodeService {
 
       // Enviar email con el código de registro
       try {
-        await emailService.sendRegistrationCode(
+        await emailService.sendRegistrationCodeEmail(
           email,
           code,
           role,
-          expiresAt,
-          admin.name
+          expiresAt
         );
       } catch (emailError) {
         console.error('Error enviando email de código de registro:', emailError);
@@ -91,7 +90,7 @@ export class RegistrationCodeService {
   }
 
   // Verificar código de registro
-  static async verifyCode(code: string): Promise<IRegistrationCode | null> {
+  static async verifyRegistrationCode(code: string): Promise<IRegistrationCode | null> {
     try {
       const registrationCode = await RegistrationCode.findOne({
         code: code.toUpperCase(),
@@ -99,21 +98,258 @@ export class RegistrationCodeService {
         expiresAt: { $gt: new Date() }
       });
 
-      if (registrationCode) {
-        // Registrar que el código fue clickeado
-        registrationCode.clickedAt = new Date();
-        await registrationCode.save();
-      }
-
       return registrationCode;
     } catch (error) {
-      console.error('Error verificando código:', error);
+      console.error('Error verificando código de registro:', error);
       throw error;
     }
   }
 
-  // Marcar inicio de registro
-  static async startRegistration(code: string): Promise<IRegistrationCode> {
+  // Listar códigos de registro
+  static async listRegistrationCodes(
+    adminId: string,
+    options: {
+      page: number;
+      limit: number;
+      filters: any;
+    }
+  ): Promise<{
+    codes: IRegistrationCode[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    try {
+      const { page, limit, filters } = options;
+      const skip = (page - 1) * limit;
+
+      const query = { ...filters };
+      const total = await RegistrationCode.countDocuments(query);
+      const codes = await RegistrationCode.find(query)
+        .populate('createdBy', 'name email')
+        .populate('usedBy', 'name email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+      return {
+        codes,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      };
+    } catch (error) {
+      console.error('Error listando códigos de registro:', error);
+      throw error;
+    }
+  }
+
+  // Revocar código de registro
+  static async revokeRegistrationCode(
+    adminId: string,
+    codeId: string
+  ): Promise<boolean> {
+    try {
+      const admin = await User.findById(adminId);
+      if (!admin || admin.role !== 'admin') {
+        throw new Error('Solo los administradores pueden revocar códigos');
+      }
+
+      const result = await RegistrationCode.updateOne(
+        { _id: codeId, createdBy: adminId },
+        { status: 'revoked' }
+      );
+
+      return result.modifiedCount > 0;
+    } catch (error) {
+      console.error('Error revocando código de registro:', error);
+      throw error;
+    }
+  }
+
+  // Obtener estadísticas de códigos
+  static async getRegistrationCodeStats(adminId: string): Promise<any> {
+    try {
+      const admin = await User.findById(adminId);
+      if (!admin || admin.role !== 'admin') {
+        throw new Error('Solo los administradores pueden ver estadísticas');
+      }
+
+      const stats = await RegistrationCode.aggregate([
+        { $match: { createdBy: new mongoose.Types.ObjectId(adminId) } },
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 }
+          }
+        }
+      ]);
+
+      const roleStats = await RegistrationCode.aggregate([
+        { $match: { createdBy: new mongoose.Types.ObjectId(adminId) } },
+        {
+          $group: {
+            _id: '$role',
+            count: { $sum: 1 }
+          }
+        }
+      ]);
+
+      const totalCodes = await RegistrationCode.countDocuments({ createdBy: adminId });
+      const pendingCodes = await RegistrationCode.countDocuments({
+        createdBy: adminId,
+        status: 'pending',
+        expiresAt: { $gt: new Date() }
+      });
+
+      return {
+        totalCodes,
+        pendingCodes,
+        statusBreakdown: stats,
+        roleBreakdown: roleStats
+      };
+    } catch (error) {
+      console.error('Error obteniendo estadísticas:', error);
+      throw error;
+    }
+  }
+
+  // Reenviar código de registro
+  static async resendRegistrationCode(
+    adminId: string,
+    codeId: string
+  ): Promise<boolean> {
+    try {
+      const admin = await User.findById(adminId);
+      if (!admin || admin.role !== 'admin') {
+        throw new Error('Solo los administradores pueden reenviar códigos');
+      }
+
+      const registrationCode = await RegistrationCode.findOne({
+        _id: codeId,
+        createdBy: adminId,
+        status: 'pending'
+      });
+
+      if (!registrationCode) {
+        return false;
+      }
+
+      // Enviar email nuevamente
+      try {
+        await emailService.sendRegistrationCodeEmail(
+          registrationCode.email,
+          registrationCode.code,
+          registrationCode.role,
+          registrationCode.expiresAt
+        );
+      } catch (emailError) {
+        console.error('Error reenviando email:', emailError);
+        throw new Error('Error enviando email');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error reenviando código de registro:', error);
+      throw error;
+    }
+  }
+
+  // Obtener códigos por rol
+  static async getRegistrationCodesByRole(
+    adminId: string,
+    role: string,
+    options: {
+      page: number;
+      limit: number;
+    }
+  ): Promise<{
+    codes: IRegistrationCode[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    try {
+      const admin = await User.findById(adminId);
+      if (!admin || admin.role !== 'admin') {
+        throw new Error('Solo los administradores pueden ver códigos por rol');
+      }
+
+      const { page, limit } = options;
+      const skip = (page - 1) * limit;
+
+      const query = { createdBy: adminId, role };
+      const total = await RegistrationCode.countDocuments(query);
+      const codes = await RegistrationCode.find(query)
+        .populate('createdBy', 'name email')
+        .populate('usedBy', 'name email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+      return {
+        codes,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      };
+    } catch (error) {
+      console.error('Error obteniendo códigos por rol:', error);
+      throw error;
+    }
+  }
+
+  // Limpiar códigos expirados
+  static async cleanExpiredCodes(adminId: string): Promise<{ deletedCount: number }> {
+    try {
+      const admin = await User.findById(adminId);
+      if (!admin || admin.role !== 'admin') {
+        throw new Error('Solo los administradores pueden limpiar códigos expirados');
+      }
+
+      // Actualizar códigos expirados a estado 'expired'
+      const updateResult = await RegistrationCode.updateMany(
+        {
+          createdBy: adminId,
+          status: 'pending',
+          expiresAt: { $lt: new Date() }
+        },
+        {
+          $set: { status: 'expired' }
+        }
+      );
+
+      return {
+        deletedCount: updateResult.modifiedCount
+      };
+    } catch (error) {
+      console.error('Error limpiando códigos expirados:', error);
+      throw error;
+    }
+  }
+
+  // Obtener todos los códigos de registro (solo admin)
+  static async getAllRegistrationCodes(adminId: string): Promise<IRegistrationCode[]> {
+    try {
+      const admin = await User.findById(adminId);
+      if (!admin || admin.role !== 'admin') {
+        throw new Error('Solo los administradores pueden ver todos los códigos');
+      }
+
+      const codes = await RegistrationCode.find({ createdBy: adminId })
+        .populate('createdBy', 'name email')
+        .populate('usedBy', 'name email')
+        .sort({ createdAt: -1 });
+
+      return codes;
+    } catch (error) {
+      console.error('Error obteniendo todos los códigos:', error);
+      throw error;
+    }
+  }
+
+  // Iniciar registro con código
+  static async startRegistration(code: string): Promise<IRegistrationCode | null> {
     try {
       const registrationCode = await RegistrationCode.findOne({
         code: code.toUpperCase(),
@@ -122,9 +358,10 @@ export class RegistrationCodeService {
       });
 
       if (!registrationCode) {
-        throw new Error('Código de registro inválido o expirado');
+        return null;
       }
 
+      // Marcar que se inició el registro
       registrationCode.registrationStartedAt = new Date();
       await registrationCode.save();
 
@@ -135,8 +372,8 @@ export class RegistrationCodeService {
     }
   }
 
-  // Completar registro
-  static async completeRegistration(code: string, userId: string): Promise<void> {
+  // Completar registro con código
+  static async completeRegistration(userId: string, code: string): Promise<boolean> {
     try {
       const registrationCode = await RegistrationCode.findOne({
         code: code.toUpperCase(),
@@ -145,169 +382,20 @@ export class RegistrationCodeService {
       });
 
       if (!registrationCode) {
-        throw new Error('Código de registro inválido o expirado');
+        return false;
       }
 
-      // Obtener información del usuario que completó el registro
-      const user = await User.findById(userId);
-      if (!user) {
-        throw new Error('Usuario no encontrado');
-      }
-
+      // Marcar como usado
       registrationCode.status = 'used';
       registrationCode.usedAt = new Date();
       registrationCode.usedBy = new mongoose.Types.ObjectId(userId);
       registrationCode.registrationCompletedAt = new Date();
       await registrationCode.save();
 
-      // Enviar notificación al administrador que creó el código
-      try {
-        const admin = await User.findById(registrationCode.createdBy);
-        if (admin) {
-          await emailService.sendCodeUsedNotification(
-            admin.email,
-            code,
-            user.email,
-            user.name,
-            registrationCode.role
-          );
-        }
-      } catch (emailError) {
-        console.error('Error enviando notificación de código usado:', emailError);
-        // No fallar el proceso si el email falla
-      }
+      return true;
     } catch (error) {
       console.error('Error completando registro:', error);
       throw error;
     }
   }
-
-  // Revocar código de registro
-  static async revokeCode(adminId: string, codeId: string): Promise<void> {
-    try {
-      // Verificar que el usuario sea administrador
-      const admin = await User.findById(adminId);
-      if (!admin || admin.role !== 'admin') {
-        throw new Error('Solo los administradores pueden revocar códigos');
-      }
-
-      const registrationCode = await RegistrationCode.findById(codeId);
-      if (!registrationCode) {
-        throw new Error('Código de registro no encontrado');
-      }
-
-      registrationCode.status = 'revoked';
-      await registrationCode.save();
-    } catch (error) {
-      console.error('Error revocando código:', error);
-      throw error;
-    }
-  }
-
-  // Obtener todos los códigos de registro (para admin)
-  static async getAllCodes(adminId: string): Promise<IRegistrationCode[]> {
-    try {
-      // Verificar que el usuario sea administrador
-      const admin = await User.findById(adminId);
-      if (!admin || admin.role !== 'admin') {
-        throw new Error('Solo los administradores pueden ver todos los códigos');
-      }
-
-      return await RegistrationCode.find()
-        .populate('createdBy', 'name email')
-        .populate('usedBy', 'name email')
-        .sort({ createdAt: -1 });
-    } catch (error) {
-      console.error('Error obteniendo códigos:', error);
-      throw error;
-    }
-  }
-
-  // Obtener estadísticas de códigos
-  static async getCodeStats(adminId: string): Promise<any> {
-    try {
-      // Verificar que el usuario sea administrador
-      const admin = await User.findById(adminId);
-      if (!admin || admin.role !== 'admin') {
-        throw new Error('Solo los administradores pueden ver estadísticas');
-      }
-
-      const totalCodes = await RegistrationCode.countDocuments();
-      const pendingCodes = await RegistrationCode.countDocuments({ status: 'pending' });
-      const usedCodes = await RegistrationCode.countDocuments({ status: 'used' });
-      const expiredCodes = await RegistrationCode.countDocuments({ status: 'expired' });
-      const revokedCodes = await RegistrationCode.countDocuments({ status: 'revoked' });
-
-      const roleStats = await RegistrationCode.aggregate([
-        {
-          $group: {
-            _id: '$role',
-            count: { $sum: 1 },
-            used: {
-              $sum: { $cond: [{ $eq: ['$status', 'used'] }, 1, 0] }
-            },
-            pending: {
-              $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] }
-            }
-          }
-        }
-      ]);
-
-      return {
-        total: totalCodes,
-        pending: pendingCodes,
-        used: usedCodes,
-        expired: expiredCodes,
-        revoked: revokedCodes,
-        roleStats
-      };
-    } catch (error) {
-      console.error('Error obteniendo estadísticas:', error);
-      throw error;
-    }
-  }
-
-  // Limpiar códigos expirados
-  static async cleanExpiredCodes(): Promise<number> {
-    try {
-      // Obtener códigos que van a expirar
-      const codesToExpire = await RegistrationCode.find({
-        status: 'pending',
-        expiresAt: { $lt: new Date() }
-      });
-
-      // Enviar notificaciones antes de expirar
-      for (const code of codesToExpire) {
-        try {
-          const admin = await User.findById(code.createdBy);
-          if (admin) {
-            await emailService.sendCodeExpiredNotification(
-              admin.email,
-              code.code,
-              code.email,
-              code.role
-            );
-          }
-        } catch (emailError) {
-          console.error('Error enviando notificación de código expirado:', emailError);
-        }
-      }
-
-      // Marcar códigos como expirados
-      const result = await RegistrationCode.updateMany(
-        {
-          status: 'pending',
-          expiresAt: { $lt: new Date() }
-        },
-        {
-          status: 'expired'
-        }
-      );
-
-      return result.modifiedCount;
-    } catch (error) {
-      console.error('Error limpiando códigos expirados:', error);
-      throw error;
-    }
-  }
-} 
+}

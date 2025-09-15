@@ -36,7 +36,19 @@ const GoogleCallback: React.FC = () => {
         setStatus('success');
         setMessage('¡Autenticación exitosa! Redirigiendo...');
         
-        setTimeout(() => navigate('/'), 2000);
+        // Redirigir según el rol del usuario
+        setTimeout(() => {
+          if (user.role === 'admin') {
+            navigate('/admin/dashboard');
+          } else if (user.role === 'store_manager') {
+            navigate('/store-manager');
+          } else if (user.role === 'delivery') {
+            navigate('/delivery/dashboard');
+          } else {
+            // Para clientes, navegar a una ruta específica del cliente
+            navigate('/profile');
+          }
+        }, 2000);
       } catch (error) {
         setStatus('error');
         setMessage('Error procesando la autenticación');

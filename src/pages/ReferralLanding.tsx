@@ -74,7 +74,7 @@ const ReferralLanding: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            ¡Bienvenido a RepuestosPro!
+            ¡Bienvenido a PiezasYA!
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             Tu amigo te invitó a unirte a la mejor plataforma de repuestos
@@ -89,7 +89,7 @@ const ReferralLanding: React.FC = () => {
                 </h2>
               </div>
               <p className="text-gray-600">
-                Tu amigo te ha invitado a unirte a RepuestosPro. ¡Regístrate y ambos ganarán puntos!
+                Tu amigo te ha invitado a unirte a PiezasYA. ¡Regístrate y ambos ganarán puntos!
               </p>
             </div>
           )}
@@ -164,7 +164,7 @@ const ReferralLanding: React.FC = () => {
         {/* Características */}
         <div className="bg-white rounded-lg shadow-sm p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            ¿Por qué RepuestosPro?
+            ¿Por qué PiezasYA?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex items-start space-x-3">

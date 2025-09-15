@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo    RepuestosPro - Ecommerce
+echo    PiezasYA - Ecommerce
 echo ========================================
 echo.
 

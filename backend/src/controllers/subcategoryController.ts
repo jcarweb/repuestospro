@@ -2,29 +2,58 @@ import { Request, Response } from 'express';
 import Subcategory, { ISubcategory } from '../models/Subcategory';
 import Category from '../models/Category';
 import Activity from '../models/Activity';
+import Product from '../models/Product';
 
 export class SubcategoryController {
   // Obtener todas las subcategorías
   static async getAllSubcategories(req: Request, res: Response): Promise<void> {
     try {
-      const { categoryId, vehicleType, isActive } = req.query;
+      console.log('🔍 getAllSubcategories llamado');
+      const { search, categoryId, vehicleType, isActive } = req.query;
+      console.log('📋 Query params:', { search, categoryId, vehicleType, isActive });
       
       const filter: any = {};
+      if (search) {
+        filter.$or = [
+          { name: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } }
+        ];
+      }
       if (categoryId) filter.categoryId = categoryId;
       if (vehicleType) filter.vehicleType = vehicleType;
       if (isActive !== undefined) filter.isActive = isActive === 'true';
+
+      console.log('🔍 Filtro aplicado:', filter);
 
       const subcategories = await Subcategory.find(filter)
         .populate('categoryId', 'name vehicleType')
         .sort({ order: 1, name: 1 })
         .select('-__v');
 
+      console.log('📊 Subcategorías encontradas:', subcategories.length);
+
+      // Agregar conteo de productos para cada subcategoría
+      const subcategoriesWithProductCount = await Promise.all(
+        subcategories.map(async (subcategory) => {
+          const productCount = await Product.countDocuments({ 
+            subcategory: subcategory.name, // Usar el nombre en lugar del ID
+            isActive: true 
+          });
+          return {
+            ...subcategory.toObject(),
+            productCount
+          };
+        })
+      );
+
+      console.log('✅ Enviando respuesta con', subcategoriesWithProductCount.length, 'subcategorías');
+
       res.json({
         success: true,
-        data: subcategories
+        data: subcategoriesWithProductCount
       });
     } catch (error) {
-      console.error('Error obteniendo subcategorías:', error);
+      console.error('❌ Error obteniendo subcategorías:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
@@ -36,11 +65,11 @@ export class SubcategoryController {
   static async getSubcategoryById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      
+
       const subcategory = await Subcategory.findById(id)
         .populate('categoryId', 'name vehicleType')
         .select('-__v');
-      
+
       if (!subcategory) {
         res.status(404).json({
           success: false,
@@ -49,9 +78,20 @@ export class SubcategoryController {
         return;
       }
 
+      // Agregar conteo de productos
+      const productCount = await Product.countDocuments({ 
+        subcategory: subcategory.name, // Usar el nombre en lugar del ID
+        isActive: true 
+      });
+
+      const subcategoryWithProductCount = {
+        ...subcategory.toObject(),
+        productCount
+      };
+
       res.json({
         success: true,
-        data: subcategory
+        data: subcategoryWithProductCount
       });
     } catch (error) {
       console.error('Error obteniendo subcategoría:', error);
@@ -140,11 +180,20 @@ export class SubcategoryController {
   static async updateSubcategory(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { name, description, categoryId, vehicleType, isActive, order, icon, image } = req.body;
+      const { name, description, categoryId, vehicleType, order, icon, image } = req.body;
 
-      const subcategory = await Subcategory.findById(id);
-      
-      if (!subcategory) {
+      // Validar campos requeridos
+      if (!name || !categoryId || !vehicleType) {
+        res.status(400).json({
+          success: false,
+          message: 'Nombre, categoría y tipo de vehículo son requeridos'
+        });
+        return;
+      }
+
+      // Verificar que la subcategoría existe
+      const existingSubcategory = await Subcategory.findById(id);
+      if (!existingSubcategory) {
         res.status(404).json({
           success: false,
           message: 'Subcategoría no encontrada'
@@ -152,59 +201,60 @@ export class SubcategoryController {
         return;
       }
 
-      // Si se está cambiando la categoría, verificar que existe
-      if (categoryId && categoryId !== subcategory.categoryId.toString()) {
-        const category = await Category.findById(categoryId);
-        if (!category) {
-          res.status(404).json({
-            success: false,
-            message: 'Categoría no encontrada'
-          });
-          return;
-        }
-      }
-
-      // Si se está cambiando el nombre, verificar que no exista duplicado
-      if (name && name.trim() !== subcategory.name) {
-        const existingSubcategory = await Subcategory.findOne({ 
-          name: name.trim(), 
-          categoryId: categoryId || subcategory.categoryId,
-          _id: { $ne: id }
+      // Verificar que la categoría existe
+      const category = await Category.findById(categoryId);
+      if (!category) {
+        res.status(404).json({
+          success: false,
+          message: 'Categoría no encontrada'
         });
-
-        if (existingSubcategory) {
-          res.status(400).json({
-            success: false,
-            message: 'Ya existe una subcategoría con este nombre en esta categoría'
-          });
-          return;
-        }
+        return;
       }
 
-      // Actualizar campos
-      if (name !== undefined) subcategory.name = name.trim();
-      if (description !== undefined) subcategory.description = description.trim();
-      if (categoryId !== undefined) subcategory.categoryId = categoryId;
-      if (vehicleType !== undefined) subcategory.vehicleType = vehicleType;
-      if (isActive !== undefined) subcategory.isActive = isActive;
-      if (order !== undefined) subcategory.order = order;
-      if (icon !== undefined) subcategory.icon = icon.trim();
-      if (image !== undefined) subcategory.image = image.trim();
+      // Verificar si ya existe otra subcategoría con el mismo nombre en la misma categoría
+      const duplicateSubcategory = await Subcategory.findOne({ 
+        name: name.trim(), 
+        categoryId,
+        _id: { $ne: id }
+      });
 
-      await subcategory.save();
+      if (duplicateSubcategory) {
+        res.status(400).json({
+          success: false,
+          message: 'Ya existe una subcategoría con este nombre en esta categoría'
+        });
+        return;
+      }
+
+      const updateData: any = {
+        name: name.trim(),
+        categoryId,
+        vehicleType
+      };
+
+      if (description !== undefined) updateData.description = description.trim();
+      if (order !== undefined) updateData.order = order;
+      if (icon !== undefined) updateData.icon = icon.trim();
+      if (image !== undefined) updateData.image = image.trim();
+
+      const updatedSubcategory = await Subcategory.findByIdAndUpdate(
+        id,
+        updateData,
+        { new: true, runValidators: true }
+      ).populate('categoryId', 'name vehicleType');
 
       // Registrar actividad
       await Activity.create({
         userId: (req as any).user._id,
         type: 'subcategory_updated',
-        description: `Subcategoría "${subcategory.name}" actualizada`,
-        metadata: { subcategoryId: subcategory._id, categoryId: subcategory.categoryId, vehicleType: subcategory.vehicleType }
+        description: `Subcategoría "${updatedSubcategory.name}" actualizada`,
+        metadata: { subcategoryId: updatedSubcategory._id, categoryId, vehicleType }
       });
 
       res.json({
         success: true,
         message: 'Subcategoría actualizada exitosamente',
-        data: subcategory
+        data: updatedSubcategory
       });
     } catch (error) {
       console.error('Error actualizando subcategoría:', error);
@@ -220,12 +270,22 @@ export class SubcategoryController {
     try {
       const { id } = req.params;
 
+      // Verificar que la subcategoría existe
       const subcategory = await Subcategory.findById(id);
-      
       if (!subcategory) {
         res.status(404).json({
           success: false,
           message: 'Subcategoría no encontrada'
+        });
+        return;
+      }
+
+      // Verificar si hay productos asociados
+      const productCount = await Product.countDocuments({ subcategory: id });
+      if (productCount > 0) {
+        res.status(400).json({
+          success: false,
+          message: `No se puede eliminar la subcategoría porque tiene ${productCount} productos asociados`
         });
         return;
       }
@@ -237,7 +297,7 @@ export class SubcategoryController {
         userId: (req as any).user._id,
         type: 'subcategory_deleted',
         description: `Subcategoría "${subcategory.name}" eliminada`,
-        metadata: { subcategoryId: subcategory._id, categoryId: subcategory.categoryId, vehicleType: subcategory.vehicleType }
+        metadata: { subcategoryId: subcategory._id, categoryId: subcategory.categoryId }
       });
 
       res.json({
@@ -258,8 +318,8 @@ export class SubcategoryController {
     try {
       const { id } = req.params;
 
+      // Verificar que la subcategoría existe
       const subcategory = await Subcategory.findById(id);
-      
       if (!subcategory) {
         res.status(404).json({
           success: false,
@@ -268,6 +328,7 @@ export class SubcategoryController {
         return;
       }
 
+      // Cambiar estado
       subcategory.isActive = !subcategory.isActive;
       await subcategory.save();
 
@@ -276,7 +337,7 @@ export class SubcategoryController {
         userId: (req as any).user._id,
         type: 'subcategory_status_changed',
         description: `Subcategoría "${subcategory.name}" ${subcategory.isActive ? 'activada' : 'desactivada'}`,
-        metadata: { subcategoryId: subcategory._id, categoryId: subcategory.categoryId, vehicleType: subcategory.vehicleType }
+        metadata: { subcategoryId: subcategory._id, isActive: subcategory.isActive }
       });
 
       res.json({
@@ -286,6 +347,73 @@ export class SubcategoryController {
       });
     } catch (error) {
       console.error('Error cambiando estado de subcategoría:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Obtener estadísticas de subcategorías
+  static async getSubcategoryStats(req: Request, res: Response): Promise<void> {
+    try {
+      // Total de subcategorías
+      const totalSubcategories = await Subcategory.countDocuments();
+      
+      // Subcategorías activas e inactivas
+      const activeSubcategories = await Subcategory.countDocuments({ isActive: true });
+      const inactiveSubcategories = await Subcategory.countDocuments({ isActive: false });
+
+      // Subcategorías con productos - usar un enfoque diferente
+      const allSubcategories = await Subcategory.find({}, 'name');
+      let subcategoriesWithProductsCount = 0;
+      
+      for (const subcategory of allSubcategories) {
+        const productCount = await Product.countDocuments({ 
+          subcategory: subcategory.name,
+          isActive: true 
+        });
+        if (productCount > 0) {
+          subcategoriesWithProductsCount++;
+        }
+      }
+
+      // Estadísticas por tipo de vehículo
+      const byVehicleType = await Subcategory.aggregate([
+        {
+          $group: {
+            _id: '$vehicleType',
+            count: { $sum: 1 }
+          }
+        }
+      ]);
+
+      // Convertir a objeto
+      const vehicleTypeStats = {
+        car: 0,
+        motorcycle: 0,
+        truck: 0,
+        bus: 0
+      };
+
+      byVehicleType.forEach(stat => {
+        vehicleTypeStats[stat._id as keyof typeof vehicleTypeStats] = stat.count;
+      });
+
+      const stats = {
+        totalSubcategories,
+        activeSubcategories,
+        inactiveSubcategories,
+        subcategoriesWithProducts: subcategoriesWithProductsCount,
+        byVehicleType: vehicleTypeStats
+      };
+
+      res.json({
+        success: true,
+        data: stats
+      });
+    } catch (error) {
+      console.error('Error obteniendo estadísticas de subcategorías:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

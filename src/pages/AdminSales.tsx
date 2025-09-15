@@ -1,28 +1,31 @@
 import React from 'react';
 import { ShoppingCart, TrendingUp, DollarSign, Users } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const AdminSales: React.FC = () => {
+  const { t } = useLanguage();
+  
   const stats = [
     {
-      title: 'Ventas Hoy',
+      title: t('adminSales.stats.todaySales'),
       value: '$2,450',
       icon: TrendingUp,
       color: 'bg-green-500'
     },
     {
-      title: 'Ventas del Mes',
+      title: t('adminSales.stats.monthlySales'),
       value: '$12,450',
       icon: DollarSign,
       color: 'bg-blue-500'
     },
     {
-      title: 'Órdenes Pendientes',
+      title: t('adminSales.stats.pendingOrders'),
       value: '8',
       icon: ShoppingCart,
       color: 'bg-yellow-500'
     },
     {
-      title: 'Clientes Activos',
+      title: t('adminSales.stats.activeCustomers'),
       value: '156',
       icon: Users,
       color: 'bg-purple-500'
@@ -32,8 +35,8 @@ const AdminSales: React.FC = () => {
   return (
     <div className="p-4">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Gestión de Ventas</h1>
-        <p className="text-gray-600 mt-2">Monitorea y gestiona las ventas del negocio</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('adminSales.title')}</h1>
+        <p className="text-gray-600 mt-2">{t('adminSales.subtitle')}</p>
       </div>
 
       {/* Estadísticas */}
@@ -59,11 +62,11 @@ const AdminSales: React.FC = () => {
       {/* Contenido principal */}
       <div className="bg-white rounded-lg shadow">
         <div className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Historial de Ventas</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('adminSales.salesHistory.title')}</h3>
           <div className="text-center py-12">
             <ShoppingCart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">Esta funcionalidad estará disponible próximamente</p>
-            <p className="text-sm text-gray-500 mt-2">Aquí podrás ver el historial completo de ventas y gestionar órdenes</p>
+            <p className="text-gray-600">{t('adminSales.salesHistory.comingSoon')}</p>
+            <p className="text-sm text-gray-500 mt-2">{t('adminSales.salesHistory.description')}</p>
           </div>
         </div>
       </div>

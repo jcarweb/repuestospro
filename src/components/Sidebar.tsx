@@ -1,20 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import Logo from './Logo';
 import { 
+  Home, 
+  Package, 
+  Tag, 
+  ShoppingCart, 
+  Award, 
   BarChart3, 
   Users, 
-  Tag, 
-  Home, 
-  ShoppingCart, 
-  Package, 
+  Search, 
+  Database,
+  Truck,
+  Store,
   Settings,
-  Award,
-  Shield,
   User,
-  Search,
-  Database
+  CreditCard,
+  MapPin,
+  Clock,
+  Star,
+  MessageSquare,
+  FileText,
+  Bell,
+  Shield,
+  Key,
+  Smartphone,
+  Navigation,
+  Calendar,
+  TrendingUp,
+  DollarSign,
+  Gift,
+  Heart,
+  ShoppingBag,
+  Camera,
+  Image
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -22,79 +44,354 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { user } = useAuth();
+  const { user, hasRole, hasAnyRole } = useAuth();
+  const { t, currentLanguage, updateTrigger } = useLanguage();
   const location = useLocation();
+  
+  // Estado local para forzar re-renders
+  const [forceUpdate, setForceUpdate] = useState(0);
+
+  // Forzar re-render cuando cambie el idioma
+  useEffect(() => {
+    setForceUpdate(prev => prev + 1);
+  }, [currentLanguage, updateTrigger, t]);
 
   const isActive = (path: string) => {
-    return location.pathname === path;
+    const isExactMatch = location.pathname === path;
+    const isPartialMatch = location.pathname.startsWith(path + '/');
+    const isActiveRoute = isExactMatch || isPartialMatch;
+    
+    return isActiveRoute;
   };
 
-  const menuItems = [
+  // Menú para Administrador - se re-evalúa en cada render
+  const adminMenuItems = [
     {
-      title: 'Dashboard',
+      title: t('sidebar.admin.dashboard'),
       path: '/admin/dashboard',
       icon: Home,
-      roles: ['admin', 'store_manager']
+      description: 'Panel principal de administración'
     },
     {
-      title: 'Productos',
+      title: t('sidebar.admin.users'),
+      path: '/admin/users',
+      icon: Users,
+      description: 'Gestión de usuarios del sistema'
+    },
+    {
+      title: t('sidebar.admin.products'),
       path: '/admin/products',
       icon: Package,
-      roles: ['admin', 'store_manager']
+      description: 'Gestión de productos global'
     },
     {
-      title: 'Categorías',
-      path: '/admin/categories',
+      title: t('sidebar.admin.inventory'),
+      path: '/admin/inventory',
       icon: Package,
-      roles: ['admin', 'store_manager']
+      description: 'Gestión de inventario global'
     },
     {
-      title: 'Promociones',
+      title: t('sidebar.admin.categories'),
+      path: '/admin/categories',
+      icon: Database,
+      description: 'Gestión de categorías y subcategorías'
+    },
+    {
+      title: t('sidebar.admin.promotions'),
       path: '/admin/promotions',
       icon: Tag,
-      roles: ['admin', 'store_manager']
+      description: 'Gestión de promociones globales'
     },
     {
-      title: 'Ventas',
+      title: t('sidebar.admin.sales'),
       path: '/admin/sales',
       icon: ShoppingCart,
-      roles: ['admin', 'store_manager']
+      description: t('sidebar.admin.sales.description')
     },
     {
-      title: 'Fidelización',
+      title: t('sidebar.admin.salesReports'),
+      path: '/admin/sales-reports',
+      icon: BarChart3,
+      description: 'Reportes avanzados de ventas con filtros globales'
+    },
+    {
+      title: t('sidebar.admin.delivery'),
+      path: '/admin/delivery',
+      icon: Truck,
+      description: 'Gestión de delivery con lógica mixta de riders'
+    },
+    {
+      title: t('sidebar.admin.loyalty'),
       path: '/admin/loyalty',
       icon: Award,
-      roles: ['admin', 'store_manager']
+      description: 'Sistema de lealtad y premios'
     },
     {
-      title: 'Google Analytics',
+      title: t('sidebar.admin.analytics'),
       path: '/admin/analytics',
       icon: BarChart3,
-      roles: ['admin']
+      description: 'Estadísticas y métricas'
     },
     {
-      title: 'Códigos de Registro',
+      title: t('sidebar.admin.registrationCodes'),
       path: '/admin/registration-codes',
-      icon: Users,
-      roles: ['admin']
+      icon: Key,
+      description: 'Generar códigos de registro'
     },
     {
-      title: 'Configuración de Búsqueda',
+      title: t('sidebar.admin.searchConfig'),
       path: '/admin/search-config',
       icon: Search,
-      roles: ['admin']
+      description: 'Configurar búsqueda avanzada'
     },
     {
-      title: 'Generar Productos',
+      title: t('sidebar.admin.generateProducts'),
       path: '/admin/generate-products',
       icon: Database,
-      roles: ['admin']
+      description: 'Generar productos de prueba'
+    },
+    {
+      title: t('sidebar.admin.dataEnrichment'),
+      path: '/admin/data-enrichment',
+      icon: Camera,
+      description: 'Enriquecimiento de datos de locales con OCR y APIs'
+    },
+    {
+      title: t('sidebar.admin.globalSettings'),
+      path: '/admin/settings',
+      icon: Settings,
+      description: 'Configuración del sistema'
     }
   ];
 
-  const filteredMenuItems = menuItems.filter(item => 
-    item.roles.includes(user?.role || '')
-  );
+  // Menú para Gestor de Tienda - se re-evalúa en cada render
+  const storeManagerMenuItems = [
+    {
+      title: t('sidebar.storeManager.inventory'),
+      path: '/store-manager/inventory',
+      icon: Package,
+      description: 'Configurar y gestionar inventario'
+    },
+    {
+      title: t('sidebar.storeManager.inventoryAlerts'),
+      path: '/store-manager/inventory-alerts',
+      icon: Bell,
+      description: 'Alertas de inventario'
+    },
+    {
+      title: t('sidebar.storeManager.notifications'),
+      path: '/store-manager/notifications',
+      icon: Bell,
+      description: 'Notificaciones de inventario'
+    },
+    {
+      title: t('sidebar.storeManager.dashboard'),
+      path: '/store-manager/dashboard',
+      icon: Home,
+      description: 'Panel de gestión de tienda'
+    },
+    {
+      title: t('sidebar.storeManager.products'),
+      path: '/store-manager/products',
+      icon: Package,
+      description: 'Gestión de productos de la tienda'
+    },
+    {
+      title: t('sidebar.storeManager.promotions'),
+      path: '/store-manager/promotions',
+      icon: Tag,
+      description: 'Promociones de la tienda'
+    },
+    {
+      title: t('sidebar.storeManager.sales'),
+      path: '/store-manager/sales',
+      icon: ShoppingCart,
+      description: t('sidebar.storeManager.sales.description')
+    },
+    {
+      title: t('sidebar.storeManager.orders'),
+      path: '/store-manager/orders',
+      icon: ShoppingBag,
+      description: 'Gestión de pedidos'
+    },
+    {
+      title: t('sidebar.storeManager.delivery'),
+      path: '/store-manager/delivery',
+      icon: Truck,
+      description: 'Asignar y gestionar delivery'
+    },
+    {
+      title: t('sidebar.storeManager.analytics'),
+      path: '/store-manager/analytics',
+      icon: BarChart3,
+      description: 'Estadísticas de la tienda'
+    },
+    {
+      title: t('sidebar.storeManager.messages'),
+      path: '/store-manager/messages',
+      icon: MessageSquare,
+      description: 'Mensajería con clientes'
+    },
+    {
+      title: t('sidebar.storeManager.reviews'),
+      path: '/store-manager/reviews',
+      icon: Star,
+      description: 'Reseñas de productos'
+    },
+    {
+      title: t('sidebar.storeManager.sellers'),
+      path: '/store-manager/sellers',
+      icon: Users,
+      description: 'Gestión de vendedores'
+    },
+    {
+      title: t('sidebar.storeManager.settings'),
+      path: '/store-manager/settings',
+      icon: Settings,
+      description: 'Configuración de la tienda'
+    }
+  ];
+
+  // Menú para Delivery - se re-evalúa en cada render
+  const deliveryMenuItems = [
+    {
+      title: t('sidebar.delivery.dashboard'),
+      path: '/delivery/dashboard',
+      icon: Home,
+      description: 'Panel de delivery'
+    },
+    {
+      title: t('sidebar.delivery.assignedOrders'),
+      path: '/delivery/orders',
+      icon: ShoppingBag,
+      description: 'Ver pedidos asignados'
+    },
+    {
+      title: t('sidebar.delivery.routeMap'),
+      path: '/delivery/map',
+      icon: MapPin,
+      description: 'Mapa con rutas de entrega'
+    },
+    {
+      title: t('sidebar.delivery.deliveryReport'),
+      path: '/delivery/report',
+      icon: FileText,
+      description: 'Reportar estado de entregas'
+    },
+    {
+      title: t('sidebar.delivery.ratings'),
+      path: '/delivery/ratings',
+      icon: Star,
+      description: 'Ver calificaciones recibidas'
+    },
+    {
+      title: t('sidebar.delivery.workSchedule'),
+      path: '/delivery/schedule',
+      icon: Clock,
+      description: 'Configurar horario de trabajo'
+    },
+    {
+      title: t('sidebar.delivery.availabilityStatus'),
+      path: '/delivery/status',
+      icon: Bell,
+      description: 'Cambiar estado de disponibilidad'
+    },
+    {
+      title: t('sidebar.delivery.profile'),
+      path: '/delivery/profile',
+      icon: User,
+      description: 'Configuración del perfil'
+    }
+  ];
+
+  // Menú para Cliente - se re-evalúa en cada render
+  const clientMenuItems = [
+    {
+      title: t('sidebar.client.home'),
+      path: '/',
+      icon: Home,
+      description: 'Página principal'
+    },
+    {
+      title: t('sidebar.client.products'),
+      path: '/products',
+      icon: Package,
+      description: 'Explorar productos'
+    },
+    {
+      title: t('sidebar.client.categories'),
+      path: '/categories',
+      icon: Database,
+      description: 'Ver categorías'
+    },
+    {
+      title: t('sidebar.client.cart'),
+      path: '/cart',
+      icon: ShoppingCart,
+      description: 'Ver carrito de compras'
+    },
+    {
+      title: t('sidebar.client.favorites'),
+      path: '/favorites',
+      icon: Heart,
+      description: 'Productos favoritos'
+    },
+    {
+      title: t('sidebar.client.loyalty'),
+      path: '/loyalty',
+      icon: Award,
+      description: 'Puntos y premios'
+    },
+    {
+      title: t('sidebar.client.myOrders'),
+      path: '/orders',
+      icon: ShoppingBag,
+      description: 'Historial de pedidos'
+    },
+    {
+      title: t('sidebar.client.profile'),
+      path: '/profile',
+      icon: User,
+      description: 'Configuración del perfil'
+    },
+    {
+      title: t('sidebar.client.security'),
+      path: '/security',
+      icon: Shield,
+      description: 'Configuración de seguridad'
+    },
+    {
+      title: t('sidebar.client.notifications'),
+      path: '/notifications',
+      icon: Bell,
+      description: 'Configurar notificaciones'
+    }
+  ];
+
+  // Determinar qué menú mostrar según el rol
+  const getMenuItems = () => {
+    if (hasRole('admin')) {
+      return adminMenuItems;
+    } else if (hasRole('store_manager')) {
+      return storeManagerMenuItems
+    } else if (hasRole('delivery')) {
+      return deliveryMenuItems;
+    } else if (hasRole('client')) {
+      return clientMenuItems;
+    }
+    return [];
+  };
+
+  const menuItems = getMenuItems();
+
+  // Función para obtener el rol traducido - se re-evalúa en cada render
+  const getRoleText = () => {
+    if (user?.role === 'admin') return t('sidebar.roles.admin');
+    if (user?.role === 'store_manager') return t('sidebar.roles.storeManager');
+    if (user?.role === 'delivery') return t('sidebar.roles.delivery');
+    if (user?.role === 'client') return t('sidebar.roles.client');
+    return '';
+  };
 
   return (
     <>
@@ -106,93 +403,73 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         />
       )}
 
-      {/* Sidebar */}
-      <div className={`
-        fixed top-0 left-0 h-full bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:z-auto lg:shadow-none
-        w-64
-      `}>
+             {/* Sidebar */}
+       <div 
+         key={`sidebar-${currentLanguage}-${forceUpdate}`}
+         className={`
+           fixed top-0 left-0 h-full bg-white dark:bg-[#333333] shadow-lg z-50 transform transition-transform duration-300 ease-in-out
+           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+           lg:translate-x-0 lg:static lg:z-auto
+           w-64 border-r border-gray-200 dark:border-[#555555]
+         `}>
         <div className="flex flex-col h-full">
-          {/* Header del sidebar */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-800">
-              Panel de Control
-            </h2>
-            <button
-              onClick={onClose}
-              className="lg:hidden text-gray-500 hover:text-gray-700"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Información del usuario */}
-          <div className="p-4 border-b border-gray-200">
+          {/* Header */}
+          <div className="p-4 border-b border-gray-200 dark:border-[#555555]">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-blue-600" />
-              </div>
+              <Logo className="h-10 w-auto" />
               <div>
-                <p className="font-medium text-gray-900">{user?.name}</p>
-                <p className="text-sm text-gray-500 capitalize">{user?.role}</p>
+                <h1 className="text-lg font-bold text-[#333333] dark:text-[#FFC300]">PIEZAS YA</h1>
+                                 <p className="text-sm text-gray-500 dark:text-white capitalize">
+                   {getRoleText()}
+                 </p>
               </div>
             </div>
           </div>
 
-          {/* Menú de navegación */}
-          <nav className="flex-1 p-4 space-y-2">
-            {filteredMenuItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={onClose}
-                  className={`
-                    flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors
-                    ${isActive(item.path) 
-                      ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-700' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                    }
-                  `}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.title}</span>
-                </Link>
-              );
-            })}
-          </nav>
+                     {/* Menú */}
+           <nav className="flex-1 overflow-y-auto p-4">
+             <ul className="space-y-2">
+                               {menuItems.map((item) => {
+                  const Icon = item.icon;
+                  const isItemActive = isActive(item.path);
+                  
+                  return (
+                   <li key={`${item.path}-${currentLanguage}-${forceUpdate}`}>
+                     <Link
+                       to={item.path}
+                       className={`
+                         flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                         ${isItemActive
+                           ? 'bg-[#FFC300] bg-opacity-20 text-[#333333] border-r-2 border-[#FFC300]'
+                           : 'text-[#333333] dark:text-white hover:bg-[#FFC300] hover:bg-opacity-10 hover:text-[#333333]'
+                         }
+                       `}
+                       onClick={onClose}
+                       title={item.description}
+                     >
+                       <Icon className="w-5 h-5 text-[#333333] dark:text-white" />
+                       <span>{item.title}</span>
+                     </Link>
+                   </li>
+                 );
+               })}
+             </ul>
+           </nav>
 
-          {/* Footer del sidebar */}
-          <div className="p-4 border-t border-gray-200">
-            <div className="space-y-2">
-              <Link
-                to="/profile"
-                onClick={onClose}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <User className="w-5 h-5" />
-                <span>Mi Perfil</span>
-              </Link>
-              <Link
-                to="/profile?section=settings"
-                onClick={onClose}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <Settings className="w-5 h-5" />
-                <span>Configuración</span>
-              </Link>
-              <Link
-                to="/security"
-                onClick={onClose}
-                className="flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <Shield className="w-5 h-5" />
-                <span>Seguridad</span>
-              </Link>
+          {/* Footer */}
+          <div className="p-4 border-t border-gray-200 dark:border-[#555555]">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gray-200 dark:bg-[#555555] rounded-full flex items-center justify-center">
+                <User className="w-4 h-4 text-gray-600 dark:text-gray-200" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  {user?.name}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-300 truncate">
+                  {user?.email}
+                </p>
+              </div>
             </div>
           </div>
         </div>

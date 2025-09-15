@@ -1,52 +1,54 @@
 import React, { useState } from 'react';
-import { X, Key, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { Key, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface PinSetupProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  token: string;
+  onPinSet: (pin: string) => void;
+  onCancel: () => void;
 }
 
-const PinSetup: React.FC<PinSetupProps> = ({ isOpen, onClose, onSuccess, token }) => {
+const PinSetup: React.FC<PinSetupProps> = ({ onPinSet, onCancel }) => {
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [showPin, setShowPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handlePinChange = (value: string, isConfirm: boolean = false) => {
+    // Solo permitir números y máximo 6 dígitos
+    const numericValue = value.replace(/\D/g, '').slice(0, 6);
+    
+    if (isConfirm) {
+      setConfirmPin(numericValue);
+    } else {
+      setPin(numericValue);
+    }
+    setError('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
 
-    // Validaciones
-    if (pin.length < 4 || pin.length > 6) {
-      setError('El PIN debe tener entre 4 y 6 dígitos');
-      setLoading(false);
+    if (pin.length < 4) {
+      setError('El PIN debe tener al menos 4 dígitos');
       return;
     }
 
     if (pin !== confirmPin) {
       setError('Los PINs no coinciden');
-      setLoading(false);
       return;
     }
 
-    if (!/^\d+$/.test(pin)) {
-      setError('El PIN solo debe contener números');
-      setLoading(false);
-      return;
-    }
+    setLoading(true);
 
     try {
+      // Aquí se enviaría al servidor para guardar el PIN
       const response = await fetch('http://localhost:5000/api/auth/setup-pin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ pin })
       });
@@ -54,169 +56,125 @@ const PinSetup: React.FC<PinSetupProps> = ({ isOpen, onClose, onSuccess, token }
       const result = await response.json();
 
       if (result.success) {
-        setSuccess(true);
-        setTimeout(() => {
-          onSuccess();
-          onClose();
-        }, 2000);
+        onPinSet(pin);
       } else {
         setError(result.message || 'Error configurando PIN');
       }
     } catch (error) {
-      console.error('Error configurando PIN:', error);
       setError('Error de conexión. Intenta de nuevo.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    if (!loading) {
-      setPin('');
-      setConfirmPin('');
-      setError('');
-      setSuccess(false);
-      onClose();
-    }
-  };
-
-  if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 w-full max-w-md mx-4">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-            <Key className="w-6 h-6 mr-2 text-green-600" />
-            Configurar PIN
-          </h2>
-          <button
-            onClick={handleClose}
-            disabled={loading}
-            className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
-          >
-            <X size={24} />
-          </button>
-        </div>
-
-        {success ? (
-          <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-              <CheckCircle className="h-6 w-6 text-green-600" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              ¡PIN Configurado!
-            </h3>
-            <p className="text-gray-600">
-              Tu PIN ha sido configurado exitosamente. Ahora puedes usarlo para iniciar sesión.
-            </p>
+        <div className="text-center">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
+            <Key className="h-8 w-8 text-blue-600" />
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="rounded-md bg-red-50 p-4">
-                <div className="flex">
-                  <AlertCircle className="h-5 w-5 text-red-400" />
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">
-                      {error}
-                    </h3>
-                  </div>
-                </div>
+          
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Configurar PIN de Acceso
+          </h2>
+          
+          <p className="text-gray-600 mb-6">
+            Crea un PIN de 4-6 dígitos para acceder rápidamente a tu cuenta. 
+            Este PIN será requerido para iniciar sesión con PIN.
+          </p>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center">
+                <AlertCircle className="text-red-500 mr-2" size={20} />
+                <span className="text-red-700 text-sm">{error}</span>
               </div>
-            )}
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-blue-800 mb-2">
-                Requisitos del PIN:
-              </h3>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Entre 4 y 6 dígitos</li>
-                <li>• Solo números</li>
-                <li>• Fácil de recordar pero seguro</li>
-              </ul>
             </div>
+          )}
 
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="pin" className="block text-sm font-medium text-gray-700 mb-2">
-                Nuevo PIN
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+                PIN (4-6 dígitos)
               </label>
               <div className="relative">
                 <input
-                  id="pin"
                   type={showPin ? 'text' : 'password'}
                   value={pin}
-                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Ingresa tu PIN"
+                  onChange={(e) => handlePinChange(e.target.value)}
+                  className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-lg tracking-widest"
+                  placeholder="••••"
                   maxLength={6}
                   required
                 />
+                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <button
                   type="button"
                   onClick={() => setShowPin(!showPin)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPin ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  )}
+                  {showPin ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {pin.length}/6 dígitos
-              </p>
             </div>
 
             <div>
-              <label htmlFor="confirmPin" className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
                 Confirmar PIN
               </label>
               <div className="relative">
                 <input
-                  id="confirmPin"
                   type={showConfirmPin ? 'text' : 'password'}
                   value={confirmPin}
-                  onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Confirma tu PIN"
+                  onChange={(e) => handlePinChange(e.target.value, true)}
+                  className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-lg tracking-widest"
+                  placeholder="••••"
                   maxLength={6}
                   required
                 />
+                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPin(!showConfirmPin)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showConfirmPin ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  )}
+                  {showConfirmPin ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
             </div>
 
-            <div className="flex space-x-3">
-              <button
-                type="button"
-                onClick={handleClose}
-                disabled={loading}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 disabled:opacity-50 transition-colors"
-              >
-                Cancelar
-              </button>
+            <div className="space-y-3 pt-4">
               <button
                 type="submit"
-                disabled={loading || pin.length < 4 || confirmPin.length < 4}
-                className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                disabled={loading || pin.length < 4 || pin !== confirmPin}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Configurando...' : 'Configurar PIN'}
               </button>
+              
+              <button
+                type="button"
+                onClick={onCancel}
+                className="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Cancelar
+              </button>
             </div>
           </form>
-        )}
+
+          <div className="mt-6 text-xs text-gray-500">
+            <p className="mb-2">
+              <strong>Recomendaciones de seguridad:</strong>
+            </p>
+            <ul className="text-left space-y-1">
+              <li>• No uses fechas de nacimiento o números secuenciales</li>
+              <li>• No compartas tu PIN con nadie</li>
+              <li>• Cambia tu PIN regularmente</li>
+              <li>• Puedes cambiar tu PIN en cualquier momento desde tu perfil</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );

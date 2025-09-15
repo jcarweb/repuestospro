@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Product from '../models/Product';
+import Store from '../models/Store';
 
 // Configuración de la base de datos
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/repuestospro', {
@@ -7,11 +8,41 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/repuestos
   useUnifiedTopology: true
 } as any);
 
-// Datos de prueba
-const brands = [
-  'Toyota', 'Honda', 'Ford', 'Chevrolet', 'Nissan', 'BMW', 'Mercedes', 'Audi', 
-  'Volkswagen', 'Hyundai', 'Kia', 'Mazda', 'Subaru', 'Mitsubishi', 'Lexus'
-];
+// Marcas por tipo de vehículo
+const vehicleBrands = {
+  automovil: [
+    'Toyota', 'Honda', 'Ford', 'Chevrolet', 'Nissan', 'BMW', 'Mercedes', 'Audi', 
+    'Volkswagen', 'Hyundai', 'Kia', 'Mazda', 'Subaru', 'Mitsubishi', 'Lexus',
+    'Peugeot', 'Renault', 'Fiat', 'Seat', 'Skoda', 'Volvo', 'Jaguar', 'Land Rover'
+  ],
+  motocicleta: [
+    'Bera', 'Empire Keeway', 'MD-Haojin', 'Suzuki-Haojue', 'Toro', 'Escuda', 'Skygo',
+    'Honda', 'Yamaha', 'Bajaj', 'TVS', 'Zontes', 'CFMoto', 'Kawasaki', 'Suzuki',
+    'Ducati', 'KTM', 'Aprilia', 'Benelli', 'Harley-Davidson', 'Triumph'
+  ],
+  camion: [
+    'FOTON', 'Mack', 'Volvo', 'Iveco', 'JAC', 'Chevrolet', 'Ford', 'Mitsubishi',
+    'Freightliner', 'Kenworth', 'Peterbilt', 'Scania', 'MAN', 'DAF', 'Renault Trucks',
+    'Isuzu', 'Hino', 'UD Trucks', 'Tata', 'Ashok Leyland'
+  ],
+  maquinaria_agricola: [
+    'John Deere', 'Massey Ferguson', 'New Holland', 'Case IH', 'Kubota', 'Fendt', 
+    'Valtra', 'Deutz-Fahr', 'Claas', 'Landini', 'McCormick', 'Same', 'Lamborghini',
+    'Antonio Carraro', 'Goldoni', 'Arbos', 'Solis', 'Mahindra', 'Tafe'
+  ],
+  maquinaria_industrial: [
+    'Cat', 'Komatsu', 'XCMG', 'Caterpillar', 'John Deere', 'Sany', 'Volvo CE',
+    'Liebherr', 'Hitachi', 'Doosan', 'Hyundai', 'JCB', 'Bobcat', 'Case',
+    'Miller', 'Hypertherm', 'ESAB', 'Lincoln Electric', 'Fronius', 'Kemppi',
+    'Agrometal', 'Bombagua', 'Induveca', 'INVEVAL', 'Metalúrgica Venezolana',
+    'Industrias Venoco', 'Maquinarias del Sur', 'Equipos Industriales CA'
+  ]
+};
+
+// Función para obtener marcas por tipo de vehículo
+function getBrandsByVehicleType(vehicleType: string): string[] {
+  return vehicleBrands[vehicleType as keyof typeof vehicleBrands] || vehicleBrands.automovil;
+}
 
 const categories = [
   'Motor', 'Frenos', 'Suspensión', 'Eléctrico', 'Transmisión', 'Refrigeración', 
@@ -139,17 +170,39 @@ const descriptions = {
   ]
 };
 
+// Función para determinar el tipo de despacho basado en el tipo de vehículo
+function getDeliveryType(vehicleType: string): string {
+  switch (vehicleType) {
+    case 'automovil':
+      return 'delivery_motorizado';
+    case 'motocicleta':
+    case 'camion':
+    case 'maquinaria_industrial':
+    case 'maquinaria_agricola':
+      return 'pickup';
+    default:
+      return 'delivery_motorizado';
+  }
+}
+
 // Función para generar un producto aleatorio
 function generateRandomProduct() {
   const category = categories[Math.floor(Math.random() * categories.length)];
-  const brand = brands[Math.floor(Math.random() * brands.length)];
-  const subcategoryList = subcategories[category];
+  const subcategoryList = (subcategories as any)[category];
   const subcategory = subcategoryList[Math.floor(Math.random() * subcategoryList.length)];
   
-  const productNamesList = productNames[category];
+  // Determinar tipo de vehículo (por ahora solo automóviles, se puede expandir)
+  const vehicleType = 'automovil';
+  const deliveryType = getDeliveryType(vehicleType);
+  
+  // Obtener marcas específicas para el tipo de vehículo
+  const availableBrands = getBrandsByVehicleType(vehicleType);
+  const brand = availableBrands[Math.floor(Math.random() * availableBrands.length)];
+  
+  const productNamesList = (productNames as any)[category];
   const productName = productNamesList[Math.floor(Math.random() * productNamesList.length)];
   
-  const descriptionsList = descriptions[category];
+  const descriptionsList = (descriptions as any)[category];
   const description = descriptionsList[Math.floor(Math.random() * descriptionsList.length)];
   
   const price = Math.floor(Math.random() * 500) + 10; // Precio entre $10 y $510
@@ -159,8 +212,10 @@ function generateRandomProduct() {
     name: `${productName} ${brand}`,
     description: `${description} compatible con vehículos ${brand}`,
     price: price,
-    image: `https://via.placeholder.com/300x200/0066cc/ffffff?text=${encodeURIComponent(productName)}`,
+    images: [`https://via.placeholder.com/300x200/0066cc/ffffff?text=${encodeURIComponent(productName)}`],
     category: category.toLowerCase(),
+    vehicleType: vehicleType,
+    deliveryType: deliveryType,
     brand: brand.toLowerCase(),
     subcategory: subcategory.toLowerCase(),
     sku: `SKU-${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
@@ -175,7 +230,8 @@ function generateRandomProduct() {
       compatibilidad: `${brand}, ${category}`,
       garantia: '12 meses'
     },
-    popularity: Math.floor(Math.random() * 100) + 1
+    popularity: Math.floor(Math.random() * 100) + 1,
+    store: null as any // Se asignará después
   };
 }
 
@@ -184,10 +240,22 @@ export async function generateTestProducts() {
   try {
     console.log('🚀 Iniciando generación de productos de prueba...');
     
+    // Obtener tiendas existentes
+    const stores = await Store.find({ isActive: true });
+    if (stores.length === 0) {
+      throw new Error('No hay tiendas activas en la base de datos. Ejecuta primero el seed de tiendas.');
+    }
+    
+    console.log(`🏪 Usando ${stores.length} tiendas para asignar productos`);
+    
     // Generar 150 productos de prueba
     const products = [];
     for (let i = 0; i < 150; i++) {
-      products.push(generateRandomProduct());
+      const product = generateRandomProduct();
+      // Asignar una tienda aleatoria
+      const randomStore = stores[Math.floor(Math.random() * stores.length)];
+      product.store = randomStore._id;
+      products.push(product);
     }
     
     // Insertar productos en la base de datos

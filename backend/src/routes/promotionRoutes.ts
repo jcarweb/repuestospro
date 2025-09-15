@@ -27,6 +27,9 @@ router.post('/', PromotionController.createPromotion);
 // Obtener todas las promociones
 router.get('/', PromotionController.getAllPromotions);
 
+// Verificar acceso a promociones
+router.get('/check-access', PromotionController.checkPromotionsAccess);
+
 // Obtener promoción por ID
 router.get('/:id', PromotionController.getPromotionById);
 
@@ -44,6 +47,9 @@ router.get('/stats/overview', PromotionController.getPromotionStats);
 
 // Obtener productos disponibles para promociones
 router.get('/products/available', PromotionController.getAvailableProducts);
+
+// Obtener tiendas disponibles para promociones (solo admin)
+router.get('/stores/available', adminMiddleware, PromotionController.getAvailableStores);
 
 // Obtener categorías disponibles para promociones
 router.get('/categories/available', PromotionController.getAvailableCategories);

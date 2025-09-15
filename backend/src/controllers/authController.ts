@@ -27,11 +27,13 @@ export class AuthController {
   // Registrar usuario
   static async register(req: Request, res: Response): Promise<void> {
     try {
-      const { name, email, password, phone, pin, role = 'user' } = req.body;
+      console.log('🔍 Iniciando registro de usuario:', req.body);
+      const { name, email, password, phone, pin, role = 'client' } = req.body;
 
       // Validar email
       const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
       if (!emailRegex.test(email)) {
+        console.log('❌ Email inválido:', email);
         res.status(400).json({
           success: false,
           message: 'Email inválido'
@@ -40,8 +42,10 @@ export class AuthController {
       }
 
       // Verificar si el usuario ya existe
+      console.log('🔍 Verificando si el usuario ya existe...');
       const existingUser = await User.findOne({ email });
       if (existingUser) {
+        console.log('❌ Usuario ya existe:', existingUser._id);
         res.status(400).json({
           success: false,
           message: 'El email ya está registrado'
@@ -49,46 +53,81 @@ export class AuthController {
         return;
       }
 
+      console.log('✅ Usuario no existe, procediendo con el registro');
+
+      // Generar código de referido
+      console.log('🔍 Generando código de referido...');
+      let referralCode: string;
+      try {
+        referralCode = await LoyaltyService.generateReferralCode();
+        console.log('✅ Código de referido generado:', referralCode);
+      } catch (error) {
+        console.error('❌ Error generando código de referido:', error);
+        // Usar un código temporal si falla
+        referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        console.log('⚠️ Usando código temporal:', referralCode);
+      }
+
       // Crear usuario
+      console.log('🔍 Creando usuario...');
       const userData: any = {
         name,
         email,
         password,
         phone,
         role,
-        referralCode: await LoyaltyService.generateReferralCode()
+        referralCode
       };
 
       if (pin) {
         userData.pin = pin;
       }
 
+      console.log('📋 Datos del usuario a crear:', { ...userData, password: '[HIDDEN]' });
+
       const user = await User.create(userData);
+      console.log('✅ Usuario creado exitosamente:', user._id);
 
       // Generar token de verificación de email
+      console.log('🔍 Generando token de verificación...');
       const emailVerificationToken = AuthController.generateTemporaryToken();
       user.emailVerificationToken = emailVerificationToken;
       user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
       await user.save();
+      console.log('✅ Token de verificación generado');
 
       // Enviar email de verificación
       try {
-        await emailService.sendEmailVerification(user.email, emailVerificationToken, user.name);
+        console.log('🔍 Enviando email de verificación...');
+        await emailService.sendEmailVerificationEmail(user.email, emailVerificationToken);
+        console.log('✅ Email de verificación enviado');
       } catch (emailError) {
-        console.error('Error enviando email de verificación:', emailError);
+        console.error('❌ Error enviando email de verificación:', emailError);
+        console.log('⚠️ Continuando sin email de verificación');
         // No fallar el registro si el email falla
       }
 
       // Registrar actividad
-      await Activity.create({
-        userId: user._id,
-        type: 'register',
-        description: 'Usuario registrado exitosamente',
-        metadata: { ip: req.ip, userAgent: req.get('User-Agent') }
-      });
+      try {
+        console.log('🔍 Registrando actividad...');
+        await Activity.create({
+          userId: user._id,
+          type: 'register',
+          description: 'Usuario registrado exitosamente',
+          metadata: { ip: req.ip, userAgent: req.get('User-Agent') }
+        });
+        console.log('✅ Actividad registrada');
+      } catch (activityError) {
+        console.error('❌ Error registrando actividad:', activityError);
+        // No fallar el registro si la actividad falla
+      }
 
       // Generar token JWT
+      console.log('🔍 Generando token JWT...');
       const token = AuthController.generateToken(user._id.toString());
+      console.log('✅ Token JWT generado');
+
+      console.log('🎉 Registro completado exitosamente');
 
       res.status(201).json({
         success: true,
@@ -105,7 +144,8 @@ export class AuthController {
         }
       });
     } catch (error) {
-      console.error('Error registrando usuario:', error);
+      console.error('❌ Error registrando usuario:', error);
+      console.error('Stack:', error instanceof Error ? error.stack : 'No stack available');
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
@@ -118,8 +158,13 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
-      // Buscar usuario
-      const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil');
+      // Buscar usuario con información de tiendas
+      const user = await User.findOne({ email })
+        .select('+password +loginAttempts +lockUntil')
+        .populate({
+          path: 'stores',
+          select: 'name address city state isMainStore _id'
+        });
       
       if (!user) {
         res.status(401).json({
@@ -150,8 +195,8 @@ export class AuthController {
         return;
       }
 
-      // Verificar si el email está verificado
-      if (!user.isEmailVerified) {
+      // Verificar si el email está verificado (solo en producción)
+      if (!user.isEmailVerified && config.NODE_ENV === 'production') {
         res.status(403).json({
           success: false,
           message: 'Debes verificar tu email antes de poder iniciar sesión. Revisa tu bandeja de entrada o solicita un nuevo enlace de verificación.',
@@ -180,7 +225,8 @@ export class AuthController {
               isEmailVerified: user.isEmailVerified,
               role: user.role,
               fingerprintEnabled: user.fingerprintEnabled,
-              twoFactorEnabled: true
+              twoFactorEnabled: true,
+              stores: user.stores || []
             }
           }
         });
@@ -212,7 +258,8 @@ export class AuthController {
             isEmailVerified: user.isEmailVerified,
             role: user.role,
             fingerprintEnabled: user.fingerprintEnabled,
-            twoFactorEnabled: false
+            twoFactorEnabled: false,
+            stores: user.stores || []
           },
           token
         }
@@ -812,7 +859,7 @@ export class AuthController {
 
       // Redirigir al frontend con el token
       const frontendUrl = config.CORS_ORIGIN;
-      res.redirect(`${frontendUrl}/auth/google/callback?token=${token}&user=${encodeURIComponent(JSON.stringify({
+      res.redirect(`${frontendUrl}/google-callback?token=${token}&user=${encodeURIComponent(JSON.stringify({
         id: user._id,
         name: user.name,
         email: user.email,
@@ -821,7 +868,7 @@ export class AuthController {
       }))}`);
     } catch (error) {
       console.error('Error en callback de Google:', error);
-      res.redirect(`${config.CORS_ORIGIN}/auth/google/error`);
+      res.redirect(`${config.CORS_ORIGIN}/google-callback?error=true`);
     }
   }
 
@@ -863,7 +910,7 @@ export class AuthController {
 
       // Enviar email de verificación
       try {
-        await emailService.sendEmailVerification(user.email, emailVerificationToken, user.name);
+        await emailService.sendEmailVerificationEmail(user.email, emailVerificationToken);
       } catch (emailError) {
         console.error('Error enviando email de verificación:', emailError);
         res.status(500).json({
@@ -902,6 +949,111 @@ export class AuthController {
     });
   }
 
+  // Login con Google para app móvil
+  static async loginWithGoogle(req: Request, res: Response): Promise<void> {
+    try {
+      console.log('🔐 Iniciando login con Google para app móvil');
+      const { googleToken, userInfo } = req.body;
+
+      if (!googleToken || !userInfo) {
+        res.status(400).json({
+          success: false,
+          message: 'Token de Google y información del usuario requeridos'
+        });
+        return;
+      }
+
+      const { email, name, picture } = userInfo;
+
+      // Verificar si el usuario ya existe
+      let user = await User.findOne({ email });
+
+      if (!user) {
+        console.log('👤 Usuario no existe, creando nuevo usuario con Google');
+        
+        // Crear nuevo usuario
+        const userData: any = {
+          name,
+          email,
+          password: crypto.randomBytes(32).toString('hex'), // Contraseña aleatoria
+          isEmailVerified: true, // Google ya verifica el email
+          googleId: userInfo.id,
+          profilePicture: picture,
+          role: 'client' // Solo clientes pueden registrarse desde móvil
+        };
+
+        // Generar código de referido
+        try {
+          userData.referralCode = await LoyaltyService.generateReferralCode();
+        } catch (error) {
+          console.error('Error generando código de referido:', error);
+          userData.referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        user = await User.create(userData);
+        console.log('✅ Usuario creado exitosamente con Google:', user._id);
+
+        // Registrar actividad
+        await Activity.create({
+          userId: user._id,
+          type: 'user_registration',
+          description: 'Usuario registrado con Google',
+          metadata: { 
+            provider: 'google',
+            ip: req.ip 
+          }
+        });
+      } else {
+        console.log('👤 Usuario existente encontrado:', user._id);
+        
+        // Actualizar información de Google si es necesario
+        if (!user.googleId) {
+          user.googleId = userInfo.id;
+          user.profilePicture = picture;
+          await user.save();
+        }
+
+        // Registrar actividad
+        await Activity.create({
+          userId: user._id,
+          type: 'user_login',
+          description: 'Inicio de sesión con Google',
+          metadata: { 
+            provider: 'google',
+            ip: req.ip 
+          }
+        });
+      }
+
+      // Generar token JWT
+      const token = AuthController.generateToken(user._id);
+
+      console.log('✅ Login con Google exitoso para usuario:', user._id);
+
+      res.json({
+        success: true,
+        message: 'Inicio de sesión con Google exitoso',
+        data: {
+          token,
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            profilePicture: user.profilePicture,
+            isEmailVerified: user.isEmailVerified
+          }
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error en login con Google:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error en el inicio de sesión con Google'
+      });
+    }
+  }
+
   // Login con huella digital
   static async loginWithFingerprint(req: Request, res: Response): Promise<void> {
     try {
@@ -937,8 +1089,8 @@ export class AuthController {
         return;
       }
 
-      // Verificar si el email está verificado
-      if (!user.isEmailVerified) {
+      // Verificar si el email está verificado (solo en producción)
+      if (!user.isEmailVerified && config.NODE_ENV === 'production') {
         res.status(403).json({
           success: false,
           message: 'Debes verificar tu email antes de poder iniciar sesión. Revisa tu bandeja de entrada o solicita un nuevo enlace de verificación.',
@@ -1000,8 +1152,8 @@ export class AuthController {
 
       // Generar secreto
       const secret = speakeasy.generateSecret({
-        name: `RepuestosPro (${user.email})`,
-        issuer: 'RepuestosPro'
+        name: `PiezasYA (${user.email})`,
+        issuer: 'PiezasYA'
       });
 
       // Generar QR code
@@ -1477,6 +1629,157 @@ export class AuthController {
         success: false,
         message: 'Error interno del servidor'
       });
+    }
+  }
+
+  // Verificar token
+  static async verifyToken(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user._id;
+      const user = await User.findById(userId).select('-password -twoFactorSecret -backupCodes');
+
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        message: 'Token válido',
+        data: {
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            role: user.role,
+            isEmailVerified: user.isEmailVerified,
+            isActive: user.isActive,
+            pin: user.pin,
+            fingerprintEnabled: user.fingerprintEnabled,
+            twoFactorEnabled: user.twoFactorEnabled,
+            emailNotifications: user.emailNotifications,
+            pushNotifications: user.pushNotifications,
+            marketingEmails: user.marketingEmails,
+            points: user.points,
+            loyaltyLevel: user.loyaltyLevel,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error verificando token:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Verificar estado de verificación de email
+  static async checkEmailVerification(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        res.status(400).json({ error: 'Email requerido' });
+        return;
+      }
+
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        res.status(404).json({ error: 'Usuario no encontrado' });
+        return;
+      }
+
+      res.json({
+        verified: user.isEmailVerified,
+        message: user.isEmailVerified ? 'Email verificado' : 'Email no verificado'
+      });
+    } catch (error) {
+      console.error('❌ Error verificando email:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
+
+  // Verificar código de doble factor
+  static async verifyTwoFactorCode(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, code } = req.body;
+
+      if (!email || !code) {
+        res.status(400).json({ error: 'Email y código requeridos' });
+        return;
+      }
+
+      const user = await User.findOne({ email }).select('+twoFactorSecret');
+
+      if (!user) {
+        res.status(404).json({ error: 'Usuario no encontrado' });
+        return;
+      }
+
+      if (!user.twoFactorEnabled) {
+        res.status(400).json({ error: '2FA no está habilitado para este usuario' });
+        return;
+      }
+
+      // Verificar el código usando la librería speakeasy
+      const verified = speakeasy.totp.verify({
+        secret: user.twoFactorSecret,
+        encoding: 'base32',
+        token: code,
+        window: 2 // Permitir 2 códigos antes y después
+      });
+
+      res.json({
+        valid: verified,
+        message: verified ? 'Código válido' : 'Código inválido'
+      });
+    } catch (error) {
+      console.error('❌ Error verificando código 2FA:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
+
+  // Obtener configuración de autenticación del usuario
+  static async getUserAuthSettings(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        res.status(400).json({ error: 'Email requerido' });
+        return;
+      }
+
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        res.status(404).json({ error: 'Usuario no encontrado' });
+        return;
+      }
+
+      // Configuración de autenticación del usuario
+      const settings = {
+        emailVerified: user.isEmailVerified,
+        gpsRequired: false, // Por defecto deshabilitado
+        biometricEnabled: user.fingerprintEnabled || false,
+        twoFactorEnabled: user.twoFactorEnabled || false,
+        pinEnabled: !!user.pin,
+      };
+
+      res.json({
+        success: true,
+        settings
+      });
+    } catch (error) {
+      console.error('❌ Error obteniendo configuración de usuario:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   }
 }
