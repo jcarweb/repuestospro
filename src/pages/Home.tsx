@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useLanguageChange } from '../hooks/useLanguageChange';
 import AdvancedSearch from '../components/AdvancedSearch';
+import ProductCard from '../components/ProductCard';
+import type { Product } from '../services/productService';
 import { 
   Package, 
   TrendingUp, 
@@ -81,11 +83,83 @@ const Home: React.FC = () => {
     { id: 6, name: 'Carrocería', icon: 'car', count: '1,123', color: 'bg-indigo-500' },
   ];
 
-  const trendingProducts = [
-    { id: 1, name: 'Pastillas de Freno Premium', price: '$45.99', originalPrice: '$59.99', discount: '23%', image: 'brakes', rating: 4.8, reviews: 156 },
-    { id: 2, name: 'Filtro de Aceite de Alto Rendimiento', price: '$12.99', originalPrice: '$18.99', discount: '32%', image: 'wrench', rating: 4.6, reviews: 89 },
-    { id: 3, name: 'Amortiguadores Deportivos', price: '$89.99', originalPrice: '$129.99', discount: '31%', image: 'zap', rating: 4.7, reviews: 234 },
-    { id: 4, name: 'Bujías de Iridio', price: '$24.99', originalPrice: '$34.99', discount: '29%', image: 'lightbulb', rating: 4.9, reviews: 67 },
+  const trendingProducts: Product[] = [
+    { 
+      _id: '1', 
+      name: 'Pastillas de Freno Premium', 
+      description: 'Pastillas de freno de alta calidad para un rendimiento óptimo',
+      price: 45.99, 
+      images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center'], 
+      category: 'car',
+      subcategory: 'Frenos',
+      brand: 'Brembo',
+      stock: 15,
+      popularity: 4.8, 
+      sku: 'BRM-001',
+      specifications: {},
+      tags: ['frenos', 'premium', 'brembo'],
+      isFeatured: true,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    { 
+      _id: '2', 
+      name: 'Filtro de Aceite de Alto Rendimiento', 
+      description: 'Filtro de aceite premium para protección del motor',
+      price: 12.99, 
+      images: ['https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=400&h=300&fit=crop&crop=center'], 
+      category: 'car',
+      subcategory: 'Filtros',
+      brand: 'Mann-Filter',
+      stock: 25,
+      popularity: 4.6, 
+      sku: 'MF-002',
+      specifications: {},
+      tags: ['filtro', 'aceite', 'motor'],
+      isFeatured: true,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    { 
+      _id: '3', 
+      name: 'Amortiguadores Deportivos', 
+      description: 'Amortiguadores deportivos para mejor manejo y estabilidad',
+      price: 89.99, 
+      images: ['https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400&h=300&fit=crop&crop=center'], 
+      category: 'car',
+      subcategory: 'Suspensión',
+      brand: 'Bilstein',
+      stock: 8,
+      popularity: 4.7, 
+      sku: 'BIL-003',
+      specifications: {},
+      tags: ['amortiguadores', 'deportivos', 'suspension'],
+      isFeatured: true,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    { 
+      _id: '4', 
+      name: 'Bujías de Iridio', 
+      description: 'Bujías de iridio para mejor combustión y eficiencia',
+      price: 24.99, 
+      images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center'], 
+      category: 'car',
+      subcategory: 'Motor',
+      brand: 'NGK',
+      stock: 20,
+      popularity: 4.9, 
+      sku: 'NGK-004',
+      specifications: {},
+      tags: ['bujias', 'iridio', 'motor'],
+      isFeatured: true,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
   ];
 
   const offers = [
@@ -233,7 +307,7 @@ const Home: React.FC = () => {
             {featuredCategories.map((category) => (
               <Link
                 key={category.id}
-                to={`/category/${category.id}`}
+                to={`/category/${category.name.toLowerCase()}`}
                 className="group bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 border border-gray-100 hover:border-[#FFC300]"
               >
                 <div className={`w-16 h-16 ${category.color} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
@@ -274,59 +348,7 @@ const Home: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {trendingProducts.map((product) => (
-              <div key={product.id} className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 group">
-                <div className="relative mb-4">
-                  <div className="w-full h-48 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
-                    {renderProductIcon(product.image)}
-                  </div>
-                  <div className="absolute top-2 right-2">
-                    <button className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors">
-                      <Heart className="w-5 h-5 text-gray-400 hover:text-red-500" />
-                    </button>
-                  </div>
-                  <div className="absolute top-2 left-2">
-                    <span className="px-3 py-1 bg-red-500 text-white text-sm font-bold rounded-full">
-                      {product.discount}
-                    </span>
-                  </div>
-                </div>
-
-                <h3 className="text-lg font-semibold text-[#333333] mb-2 group-hover:text-[#FFC300] transition-colors line-clamp-2">
-                  {product.name}
-                </h3>
-
-                <div className="flex items-center mb-3">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < Math.floor(product.rating) ? 'text-[#FFC300] fill-current' : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-500 ml-2">
-                    ({product.reviews})
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <span className="text-2xl font-bold text-[#333333]">
-                      {product.price}
-                    </span>
-                    <span className="text-sm text-gray-500 line-through ml-2">
-                      {product.originalPrice}
-                    </span>
-                  </div>
-                </div>
-
-                <button className="w-full py-3 bg-[#FFC300] text-[#333333] font-semibold rounded-lg hover:bg-[#FFB800] transition-colors flex items-center justify-center">
-                  <ShoppingCart className="w-5 h-5 mr-2" />
-                  Agregar al Carrito
-                </button>
-              </div>
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         </div>

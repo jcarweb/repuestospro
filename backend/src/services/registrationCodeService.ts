@@ -14,7 +14,7 @@ export class RegistrationCodeService {
   static async createRegistrationCode(
     adminId: string,
     email: string,
-    role: 'admin' | 'store_manager' | 'delivery',
+    role: 'admin' | 'store_manager' | 'delivery' | 'seller',
     expiresInDays: number = 7
   ): Promise<IRegistrationCode> {
     try {

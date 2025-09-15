@@ -5,12 +5,15 @@ import { authMiddleware, adminMiddleware, storeManagerMiddleware } from '../midd
 const router = Router();
 
 // Rutas públicas
-router.get('/stores', storeController.getAllStores);
 router.get('/stores/:id', storeController.getStoreById);
 router.get('/stores/search/by-division', storeController.searchByAdministrativeDivision);
+router.get('/stores/managers', storeController.getStoreManagers);
 
 // Rutas protegidas
 router.use(authMiddleware);
+
+// Ruta para obtener todas las tiendas (solo para usuarios autenticados)
+router.get('/stores', storeController.getAllStores);
 
 // Rutas para todos los usuarios autenticados
 router.get('/user/stores', storeController.getUserStores);
@@ -33,7 +36,6 @@ router.patch('/stores/:id/toggle-status', storeController.toggleStoreStatus);
 router.put('/stores/:id/set-main', storeController.setMainStore);
 router.delete('/stores/:id', storeController.deleteStore);
 
-// Rutas para admin
-router.get('/admin/stores/stats', adminMiddleware, storeController.getStoreStats);
+// Rutas para admin (movidas a adminRoutes.ts)
 
 export default router;

@@ -1,14 +1,16 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Star, ShoppingCart, Heart } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useFavorites } from '../contexts/FavoritesContext';
-import type { Product } from '../types';
+import ShareButtons from './ShareButtons';
+import type { Product } from '../services/productService';
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
+  const navigate = useNavigate();
   const { addItem, isInCart } = useCart();
   const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
 
@@ -17,6 +19,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
       style: 'currency',
       currency: 'USD'
     }).format(price);
+  };
+
+  // Función para obtener la imagen del producto con fallback
+  const getProductImage = () => {
+    if (product.images && product.images.length > 0 && product.images[0] !== '') {
+      return product.images[0];
+    }
+    // Fallback a imagen de Unsplash que funciona
+    return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center';
   };
 
   const renderStars = (rating: number) => {
@@ -32,48 +43,61 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   const handleAddToCart = () => {
     addItem({
-      id: product.id,
+      id: product._id,
       name: product.name,
       price: product.price,
       quantity: 1,
-      image: product.image,
+      image: product.images && product.images.length > 0 ? product.images[0] : '',
       category: product.category,
       brand: product.brand
     });
   };
 
   const handleToggleFavorite = () => {
-    if (isFavorite(product.id)) {
-      removeFromFavorites(product.id);
+    if (isFavorite(product._id)) {
+      removeFromFavorites(product._id);
     } else {
       addToFavorites({
-        id: product.id,
+        id: product._id,
         name: product.name,
         price: product.price,
-        image: product.image,
+        image: product.images && product.images.length > 0 ? product.images[0] : '',
         category: product.category,
         brand: product.brand
       });
     }
   };
 
+  const handleCardClick = () => {
+    // Navegar al detalle del producto
+    navigate(`/product/${product._id}`);
+    // Scroll to top para mejor UX
+    window.scrollTo(0, 0);
+  };
+
+  const handleActionClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevenir que se active la navegación de la tarjeta
+  };
+
   return (
-    <div className="card group hover:shadow-lg transition-shadow duration-300">
+    <div 
+      className="card group hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:-translate-y-1 border border-gray-200 hover:border-blue-300"
+      onClick={handleCardClick}
+      title="Haz clic para ver detalles del producto"
+    >
       {/* Imagen del producto */}
       <div className="relative mb-4">
-        <Link to={`/product/${product.id}`}>
-          <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
             <img
-              src={product.image}
+              src={getProductImage()}
               alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = 'https://via.placeholder.com/300x300?text=Sin+Imagen';
+                target.src = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center';
               }}
             />
-          </div>
-        </Link>
+        </div>
         
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
@@ -92,26 +116,40 @@ const ProductCard = ({ product }: ProductCardProps) => {
         {/* Botones de acción */}
         <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button
-            onClick={handleToggleFavorite}
+            onClick={(e) => {
+              handleActionClick(e);
+              handleToggleFavorite();
+            }}
             className={`p-2 rounded-full shadow-md transition-colors ${
-              isFavorite(product.id) 
+              isFavorite(product._id) 
                 ? 'bg-red-50 text-red-500 hover:bg-red-100' 
                 : 'bg-white text-gray-600 hover:bg-gray-50'
             }`}
           >
-            <Heart className={`h-4 w-4 ${isFavorite(product.id) ? 'fill-current' : ''}`} />
+            <Heart className={`h-4 w-4 ${isFavorite(product._id) ? 'fill-current' : ''}`} />
           </button>
           <button
-            onClick={handleAddToCart}
+            onClick={(e) => {
+              handleActionClick(e);
+              handleAddToCart();
+            }}
             disabled={product.stock === 0}
             className={`p-2 rounded-full shadow-md transition-colors ${
-              isInCart(product.id)
+              isInCart(product._id)
                 ? 'bg-green-50 text-green-600 hover:bg-green-100'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
+                : 'bg-white text-gray-600 hover:bg-[#FFC300] hover:text-[#333333]'
             } ${product.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <ShoppingCart className="h-4 w-4" />
           </button>
+          <div onClick={handleActionClick}>
+            <ShareButtons
+              productId={product._id}
+              productName={product.name}
+              productPrice={product.price}
+              productImage={getProductImage()}
+            />
+          </div>
         </div>
       </div>
 
@@ -124,11 +162,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </div>
 
         {/* Nombre del producto */}
-        <Link to={`/product/${product.id}`} className="block">
-          <h3 className="font-semibold text-gray-900 line-clamp-2 hover:text-primary-600 transition-colors">
-            {product.name}
-          </h3>
-        </Link>
+        <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+          {product.name}
+        </h3>
+        
+        {/* Indicador de que es clickeable */}
+        <div className="text-xs text-gray-400 group-hover:text-blue-500 transition-colors">
+          Haz clic para ver detalles
+        </div>
 
         {/* Precio */}
         <div className="flex items-center gap-2">
@@ -145,9 +186,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
         {/* Rating y reviews */}
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
-            {renderStars(product.rating)}
+            {renderStars(product.popularity)}
             <span className="text-sm text-gray-600 ml-1">
-              ({product.reviews})
+              ({product.popularity})
             </span>
           </div>
         </div>
@@ -161,18 +202,32 @@ const ProductCard = ({ product }: ProductCardProps) => {
           )}
         </div>
 
+        {/* Tipo de Despacho */}
+        {product.deliveryType && (
+          <div className="text-sm">
+            {product.deliveryType === 'delivery_motorizado' ? (
+              <span className="text-blue-600">🚚 Delivery</span>
+            ) : (
+              <span className="text-orange-600">📦 Pick up</span>
+            )}
+          </div>
+        )}
+
         {/* Botón agregar al carrito */}
         <button
-          onClick={handleAddToCart}
+          onClick={(e) => {
+            handleActionClick(e);
+            handleAddToCart();
+          }}
           disabled={product.stock === 0}
           className={`w-full py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-            isInCart(product.id)
+            isInCart(product._id)
               ? 'bg-green-600 text-white hover:bg-green-700'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'bg-[#FFC300] text-[#333333] hover:bg-[#FFB800]'
           } disabled:bg-gray-300 disabled:cursor-not-allowed`}
         >
           <ShoppingCart className="h-4 w-4" />
-          {isInCart(product.id) ? 'En el carrito' : 'Agregar al carrito'}
+          {isInCart(product._id) ? 'En el carrito' : 'Agregar al carrito'}
         </button>
       </div>
     </div>

@@ -1050,6 +1050,56 @@ app.delete('/api/products/:id', async (req, res) => {
   }
 });
 
+// Obtener categorías de productos
+app.get('/api/products/categories', async (req, res) => {
+  console.log('📂 Solicitud de categorías recibida');
+  try {
+    // Categorías basadas en los productos mock
+    const categories = [
+      'Filtros',
+      'Frenos', 
+      'Encendido',
+      'Lubricantes'
+    ];
+    
+    res.json({
+      success: true,
+      data: categories
+    });
+  } catch (error) {
+    console.error('❌ Error obteniendo categorías:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Error interno del servidor al obtener categorías'
+    });
+  }
+});
+
+// Obtener marcas de productos
+app.get('/api/products/brands', async (req, res) => {
+  console.log('🏷️ Solicitud de marcas recibida');
+  try {
+    // Marcas basadas en los productos mock
+    const brands = [
+      'Bosch',
+      'Brembo',
+      'NGK',
+      'Mobil'
+    ];
+    
+    res.json({
+      success: true,
+      data: brands
+    });
+  } catch (error) {
+    console.error('❌ Error obteniendo marcas:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Error interno del servidor al obtener marcas'
+    });
+  }
+});
+
 // Ruta simple para obtener tiendas (para testing)
 app.get('/api/stores', async (req, res) => {
   console.log('🏪 [MONGODB SERVER] Solicitud de tiendas recibida');

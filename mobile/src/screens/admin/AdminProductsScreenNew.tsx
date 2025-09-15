@@ -23,6 +23,7 @@ import { Ionicons } from '@expo/vector-icons';
 const AdminProductsScreen: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Store[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,7 +47,7 @@ const AdminProductsScreen: React.FC = () => {
       // Cargar productos desde el servicio
       const response = await productService.getProducts({
         page: 1,
-        limit: 50,
+        limit: 1000, // Aumentar límite para cargar todos los productos
         search: searchQuery || undefined,
         category: selectedCategory !== 'all' ? selectedCategory : undefined,
         storeId: selectedStore !== 'all' ? selectedStore : undefined,
@@ -54,8 +55,10 @@ const AdminProductsScreen: React.FC = () => {
       });
       
       if (response.success && response.data) {
-        setProducts(response.data.data || []);
-        console.log(`✅ Cargados ${response.data.total} productos`);
+        // La respuesta real tiene la estructura: { data: { products: [...], pagination: {...} } }
+        const productsData = response.data.products || response.data || [];
+        setProducts(productsData);
+        console.log(`✅ Cargados ${response.data.pagination?.total || productsData.length || 0} productos`);
       } else {
         console.error('❌ Error cargando productos:', response.error);
         showToast('Error al cargar productos', 'error');
@@ -140,8 +143,8 @@ const AdminProductsScreen: React.FC = () => {
     try {
       const response = await productService.getStores();
       if (response.success && response.data) {
-        setStores(response.data.data || []);
-        console.log(`✅ Cargadas ${response.data.total} tiendas`);
+        setStores(response.data.stores || []);
+        console.log(`✅ Cargadas ${response.data.stores?.length || 0} tiendas`);
       } else {
         console.error('❌ Error cargando tiendas:', response.error);
         // Fallback a datos mock
@@ -194,9 +197,20 @@ const AdminProductsScreen: React.FC = () => {
     }
   };
 
+  const loadCategories = async () => {
+    try {
+      const categoriesData = await productService.getCategories();
+      setCategories(categoriesData);
+      console.log(`✅ Cargadas ${categoriesData.length} categorías`);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      setCategories([]);
+    }
+  };
+
   const onRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await Promise.all([loadProducts(), loadStores()]);
+    await Promise.all([loadProducts(), loadStores(), loadCategories()]);
     setIsRefreshing(false);
   }, [searchQuery, selectedCategory, selectedStore, selectedStatus]);
 
@@ -403,6 +417,7 @@ const AdminProductsScreen: React.FC = () => {
   useEffect(() => {
     loadProducts();
     loadStores();
+    loadCategories();
   }, [searchQuery, selectedCategory, selectedStore, selectedStatus]);
 
   useFocusEffect(
@@ -410,6 +425,7 @@ const AdminProductsScreen: React.FC = () => {
       if (canManageProducts) {
         loadProducts();
         loadStores();
+        loadCategories();
       }
     }, [canManageProducts])
   );
@@ -461,8 +477,13 @@ const AdminProductsScreen: React.FC = () => {
           <Text style={styles.filterLabel}>Categoría:</Text>
           <View style={styles.filterButtons}>
             {renderFilterButton('Todas', 'all', selectedCategory, () => setSelectedCategory('all'))}
-            {productService.getCategories().slice(0, 4).map(category => (
-              renderFilterButton(category, category, selectedCategory, () => setSelectedCategory(category))
+            {(categories || []).map(category => (
+              renderFilterButton(
+                category.name || category, 
+                category.name || category, 
+                selectedCategory, 
+                () => setSelectedCategory(category.name || category)
+              )
             ))}
           </View>
         </View>
@@ -471,7 +492,7 @@ const AdminProductsScreen: React.FC = () => {
           <Text style={styles.filterLabel}>Tienda:</Text>
           <View style={styles.filterButtons}>
             {renderFilterButton('Todas', 'all', selectedStore, () => setSelectedStore('all'))}
-            {stores.slice(0, 3).map(store => (
+            {(stores || []).map(store => (
               renderFilterButton(store.name, store._id, selectedStore, () => setSelectedStore(store._id))
             ))}
           </View>

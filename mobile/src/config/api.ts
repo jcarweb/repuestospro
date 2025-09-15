@@ -24,11 +24,11 @@ export class DynamicAPIConfig {
     if (this.isInitialized) return;
 
     try {
-      // FORZAR IP de red para conexión móvil
+      // FORZAR localhost para conexión móvil
       this.currentConfig = {
-        baseUrl: 'http://192.168.0.110:5000/api',
+        baseUrl: 'http://localhost:5000/api',
         isLocal: true,
-        networkName: 'Red Local (Forzado)',
+        networkName: 'Localhost',
         lastTested: Date.now(),
         isWorking: true,
       };
@@ -38,7 +38,7 @@ export class DynamicAPIConfig {
       console.error('Error initializing API config:', error);
       // Fallback a configuración por defecto
       this.currentConfig = {
-        baseUrl: 'http://192.168.0.110:5000/api',
+        baseUrl: 'http://localhost:5000/api',
         isLocal: true,
         networkName: 'Backend Local',
         lastTested: Date.now(),
@@ -53,7 +53,7 @@ export class DynamicAPIConfig {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    return this.currentConfig?.baseUrl || 'http://192.168.0.110:5000/api';
+    return this.currentConfig?.baseUrl || 'http://localhost:5000/api';
   }
 
   // Obtener la configuración completa
@@ -68,9 +68,9 @@ export class DynamicAPIConfig {
   async rescan(): Promise<NetworkConfig> {
     // FORZAR localhost en lugar de hacer rescan
     this.currentConfig = {
-      baseUrl: 'http://192.168.0.110:5000/api',
+      baseUrl: 'http://localhost:5000/api',
       isLocal: true,
-      networkName: 'Red Local (Forzado)',
+      networkName: 'Localhost',
       lastTested: Date.now(),
       isWorking: true,
     };

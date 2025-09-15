@@ -7,6 +7,8 @@ export interface Product {
   price: number;
   images: string[];
   category: string;
+  vehicleType?: string;
+  deliveryType?: string;
   brand: string;
   subcategory: string;
   stock: number;

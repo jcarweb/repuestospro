@@ -21,7 +21,9 @@
     "import-subcategories": "ts-node src/scripts/importSubcategories.ts",
     "check-port": "node check-ports.js",
     "free-port": "node check-ports.js 5000",
-    "generate-products": "ts-node src/scripts/generateTestProducts.ts"
+    "generate-products": "ts-node src/scripts/generateTestProducts.ts",
+    "setup:vehicle-types": "ts-node src/scripts/setupVehicleTypes.ts",
+    "seed:venezuela-brands": "ts-node src/scripts/seedVenezuelaBrands.ts"
   },
   "keywords": [
     "ecommerce",

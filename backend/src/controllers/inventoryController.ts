@@ -766,6 +766,619 @@ class InventoryController {
       });
     }
   }
+
+  // ===== MÉTODOS PARA ADMIN =====
+
+  // Obtener inventario de todas las tiendas (Admin)
+  async getAdminInventory(req: Request, res: Response) {
+    try {
+      const { storeId, inventoryType, alert, search } = req.query;
+      
+      // Construir filtros
+      const filters: any = {};
+      
+      if (storeId && storeId !== 'all') {
+        filters.store = storeId;
+      }
+      
+      if (inventoryType && inventoryType !== 'all') {
+        filters.inventoryType = inventoryType;
+      }
+      
+      if (alert && alert !== 'all') {
+        if (alert === 'lowStock') filters['alerts.lowStock'] = true;
+        if (alert === 'outOfStock') filters['alerts.outOfStock'] = true;
+        if (alert === 'overStock') filters['alerts.overStock'] = true;
+        if (alert === 'normal') {
+          filters['alerts.lowStock'] = false;
+          filters['alerts.outOfStock'] = false;
+          filters['alerts.overStock'] = false;
+        }
+      }
+
+      let query = ProductInventory.find(filters)
+        .populate('product', 'name sku price category brand')
+        .populate('store', 'name address')
+        .populate('lastUpdatedBy', 'name email')
+        .sort({ lastUpdated: -1 });
+
+      // Aplicar búsqueda si existe
+      if (search) {
+        const searchRegex = new RegExp(search as string, 'i');
+        query = ProductInventory.find({
+          ...filters,
+          $or: [
+            { 'product.name': searchRegex },
+            { 'product.sku': searchRegex },
+            { 'store.name': searchRegex }
+          ]
+        })
+        .populate('product', 'name sku price category brand')
+        .populate('store', 'name address')
+        .populate('lastUpdatedBy', 'name email')
+        .sort({ lastUpdated: -1 });
+      }
+
+      const inventory = await query;
+
+      res.json({
+        success: true,
+        data: inventory
+      });
+    } catch (error) {
+      console.error('Error obteniendo inventario admin:', error);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
+
+  // Obtener estadísticas globales (Admin)
+  async getAdminStats(req: Request, res: Response) {
+    try {
+      const totalProducts = await ProductInventory.countDocuments();
+      const totalStores = await ProductInventory.distinct('store').length;
+      const lowStockItems = await ProductInventory.countDocuments({ 'alerts.lowStock': true });
+      const outOfStockItems = await ProductInventory.countDocuments({ 'alerts.outOfStock': true });
+      
+      // Calcular valor total del inventario
+      const inventoryWithProducts = await ProductInventory.find()
+        .populate('product', 'price')
+        .select('mainStock.quantity product');
+      
+      const totalValue = inventoryWithProducts.reduce((total, item) => {
+        return total + (item.mainStock.quantity * (item.product as any).price);
+      }, 0);
+
+      res.json({
+        success: true,
+        data: {
+          totalProducts,
+          totalStores,
+          lowStockItems,
+          outOfStockItems,
+          totalValue
+        }
+      });
+    } catch (error) {
+      console.error('Error obteniendo estadísticas admin:', error);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
+
+  // Exportar inventario (Admin)
+  async exportAdminInventory(req: Request, res: Response) {
+    try {
+      const { storeId, inventoryType, alert, search } = req.query;
+      
+      // Usar la misma lógica que getAdminInventory
+      const filters: any = {};
+      
+      if (storeId && storeId !== 'all') {
+        filters.store = storeId;
+      }
+      
+      if (inventoryType && inventoryType !== 'all') {
+        filters.inventoryType = inventoryType;
+      }
+      
+      if (alert && alert !== 'all') {
+        if (alert === 'lowStock') filters['alerts.lowStock'] = true;
+        if (alert === 'outOfStock') filters['alerts.outOfStock'] = true;
+        if (alert === 'overStock') filters['alerts.overStock'] = true;
+        if (alert === 'normal') {
+          filters['alerts.lowStock'] = false;
+          filters['alerts.outOfStock'] = false;
+          filters['alerts.overStock'] = false;
+        }
+      }
+
+      let query = ProductInventory.find(filters)
+        .populate('product', 'name sku price category brand')
+        .populate('store', 'name address')
+        .sort({ lastUpdated: -1 });
+
+      if (search) {
+        const searchRegex = new RegExp(search as string, 'i');
+        query = ProductInventory.find({
+          ...filters,
+          $or: [
+            { 'product.name': searchRegex },
+            { 'product.sku': searchRegex },
+            { 'store.name': searchRegex }
+          ]
+        })
+        .populate('product', 'name sku price category brand')
+        .populate('store', 'name address')
+        .sort({ lastUpdated: -1 });
+      }
+
+      const inventory = await query;
+
+      // Generar CSV
+      const csvHeader = 'Producto,SKU,Precio,Categoría,Marca,Tienda,Tipo Inventario,Stock Total,Stock Disponible,Stock Reservado,Stock Mínimo,Stock Máximo,Estado,Última Actualización\n';
+      
+      const csvRows = inventory.map(item => {
+        const product = item.product as any;
+        const store = item.store as any;
+        
+        let estado = 'Normal';
+        if (item.alerts.outOfStock) estado = 'Sin Stock';
+        else if (item.alerts.lowStock) estado = 'Stock Bajo';
+        else if (item.alerts.overStock) estado = 'Stock Alto';
+        
+        return `"${product.name}","${product.sku}",${product.price},"${product.category}","${product.brand}","${store.name}","${item.inventoryType}",${item.mainStock.quantity},${item.mainStock.available},${item.mainStock.reserved},${item.mainStock.minStock},${item.mainStock.maxStock},"${estado}","${item.lastUpdated.toISOString()}"`;
+      }).join('\n');
+
+      const csvContent = csvHeader + csvRows;
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="inventario_admin_${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error('Error exportando inventario admin:', error);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
+
+  // Importar inventario (Admin)
+  async importAdminInventory(req: Request, res: Response) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ success: false, message: 'No se proporcionó archivo CSV' });
+      }
+
+      const csvContent = req.file.buffer.toString('utf-8');
+      const lines = csvContent.split('\n');
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      
+      let successCount = 0;
+      let errorCount = 0;
+      const errors: string[] = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        if (lines[i].trim() === '') continue;
+        
+        try {
+          const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+          const row: any = {};
+          
+          headers.forEach((header, index) => {
+            row[header] = values[index] || '';
+          });
+
+          // Buscar producto por SKU
+          const product = await Product.findOne({ sku: row.SKU });
+          if (!product) {
+            errors.push(`Fila ${i + 1}: Producto con SKU ${row.SKU} no encontrado`);
+            errorCount++;
+            continue;
+          }
+
+          // Buscar tienda por nombre
+          const store = await Store.findOne({ name: row.Tienda });
+          if (!store) {
+            errors.push(`Fila ${i + 1}: Tienda ${row.Tienda} no encontrada`);
+            errorCount++;
+            continue;
+          }
+
+          // Buscar o crear inventario
+          let inventory = await ProductInventory.findOne({
+            product: product._id,
+            store: store._id
+          });
+
+          if (!inventory) {
+            inventory = new ProductInventory({
+              product: product._id,
+              store: store._id,
+              inventoryType: row['Tipo Inventario'] || 'separate',
+              lastUpdatedBy: (req as any).user.id
+            });
+          }
+
+          // Actualizar stock
+          inventory.mainStock.quantity = parseInt(row['Stock Total']) || 0;
+          inventory.mainStock.reserved = parseInt(row['Stock Reservado']) || 0;
+          inventory.mainStock.minStock = parseInt(row['Stock Mínimo']) || 0;
+          inventory.mainStock.maxStock = parseInt(row['Stock Máximo']) || 1000;
+          inventory.lastUpdated = new Date();
+          inventory.lastUpdatedBy = (req as any).user.id;
+
+          await inventory.save();
+          successCount++;
+
+        } catch (error) {
+          errors.push(`Fila ${i + 1}: ${error.message}`);
+          errorCount++;
+        }
+      }
+
+      res.json({
+        success: true,
+        data: {
+          successCount,
+          errorCount,
+          errors: errors.slice(0, 10) // Solo mostrar los primeros 10 errores
+        }
+      });
+    } catch (error) {
+      console.error('Error importando inventario admin:', error);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
+
+  // ===== MÉTODOS PARA STORE MANAGER =====
+
+  // Obtener inventario de tiendas del usuario (Store Manager)
+  async getStoreManagerInventory(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user.id;
+      const { storeId, inventoryType, alert, search } = req.query;
+      
+      // Obtener tiendas del usuario
+      const user = await User.findById(userId).populate('stores');
+      if (!user || !user.stores || user.stores.length === 0) {
+        return res.status(404).json({ success: false, message: 'No se encontraron tiendas asignadas' });
+      }
+
+      const userStoreIds = (user.stores as any[]).map(store => store._id);
+      
+      // Construir filtros
+      const filters: any = { store: { $in: userStoreIds } };
+      
+      if (storeId && storeId !== 'all') {
+        filters.store = storeId;
+      }
+      
+      if (inventoryType && inventoryType !== 'all') {
+        filters.inventoryType = inventoryType;
+      }
+      
+      if (alert && alert !== 'all') {
+        if (alert === 'lowStock') filters['alerts.lowStock'] = true;
+        if (alert === 'outOfStock') filters['alerts.outOfStock'] = true;
+        if (alert === 'overStock') filters['alerts.overStock'] = true;
+        if (alert === 'normal') {
+          filters['alerts.lowStock'] = false;
+          filters['alerts.outOfStock'] = false;
+          filters['alerts.overStock'] = false;
+        }
+      }
+
+      let query = ProductInventory.find(filters)
+        .populate('product', 'name sku price category brand')
+        .populate('store', 'name address')
+        .populate('lastUpdatedBy', 'name email')
+        .sort({ lastUpdated: -1 });
+
+      // Aplicar búsqueda si existe
+      if (search) {
+        const searchRegex = new RegExp(search as string, 'i');
+        query = ProductInventory.find({
+          ...filters,
+          $or: [
+            { 'product.name': searchRegex },
+            { 'product.sku': searchRegex }
+          ]
+        })
+        .populate('product', 'name sku price category brand')
+        .populate('store', 'name address')
+        .populate('lastUpdatedBy', 'name email')
+        .sort({ lastUpdated: -1 });
+      }
+
+      const inventory = await query;
+
+      res.json({
+        success: true,
+        data: inventory
+      });
+    } catch (error) {
+      console.error('Error obteniendo inventario store manager:', error);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
+
+  // Obtener estadísticas de tienda (Store Manager)
+  async getStoreManagerStats(req: Request, res: Response) {
+    try {
+      const { storeId } = req.params;
+      const userId = (req as any).user.id;
+      
+      // Verificar que el usuario tenga acceso a la tienda
+      const user = await User.findById(userId).populate('stores');
+      if (!user || !user.stores) {
+        return res.status(404).json({ success: false, message: 'No se encontraron tiendas asignadas' });
+      }
+
+      const userStoreIds = (user.stores as any[]).map(store => store._id);
+      if (!userStoreIds.includes(storeId)) {
+        return res.status(403).json({ success: false, message: 'No tienes acceso a esta tienda' });
+      }
+
+      const totalProducts = await ProductInventory.countDocuments({ store: storeId });
+      const lowStockItems = await ProductInventory.countDocuments({ 
+        store: storeId, 
+        'alerts.lowStock': true 
+      });
+      const outOfStockItems = await ProductInventory.countDocuments({ 
+        store: storeId, 
+        'alerts.outOfStock': true 
+      });
+      
+      // Calcular valor total del inventario
+      const inventoryWithProducts = await ProductInventory.find({ store: storeId })
+        .populate('product', 'price')
+        .select('mainStock.quantity product');
+      
+      const totalValue = inventoryWithProducts.reduce((total, item) => {
+        return total + (item.mainStock.quantity * (item.product as any).price);
+      }, 0);
+
+      // Contar movimientos recientes (últimos 7 días)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      const recentMovements = await ProductInventory.countDocuments({
+        store: storeId,
+        lastUpdated: { $gte: sevenDaysAgo }
+      });
+
+      res.json({
+        success: true,
+        data: {
+          totalProducts,
+          lowStockItems,
+          outOfStockItems,
+          totalValue,
+          recentMovements
+        }
+      });
+    } catch (error) {
+      console.error('Error obteniendo estadísticas store manager:', error);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
+
+  // Obtener movimientos recientes (Store Manager)
+  async getStoreManagerMovements(req: Request, res: Response) {
+    try {
+      const { storeId } = req.params;
+      const userId = (req as any).user.id;
+      
+      // Verificar que el usuario tenga acceso a la tienda
+      const user = await User.findById(userId).populate('stores');
+      if (!user || !user.stores) {
+        return res.status(404).json({ success: false, message: 'No se encontraron tiendas asignadas' });
+      }
+
+      const userStoreIds = (user.stores as any[]).map(store => store._id);
+      if (!userStoreIds.includes(storeId)) {
+        return res.status(403).json({ success: false, message: 'No tienes acceso a esta tienda' });
+      }
+
+      // Obtener historial de actualizaciones de inventario
+      const inventory = await ProductInventory.find({ store: storeId })
+        .populate('product', 'name sku')
+        .populate('lastUpdatedBy', 'name')
+        .sort({ lastUpdated: -1 })
+        .limit(50);
+
+      const movements = inventory.map(item => ({
+        _id: item._id,
+        type: 'adjustment',
+        quantity: item.mainStock.quantity,
+        reason: 'Actualización de stock',
+        date: item.lastUpdated,
+        user: (item.lastUpdatedBy as any)?.name || 'Sistema'
+      }));
+
+      res.json({
+        success: true,
+        data: movements
+      });
+    } catch (error) {
+      console.error('Error obteniendo movimientos store manager:', error);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
+
+  // Exportar inventario (Store Manager)
+  async exportStoreManagerInventory(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user.id;
+      const { storeId, inventoryType, alert, search } = req.query;
+      
+      // Obtener tiendas del usuario
+      const user = await User.findById(userId).populate('stores');
+      if (!user || !user.stores || user.stores.length === 0) {
+        return res.status(404).json({ success: false, message: 'No se encontraron tiendas asignadas' });
+      }
+
+      const userStoreIds = (user.stores as any[]).map(store => store._id);
+      
+      // Construir filtros
+      const filters: any = { store: { $in: userStoreIds } };
+      
+      if (storeId && storeId !== 'all') {
+        filters.store = storeId;
+      }
+      
+      if (inventoryType && inventoryType !== 'all') {
+        filters.inventoryType = inventoryType;
+      }
+      
+      if (alert && alert !== 'all') {
+        if (alert === 'lowStock') filters['alerts.lowStock'] = true;
+        if (alert === 'outOfStock') filters['alerts.outOfStock'] = true;
+        if (alert === 'overStock') filters['alerts.overStock'] = true;
+        if (alert === 'normal') {
+          filters['alerts.lowStock'] = false;
+          filters['alerts.outOfStock'] = false;
+          filters['alerts.overStock'] = false;
+        }
+      }
+
+      let query = ProductInventory.find(filters)
+        .populate('product', 'name sku price category brand')
+        .populate('store', 'name address')
+        .sort({ lastUpdated: -1 });
+
+      if (search) {
+        const searchRegex = new RegExp(search as string, 'i');
+        query = ProductInventory.find({
+          ...filters,
+          $or: [
+            { 'product.name': searchRegex },
+            { 'product.sku': searchRegex }
+          ]
+        })
+        .populate('product', 'name sku price category brand')
+        .populate('store', 'name address')
+        .sort({ lastUpdated: -1 });
+      }
+
+      const inventory = await query;
+
+      // Generar CSV
+      const csvHeader = 'Producto,SKU,Precio,Categoría,Marca,Tienda,Tipo Inventario,Stock Total,Stock Disponible,Stock Reservado,Stock Mínimo,Stock Máximo,Estado,Última Actualización\n';
+      
+      const csvRows = inventory.map(item => {
+        const product = item.product as any;
+        const store = item.store as any;
+        
+        let estado = 'Normal';
+        if (item.alerts.outOfStock) estado = 'Sin Stock';
+        else if (item.alerts.lowStock) estado = 'Stock Bajo';
+        else if (item.alerts.overStock) estado = 'Stock Alto';
+        
+        return `"${product.name}","${product.sku}",${product.price},"${product.category}","${product.brand}","${store.name}","${item.inventoryType}",${item.mainStock.quantity},${item.mainStock.available},${item.mainStock.reserved},${item.mainStock.minStock},${item.mainStock.maxStock},"${estado}","${item.lastUpdated.toISOString()}"`;
+      }).join('\n');
+
+      const csvContent = csvHeader + csvRows;
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="inventario_store_manager_${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error('Error exportando inventario store manager:', error);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
+
+  // Importar inventario (Store Manager)
+  async importStoreManagerInventory(req: Request, res: Response) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ success: false, message: 'No se proporcionó archivo CSV' });
+      }
+
+      const userId = (req as any).user.id;
+      const { storeId } = req.body;
+      
+      // Verificar que el usuario tenga acceso a la tienda
+      const user = await User.findById(userId).populate('stores');
+      if (!user || !user.stores) {
+        return res.status(404).json({ success: false, message: 'No se encontraron tiendas asignadas' });
+      }
+
+      const userStoreIds = (user.stores as any[]).map(store => store._id);
+      if (!userStoreIds.includes(storeId)) {
+        return res.status(403).json({ success: false, message: 'No tienes acceso a esta tienda' });
+      }
+
+      const csvContent = req.file.buffer.toString('utf-8');
+      const lines = csvContent.split('\n');
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      
+      let successCount = 0;
+      let errorCount = 0;
+      const errors: string[] = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        if (lines[i].trim() === '') continue;
+        
+        try {
+          const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+          const row: any = {};
+          
+          headers.forEach((header, index) => {
+            row[header] = values[index] || '';
+          });
+
+          // Buscar producto por SKU
+          const product = await Product.findOne({ sku: row.SKU });
+          if (!product) {
+            errors.push(`Fila ${i + 1}: Producto con SKU ${row.SKU} no encontrado`);
+            errorCount++;
+            continue;
+          }
+
+          // Buscar o crear inventario
+          let inventory = await ProductInventory.findOne({
+            product: product._id,
+            store: storeId
+          });
+
+          if (!inventory) {
+            inventory = new ProductInventory({
+              product: product._id,
+              store: storeId,
+              inventoryType: row['Tipo Inventario'] || 'separate',
+              lastUpdatedBy: userId
+            });
+          }
+
+          // Actualizar stock
+          inventory.mainStock.quantity = parseInt(row['Stock Total']) || 0;
+          inventory.mainStock.reserved = parseInt(row['Stock Reservado']) || 0;
+          inventory.mainStock.minStock = parseInt(row['Stock Mínimo']) || 0;
+          inventory.mainStock.maxStock = parseInt(row['Stock Máximo']) || 1000;
+          inventory.lastUpdated = new Date();
+          inventory.lastUpdatedBy = userId;
+
+          await inventory.save();
+          successCount++;
+
+        } catch (error) {
+          errors.push(`Fila ${i + 1}: ${error.message}`);
+          errorCount++;
+        }
+      }
+
+      res.json({
+        success: true,
+        data: {
+          successCount,
+          errorCount,
+          errors: errors.slice(0, 10) // Solo mostrar los primeros 10 errores
+        }
+      });
+    } catch (error) {
+      console.error('Error importando inventario store manager:', error);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
 }
 
 export default new InventoryController();

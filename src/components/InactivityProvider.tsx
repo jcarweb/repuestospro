@@ -13,8 +13,8 @@ interface InactivityProviderProps {
 
 const InactivityProvider: React.FC<InactivityProviderProps> = ({ 
   children, 
-  timeoutMinutes = 30,
-  warningMinutes = 5 
+  timeoutMinutes = 60, // Aumentado de 30 a 60 minutos
+  warningMinutes = 10  // Aumentado de 5 a 10 minutos
 }) => {
   const [showNotification, setShowNotification] = useState(false);
   const [currentTimeoutMinutes, setCurrentTimeoutMinutes] = useState(timeoutMinutes);

@@ -174,17 +174,95 @@ class ProductController {
     }
   }
 
+  // Obtener producto por ID para administradores (incluye productos inactivos)
+  async getAdminProductById(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const product = await Product.findOne({ _id: id, deleted: { $ne: true } })
+        .select('-__v');
+
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: 'Producto no encontrado'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: product
+      });
+    } catch (error) {
+      console.error('Error fetching admin product by ID:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
   // Obtener productos por categoría
   async getProductsByCategory(req: Request, res: Response) {
     try {
       const { category } = req.params;
-      const { page = 1, limit = 12, sortBy = 'popularity', sortOrder = 'desc' } = req.query;
+      const { 
+        page = 1, 
+        limit = 12, 
+        sortBy = 'popularity', 
+        sortOrder = 'desc',
+        vehicleType,
+        brand,
+        subcategory,
+        minPrice,
+        maxPrice
+      } = req.query;
+
+      console.log('🔍 Backend - Filtros recibidos:', {
+        category,
+        vehicleType,
+        brand,
+        subcategory,
+        minPrice,
+        maxPrice,
+        page,
+        limit,
+        sortBy,
+        sortOrder
+      });
 
       const filter: any = { 
         isActive: true,
         deleted: { $ne: true },
         category: category.toLowerCase()
       };
+
+      // Aplicar filtros adicionales
+      if (vehicleType && vehicleType !== '') {
+        filter.vehicleType = vehicleType;
+        console.log('🔍 Backend - Aplicando filtro vehicleType:', vehicleType);
+      }
+      if (brand && brand !== '') {
+        filter.brand = String(brand).toLowerCase();
+        console.log('🔍 Backend - Aplicando filtro brand:', brand);
+      }
+
+      if (subcategory && subcategory !== '') {
+        filter.subcategory = String(subcategory).toLowerCase();
+        console.log('🔍 Backend - Aplicando filtro subcategory:', subcategory);
+      }
+
+      if (minPrice && minPrice !== '') {
+        filter.price = { ...filter.price, $gte: Number(minPrice) };
+        console.log('🔍 Backend - Aplicando filtro minPrice:', minPrice);
+      }
+
+      if (maxPrice && maxPrice !== '') {
+        filter.price = { ...filter.price, $lte: Number(maxPrice) };
+        console.log('🔍 Backend - Aplicando filtro maxPrice:', maxPrice);
+      }
+
+      console.log('🔍 Backend - Filtro final:', JSON.stringify(filter, null, 2));
 
       const sort: any = {};
       sort[sortBy as string] = sortOrder === 'asc' ? 1 : -1;
@@ -199,8 +277,15 @@ class ProductController {
 
       const total = await Product.countDocuments(filter);
 
+      console.log('🔍 Backend - Productos encontrados:', products.length);
+      console.log('🔍 Backend - Total:', total);
+
       // Obtener subcategorías de esta categoría
-      const subcategories = await Product.distinct('subcategory', filter);
+      const subcategories = await Product.distinct('subcategory', { 
+        isActive: true,
+        deleted: { $ne: true },
+        category: category.toLowerCase()
+      });
 
       res.json({
         success: true,
@@ -312,6 +397,100 @@ class ProductController {
     }
   }
 
+  // Obtener tipos de vehículos disponibles
+  async getVehicleTypes(req: Request, res: Response) {
+    try {
+      // Importar el modelo VehicleType
+      const VehicleType = require('../models/VehicleType').default;
+      
+      const vehicleTypes = await VehicleType.find({ isActive: true })
+        .sort({ name: 1 })
+        .select('name description icon deliveryType');
+
+      res.json({
+        success: true,
+        data: vehicleTypes.map((type: any) => ({
+          name: type.name,
+          description: type.description,
+          icon: type.icon,
+          deliveryType: type.deliveryType
+        }))
+      });
+    } catch (error) {
+      console.error('Error obteniendo tipos de vehículos:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Obtener marcas por tipo de vehículo
+  async getBrandsByVehicleType(req: Request, res: Response) {
+    try {
+      const { vehicleType } = req.params;
+      
+      // Marcas por tipo de vehículo - Específicas para Venezuela
+      const vehicleBrands = {
+        automovil: [
+          // Marcas populares en Venezuela
+          'Toyota', 'Honda', 'Ford', 'Chevrolet', 'Nissan', 'BMW', 'Mercedes', 'Audi', 
+          'Volkswagen', 'Hyundai', 'Kia', 'Mazda', 'Subaru', 'Mitsubishi', 'Lexus',
+          'Peugeot', 'Renault', 'Fiat', 'Seat', 'Skoda', 'Volvo', 'Jaguar', 'Land Rover',
+          'Datsun', 'Dongfeng', 'JAC Motors'
+        ],
+        motocicleta: [
+          // Marcas específicas de Venezuela
+          'Bera', 'Empire Keeway', 'Suzuki', 'Yamaha', 'Kawasaki', 'Toro', 'MD', 'Skygo', 
+          'AVA', 'Haojue', 'Vefase', 'Ducati', 'Benelli', 'TVS',
+          // Marcas adicionales populares
+          'Honda', 'Bajaj', 'Zontes', 'CFMoto', 'KTM', 'Aprilia', 'Harley-Davidson', 'Triumph'
+        ],
+        camion: [
+          // Marcas de camiones populares en Venezuela
+          'Foton', 'Mack', 'Volvo', 'Iveco', 'Ford', 'Chevrolet', 'Dongfeng', 'Dina', 
+          'JAC Motors', 'Mitsubishi Fuso', 'Datsun', 'Mercedes-Benz', 'Scania', 'MAN', 
+          'Freightliner', 'Kenworth', 'International', 'Caterpillar'
+        ],
+        maquinaria_agricola: [
+          // Marcas de maquinaria agrícola en Venezuela
+          'John Deere', 'New Holland', 'Massey Ferguson', 'Fendt', 'Kubota', 'Deutz-Fahr', 
+          'Case IH', 'Claas', 'JCB', 'Iseki',
+          // Marcas adicionales
+          'Valtra', 'Landini', 'McCormick', 'Same', 'Lamborghini', 'Antonio Carraro', 
+          'Goldoni', 'Arbos', 'Solis', 'Mahindra', 'Tafe'
+        ],
+        maquinaria_industrial: [
+          // Marcas de maquinaria industrial en Venezuela
+          'Foton', 'Mack', 'Volvo', 'Dina', 'Iveco', 'Dongfeng', 'JAC', 'Hino', 'Isuzu', 
+          'Maxus', 'Mercedes-Benz', 'Scania', 'MAN', 'Freightliner', 'Kenworth', 
+          'International', 'Caterpillar', 'Chevrolet',
+          // Maquinaria pesada adicional
+          'Cat', 'Komatsu', 'XCMG', 'John Deere', 'Sany', 'Volvo CE', 'Liebherr', 
+          'Hitachi', 'Doosan', 'Hyundai', 'JCB', 'Bobcat', 'Case',
+          // Equipos de corte y soldadura
+          'Miller', 'Hypertherm', 'ESAB', 'Lincoln Electric', 'Fronius', 'Kemppi',
+          // Marcas locales venezolanas
+          'Agrometal', 'Bombagua', 'Induveca', 'INVEVAL', 'Metalúrgica Venezolana',
+          'Industrias Venoco', 'Maquinarias del Sur', 'Equipos Industriales CA'
+        ]
+      };
+
+      const brands = vehicleBrands[vehicleType as keyof typeof vehicleBrands] || vehicleBrands.automovil;
+
+      res.json({
+        success: true,
+        data: brands.sort()
+      });
+    } catch (error) {
+      console.error('Error obteniendo marcas por tipo de vehículo:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
   // Crear un producto individual (Admin/Store Manager) - VERSIÓN SIMPLIFICADA
   async createProduct(req: Request, res: Response) {
     try {
@@ -383,7 +562,7 @@ class ProductController {
         isActive: true,
         isFeatured: Boolean(isFeatured),
         tags: tags ? (Array.isArray(tags) ? tags : tags.split(',').map((tag: string) => tag.trim())) : [],
-        specifications: specifications ? (typeof specifications === 'string' ? { description: specifications } : specifications) : {},
+        specifications: specifications ? (typeof specifications === 'string' ? { description: specifications } : specifications) : new Map(),
         images: processedImages,
         store: storeId,
         createdBy: storeId // Temporalmente usar storeId como createdBy
@@ -735,7 +914,7 @@ class ProductController {
                   stock: Number(row.stock) || 0,
                   isFeatured: row.isFeatured === 'true' || row.isFeatured === '1',
                   tags: row.tags ? row.tags.split(',').map((tag: string) => tag.trim()) : [],
-                  specifications: row.specifications ? JSON.parse(row.specifications) : {},
+                  specifications: row.specifications ? JSON.parse(row.specifications) : new Map(),
                   images: row.images ? row.images.split(',').map((img: string) => img.trim()) : [],
                   store: storeId,
                   createdBy: userId
@@ -755,7 +934,9 @@ class ProductController {
             }
 
             // Eliminar el archivo temporal
-            fs.unlinkSync(req.file.path);
+            if (req.file) {
+              fs.unlinkSync(req.file.path);
+            }
 
             res.json({
               success: true,

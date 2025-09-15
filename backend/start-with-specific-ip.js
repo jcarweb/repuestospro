@@ -16,8 +16,8 @@ process.env.HOST = NETWORK_CONFIG.host;
 process.env.PORT = NETWORK_CONFIG.port;
 process.env.NODE_ENV = 'development';
 
-// Iniciar el servidor
-const serverProcess = spawn('node', ['server-mongodb.js'], {
+// Iniciar el servidor TypeScript
+const serverProcess = spawn('npx', ['ts-node', '--transpile-only', './src/index.ts'], {
   cwd: path.join(__dirname),
   stdio: 'inherit',
   env: {

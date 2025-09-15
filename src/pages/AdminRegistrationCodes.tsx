@@ -558,6 +558,7 @@ const AdminRegistrationCodes: React.FC = () => {
                   <option value="admin">{t('adminRegistrationCodes.roles.admin')}</option>
                   <option value="store_manager">{t('adminRegistrationCodes.roles.storeManager')}</option>
                   <option value="delivery">{t('adminRegistrationCodes.roles.delivery')}</option>
+                  <option value="seller">{t('adminRegistrationCodes.roles.seller')}</option>
                 </select>
               </div>
 

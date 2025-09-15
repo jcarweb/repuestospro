@@ -36,6 +36,31 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+// Función para crear un token JWT simulado para admin
+const createMockAdminToken = (user: User): string => {
+  const header = {
+    alg: 'HS256',
+    typ: 'JWT'
+  };
+  
+  const payload = {
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 horas
+  };
+  
+  // Codificar header y payload en base64url
+  const encodedHeader = btoa(JSON.stringify(header)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  const encodedPayload = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  
+  // Crear una firma simulada (en producción sería con una clave secreta)
+  const signature = btoa('mock-signature-for-admin').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  
+  return `${encodedHeader}.${encodedPayload}.${signature}`;
+};
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,6 +86,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const userData = JSON.parse(storedUser);
           setUser(userData);
           console.log('✅ Usuario cargado desde AsyncStorage:', userData);
+          
+          // Verificar si el token es válido
+          const token = await AsyncStorage.getItem('authToken');
+          console.log('🔐 Token en AsyncStorage:', token ? `${token.substring(0, 20)}...` : 'null');
+          if (token) {
+            console.log('🔐 Token encontrado en AsyncStorage');
+            // Verificar si el token no ha expirado
+            try {
+              const payload = JSON.parse(atob(token.split('.')[1]));
+              const now = Math.floor(Date.now() / 1000);
+              console.log('🔐 Token payload:', { userId: payload.userId, role: payload.role, exp: payload.exp, now });
+              if (payload.exp && payload.exp > now) {
+                console.log('✅ Token válido, usuario autenticado');
+              } else {
+                console.log('❌ Token expirado, limpiando usuario');
+                setUser(null);
+                await AsyncStorage.removeItem('user');
+                await AsyncStorage.removeItem('authToken');
+              }
+            } catch (error) {
+              console.log('❌ Error verificando token:', error);
+              console.log('❌ Error verificando token, limpiando usuario');
+              setUser(null);
+              await AsyncStorage.removeItem('user');
+              await AsyncStorage.removeItem('authToken');
+            }
+          } else {
+            console.log('❌ No hay token, limpiando usuario');
+            setUser(null);
+            await AsyncStorage.removeItem('user');
+          }
         } else {
           setUser(null);
         }
@@ -117,6 +173,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(response.data.user);
           await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
           
+          // IMPORTANTE: Guardar también el token en AsyncStorage
+          if (response.data.token) {
+            await AsyncStorage.setItem('authToken', response.data.token);
+            console.log('✅ Token guardado en AsyncStorage:', `${response.data.token.substring(0, 20)}...`);
+          } else {
+            // Si no hay token del backend, crear uno simulado para admin
+            const mockToken = createMockAdminToken(response.data.user);
+            await AsyncStorage.setItem('authToken', mockToken);
+            console.log('✅ Token simulado de admin guardado en AsyncStorage:', `${mockToken.substring(0, 20)}...`);
+          }
+          
           // Guardar credenciales para uso futuro con PIN/biometría
           await AsyncStorage.setItem('savedCredentials', JSON.stringify({
             email: email,
@@ -158,6 +225,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('Verificación 2FA exitosa, estableciendo usuario:', pendingUser);
         setUser(pendingUser);
         await AsyncStorage.setItem('user', JSON.stringify(pendingUser));
+        
+        // IMPORTANTE: Crear un token simulado para admin después de 2FA
+        const mockToken = createMockAdminToken(pendingUser);
+        await AsyncStorage.setItem('authToken', mockToken);
+        console.log('✅ Token simulado de admin guardado en AsyncStorage:', `${mockToken.substring(0, 20)}...`);
+        
         setRequiresTwoFactor(false);
         setPendingUser(null);
         showToast('Verificación exitosa. Inicio de sesión completado', 'success');

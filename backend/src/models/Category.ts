@@ -1,51 +1,56 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ICategory extends Document {
   name: string;
-  description: string;
-  image?: string;
-  parentCategory?: mongoose.Types.ObjectId;
+  description?: string;
+  icon?: string;
+  color?: string;
   isActive: boolean;
-  order: number;
+  sortOrder?: number;
   createdAt: Date;
   updatedAt: Date;
+  createdBy?: mongoose.Types.ObjectId;
+  updatedBy?: mongoose.Types.ObjectId;
 }
 
 const CategorySchema = new Schema<ICategory>({
   name: {
     type: String,
     required: true,
+    unique: true,
     trim: true,
-    unique: true
+    lowercase: true
   },
   description: {
     type: String,
-    required: true,
     trim: true
   },
-  image: {
-    type: String
+  icon: {
+    type: String,
+    trim: true
   },
-  parentCategory: {
-    type: Schema.Types.ObjectId,
-    ref: 'Category'
+  color: {
+    type: String,
+    trim: true
   },
   isActive: {
     type: Boolean,
     default: true
   },
-  order: {
+  sortOrder: {
     type: Number,
     default: 0
+  },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  updatedBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
   }
 }, {
   timestamps: true
 });
 
-// Índices para optimizar consultas
-CategorySchema.index({ name: 1 });
-CategorySchema.index({ isActive: 1 });
-CategorySchema.index({ parentCategory: 1 });
-CategorySchema.index({ order: 1 });
-
-export default mongoose.model<ICategory>('Category', CategorySchema); 
+export default mongoose.model<ICategory>('Category', CategorySchema);

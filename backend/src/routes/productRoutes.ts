@@ -12,6 +12,8 @@ router.get('/', productController.getProducts);
 router.get('/featured', productController.getFeaturedProducts);
 router.get('/categories', productController.getCategories);
 router.get('/brands', productController.getBrands);
+router.get('/vehicle-types', productController.getVehicleTypes);
+router.get('/brands/vehicle-type/:vehicleType', productController.getBrandsByVehicleType);
 router.get('/category/:category', productController.getProductsByCategory);
 router.get('/nearby', productController.getProductsByLocation);
 router.get('/:id', productController.getProductById);
@@ -22,6 +24,7 @@ router.use(authMiddleware);
 // Rutas para Admin
 router.get('/admin/all', adminMiddleware, productController.getAdminProducts);
 router.get('/admin/stats', adminMiddleware, productController.getProductStats);
+router.get('/admin/:id', adminMiddleware, productController.getAdminProductById);
 router.post('/admin/create', adminMiddleware, productController.createProduct);
 router.put('/admin/:id', adminMiddleware, productController.updateProduct);
 router.delete('/admin/:id', adminMiddleware, productController.deleteProduct);

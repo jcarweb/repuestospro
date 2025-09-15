@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useLanguageChange } from '../hooks/useLanguageChange';
+import ProductCard from '../components/ProductCard';
 import { 
   Search, 
   Filter, 
@@ -20,17 +21,19 @@ interface Product {
   name: string;
   description: string;
   price: number;
-  originalPrice?: number;
-  image: string;
+  images: string[];
   brand: string;
   category: string;
   subcategory: string;
   stock: number;
-  rating?: number;
-  reviews?: number;
-  isOnSale?: boolean;
-  discountPercentage?: number;
-  popularity?: number;
+  popularity: number;
+  sku: string;
+  specifications: Record<string, any>;
+  tags: string[];
+  isFeatured: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Category {
@@ -182,10 +185,12 @@ const Products: React.FC = () => {
   };
 
   // Función para obtener la URL correcta de la imagen del producto
-  const getProductImageUrl = (imageUrl: string | undefined) => {
-    if (!imageUrl) {
-      return 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+  const getProductImageUrl = (images: string[] | undefined) => {
+    if (!images || images.length === 0) {
+      return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center';
     }
+    
+    const imageUrl = images[0];
     
     // Si la URL ya es completa (http/https), usarla tal como está
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
@@ -201,165 +206,14 @@ const Products: React.FC = () => {
     return `http://localhost:5000/${imageUrl}`;
   };
 
-  // Renderizado de productos
+  // Renderizado de productos usando ProductCard
   const renderProduct = (product: Product) => (
-    <div key={product._id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-      {/* Imagen del producto */}
-      <div className="relative">
-        <img
-          src={getProductImageUrl(product.image)}
-          alt={product.name}
-          className="w-full h-48 object-cover rounded-t-xl"
-          onLoad={() => console.log('Imagen cargada exitosamente:', product.name)}
-          onError={(e) => {
-            console.error('Error cargando imagen para:', product.name, 'URL:', getProductImageUrl(product.image));
-            const target = e.target as HTMLImageElement;
-            target.src = 'https://via.placeholder.com/300x200?text=Sin+Imagen';
-          }}
-        />
-        
-        {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-2">
-          {product.isOnSale && (
-            <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
-              {product.discountPercentage}% OFF
-            </span>
-          )}
-          {product.stock === 0 && (
-            <span className="px-2 py-1 bg-gray-500 text-white text-xs font-bold rounded-full">
-              Sin Stock
-            </span>
-          )}
-        </div>
-
-        {/* Botones de acción */}
-        <div className="absolute top-2 right-2 flex flex-col gap-2">
-          <button className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors">
-            <Heart className="w-4 h-4 text-gray-400 hover:text-red-500" />
-          </button>
-          <button className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors">
-            <ShoppingCart className="w-4 h-4 text-gray-400 hover:text-blue-500" />
-          </button>
-        </div>
-      </div>
-
-      {/* Información del producto */}
-      <div className="p-4">
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm">
-          {product.name}
-        </h3>
-        
-        <div className="flex items-center space-x-2 mb-2">
-          <span className="text-xs text-gray-500 capitalize">
-            {product.brand}
-          </span>
-          <span className="text-gray-300">•</span>
-          <span className="text-xs text-gray-500 capitalize">
-            {product.subcategory}
-          </span>
-        </div>
-
-        {/* Rating */}
-        {product.rating && (
-          <div className="flex items-center mb-2">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-3 h-3 ${
-                    i < Math.floor(product.rating!) ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-xs text-gray-500 ml-1">
-              ({product.reviews || 0})
-            </span>
-          </div>
-        )}
-
-        {/* Precio */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold text-[#FFC300]">
-              {formatPrice(product.price)}
-            </span>
-            {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-sm text-gray-500 line-through">
-                {formatPrice(product.originalPrice)}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center space-x-1">
-            <span className="text-xs text-gray-600">
-              {product.popularity || 0}
-            </span>
-          </div>
-        </div>
-
-        {/* Stock y acciones */}
-        <div className="flex items-center justify-between text-xs">
-          <span className={`px-2 py-1 rounded-full ${
-            product.stock > 0 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-red-100 text-red-800'
-          }`}>
-            {product.stock > 0 ? `${product.stock} disponibles` : 'Sin stock'}
-          </span>
-          
-          <Link 
-            to={`/product/${product._id}`}
-            className="flex items-center space-x-1 text-[#FFC300] hover:text-[#E6B800]"
-          >
-            <span>Ver</span>
-            <ChevronRight className="w-3 h-3" />
-          </Link>
-        </div>
-      </div>
-    </div>
+    <ProductCard key={product._id} product={product} />
   );
 
-  // Renderizado de productos en modo lista
+  // Renderizado de productos en modo lista (también usa ProductCard)
   const renderProductList = (product: Product) => (
-    <div key={product._id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4">
-      <div className="flex items-center space-x-4">
-        {/* Imagen */}
-        <img
-          src={getProductImageUrl(product.image)}
-          alt={product.name}
-          className="w-24 h-24 object-cover rounded-lg"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = 'https://via.placeholder.com/100x100?text=Sin+Imagen';
-          }}
-        />
-        
-        {/* Información */}
-        <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 mb-1">{product.name}</h3>
-          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
-          
-          <div className="flex items-center space-x-4 text-sm text-gray-500">
-            <span>Marca: {product.brand}</span>
-            <span>Categoría: {product.subcategory}</span>
-            <span>Stock: {product.stock}</span>
-          </div>
-        </div>
-        
-        {/* Precio y acciones */}
-        <div className="text-right">
-          <div className="text-xl font-bold text-[#FFC300] mb-2">
-            {formatPrice(product.price)}
-          </div>
-          <Link 
-            to={`/product/${product._id}`}
-            className="inline-flex items-center px-4 py-2 bg-[#FFC300] text-[#333333] rounded-lg hover:bg-[#E6B800] transition-colors"
-          >
-            Ver Detalles
-          </Link>
-        </div>
-      </div>
-    </div>
+    <ProductCard key={product._id} product={product} />
   );
 
   if (loading && products.length === 0) {
@@ -589,18 +443,6 @@ const Products: React.FC = () => {
 
           {/* Lista de productos */}
           <div className="flex-1">
-            {/* Debug info - temporal para diagnosticar */}
-            {products.length > 0 && (
-              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h4 className="font-medium text-blue-800 mb-2">Debug Info:</h4>
-                <p className="text-sm text-blue-700">
-                  Productos cargados: {products.length} | 
-                  Primer producto: {products[0]?.name} | 
-                  Imagen del primer producto: {products[0]?.image ? 'Sí' : 'No'} | 
-                  URL: {products[0]?.image || 'Vacío'}
-                </p>
-              </div>
-            )}
             
             {error ? (
               <div className="text-center py-12">

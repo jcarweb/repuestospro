@@ -41,7 +41,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     longitude: number;
   } | null>(null);
 
-  // Verificar token al cargar la aplicación (simplificado)
+  // Verificar token al cargar la aplicación
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -59,7 +59,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return;
         }
 
-        // Por ahora, solo usar los datos almacenados sin verificar con el backend
+        // Verificar que el token no esté expirado (básico)
+        try {
+          const tokenPayload = JSON.parse(atob(storedToken.split('.')[1]));
+          const currentTime = Date.now() / 1000;
+          
+          if (tokenPayload.exp && tokenPayload.exp < currentTime) {
+            console.log('AuthContext - Token expirado, limpiando datos');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+            setToken(null);
+            setIsLoading(false);
+            return;
+          }
+        } catch (tokenError) {
+          console.warn('AuthContext - Error verificando token, continuando con datos almacenados');
+        }
+
+        // Usar los datos almacenados
         try {
           const userData = JSON.parse(storedUser);
           setUser(userData);

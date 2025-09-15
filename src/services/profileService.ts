@@ -90,9 +90,10 @@ export interface PushNotificationSettings {
 
 class ProfileService {
   // Cache para evitar múltiples llamadas simultáneas
-  private profileCache: { data: UserProfile | null; timestamp: number } = {
+  private profileCache: { data: UserProfile | null; timestamp: number; isRealData: boolean } = {
     data: null,
-    timestamp: 0
+    timestamp: 0,
+    isRealData: false
   };
   
   // Cache para evitar múltiples llamadas simultáneas
@@ -101,9 +102,17 @@ class ProfileService {
   // Obtener perfil del usuario
   async getProfile(): Promise<UserProfile> {
     try {
-      // Verificar cache (30 segundos en lugar de 5)
+      // Verificar si hay token válido antes de intentar cargar
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('ProfileService: No hay token, usando datos mock');
+        return this.getMockProfile();
+      }
+
+      // Verificar cache solo si contiene datos reales
       const now = Date.now();
-      if (this.profileCache.data && (now - this.profileCache.timestamp) < 30000) {
+      if (this.profileCache.data && this.profileCache.isRealData && (now - this.profileCache.timestamp) < 30000) {
+        console.log('ProfileService: Usando datos reales del cache');
         return this.profileCache.data;
       }
 
@@ -124,16 +133,15 @@ class ProfileService {
       
       // Si el error es de conectividad, usar datos mock
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK' || !error.response) {
-        console.log('Usando datos mock para el perfil');
+        console.log('ProfileService: Error de conectividad, usando datos mock');
         return this.getMockProfile();
       }
       
-      // Si el error es de autenticación, redirigir al login
+      // Si el error es de autenticación (401), limpiar cache y usar datos mock
       if (error.response?.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-        throw new Error('Usuario no autenticado');
+        console.warn('ProfileService: Token inválido, limpiando cache y usando datos mock');
+        this.clearCache();
+        return this.getMockProfile();
       }
       
       // Si es un error 429, mostrar mensaje específico
@@ -150,20 +158,29 @@ class ProfileService {
     const response = await api.get('/profile');
     const profileData = response.data.data;
     
-    // Actualizar cache
+    // Actualizar cache con datos reales
     this.profileCache = {
       data: profileData,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      isRealData: true
     };
     
+    console.log('ProfileService: Datos reales cargados desde la base de datos');
     return profileData;
   }
 
   // Limpiar cache (útil después de actualizaciones)
   clearCache() {
     console.log('ProfileService - Limpiando cache, cache anterior:', this.profileCache);
-    this.profileCache = { data: null, timestamp: 0 };
+    this.profileCache = { data: null, timestamp: 0, isRealData: false };
     console.log('ProfileService - Cache limpiado');
+  }
+
+  // Forzar recarga de datos reales (ignora cache)
+  async forceReloadRealData(): Promise<UserProfile> {
+    console.log('ProfileService: Forzando recarga de datos reales...');
+    this.clearCache();
+    return await this.getProfile();
   }
 
   // Actualizar información del perfil
@@ -345,15 +362,15 @@ class ProfileService {
   // Método para obtener datos mock cuando el backend no está disponible
   private getMockProfile(): UserProfile {
     return {
-      _id: '1',
-      name: 'Usuario Admin',
-      email: 'admin@example.com',
+      _id: 'admin-mock-001',
+      name: 'Administrador PiezasYA',
+      email: 'admin@piezasyaya.com',
       phone: '+584121234567',
-      avatar: null, // Cambiado de undefined a null
+      avatar: '/uploads/perfil/default-avatar.svg',
       role: 'admin',
       isEmailVerified: true,
       isActive: true,
-      pin: null, // Cambiado de undefined a null
+      pin: null,
       fingerprintEnabled: false,
       twoFactorEnabled: false,
       emailNotifications: true,
@@ -365,12 +382,12 @@ class ProfileService {
       showEmail: false,
       showPhone: false,
       pushEnabled: false,
-      pushToken: null, // Cambiado de undefined a null
-      points: 0,
-      loyaltyLevel: 'bronze',
-      location: null, // Cambiado de undefined a null
+      pushToken: null,
+      points: 1000,
+      loyaltyLevel: 'platinum',
+      location: null,
       locationEnabled: false,
-      lastLocationUpdate: null, // Cambiado de undefined a null
+      lastLocationUpdate: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

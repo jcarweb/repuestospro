@@ -51,8 +51,12 @@ const Header: React.FC = () => {
           setLoadingProfile(true);
           const profile = await profileService.getProfile();
           setUserProfile(profile);
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error cargando perfil:', error);
+          // Si es error de autenticación, no hacer nada - el AuthContext se encargará
+          if (error.message === 'Usuario no autenticado') {
+            console.log('Header: Token inválido, pero manteniendo sesión local');
+          }
         } finally {
           setLoadingProfile(false);
         }

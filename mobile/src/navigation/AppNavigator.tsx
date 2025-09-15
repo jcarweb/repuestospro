@@ -36,7 +36,14 @@ import PrivacySettingsScreen from '../screens/client/PrivacySettingsScreen';
 // Admin Screens
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
 import AdminUsersScreen from '../screens/admin/AdminUsersScreen';
+import AdminProductsScreen from '../screens/admin/AdminProductsScreen';
+import AdminStoresScreen from '../screens/admin/AdminStoresScreen';
+import AdminOrdersScreen from '../screens/admin/AdminOrdersScreen';
+import AdminReportsScreen from '../screens/admin/AdminReportsScreen';
+import AdminSettingsScreen from '../screens/admin/AdminSettingsScreen';
+import OrderDetailsScreen from '../screens/admin/OrderDetailsScreen';
 import AdminCreateUserScreen from '../screens/admin/AdminCreateUserScreen';
+import AdminCreateProductScreen from '../screens/admin/AdminCreateProductScreen';
 import StorePhotoCaptureScreen from '../screens/admin/StorePhotoCaptureScreen';
 import StorePhotosListScreen from '../screens/admin/StorePhotosListScreen';
 
@@ -339,6 +346,24 @@ const AppNavigator = () => {
                   options={{ headerShown: false }} 
                 />
                 <Stack.Screen 
+                  name="AdminProducts" 
+                  component={AdminProductsScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Gestión de Productos',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="AdminStores" 
+                  component={AdminStoresScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Gestión de Tiendas',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
                   name="StorePhotoCapture" 
                   component={StorePhotoCaptureScreen} 
                   options={{ 
@@ -372,6 +397,51 @@ const AppNavigator = () => {
                     headerShown: true,
                     title: 'Crear Usuario',
                     headerBackTitle: 'Usuarios'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="AdminCreateProduct" 
+                  component={AdminCreateProductScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Crear Producto',
+                    headerBackTitle: 'Productos'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="AdminOrders" 
+                  component={AdminOrdersScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Gestión de Órdenes',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="OrderDetails" 
+                  component={OrderDetailsScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Detalles de la Orden',
+                    headerBackTitle: 'Órdenes'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="AdminReports" 
+                  component={AdminReportsScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Reportes y Analytics',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="AdminSettings" 
+                  component={AdminSettingsScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Configuraciones',
+                    headerBackTitle: 'Dashboard'
                   }} 
                 />
               </>

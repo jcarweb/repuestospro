@@ -26,8 +26,42 @@ const AdminHeader: React.FC = () => {
           setLoadingProfile(true);
           const profile = await profileService.getProfile();
           setUserProfile(profile);
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error cargando perfil:', error);
+          // Si es error de autenticación, usar datos del usuario local
+          if (error.message === 'Usuario no autenticado') {
+            console.log('AdminHeader: Token inválido, usando datos locales del usuario');
+            setUserProfile({
+              _id: user._id || 'local-user',
+              name: user.name || 'Administrador',
+              email: user.email || 'admin@piezasyaya.com',
+              phone: user.phone || '+584121234567',
+              avatar: user.avatar || '/uploads/perfil/default-avatar.svg',
+              role: user.role || 'admin',
+              isEmailVerified: user.isEmailVerified || true,
+              isActive: user.isActive || true,
+              pin: null,
+              fingerprintEnabled: false,
+              twoFactorEnabled: false,
+              emailNotifications: true,
+              pushNotifications: true,
+              marketingEmails: false,
+              theme: 'light',
+              language: 'es',
+              profileVisibility: 'private',
+              showEmail: false,
+              showPhone: false,
+              pushEnabled: false,
+              pushToken: null,
+              points: 1000,
+              loyaltyLevel: 'platinum',
+              location: null,
+              locationEnabled: false,
+              lastLocationUpdate: null,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            });
+          }
         } finally {
           setLoadingProfile(false);
         }

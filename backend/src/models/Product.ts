@@ -6,6 +6,8 @@ export interface IProduct extends Document {
   price: number;
   images: string[]; // Múltiples imágenes
   category: string; // Cambiado de mongoose.Types.ObjectId a string
+  vehicleType?: string; // Tipo de vehículo: automovil, motocicleta, camion, maquinaria_industrial, maquinaria_agricola
+  deliveryType?: string; // Tipo de despacho: delivery_motorizado, pickup
   brand?: string;
   subcategory?: string;
   sku: string; // SKU interno del gestor de tienda
@@ -49,6 +51,18 @@ const ProductSchema = new Schema<IProduct>({
   category: {
     type: String,
     required: true
+  },
+  vehicleType: {
+    type: String,
+    trim: true,
+    enum: ['automovil', 'motocicleta', 'camion', 'maquinaria_industrial', 'maquinaria_agricola'],
+    default: 'automovil'
+  },
+  deliveryType: {
+    type: String,
+    trim: true,
+    enum: ['delivery_motorizado', 'pickup'],
+    default: 'delivery_motorizado'
   },
   brand: {
     type: String,

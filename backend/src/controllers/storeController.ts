@@ -6,6 +6,33 @@ import Municipality from '../models/Municipality';
 import Parish from '../models/Parish';
 
 class StoreController {
+  // Obtener usuarios store_manager para asignación de tiendas
+  async getStoreManagers(req: Request, res: Response) {
+    try {
+      const users = await User.find({ 
+        role: 'store_manager', 
+        isActive: true 
+      }).select('name email role isActive').sort({ name: 1 });
+      
+      // Mapear los usuarios para incluir el campo 'id' además de '_id'
+      const mappedUsers = users.map(user => ({
+        ...user.toObject(),
+        id: (user as any)._id.toString()
+      }));
+      
+      res.json({
+        success: true,
+        data: mappedUsers
+      });
+    } catch (error) {
+      console.error('Error getting store managers:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
   // Obtener todas las tiendas (para admin)
   async getAllStores(req: Request, res: Response) {
     try {

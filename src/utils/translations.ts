@@ -1489,6 +1489,11 @@ export const translations: Translations = {
     en: 'Products',
     pt: 'Produtos'
   },
+  'sidebar.admin.inventory': {
+    es: 'Inventario',
+    en: 'Inventory',
+    pt: 'Inventário'
+  },
   'sidebar.admin.categories': {
     es: 'Categorías',
     en: 'Categories',
@@ -1599,16 +1604,31 @@ export const translations: Translations = {
     en: 'Reviews',
     pt: 'Avaliações'
   },
+  'sidebar.storeManager.sellers': {
+    es: 'Vendedores',
+    en: 'Sellers',
+    pt: 'Vendedores'
+  },
   'sidebar.storeManager.settings': {
     es: 'Configuración',
     en: 'Settings',
     pt: 'Configurações'
   },
-  'sidebar.storeManager.inventory': {
-    es: 'Gestión de Inventario',
-    en: 'Inventory Management',
-    pt: 'Gestão de Inventário'
-  },
+    'sidebar.storeManager.inventory': {
+      es: 'Gestión de Inventario',
+      en: 'Inventory Management',
+      pt: 'Gestão de Inventário'
+    },
+    'sidebar.storeManager.inventoryAlerts': {
+      es: 'Alertas de Inventario',
+      en: 'Inventory Alerts',
+      pt: 'Alertas de Inventário'
+    },
+    'sidebar.storeManager.notifications': {
+      es: 'Notificaciones',
+      en: 'Notifications',
+      pt: 'Notificações'
+    },
   'sidebar.storeManager.branches': {
     es: 'Gestión de Sucursales',
     en: 'Branch Management',
@@ -9447,6 +9467,11 @@ export const translations: Translations = {
     en: 'Delivery',
     pt: 'Entrega'
   },
+  'adminRegistrationCodes.roles.seller': {
+    es: 'Vendedor',
+    en: 'Seller',
+    pt: 'Vendedor'
+  },
   'adminRegistrationCodes.notUsed': {
     es: 'No usado',
     en: 'Not used',
@@ -12076,7 +12101,17 @@ export const translations: Translations = {
   'availability.scheduleTitle': { es: 'Programar Disponibilidad', en: 'Schedule Availability', pt: 'Programar Disponibilidade' },
   'availability.scheduleDesc': { es: 'Programa tu disponibilidad para días específicos y horarios.', en: 'Schedule your availability for specific days and times.', pt: 'Programe sua disponibilidade para dias e horários específicos.' },
   'availability.configure': { es: 'Configurar', en: 'Configure', pt: 'Configurar' },
-  'availability.schedule': { es: 'Programar', en: 'Schedule', pt: 'Programar' }
+  'availability.schedule': { es: 'Programar', en: 'Schedule', pt: 'Programar' },
+
+  // ===== COMPARTIR PRODUCTOS =====
+  'product.share': { es: 'Compartir', en: 'Share', pt: 'Compartilhar' },
+  'product.shareOptions': { es: 'Opciones de compartir', en: 'Share options', pt: 'Opções de compartilhamento' },
+  'product.copyLink': { es: 'Copiar enlace', en: 'Copy link', pt: 'Copiar link' },
+  'product.linkCopied': { es: 'Enlace copiado', en: 'Link copied', pt: 'Link copiado' },
+  'product.shareOnFacebook': { es: 'Compartir en Facebook', en: 'Share on Facebook', pt: 'Compartilhar no Facebook' },
+  'product.shareOnTwitter': { es: 'Compartir en Twitter', en: 'Share on Twitter', pt: 'Compartilhar no Twitter' },
+  'product.shareOnWhatsApp': { es: 'Compartir en WhatsApp', en: 'Share on WhatsApp', pt: 'Compartilhar no WhatsApp' },
+  'product.shareByEmail': { es: 'Compartir por email', en: 'Share by email', pt: 'Compartilhar por email' }
 };
 
 export class TranslationService {

@@ -3,7 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IRegistrationCode extends Document {
   code: string;
   email: string;
-  role: 'admin' | 'store_manager' | 'delivery';
+  role: 'admin' | 'store_manager' | 'delivery' | 'seller';
   status: 'pending' | 'used' | 'expired' | 'revoked';
   expiresAt: Date;
   usedAt?: Date;
@@ -34,7 +34,7 @@ const registrationCodeSchema = new Schema<IRegistrationCode>({
   role: {
     type: String,
     required: true,
-    enum: ['admin', 'store_manager', 'delivery']
+    enum: ['admin', 'store_manager', 'delivery', 'seller']
   },
   status: {
     type: String,

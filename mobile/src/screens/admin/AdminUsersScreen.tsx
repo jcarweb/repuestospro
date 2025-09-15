@@ -8,146 +8,131 @@ import {
   Alert,
   ActivityIndicator,
   StatusBar,
-  Platform,
   TextInput,
   RefreshControl,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { Ionicons } from '@expo/vector-icons';
 import { userService, User } from '../../services/userService';
+import { Ionicons } from '@expo/vector-icons';
 
 const AdminUsersScreen: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'name' | 'email' | 'createdAt' | 'lastLogin'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  
+  // Estados para mejoras de UI
+  const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
   
   const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
   const { showToast } = useToast();
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
 
-  const loadUsers = async () => {
+  // Verificar permisos
+  const canManageUsers = user?.role === 'admin';
+
+  const loadUsers = async (isFilterChange = false) => {
     try {
-      console.log('🔄 Cargando usuarios desde la base de datos...');
-      const response = await userService.getUsers();
+      if (isFilterChange) {
+        setIsFiltering(true);
+      } else {
+        setIsLoading(true);
+      }
+      
+      const response = await userService.getUsers({
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchQuery,
+        role: selectedRole !== 'all' ? selectedRole : undefined,
+        status: selectedStatus !== 'all' ? selectedStatus : undefined,
+        sortBy: sortBy,
+        sortOrder: sortOrder
+      });
       
       if (response.success && response.data) {
-        console.log(`✅ Se cargaron ${response.data.total} usuarios`);
-        setUsers(response.data.data);
+        setUsers(response.data.users);
+        console.log(`✅ Cargados ${response.data.users.length} usuarios`);
+        console.log(`📊 Total: ${response.data.pagination.total} usuarios`);
+        console.log(`🔍 Filtros aplicados: rol=${selectedRole}, estado=${selectedStatus}, búsqueda="${searchQuery}"`);
       } else {
-        console.error('❌ Error cargando usuarios:', response.error);
-        showToast(response.error || 'Error cargando usuarios', 'error');
-        
-        // Fallback a datos mock si falla la conexión
-        const mockUsers: User[] = [
-          {
-            _id: '1',
-            name: 'Usuario Admin',
-            email: 'admin@example.com',
-            role: 'admin',
-            isActive: true,
-            isEmailVerified: true,
-            fingerprintEnabled: false,
-            twoFactorEnabled: false,
-            emailNotifications: true,
-            pushNotifications: true,
-            marketingEmails: false,
-            theme: 'light',
-            language: 'es',
-            profileVisibility: 'private',
-            showEmail: false,
-            showPhone: false,
-            pushEnabled: false,
-            points: 0,
-            loyaltyLevel: 'bronze',
-            locationEnabled: false,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-        ];
-        setUsers(mockUsers);
+        console.warn('⚠️ No se pudieron cargar los usuarios:', response.message);
+        setUsers([]);
       }
-    } catch (error) {
-      console.error('❌ Error en loadUsers:', error);
-      showToast('Error de conexión cargando usuarios', 'error');
       
-      // Fallback a datos mock en caso de error
-      const mockUsers: User[] = [
-        {
-          _id: '1',
-          name: 'Usuario Admin',
-          email: 'admin@example.com',
-          role: 'admin',
-          isActive: true,
-          isEmailVerified: true,
-          fingerprintEnabled: false,
-          twoFactorEnabled: false,
-          emailNotifications: true,
-          pushNotifications: true,
-          marketingEmails: false,
-          theme: 'light',
-          language: 'es',
-          profileVisibility: 'private',
-          showEmail: false,
-          showPhone: false,
-          pushEnabled: false,
-          points: 0,
-          loyaltyLevel: 'bronze',
-          locationEnabled: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ];
-      setUsers(mockUsers);
+    } catch (error) {
+      console.error('Error cargando usuarios:', error);
+      showToast('Error al cargar usuarios', 'error');
+      setUsers([]);
+    } finally {
+      if (isFilterChange) {
+        setIsFiltering(false);
+      } else {
+        setIsLoading(false);
+      }
     }
   };
 
-  const refreshData = async () => {
+  const onRefresh = useCallback(async () => {
     setIsRefreshing(true);
     await loadUsers();
     setIsRefreshing(false);
+  }, []);
+
+  const getFilteredUsers = () => {
+    // Los filtros ya se aplican en el backend, solo devolvemos los usuarios
+    return users;
+  };
+
+  const getPaginatedUsers = () => {
+    const filtered = getFilteredUsers();
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filtered.slice(startIndex, endIndex);
+  };
+
+  const getTotalPages = () => {
+    return Math.ceil(getFilteredUsers().length / itemsPerPage);
   };
 
   const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
     Alert.alert(
-      'Cambiar Estado',
+      'Cambiar Estado del Usuario',
       `¿Estás seguro de que quieres ${currentStatus ? 'desactivar' : 'activar'} este usuario?`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
-          text: currentStatus ? 'Desactivar' : 'Activar',
-          style: currentStatus ? 'destructive' : 'default',
+          text: 'Confirmar',
+          style: 'destructive',
           onPress: async () => {
             try {
-              console.log(`🔄 Cambiando estado del usuario ${userId}...`);
-              const response = await userService.updateUserStatus(userId, !currentStatus);
+              const response = await userService.toggleUserStatus(userId, !currentStatus);
               
-              if (response.success && response.data) {
-                // Actualizar la lista local con el usuario actualizado
-                setUsers(prevUsers =>
-                  (prevUsers || []).map(user =>
-                    user._id === userId
-                      ? { ...user, isActive: !currentStatus }
-                      : user
-                  )
-                );
-                showToast(response.data.message, 'success');
+              if (response.success) {
+                setUsers(prev => prev.map(user =>
+                  user._id === userId ? { ...user, isActive: !currentStatus } : user
+                ));
+                showToast(`Usuario ${!currentStatus ? 'activado' : 'desactivado'} exitosamente`, 'success');
               } else {
-                console.error('❌ Error actualizando estado:', response.error);
-                showToast(response.error || 'Error cambiando estado del usuario', 'error');
+                showToast(response.message || 'Error al actualizar usuario', 'error');
               }
             } catch (error) {
-              console.error('❌ Error en toggleUserStatus:', error);
-              showToast('Error de conexión cambiando estado del usuario', 'error');
+              console.error('Error actualizando usuario:', error);
+              showToast('Error al actualizar usuario', 'error');
             }
-          },
-        },
+          }
+        }
       ]
     );
   };
@@ -163,280 +148,360 @@ const AdminUsersScreen: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              console.log(`🗑️ Eliminando usuario ${userId}...`);
               const response = await userService.deleteUser(userId);
               
-              if (response.success && response.data) {
-                // Remover el usuario de la lista local
-                setUsers(prevUsers => (prevUsers || []).filter(user => user._id !== userId));
-                showToast(response.data.message, 'success');
+              if (response.success) {
+                setUsers(prev => prev.filter(user => user._id !== userId));
+                showToast('Usuario eliminado exitosamente', 'success');
               } else {
-                console.error('❌ Error eliminando usuario:', response.error);
-                showToast(response.error || 'Error eliminando usuario', 'error');
+                showToast(response.message || 'Error al eliminar usuario', 'error');
               }
             } catch (error) {
-              console.error('❌ Error en deleteUser:', error);
-              showToast('Error de conexión eliminando usuario', 'error');
+              console.error('Error eliminando usuario:', error);
+              showToast('Error al eliminar usuario', 'error');
             }
-          },
-        },
+          }
+        }
       ]
     );
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      const loadData = async () => {
-        setIsLoading(true);
-        await loadUsers();
-        setIsLoading(false);
-      };
-      loadData();
-    }, [])
-  );
-
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return '#FF3B30';
-      case 'store_manager': return '#007AFF';
-      case 'delivery': return '#34C759';
-      case 'client': return '#FF9500';
-      default: return '#8E8E93';
+      case 'admin': return '#DC2626';
+      case 'store_manager': return '#2563EB';
+      case 'client': return '#059669';
+      case 'delivery': return '#D97706';
+      default: return '#6B7280';
     }
   };
 
-  const getRoleText = (role: string) => {
+  const getRoleLabel = (role: string) => {
     switch (role) {
-      case 'admin': return 'Admin';
-      case 'store_manager': return 'Gestor';
-      case 'delivery': return 'Delivery';
+      case 'admin': return 'Administrador';
+      case 'store_manager': return 'Gestor de Tienda';
       case 'client': return 'Cliente';
-      default: return 'Desconocido';
+      case 'delivery': return 'Repartidor';
+      default: return role;
     }
   };
 
-  const filteredUsers = (users || []).filter(user => {
-    const matchesSearch = (user.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (user.email || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = selectedRole === 'all' || user.role === selectedRole;
-    return matchesSearch && matchesRole;
-  });
-
-  const renderUserItem = ({ item }: { item: User }) => (
+  const renderUserCard = ({ item }: { item: User }) => (
     <View style={styles.userCard}>
       <View style={styles.userHeader}>
         <View style={styles.userInfo}>
-          <Text style={styles.userName}>{item.name || 'Sin nombre'}</Text>
-          <Text style={styles.userEmail}>{item.email || 'Sin email'}</Text>
+          <Text style={styles.userName}>{item.name}</Text>
+          <Text style={styles.userEmail}>{item.email}</Text>
+          {item.phone && <Text style={styles.userPhone}>{item.phone}</Text>}
         </View>
-        <View style={[styles.roleBadge, { backgroundColor: getRoleColor(item.role) }]}>
-          <Text style={styles.roleText}>{getRoleText(item.role)}</Text>
+        <View style={styles.userBadges}>
+          <View style={[styles.roleBadge, { backgroundColor: getRoleColor(item.role) }]}>
+            <Text style={styles.roleBadgeText}>{getRoleLabel(item.role)}</Text>
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: item.isActive ? '#10B981' : '#EF4444' }]}>
+            <Text style={styles.statusBadgeText}>
+              {item.isActive ? 'Activo' : 'Inactivo'}
+            </Text>
+          </View>
         </View>
       </View>
-
+      
       <View style={styles.userDetails}>
         <View style={styles.detailRow}>
-          <Ionicons name="checkmark-circle" size={16} color={item.isActive ? '#34C759' : '#FF3B30'} />
-          <Text style={[styles.detailText, { color: item.isActive ? '#34C759' : '#FF3B30' }]}>
-            {item.isActive ? 'Activo' : 'Inactivo'}
+          <Text style={styles.detailLabel}>Verificación Email:</Text>
+          <Text style={[styles.detailValue, { color: item.isEmailVerified ? '#10B981' : '#EF4444' }]}>
+            {item.isEmailVerified ? 'Verificado' : 'No verificado'}
           </Text>
         </View>
-        
         <View style={styles.detailRow}>
-          <Ionicons name="mail" size={16} color={item.isEmailVerified ? '#34C759' : '#FF9500'} />
-          <Text style={[styles.detailText, { color: item.isEmailVerified ? '#34C759' : '#FF9500' }]}>
-            {item.isEmailVerified ? 'Email verificado' : 'Email no verificado'}
+          <Text style={styles.detailLabel}>Último acceso:</Text>
+          <Text style={styles.detailValue}>
+            {item.lastLogin ? new Date(item.lastLogin).toLocaleDateString() : 'Nunca'}
           </Text>
         </View>
-
-        {(item.points || 0) > 0 && (
+        {item.stores && item.stores.length > 0 && (
           <View style={styles.detailRow}>
-            <Ionicons name="star" size={16} color="#FFD700" />
-            <Text style={styles.detailText}>
-              {item.points || 0} puntos - Nivel {item.loyaltyLevel || 'bronze'}
-            </Text>
+            <Text style={styles.detailLabel}>Tiendas:</Text>
+            <Text style={styles.detailValue}>{item.stores.join(', ')}</Text>
           </View>
         )}
-
-        <View style={styles.detailRow}>
-          <Ionicons name="calendar" size={16} color="#8E8E93" />
-          <Text style={styles.detailText}>
-            Registrado: {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'Fecha no disponible'}
-          </Text>
-        </View>
-
-        {item.phone && (
-          <View style={styles.detailRow}>
-            <Ionicons name="call" size={16} color="#8E8E93" />
-            <Text style={styles.detailText}>
-              {item.phone}
-            </Text>
-          </View>
-        )}
-
-        <View style={styles.detailRow}>
-          <Ionicons name="globe" size={16} color="#8E8E93" />
-          <Text style={styles.detailText}>
-            Idioma: {(item.language || 'es').toUpperCase()} - Tema: {item.theme || 'light'}
-          </Text>
-        </View>
       </View>
-
+      
       <View style={styles.userActions}>
         <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: item.isActive ? '#FF3B30' : '#34C759' }]}
+          style={[styles.actionButton, styles.editButton]}
+          onPress={() => {/* Implementar edición */}}
+        >
+          <Ionicons name="pencil" size={16} color="#3B82F6" />
+          <Text style={styles.actionButtonText}>Editar</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.actionButton, styles.toggleButton]}
           onPress={() => toggleUserStatus(item._id, item.isActive)}
         >
-          <Ionicons 
-            name={item.isActive ? 'pause-circle' : 'play-circle'} 
-            size={20} 
-            color="white" 
-          />
+          <Ionicons name={item.isActive ? "pause" : "play"} size={16} color="#F59E0B" />
           <Text style={styles.actionButtonText}>
             {item.isActive ? 'Desactivar' : 'Activar'}
           </Text>
         </TouchableOpacity>
-
+        
         <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: '#FF3B30' }]}
-          onPress={() => deleteUser(item._id, item.name || 'Usuario sin nombre')}
+          style={[styles.actionButton, styles.deleteButton]}
+          onPress={() => deleteUser(item._id, item.name)}
         >
-          <Ionicons name="trash" size={20} color="white" />
+          <Ionicons name="trash" size={16} color="#EF4444" />
           <Text style={styles.actionButtonText}>Eliminar</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 
-  // Verificar si el usuario es admin
-  if (!isAdmin) {
+  const renderTableRow = (item: User, index: number) => (
+    <View key={item._id} style={[styles.tableRow, index % 2 === 0 && styles.tableRowEven]}>
+      <Text style={styles.tableCell} numberOfLines={1}>{item.name}</Text>
+      <Text style={styles.tableCell} numberOfLines={1}>{item.email}</Text>
+      <View style={styles.tableCell}>
+        <View style={[styles.roleBadge, { backgroundColor: getRoleColor(item.role) }]}>
+          <Text style={styles.roleBadgeText}>{getRoleLabel(item.role)}</Text>
+        </View>
+      </View>
+      <View style={styles.tableCell}>
+        <View style={[styles.statusBadge, { backgroundColor: item.isActive ? '#10B981' : '#EF4444' }]}>
+          <Text style={styles.statusBadgeText}>
+            {item.isActive ? 'Activo' : 'Inactivo'}
+          </Text>
+        </View>
+      </View>
+      <Text style={styles.tableCell} numberOfLines={1}>
+        {item.lastLogin ? new Date(item.lastLogin).toLocaleDateString() : 'Nunca'}
+      </Text>
+      <View style={styles.tableActions}>
+        <TouchableOpacity
+          style={styles.tableActionButton}
+          onPress={() => toggleUserStatus(item._id, item.isActive)}
+        >
+          <Ionicons name={item.isActive ? "pause" : "play"} size={16} color="#F59E0B" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.tableActionButton}
+          onPress={() => deleteUser(item._id, item.name)}
+        >
+          <Ionicons name="trash" size={16} color="#EF4444" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  const renderFilterButton = (label: string, value: string, currentValue: string, onPress: () => void) => (
+    <TouchableOpacity
+      style={[
+        styles.filterButton,
+        currentValue === value && styles.filterButtonActive
+      ]}
+      onPress={onPress}
+    >
+      <Text style={[
+        styles.filterButtonText,
+        currentValue === value && styles.filterButtonTextActive
+      ]}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  // Recargar usuarios cuando cambien los filtros
+  useEffect(() => {
+    if (selectedRole !== 'all' || selectedStatus !== 'all' || searchQuery) {
+      loadUsers(true); // isFilterChange = true
+    }
+  }, [selectedRole, selectedStatus, searchQuery, sortBy, sortOrder]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (canManageUsers) {
+        loadUsers();
+      }
+    }, [canManageUsers])
+  );
+
+  if (!canManageUsers) {
     return (
-      <View style={styles.container}>
-        <View style={styles.restrictedContainer}>
-          <Text style={styles.restrictedTitle}>Acceso Restringido</Text>
-          <Text style={styles.restrictedText}>
-            Solo los administradores pueden acceder a esta funcionalidad.
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
+        <View style={styles.accessDeniedContainer}>
+          <Ionicons name="lock-closed" size={64} color="#EF4444" />
+          <Text style={styles.accessDeniedTitle}>Acceso Denegado</Text>
+          <Text style={styles.accessDeniedMessage}>
+            No tienes permisos para acceder a la gestión de usuarios.
+          </Text>
+          <Text style={styles.accessDeniedMessage}>
+            Tu rol actual: {user?.role || 'No definido'}
           </Text>
         </View>
       </View>
     );
   }
 
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Cargando usuarios...</Text>
-      </View>
-    );
-  }
+  const filteredUsers = getFilteredUsers();
 
   return (
-    <View style={styles.container}>
-      <StatusBar 
-        barStyle="dark-content" 
-        backgroundColor="#fff"
-        translucent={false}
-      />
+    <View style={[styles.container, { paddingTop: insets.top + 8 }]}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
       
-      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top + 10 : insets.top + 20 }]}>
-        <View style={styles.headerContent}>
-          <View style={styles.headerText}>
-            <Text style={styles.title}>Gestión de Usuarios</Text>
-            <Text style={styles.subtitle}>
-              Administrar usuarios, roles y permisos
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => {
-              navigation.navigate('AdminCreateUser' as never);
-            }}
-          >
-            <Ionicons name="add" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Gestión de Usuarios</Text>
+        <Text style={styles.headerSubtitle}>
+          Administra usuarios del sistema
+        </Text>
       </View>
 
-      {/* Filtros */}
-      <View style={styles.filtersContainer}>
+      {/* Search and Controls */}
+      <View style={styles.controlsContainer}>
         <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#8E8E93" />
+          <Ionicons name="search" size={20} color="#6B7280" />
           <TextInput
             style={styles.searchInput}
             placeholder="Buscar usuarios..."
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor="#8E8E93"
+            placeholderTextColor="#9CA3AF"
           />
         </View>
-
-        <View style={styles.roleFilter}>
+        
+        <View style={styles.controlButtons}>
           <TouchableOpacity
-            style={[styles.filterButton, selectedRole === 'all' && styles.filterButtonActive]}
-            onPress={() => setSelectedRole('all')}
+            style={[styles.controlButton, showFilters && styles.controlButtonActive]}
+            onPress={() => setShowFilters(!showFilters)}
           >
-            <Text style={[styles.filterButtonText, selectedRole === 'all' && styles.filterButtonTextActive]}>
-              Todos
-            </Text>
+            <Ionicons name="filter" size={20} color={showFilters ? "#FFFFFF" : "#6B7280"} />
           </TouchableOpacity>
+          
           <TouchableOpacity
-            style={[styles.filterButton, selectedRole === 'admin' && styles.filterButtonActive]}
-            onPress={() => setSelectedRole('admin')}
+            style={[styles.controlButton, viewMode === 'table' && styles.controlButtonActive]}
+            onPress={() => setViewMode(viewMode === 'table' ? 'cards' : 'table')}
           >
-            <Text style={[styles.filterButtonText, selectedRole === 'admin' && styles.filterButtonTextActive]}>
-              Admin
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.filterButton, selectedRole === 'store_manager' && styles.filterButtonActive]}
-            onPress={() => setSelectedRole('store_manager')}
-          >
-            <Text style={[styles.filterButtonText, selectedRole === 'store_manager' && styles.filterButtonTextActive]}>
-              Gestores
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.filterButton, selectedRole === 'delivery' && styles.filterButtonActive]}
-            onPress={() => setSelectedRole('delivery')}
-          >
-            <Text style={[styles.filterButtonText, selectedRole === 'delivery' && styles.filterButtonTextActive]}>
-              Delivery
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.filterButton, selectedRole === 'client' && styles.filterButtonActive]}
-            onPress={() => setSelectedRole('client')}
-          >
-            <Text style={[styles.filterButtonText, selectedRole === 'client' && styles.filterButtonTextActive]}>
-              Clientes
-            </Text>
+            <Ionicons name={viewMode === 'table' ? 'grid' : 'list'} size={20} color={viewMode === 'table' ? "#FFFFFF" : "#6B7280"} />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Lista de usuarios */}
-      <FlatList
-        data={filteredUsers}
-        keyExtractor={(item) => item._id}
-        renderItem={renderUserItem}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={refreshData}
-            colors={['#007AFF']}
-            tintColor="#007AFF"
-          />
-        }
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name="people-outline" size={64} color="#8E8E93" />
-            <Text style={styles.emptyText}>No se encontraron usuarios</Text>
+      {/* Collapsible Filters */}
+      {showFilters && (
+        <ScrollView 
+          style={styles.filtersContainer}
+          showsVerticalScrollIndicator={false}
+          nestedScrollEnabled={true}
+        >
+          <View style={styles.filterRow}>
+            <Text style={styles.filterLabel}>Rol:</Text>
+            <View style={styles.filterButtons}>
+              {renderFilterButton('Todos', 'all', selectedRole, () => setSelectedRole('all'))}
+              {renderFilterButton('Admin', 'admin', selectedRole, () => setSelectedRole('admin'))}
+              {renderFilterButton('Gestor', 'store_manager', selectedRole, () => setSelectedRole('store_manager'))}
+              {renderFilterButton('Cliente', 'client', selectedRole, () => setSelectedRole('client'))}
+              {renderFilterButton('Repartidor', 'delivery', selectedRole, () => setSelectedRole('delivery'))}
+            </View>
           </View>
-        }
-      />
+          
+          <View style={styles.filterRow}>
+            <Text style={styles.filterLabel}>Estado:</Text>
+            <View style={styles.filterButtons}>
+              {renderFilterButton('Todos', 'all', selectedStatus, () => setSelectedStatus('all'))}
+              {renderFilterButton('Activos', 'active', selectedStatus, () => setSelectedStatus('active'))}
+              {renderFilterButton('Inactivos', 'inactive', selectedStatus, () => setSelectedStatus('inactive'))}
+            </View>
+          </View>
+        </ScrollView>
+      )}
+
+      {/* Users List */}
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#3B82F6" />
+          <Text style={styles.loadingText}>Cargando usuarios...</Text>
+        </View>
+      ) : (
+        <View style={styles.usersContainer}>
+          {isFiltering && (
+            <View style={styles.filteringIndicator}>
+              <ActivityIndicator size="small" color="#3B82F6" />
+              <Text style={styles.filteringText}>Aplicando filtros...</Text>
+            </View>
+          )}
+          {viewMode === 'table' ? (
+            <View style={styles.tableContainer}>
+              {/* Table Header */}
+              <View style={styles.tableHeader}>
+                <Text style={styles.tableHeaderText}>Nombre</Text>
+                <Text style={styles.tableHeaderText}>Email</Text>
+                <Text style={styles.tableHeaderText}>Rol</Text>
+                <Text style={styles.tableHeaderText}>Estado</Text>
+                <Text style={styles.tableHeaderText}>Último Acceso</Text>
+                <Text style={styles.tableHeaderText}>Acciones</Text>
+              </View>
+              {/* Table Body */}
+              <ScrollView style={styles.tableBody} showsVerticalScrollIndicator={false}>
+                {getPaginatedUsers().map((item, index) => renderTableRow(item, index))}
+              </ScrollView>
+            </View>
+          ) : (
+            <FlatList
+              data={getPaginatedUsers()}
+              renderItem={renderUserCard}
+              keyExtractor={(item) => item._id}
+              contentContainerStyle={styles.usersList}
+              refreshControl={
+                <RefreshControl
+                  refreshing={isRefreshing}
+                  onRefresh={onRefresh}
+                  colors={['#3B82F6']}
+                  tintColor="#3B82F6"
+                />
+              }
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <Ionicons name="people-outline" size={64} color="#9CA3AF" />
+                  <Text style={styles.emptyTitle}>No se encontraron usuarios</Text>
+                  <Text style={styles.emptyMessage}>
+                    Intenta ajustar los filtros de búsqueda
+                  </Text>
+                </View>
+              }
+            />
+          )}
+          
+          {/* Pagination */}
+          {getTotalPages() > 1 && (
+            <View style={styles.paginationContainer}>
+              <TouchableOpacity
+                style={[styles.paginationButton, currentPage === 1 && styles.paginationButtonDisabled]}
+                onPress={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+              >
+                <Ionicons name="chevron-back" size={20} color={currentPage === 1 ? "#9CA3AF" : "#3B82F6"} />
+              </TouchableOpacity>
+              
+              <Text style={styles.paginationText}>
+                Página {currentPage} de {getTotalPages()}
+              </Text>
+              
+              <TouchableOpacity
+                style={[styles.paginationButton, currentPage === getTotalPages() && styles.paginationButtonDisabled]}
+                onPress={() => setCurrentPage(Math.min(getTotalPages(), currentPage + 1))}
+                disabled={currentPage === getTotalPages()}
+              >
+                <Ionicons name="chevron-forward" size={20} color={currentPage === getTotalPages() ? "#9CA3AF" : "#3B82F6"} />
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      )}
     </View>
   );
 };
@@ -444,103 +509,125 @@ const AdminUsersScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F9FAFB',
   },
   header: {
-    backgroundColor: '#fff',
-    padding: 20,
+    backgroundColor: 'white',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#E5E7EB',
   },
-  headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerText: {
-    flex: 1,
-  },
-  addButton: {
-    backgroundColor: '#007AFF',
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  title: {
+  headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    color: '#111827',
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
+  headerSubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 2,
   },
-  filtersContainer: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  searchContainer: {
+  controlsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 12,
+    backgroundColor: 'white',
+    marginHorizontal: 20,
+    marginVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 12,
   },
   searchInput: {
     flex: 1,
-    marginLeft: 8,
     fontSize: 16,
-    color: '#333',
+    color: '#111827',
+    marginLeft: 8,
   },
-  roleFilter: {
+  controlButtons: {
     flexDirection: 'row',
-    gap: 8,
+    marginRight: -8,
+    marginBottom: -8,
+  },
+  controlButton: {
+    padding: 8,
+    borderRadius: 8,
+    marginRight: 8,
+    marginBottom: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  controlButtonActive: {
+    backgroundColor: '#3B82F6',
+  },
+  filtersContainer: {
+    backgroundColor: 'white',
+    marginHorizontal: 20,
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    maxHeight: 300,
+  },
+  filterRow: {
+    marginBottom: 12,
+  },
+  filterLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  filterButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   filterButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#F3F4F6',
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: '#D1D5DB',
+    marginRight: 8,
+    marginBottom: 8,
   },
   filterButtonActive: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: '#3B82F6',
+    borderColor: '#3B82F6',
   },
   filterButtonText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 12,
+    color: '#6B7280',
     fontWeight: '500',
   },
   filterButtonTextActive: {
-    color: '#fff',
+    color: 'white',
   },
-  listContainer: {
-    padding: 16,
+  usersList: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   userCard: {
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   userHeader: {
     flexDirection: 'row',
@@ -552,55 +639,144 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#111827',
     marginBottom: 4,
   },
   userEmail: {
     fontSize: 14,
-    color: '#666',
+    color: '#6B7280',
+    marginBottom: 2,
+  },
+  userPhone: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  userBadges: {
+    alignItems: 'flex-end',
   },
   roleBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
+    marginBottom: 4,
   },
-  roleText: {
-    color: '#fff',
+  roleBadgeText: {
     fontSize: 12,
+    color: 'white',
+    fontWeight: '600',
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusBadgeText: {
+    fontSize: 12,
+    color: 'white',
     fontWeight: '600',
   },
   userDetails: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   detailRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
+    justifyContent: 'space-between',
+    marginBottom: 4,
   },
-  detailText: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 8,
+  detailLabel: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  detailValue: {
+    fontSize: 12,
+    color: '#111827',
+    fontWeight: '500',
   },
   userActions: {
     flexDirection: 'row',
-    gap: 12,
+    justifyContent: 'space-between',
   },
   actionButton: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 8,
-    gap: 6,
+    flex: 1,
+    marginHorizontal: 2,
+    justifyContent: 'center',
+  },
+  editButton: {
+    backgroundColor: '#EBF8FF',
+    borderWidth: 1,
+    borderColor: '#3B82F6',
+  },
+  toggleButton: {
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+  },
+  deleteButton: {
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#EF4444',
   },
   actionButtonText: {
-    color: '#fff',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
+    marginLeft: 4,
+  },
+  tableContainer: {
+    backgroundColor: 'white',
+    marginHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    overflow: 'hidden',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#F9FAFB',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  tableHeaderText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#374151',
+    flex: 1,
+  },
+  tableBody: {
+    maxHeight: 400,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  tableRowEven: {
+    backgroundColor: '#F9FAFB',
+  },
+  tableCell: {
+    fontSize: 12,
+    color: '#111827',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  tableActions: {
+    flexDirection: 'row',
+    flex: 1,
+  },
+  tableActionButton: {
+    padding: 4,
+    marginHorizontal: 2,
   },
   loadingContainer: {
     flex: 1,
@@ -608,9 +784,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 16,
+    marginTop: 12,
     fontSize: 16,
-    color: '#666',
+    color: '#6B7280',
   },
   emptyContainer: {
     flex: 1,
@@ -618,30 +794,77 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 40,
   },
-  emptyText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#666',
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#374151',
+    marginTop: 12,
+  },
+  emptyMessage: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 4,
     textAlign: 'center',
   },
-  restrictedContainer: {
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+  },
+  paginationButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+    marginHorizontal: 8,
+  },
+  paginationButtonDisabled: {
+    backgroundColor: '#F9FAFB',
+  },
+  paginationText: {
+    fontSize: 14,
+    color: '#374151',
+    marginHorizontal: 16,
+  },
+  accessDeniedContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 40,
   },
-  restrictedTitle: {
+  accessDeniedTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FF3B30',
-    marginBottom: 16,
+    color: '#EF4444',
+    marginTop: 16,
     textAlign: 'center',
   },
-  restrictedText: {
+  accessDeniedMessage: {
     fontSize: 16,
-    color: '#666',
+    color: '#6B7280',
+    marginTop: 8,
     textAlign: 'center',
     lineHeight: 24,
+  },
+  usersContainer: {
+    flex: 1,
+  },
+  filteringIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    backgroundColor: '#F3F4F6',
+    marginHorizontal: 20,
+    marginBottom: 16,
+    borderRadius: 8,
+  },
+  filteringText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
   },
 });
 

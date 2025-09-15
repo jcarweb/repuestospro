@@ -16,10 +16,10 @@ export class RegistrationCodeController {
         return;
       }
 
-      if (!['admin', 'store_manager', 'delivery'].includes(role)) {
+      if (!['admin', 'store_manager', 'delivery', 'seller'].includes(role)) {
         res.status(400).json({
           success: false,
-          message: 'Rol inválido. Debe ser admin, store_manager o delivery'
+          message: 'Rol inválido. Debe ser admin, store_manager, delivery o seller'
         });
         return;
       }

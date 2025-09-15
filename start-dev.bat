@@ -16,7 +16,7 @@ REM Esperar un momento para que el frontend se inicie
 timeout /t 3 /nobreak >nul
 
 echo 🔧 Iniciando Backend en puerto 5000...
-start "Backend" cmd /k "cd backend && node server-mongodb.js"
+start "Backend" cmd /k "cd backend && npm run dev"
 
 REM Esperar un momento para que el backend se inicie
 timeout /t 3 /nobreak >nul

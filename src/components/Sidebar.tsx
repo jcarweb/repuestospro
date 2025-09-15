@@ -85,6 +85,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       description: 'Gestión de productos global'
     },
     {
+      title: t('sidebar.admin.inventory'),
+      path: '/admin/inventory',
+      icon: Package,
+      description: 'Gestión de inventario global'
+    },
+    {
       title: t('sidebar.admin.categories'),
       path: '/admin/categories',
       icon: Database,
@@ -167,6 +173,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       description: 'Configurar y gestionar inventario'
     },
     {
+      title: t('sidebar.storeManager.inventoryAlerts'),
+      path: '/store-manager/inventory-alerts',
+      icon: Bell,
+      description: 'Alertas de inventario'
+    },
+    {
+      title: t('sidebar.storeManager.notifications'),
+      path: '/store-manager/notifications',
+      icon: Bell,
+      description: 'Notificaciones de inventario'
+    },
+    {
       title: t('sidebar.storeManager.dashboard'),
       path: '/store-manager/dashboard',
       icon: Home,
@@ -219,6 +237,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       path: '/store-manager/reviews',
       icon: Star,
       description: 'Reseñas de productos'
+    },
+    {
+      title: t('sidebar.storeManager.sellers'),
+      path: '/store-manager/sellers',
+      icon: Users,
+      description: 'Gestión de vendedores'
     },
     {
       title: t('sidebar.storeManager.settings'),

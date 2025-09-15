@@ -190,15 +190,15 @@ async function generateRandomProduct(storeId?: string) {
     isActive: true,
     isFeatured: Math.random() > 0.8, // 20% de productos destacados
     tags: [category.toLowerCase(), brand.toLowerCase(), subcategory.toLowerCase()],
-    specifications: {
-      marca: brand,
-      categoria: category,
-      subcategoria: subcategory,
-      compatibilidad: `${brand}, ${category}`,
-      garantia: '12 meses',
-      codigoOriginal: originalPartCode,
-      skuInterno: sku
-    },
+    specifications: new Map([
+      ['marca', brand],
+      ['categoria', category],
+      ['subcategoria', subcategory],
+      ['compatibilidad', `${brand}, ${category}`],
+      ['garantia', '12 meses'],
+      ['codigoOriginal', originalPartCode],
+      ['skuInterno', sku]
+    ]),
     popularity: Math.floor(Math.random() * 100) + 1
   };
   
@@ -243,9 +243,9 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return distance;
 }
 
-export class AdminController {
+const AdminController = {
   // Generar productos de prueba
-  async generateProducts(req: Request, res: Response) {
+  generateProducts: async (req: Request, res: Response) => {
     try {
       console.log('🚀 Iniciando generación de productos desde API...');
       console.log('📝 Request body:', req.body);
@@ -362,10 +362,10 @@ export class AdminController {
         error: error instanceof Error ? error.message : 'Error desconocido'
       });
     }
-  }
+  },
 
   // Regenerar productos con imágenes reales (método de prueba)
-  async regenerateProductsWithRealImages(req: Request, res: Response) {
+  regenerateProductsWithRealImages: async (req: Request, res: Response) => {
     try {
       console.log('🔄 Iniciando regeneración de productos con imágenes reales...');
       
@@ -450,10 +450,10 @@ export class AdminController {
         error: error instanceof Error ? error.message : 'Error desconocido'
       });
     }
-  }
+  },
 
   // Buscar productos por proximidad geográfica
-  static async findProductsByLocation(req: Request, res: Response) {
+  findProductsByLocation: async (req: Request, res: Response) => {
     try {
       const { latitude, longitude, radius = 10, category, brand, limit = 50 } = req.query;
       
@@ -568,10 +568,10 @@ export class AdminController {
         message: 'Error interno del servidor al buscar productos'
       });
     }
-  }
+  },
 
   // Obtener estadísticas de productos
-  async getProductStats(req: Request, res: Response) {
+  getProductStats: async (req: Request, res: Response) => {
     try {
       const totalProducts = await Product.countDocuments();
       const featuredProducts = await Product.countDocuments({ isFeatured: true });
@@ -632,12 +632,59 @@ export class AdminController {
         message: 'Error interno del servidor al obtener estadísticas'
       });
     }
-  }
+  },
 
   // Obtener todos los usuarios
-  static async getUsers(req: Request, res: Response) {
+  getUsers: async (req: Request, res: Response) => {
     try {
-      const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+      // Obtener parámetros de paginación
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const skip = (page - 1) * limit;
+      
+      // Filtros opcionales
+      const search = req.query.search as string || '';
+      const role = req.query.role as string || '';
+      const status = req.query.status as string || '';
+      const hasId = req.query.hasId === 'true';
+      
+      // Construir filtros
+      let filters: any = {};
+      
+      // Filtrar solo usuarios con ID válido si se solicita
+      if (hasId) {
+        filters._id = { $exists: true, $ne: null };
+      }
+      
+      // Filtro de búsqueda por nombre o email
+      if (search) {
+        filters.$or = [
+          { name: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } }
+        ];
+      }
+      
+      // Filtro por rol
+      if (role) {
+        filters.role = role;
+      }
+      
+      // Filtro por estado
+      if (status === 'active') {
+        filters.isActive = true;
+      } else if (status === 'inactive') {
+        filters.isActive = false;
+      }
+      
+      // Obtener total de usuarios que coinciden con los filtros
+      const totalUsers = await User.countDocuments(filters);
+      
+      // Obtener usuarios con paginación
+      const users = await User.find(filters)
+        .select('-password')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
       
       // Mapear los usuarios para incluir el campo 'id' además de '_id'
       const mappedUsers = users.map(user => ({
@@ -645,9 +692,20 @@ export class AdminController {
         id: (user as any)._id.toString()
       }));
       
+      // Calcular información de paginación
+      const totalPages = Math.ceil(totalUsers / limit);
+      
       res.json({
         success: true,
-        users: mappedUsers
+        data: mappedUsers,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalUsers,
+          limit,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        }
       });
     } catch (error) {
       console.error('Error getting users:', error);
@@ -656,10 +714,10 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   // Obtener un usuario específico
-  static async getUser(req: Request, res: Response) {
+  getUser: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       
@@ -689,10 +747,10 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   // Crear un nuevo usuario
-  static async createUser(req: Request, res: Response) {
+  createUser: async (req: Request, res: Response) => {
     try {
       const { name, email, phone, role = 'client' } = req.body;
 
@@ -757,10 +815,10 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   // Actualizar un usuario
-  static async updateUser(req: Request, res: Response) {
+  updateUser: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const { name, email, phone, role } = req.body;
@@ -822,10 +880,10 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   // Desactivar un usuario (borrado lógico)
-  static async deactivateUser(req: Request, res: Response) {
+  deactivateUser: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -861,10 +919,10 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   // Reactivar un usuario
-  static async reactivateUser(req: Request, res: Response) {
+  reactivateUser: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -892,10 +950,10 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   // Obtener estadísticas de usuarios
-  static async getUserStats(req: Request, res: Response) {
+  getUserStats: async (req: Request, res: Response) => {
     try {
       const totalUsers = await User.countDocuments();
       const activeUsers = await User.countDocuments({ isActive: true });
@@ -936,10 +994,10 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   // Resetear contraseña de usuario desde admin
-  static async resetUserPassword(req: Request, res: Response) {
+  resetUserPassword: async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
 
@@ -979,10 +1037,10 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   // Método temporal para verificar credenciales de email
-  static async checkEmailConfig(req: Request, res: Response) {
+  checkEmailConfig: async (req: Request, res: Response) => {
     try {
       const emailConfig = {
         host: process.env.EMAIL_HOST || process.env.SMTP_HOST,
@@ -1004,10 +1062,10 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   // Generar tiendas de prueba
-  static async generateStores(req: Request, res: Response) {
+  generateStores: async (req: Request, res: Response) => {
     try {
       // Datos de tiendas de prueba
       const testStores = [
@@ -1142,12 +1200,12 @@ export class AdminController {
         message: 'Error interno del servidor al generar tiendas'
       });
     }
-  }
+  },
 
   /**
    * Obtiene todas las tiendas con sus suscripciones
    */
-  static async getStoreSubscriptions(req: Request, res: Response): Promise<void> {
+  getStoreSubscriptions: async (req: Request, res: Response): Promise<void> => {
     try {
       const stores = await Store.find()
         .populate('subscription')
@@ -1181,12 +1239,12 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   /**
    * Asigna una suscripción a una tienda
    */
-  static async assignSubscriptionToStore(req: Request, res: Response): Promise<void> {
+  assignSubscriptionToStore: async (req: Request, res: Response): Promise<void> => {
     try {
       const { storeId } = req.params;
       const { subscriptionId, status, expiresAt } = req.body;
@@ -1248,12 +1306,12 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   /**
    * Actualiza el estado de suscripción de una tienda
    */
-  static async updateStoreSubscriptionStatus(req: Request, res: Response): Promise<void> {
+  updateStoreSubscriptionStatus: async (req: Request, res: Response): Promise<void> => {
     try {
       const { storeId } = req.params;
       const { status } = req.body;
@@ -1293,12 +1351,12 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   /**
    * Obtiene estadísticas de suscripciones
    */
-  static async getSubscriptionStats(req: Request, res: Response): Promise<void> {
+  getSubscriptionStats: async (req: Request, res: Response): Promise<void> => {
     try {
       const stores = await Store.find();
       
@@ -1363,12 +1421,12 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   /**
    * Obtiene tiendas que necesitan renovación
    */
-  static async getStoresNeedingRenewal(req: Request, res: Response): Promise<void> {
+  getStoresNeedingRenewal: async (req: Request, res: Response): Promise<void> => {
     try {
       const thirtyDaysFromNow = new Date();
       thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
@@ -1392,12 +1450,12 @@ export class AdminController {
         message: 'Error interno del servidor'
       });
     }
-  }
+  },
 
   /**
    * Limpiar todas las imágenes de productos de prueba de Cloudinary
    */
-  static async cleanupAllTestImages(req: Request, res: Response): Promise<void> {
+  cleanupAllTestImages: async (req: Request, res: Response): Promise<void> => {
     try {
       console.log('🗑️ Iniciando limpieza de todas las imágenes de productos de prueba...');
       
@@ -1426,20 +1484,21 @@ export class AdminController {
         error: error instanceof Error ? error.message : 'Error desconocido'
       });
     }
-  }
+  },
 
   /**
    * Limpiar carpeta específica de Cloudinary
    */
-  static async cleanupCloudinaryFolder(req: Request, res: Response): Promise<void> {
+  cleanupCloudinaryFolder: async (req: Request, res: Response): Promise<void> => {
     try {
       const { folderPath } = req.body;
       
       if (!folderPath) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Se requiere la ruta de la carpeta para limpiar'
         });
+        return;
       }
 
       console.log(`🗑️ Iniciando limpieza de carpeta: ${folderPath}`);
@@ -1468,12 +1527,12 @@ export class AdminController {
         error: error instanceof Error ? error.message : 'Error desconocido'
       });
     }
-  }
+  },
 
   /**
    * Obtener estadísticas de uso de Cloudinary
    */
-  static async getCloudinaryStats(req: Request, res: Response): Promise<void> {
+  getCloudinaryStats: async (req: Request, res: Response): Promise<void> => {
     try {
       console.log('📊 Obteniendo estadísticas de Cloudinary...');
       
@@ -1492,7 +1551,236 @@ export class AdminController {
         error: error instanceof Error ? error.message : 'Error desconocido'
       });
     }
+  },
+
+  /**
+   * Obtener estadísticas generales del dashboard de admin
+   */
+  getDashboardStats: async (req: Request, res: Response): Promise<void> => {
+    try {
+      console.log('📊 Obteniendo estadísticas del dashboard de admin...');
+      
+      // Importar el modelo Order
+      const Order = require('../models/Order').default;
+      
+      // Obtener estadísticas de usuarios
+      const totalUsers = await User.countDocuments();
+      const activeUsers = await User.countDocuments({ isActive: true });
+      const newUsersThisMonth = await User.countDocuments({
+        createdAt: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) }
+      });
+      
+      // Obtener estadísticas de productos
+      const totalProducts = await Product.countDocuments({ deleted: { $ne: true } });
+      const activeProducts = await Product.countDocuments({ 
+        deleted: { $ne: true }, 
+        isActive: true 
+      });
+      const lowStockProducts = await Product.countDocuments({ 
+        deleted: { $ne: true }, 
+        stock: { $lt: 10, $gt: 0 } 
+      });
+      const outOfStockProducts = await Product.countDocuments({ 
+        deleted: { $ne: true }, 
+        stock: 0 
+      });
+      
+      // Obtener estadísticas de tiendas
+      const totalStores = await Store.countDocuments();
+      const activeStores = await Store.countDocuments({ isActive: true });
+      
+      // Obtener estadísticas de órdenes
+      const totalOrders = await Order.countDocuments();
+      const pendingOrders = await Order.countDocuments({ 
+        orderStatus: { $in: ['pending', 'confirmed', 'processing'] } 
+      });
+      const completedOrders = await Order.countDocuments({ 
+        orderStatus: { $in: ['delivered', 'completed'] } 
+      });
+      
+      // Calcular ingresos totales
+      const revenueResult = await Order.aggregate([
+        { 
+          $match: { 
+            orderStatus: { $in: ['delivered', 'completed'] },
+            paymentStatus: 'paid'
+          } 
+        },
+        { 
+          $group: { 
+            _id: null, 
+            totalRevenue: { $sum: '$totalAmount' } 
+          } 
+        }
+      ]);
+      const totalRevenue = revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0;
+      
+      // Calcular ingresos del mes actual
+      const currentMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      const monthlyRevenueResult = await Order.aggregate([
+        { 
+          $match: { 
+            orderStatus: { $in: ['delivered', 'completed'] },
+            paymentStatus: 'paid',
+            createdAt: { $gte: currentMonthStart }
+          } 
+        },
+        { 
+          $group: { 
+            _id: null, 
+            monthlyRevenue: { $sum: '$totalAmount' } 
+          } 
+        }
+      ]);
+      const monthlyRevenue = monthlyRevenueResult.length > 0 ? monthlyRevenueResult[0].monthlyRevenue : 0;
+      
+      // Obtener entregas pendientes (órdenes listas para delivery)
+      const pendingDeliveries = await Order.countDocuments({ 
+        orderStatus: { $in: ['ready_for_delivery', 'out_for_delivery'] } 
+      });
+      
+      // Obtener estadísticas por rol de usuario
+      const usersByRole = await User.aggregate([
+        {
+          $group: {
+            _id: '$role',
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { count: -1 } }
+      ]);
+      
+      // Obtener estadísticas de productos por categoría (top 5)
+      const productsByCategory = await Product.aggregate([
+        { $match: { deleted: { $ne: true } } },
+        {
+          $group: {
+            _id: '$category',
+            count: { $sum: 1 },
+            avgPrice: { $avg: '$price' }
+          }
+        },
+        { $sort: { count: -1 } },
+        { $limit: 5 }
+      ]);
+      
+      // Obtener estadísticas de tiendas por ciudad (top 5)
+      const storesByCity = await Store.aggregate([
+        {
+          $group: {
+            _id: '$city',
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { count: -1 } },
+        { $limit: 5 }
+      ]);
+      
+      // Obtener órdenes recientes (últimas 5)
+      const recentOrders = await Order.find({})
+        .populate('userId', 'name email')
+        .populate('storeId', 'name city')
+        .select('orderNumber totalAmount orderStatus paymentStatus createdAt')
+        .sort({ createdAt: -1 })
+        .limit(5);
+      
+      const stats = {
+        users: {
+          total: totalUsers,
+          active: activeUsers,
+          newThisMonth: newUsersThisMonth,
+          byRole: usersByRole
+        },
+        products: {
+          total: totalProducts,
+          active: activeProducts,
+          lowStock: lowStockProducts,
+          outOfStock: outOfStockProducts,
+          byCategory: productsByCategory
+        },
+        stores: {
+          total: totalStores,
+          active: activeStores,
+          byCity: storesByCity
+        },
+        orders: {
+          total: totalOrders,
+          pending: pendingOrders,
+          completed: completedOrders,
+          pendingDeliveries: pendingDeliveries,
+          recent: recentOrders
+        },
+        revenue: {
+          total: totalRevenue,
+          monthly: monthlyRevenue
+        }
+      };
+      
+      console.log('✅ Estadísticas del dashboard obtenidas exitosamente');
+      
+      res.json({
+        success: true,
+        data: stats,
+        message: 'Estadísticas del dashboard obtenidas exitosamente'
+      });
+    } catch (error) {
+      console.error('❌ Error obteniendo estadísticas del dashboard:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor al obtener estadísticas del dashboard',
+        error: error instanceof Error ? error.message : 'Error desconocido'
+      });
+    }
+  },
+
+  // Obtener estadísticas de tiendas
+  getStoreStats: async (req: Request, res: Response) => {
+    try {
+      const totalStores = await Store.countDocuments();
+      const activeStores = await Store.countDocuments({ isActive: true });
+      const inactiveStores = await Store.countDocuments({ isActive: false });
+
+      // Tiendas por ciudad
+      const storesByCity = await Store.aggregate([
+        {
+          $group: {
+            _id: '$city',
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { count: -1 } },
+        { $limit: 10 }
+      ]);
+
+      // Tiendas por estado
+      const storesByState = await Store.aggregate([
+        {
+          $group: {
+            _id: '$state',
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { count: -1 } }
+      ]);
+
+      res.json({
+        success: true,
+        data: {
+          totalStores,
+          activeStores,
+          inactiveStores,
+          storesByCity,
+          storesByState
+        }
+      });
+    } catch (error) {
+      console.error('Error obteniendo estadísticas de tiendas:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
   }
-}
+};
 
 export default AdminController;

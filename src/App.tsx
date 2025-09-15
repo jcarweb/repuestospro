@@ -48,6 +48,7 @@ import AdminUsers from './pages/AdminUsers';
 import AdminStores from './pages/AdminStores';
 import AdminProducts from './pages/AdminProducts';
 import AdminCategories from './pages/AdminCategories';
+import MasterConfiguration from './pages/admin/MasterConfiguration';
 import AdminSubcategories from './pages/AdminSubcategories';
 import AdminPromotions from './pages/AdminPromotions';
 import AdminAdvertisements from './pages/AdminAdvertisements';
@@ -64,6 +65,7 @@ import AdminSearchConfig from './pages/AdminSearchConfig';
 import AdminGenerateProducts from './pages/AdminGenerateProducts';
 import AdminMonetization from './pages/AdminMonetization';
 import AdminGlobalSettings from './pages/AdminGlobalSettings';
+import AdminInventory from './pages/AdminInventory';
 
 // Páginas de gestor de tienda
 import StoreManagerDashboard from './pages/StoreManagerDashboard';
@@ -76,6 +78,10 @@ import StoreManagerAnalytics from './pages/StoreManagerAnalytics';
 import StoreManagerMessages from './pages/StoreManagerMessages';
 import StoreManagerReviews from './pages/StoreManagerReviews';
 import StoreManagerSettings from './pages/StoreManagerSettings';
+import StoreManagerInventory from './pages/StoreManagerInventory';
+import StoreManagerInventoryAlerts from './pages/StoreManagerInventoryAlerts';
+import StoreManagerNotifications from './pages/StoreManagerNotifications';
+import StoreManagerSellers from './pages/StoreManagerSellers';
 import StoreSetup from './pages/StoreSetup';
 import InventoryManagementPage from './pages/InventoryManagementPage';
 import InventoryReportsPage from './pages/InventoryReportsPage';
@@ -125,7 +131,8 @@ function AppContent() {
 
   return (
     <Router>
-      <InactivityProvider timeoutMinutes={30} warningMinutes={5}>
+      {/* Temporalmente deshabilitado para debugging */}
+      {/* <InactivityProvider timeoutMinutes={60} warningMinutes={10}> */}
         <Routes>
         {/* Rutas de verificación de email - completamente limpias, sin Header ni Sidebar */}
         <Route path="/verify-email" element={<EmailVerificationRoute />} />
@@ -171,10 +178,24 @@ function AppContent() {
                 </AdminLayout>
               </AdminRoute>
             } />
+            <Route path="/inventory" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <AdminInventory />
+                </AdminLayout>
+              </AdminRoute>
+            } />
             <Route path="/categories" element={
               <AdminRoute>
                 <AdminLayout>
                   <AdminCategories />
+                </AdminLayout>
+              </AdminRoute>
+            } />
+            <Route path="/master-configuration" element={
+              <AdminRoute>
+                <AdminLayout>
+                  <MasterConfiguration />
                 </AdminLayout>
               </AdminRoute>
             } />
@@ -349,7 +370,7 @@ function AppContent() {
                    <Route path="/product/:id" element={<ProductDetail />} />
                     <Route path="/search-results" element={<SearchResults />} />
                     <Route path="/categories" element={<Categories />} />
-                    <Route path="/category/:id" element={<CategoryProducts />} />
+                    <Route path="/category/:category" element={<CategoryProducts />} />
                    <Route path="/nearby-products" element={<NearbyProducts />} />
                    <Route path="/store-registration" element={<StoreRegistration />} />
                  </Routes>
@@ -454,6 +475,27 @@ function AppContent() {
                  </StoreManagerLayout>
                </StoreManagerRoute>
              } />
+             <Route path="/inventory" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerInventory />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/inventory-alerts" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerInventoryAlerts />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/notifications" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerNotifications />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
              <Route path="/promotions" element={
                <StoreManagerRoute>
                  <StoreManagerLayout>
@@ -500,6 +542,13 @@ function AppContent() {
                <StoreManagerRoute>
                  <StoreManagerLayout>
                    <StoreManagerReviews />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/sellers" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerSellers />
                  </StoreManagerLayout>
                </StoreManagerRoute>
              } />
@@ -652,7 +701,7 @@ function AppContent() {
              </Routes>
            } />
         </Routes>
-      </InactivityProvider>
+      {/* </InactivityProvider> */}
     </Router>
   );
 }

@@ -10,8 +10,8 @@ interface UseInactivityTimeoutOptions {
 
 export const useInactivityTimeout = (options: UseInactivityTimeoutOptions = {}) => {
   const { 
-    timeoutMinutes = 30, 
-    warningMinutes = 5, 
+    timeoutMinutes = 60, // Aumentado por defecto
+    warningMinutes = 10, // Aumentado por defecto
     onTimeout 
   } = options;
   
@@ -97,11 +97,14 @@ export const useInactivityTimeout = (options: UseInactivityTimeoutOptions = {}) 
       document.addEventListener(event, handleActivity, true);
     });
 
-    // Iniciar el timer
-    resetTimer();
+    // Iniciar el timer con un pequeño delay para evitar logout inmediato después del login
+    const initialDelay = setTimeout(() => {
+      resetTimer();
+    }, 2000); // 2 segundos de delay inicial
 
     // Cleanup
     return () => {
+      clearTimeout(initialDelay);
       events.forEach(event => {
         document.removeEventListener(event, handleActivity, true);
       });
@@ -114,6 +117,18 @@ export const useInactivityTimeout = (options: UseInactivityTimeoutOptions = {}) 
       }
     };
   }, [handleActivity, resetTimer, isEmailVerificationRoute]);
+
+  // Reiniciar timer cuando cambia la ruta (navegación)
+  useEffect(() => {
+    if (!isEmailVerificationRoute) {
+      // Pequeño delay para permitir que la página se cargue completamente
+      const routeChangeDelay = setTimeout(() => {
+        resetTimer();
+      }, 1000);
+      
+      return () => clearTimeout(routeChangeDelay);
+    }
+  }, [location.pathname, resetTimer, isEmailVerificationRoute]);
 
   return {
     showWarning,

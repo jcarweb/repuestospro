@@ -34,6 +34,9 @@ router.patch('/users/:id/reactivate', AdminController.reactivateUser);
 // Generar tiendas de prueba
 router.post('/stores/generate', AdminController.generateStores);
 
+// Obtener estadísticas de tiendas
+router.get('/stores/stats', AdminController.getStoreStats);
+
 // ===== GESTIÓN DE SUSCRIPCIONES DE TIENDAS =====
 
 // Obtener todas las tiendas con sus suscripciones
@@ -138,6 +141,12 @@ router.delete('/clean-test-data', authenticateToken, requireAdmin, async (req, r
 });
 
 // ===== ESTADÍSTICAS Y REPORTES =====
+
+// Obtener estadísticas generales del dashboard
+router.get('/dashboard-stats', AdminController.getDashboardStats);
+
+// Obtener estadísticas de tiendas
+router.get('/store-stats', AdminController.getStoreStats);
 
 // Las estadísticas están disponibles en las rutas específicas:
 // - /users/stats para estadísticas de usuarios

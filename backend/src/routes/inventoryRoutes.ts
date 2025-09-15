@@ -1,6 +1,23 @@
 import express from 'express';
 import inventoryController from '../controllers/inventoryController';
 import { authMiddleware } from '../middleware/authMiddleware';
+import multer from 'multer';
+
+// Configuración de multer para archivos CSV
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Solo se permiten archivos CSV'));
+    }
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB máximo
+  }
+});
 
 const router = express.Router();
 
@@ -25,5 +42,18 @@ router.post('/transfers', inventoryController.createTransfer);
 router.get('/transfers/:storeId', inventoryController.getTransfers);
 router.put('/transfers/:transferId/approve', inventoryController.approveTransfer);
 router.put('/transfers/:transferId/complete', inventoryController.completeTransfer);
+
+// Rutas específicas para Admin
+router.get('/admin/all', inventoryController.getAdminInventory);
+router.get('/admin/stats', inventoryController.getAdminStats);
+router.get('/admin/export', inventoryController.exportAdminInventory);
+router.post('/admin/import', upload.single('csvFile'), inventoryController.importAdminInventory);
+
+// Rutas específicas para Store Manager
+router.get('/store-manager/inventory', inventoryController.getStoreManagerInventory);
+router.get('/store-manager/stats/:storeId', inventoryController.getStoreManagerStats);
+router.get('/store-manager/movements/:storeId', inventoryController.getStoreManagerMovements);
+router.get('/store-manager/export', inventoryController.exportStoreManagerInventory);
+router.post('/store-manager/import', upload.single('csvFile'), inventoryController.importStoreManagerInventory);
 
 export default router;

@@ -136,6 +136,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
           icon: Package
         },
         {
+          name: t('sidebar.admin.inventory'),
+          path: '/admin/inventory',
+          icon: Package
+        },
+        {
           name: t('sidebar.admin.categories'),
           path: '/admin/categories',
           icon: Database
@@ -144,6 +149,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
           name: t('sidebar.admin.subcategories'),
           path: '/admin/subcategories',
           icon: FolderOpen
+        },
+        {
+          name: 'Configuración de Maestros',
+          path: '/admin/master-configuration',
+          icon: Settings
         },
         {
           name: t('sidebar.admin.promotions'),

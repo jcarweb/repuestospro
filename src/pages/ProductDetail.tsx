@@ -9,7 +9,6 @@ import {
   Truck, 
   Shield, 
   Heart,
-  Share2,
   Tag,
   Hash,
   ZoomIn
@@ -18,8 +17,10 @@ import { useCart } from '../contexts/CartContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../contexts/AuthContext';
 import { productService, type Product, type RelatedProduct } from '../services/productService';
+import ShareButtons from '../components/ShareButtons';
 import ImageTest from '../components/ImageTest';
-import ImageDiagnostic from '../components/ImageDiagnostic';
+import AuthModal from '../components/AuthModal';
+// import ImageDiagnostic from '../components/ImageDiagnostic'; // OCULTO TEMPORALMENTE
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +36,7 @@ const ProductDetail: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [showZoom, setShowZoom] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [notification, setNotification] = useState<{
     type: 'success' | 'error' | 'info';
     message: string;
@@ -104,7 +106,7 @@ const ProductDetail: React.FC = () => {
 
     if (!user) {
       showNotification('info', 'Debes iniciar sesión para agregar productos al carrito');
-      navigate('/login');
+      setShowAuthModal(true);
       return;
     }
 
@@ -137,7 +139,7 @@ const ProductDetail: React.FC = () => {
   const handleToggleFavorite = () => {
     if (!user) {
       showNotification('info', 'Debes iniciar sesión para agregar favoritos');
-      navigate('/login');
+      setShowAuthModal(true);
       return;
     }
 
@@ -159,23 +161,6 @@ const ProductDetail: React.FC = () => {
     }
   };
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: product?.name,
-          text: product?.description,
-          url: window.location.href
-        });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    } else {
-      // Fallback para navegadores que no soportan Web Share API
-      navigator.clipboard.writeText(window.location.href);
-      showNotification('success', 'Enlace copiado al portapapeles');
-    }
-  };
 
   const handleRelatedProductClick = (productId: string) => {
     navigate(`/product/${productId}`);
@@ -427,6 +412,22 @@ const ProductDetail: React.FC = () => {
                 </span>
               </div>
 
+              {/* Tipo de Despacho */}
+              {product.deliveryType && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Tipo de despacho:</span>
+                  <span className={`font-medium ${
+                    product.deliveryType === 'delivery_motorizado' ? 'text-blue-600' : 'text-orange-600'
+                  }`}>
+                    {product.deliveryType === 'delivery_motorizado' ? (
+                      <>🚚 Delivery motorizado</>
+                    ) : (
+                      <>📦 Recogida (Pick up)</>
+                    )}
+                  </span>
+                </div>
+              )}
+
               {product.stock > 0 && (
                 <div className="flex items-center space-x-4">
                   <label className="text-sm font-medium text-gray-700">
@@ -460,7 +461,7 @@ const ProductDetail: React.FC = () => {
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 flex items-center justify-center space-x-2 bg-[#FFC300] text-[#333333] py-3 px-6 rounded-lg hover:bg-[#FFB800] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ShoppingCart className="w-5 h-5" />
                 <span>{isInCart(product._id) ? 'Actualizar carrito' : 'Agregar al carrito'}</span>
@@ -477,12 +478,13 @@ const ProductDetail: React.FC = () => {
                 <Heart className={`w-5 h-5 ${isFavorite(product._id) ? 'fill-current' : ''}`} />
               </button>
               
-              <button 
-                onClick={handleShare}
+              <ShareButtons
+                productId={product._id}
+                productName={product.name}
+                productPrice={product.price}
+                productImage={product.images && product.images.length > 0 ? product.images[0] : undefined}
                 className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <Share2 className="w-5 h-5 text-gray-600" />
-              </button>
+              />
             </div>
 
             {/* Información adicional */}
@@ -554,11 +556,17 @@ const ProductDetail: React.FC = () => {
                         src={relatedProduct.images[0]}
                         alt={relatedProduct.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center';
+                        }}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <Package className="w-12 h-12" />
-                      </div>
+                      <img
+                        src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center"
+                        alt={relatedProduct.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
                     )}
                   </div>
                   
@@ -581,15 +589,15 @@ const ProductDetail: React.FC = () => {
           </div>
         )}
 
-        {/* Diagnóstico de imágenes (solo para desarrollo) */}
-        {process.env.NODE_ENV === 'development' && product && (
+        {/* Diagnóstico de imágenes (solo para desarrollo) - OCULTO TEMPORALMENTE */}
+        {/* {process.env.NODE_ENV === 'development' && product && (
           <div className="mt-8">
             <ImageDiagnostic 
               productImages={product.images || []}
               productName={product.name}
             />
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Modal de zoom de imagen */}
@@ -613,6 +621,12 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de autenticación */}
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+      />
     </div>
   );
 };

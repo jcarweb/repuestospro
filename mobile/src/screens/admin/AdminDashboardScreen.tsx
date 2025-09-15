@@ -11,24 +11,66 @@ import {
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { productService } from '../../services/productService';
 
 interface DashboardStats {
-  totalUsers: number;
-  totalProducts: number;
-  totalOrders: number;
-  totalRevenue: number;
-  activeStores: number;
-  pendingDeliveries: number;
+  users: {
+    total: number;
+    active: number;
+    newThisMonth: number;
+    byRole: Array<{ _id: string; count: number }>;
+  };
+  products: {
+    total: number;
+    active: number;
+    lowStock: number;
+    outOfStock: number;
+    byCategory: Array<{ _id: string; count: number; avgPrice: number }>;
+  };
+  stores: {
+    total: number;
+    active: number;
+    byCity: Array<{ _id: string; count: number }>;
+  };
+  orders: {
+    total: number;
+    pending: number;
+    completed: number;
+    pendingDeliveries: number;
+    recent: Array<any>;
+  };
+  revenue: {
+    total: number;
+    monthly: number;
+  };
 }
+
+type AdminStackParamList = {
+  AdminDashboard: undefined;
+  AdminUsers: undefined;
+  AdminProducts: undefined;
+  AdminStores: undefined;
+  AdminOrders: undefined;
+  AdminReports: undefined;
+  AdminSettings: undefined;
+  StorePhotoCapture: undefined;
+  StorePhotosList: undefined;
+  OrderDetails: { orderId: string };
+};
+
+type AdminDashboardNavigationProp = StackNavigationProp<AdminStackParamList, 'AdminDashboard'>;
 
 const AdminDashboardScreen: React.FC = () => {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<AdminDashboardNavigationProp>();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,19 +81,30 @@ const AdminDashboardScreen: React.FC = () => {
   const loadDashboardStats = async () => {
     try {
       setLoading(true);
-      // Aquí cargarías las estadísticas desde el backend
-      // Por ahora usamos datos de ejemplo
-      const mockStats: DashboardStats = {
-        totalUsers: 1250,
-        totalProducts: 850,
-        totalOrders: 320,
-        totalRevenue: 45678.90,
-        activeStores: 12,
-        pendingDeliveries: 45,
-      };
-      setStats(mockStats);
+      
+      // Cargar estadísticas reales desde el backend
+      const statsResponse = await productService.getDashboardStats();
+      
+      if (statsResponse.success && statsResponse.data) {
+        setStats(statsResponse.data);
+        console.log('✅ Estadísticas del dashboard cargadas:', statsResponse.data);
+      } else {
+        console.warn('⚠️ No se pudieron cargar las estadísticas del dashboard');
+        showToast('No se pudieron cargar las estadísticas', 'warning');
+      }
     } catch (error) {
       console.error('Error cargando estadísticas:', error);
+      showToast('Error al cargar estadísticas del dashboard', 'error');
+      
+      // Fallback a datos mock en caso de error
+      const mockStats: DashboardStats = {
+        users: { total: 0, active: 0, newThisMonth: 0, byRole: [] },
+        products: { total: 0, active: 0, lowStock: 0, outOfStock: 0, byCategory: [] },
+        stores: { total: 0, active: 0, byCity: [] },
+        orders: { total: 0, pending: 0, completed: 0, pendingDeliveries: 0, recent: [] },
+        revenue: { total: 0, monthly: 0 }
+      };
+      setStats(mockStats);
     } finally {
       setLoading(false);
     }
@@ -150,43 +203,44 @@ const AdminDashboardScreen: React.FC = () => {
             {renderStatCard(
               'people-outline',
               'Usuarios',
-              stats.totalUsers.toLocaleString(),
+              stats.users.total.toLocaleString(),
               colors.info
             )}
             {renderStatCard(
               'cube-outline',
               'Productos',
-              stats.totalProducts.toLocaleString(),
+              stats.products.total.toLocaleString(),
               colors.success
             )}
             {renderStatCard(
               'receipt-outline',
               'Pedidos',
-              stats.totalOrders.toLocaleString(),
+              stats.orders.total.toLocaleString(),
               colors.warning
             )}
             {renderStatCard(
               'cash-outline',
               'Ingresos',
-              `$${stats.totalRevenue.toLocaleString()}`,
+              `$${stats.revenue.total.toLocaleString()}`,
               colors.primary
             )}
             {renderStatCard(
               'business-outline',
               'Tiendas Activas',
-              stats.activeStores.toString(),
+              stats.stores.active.toString(),
               colors.info
             )}
             {renderStatCard(
               'car-outline',
               'Entregas Pendientes',
-              stats.pendingDeliveries.toString(),
+              stats.orders.pendingDeliveries.toString(),
               colors.error
             )}
           </View>
         </View>
 
-        {/* Sistema de Enriquecimiento de Datos - Nueva Sección */}
+        {/* Sistema de Enriquecimiento de Datos - Solo para Admin */}
+        {user?.role === 'admin' && (
         <View style={styles.enrichmentSection}>
           <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
             🔍 Sistema de Enriquecimiento de Datos
@@ -196,7 +250,7 @@ const AdminDashboardScreen: React.FC = () => {
             <TouchableOpacity
               style={[styles.enrichmentCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => {
-                navigation.navigate('StorePhotoCapture' as never);
+                navigation.navigate('StorePhotoCapture');
               }}
             >
               <View style={[styles.enrichmentIcon, { backgroundColor: '#10B981' }]}>
@@ -216,7 +270,7 @@ const AdminDashboardScreen: React.FC = () => {
             <TouchableOpacity
               style={[styles.enrichmentCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => {
-                navigation.navigate('StorePhotosList' as never);
+                navigation.navigate('StorePhotosList');
               }}
             >
               <View style={[styles.enrichmentIcon, { backgroundColor: '#8B5CF6' }]}>
@@ -266,6 +320,7 @@ const AdminDashboardScreen: React.FC = () => {
             </View>
           </View>
         </View>
+        )}
 
         {/* Menú de funciones */}
         <View style={styles.menuSection}>
@@ -278,7 +333,7 @@ const AdminDashboardScreen: React.FC = () => {
             'Gestión de Usuarios',
             'Administrar usuarios, roles y permisos',
             () => {
-              navigation.navigate('AdminUsers' as never);
+              navigation.navigate('AdminUsers');
             }
           )}
           
@@ -287,8 +342,7 @@ const AdminDashboardScreen: React.FC = () => {
             'Gestión de Productos',
             'Administrar catálogo de productos',
             () => {
-              // Navegar a gestión de productos
-              // navigation.navigate('ProductManagement');
+              navigation.navigate('AdminProducts');
             }
           )}
           
@@ -297,8 +351,7 @@ const AdminDashboardScreen: React.FC = () => {
             'Gestión de Tiendas',
             'Administrar tiendas y sucursales',
             () => {
-              // Navegar a gestión de tiendas
-              // navigation.navigate('StoreManagement');
+              navigation.navigate('AdminStores');
             }
           )}
           
@@ -307,8 +360,7 @@ const AdminDashboardScreen: React.FC = () => {
             'Gestión de Pedidos',
             'Ver y administrar pedidos',
             () => {
-              // Navegar a gestión de pedidos
-              // navigation.navigate('OrderManagement');
+              navigation.navigate('AdminOrders');
             }
           )}
           
@@ -327,8 +379,7 @@ const AdminDashboardScreen: React.FC = () => {
             'Reportes y Analytics',
             'Ver estadísticas y reportes',
             () => {
-              // Navegar a reportes
-              // navigation.navigate('Reports');
+              navigation.navigate('AdminReports');
             }
           )}
           
@@ -337,8 +388,7 @@ const AdminDashboardScreen: React.FC = () => {
             'Configuración Global',
             'Configurar parámetros del sistema',
             () => {
-              // Navegar a configuración
-              // navigation.navigate('GlobalSettings');
+              navigation.navigate('AdminSettings');
             }
           )}
           
@@ -363,8 +413,7 @@ const AdminDashboardScreen: React.FC = () => {
             <TouchableOpacity
               style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => {
-                // Crear nuevo producto
-                // navigation.navigate('CreateProduct');
+                navigation.navigate('AdminProducts');
               }}
             >
               <Ionicons name="add-circle-outline" size={32} color={colors.primary} />
@@ -389,8 +438,7 @@ const AdminDashboardScreen: React.FC = () => {
             <TouchableOpacity
               style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => {
-                // Ver reportes
-                // navigation.navigate('Reports');
+                navigation.navigate('AdminReports');
               }}
             >
               <Ionicons name="analytics-outline" size={32} color={colors.primary} />
@@ -402,8 +450,7 @@ const AdminDashboardScreen: React.FC = () => {
             <TouchableOpacity
               style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => {
-                // Configuración
-                // navigation.navigate('GlobalSettings');
+                navigation.navigate('AdminSettings');
               }}
             >
               <Ionicons name="settings-outline" size={32} color={colors.primary} />

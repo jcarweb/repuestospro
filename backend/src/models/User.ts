@@ -9,7 +9,7 @@ export interface IUser extends Document {
   phone?: string;
   googleId?: string;
   avatar?: string; // URL de la imagen de perfil
-  role: 'admin' | 'client' | 'delivery' | 'store_manager';
+  role: 'admin' | 'client' | 'delivery' | 'store_manager' | 'seller';
   isEmailVerified: boolean;
   isActive: boolean;
   loginAttempts: number;
@@ -84,6 +84,16 @@ export interface IUser extends Document {
   commissionRate?: number; // porcentaje de comisión por venta
   taxRate?: number; // porcentaje de impuestos
   
+  // Campos específicos para Seller
+  sellerPermissions?: {
+    catalogAccess: boolean;
+    manualDeliveryAssignment: boolean;
+    chatAccess: boolean;
+    orderManagement: boolean;
+    inventoryView: boolean;
+  };
+  assignedStore?: mongoose.Types.ObjectId; // Tienda asignada al vendedor
+  
   // Campos específicos para Admin
   adminPermissions?: {
     userManagement: boolean;
@@ -141,7 +151,7 @@ const userSchema = new Schema<IUser>({
   },
   role: {
     type: String,
-    enum: ['admin', 'client', 'delivery', 'store_manager'],
+    enum: ['admin', 'client', 'delivery', 'store_manager', 'seller'],
     default: 'client'
   },
   isEmailVerified: {
@@ -350,6 +360,34 @@ const userSchema = new Schema<IUser>({
     default: 12 // 12% por defecto
   },
   
+  // Campos específicos para Seller
+  sellerPermissions: {
+    catalogAccess: {
+      type: Boolean,
+      default: true
+    },
+    manualDeliveryAssignment: {
+      type: Boolean,
+      default: true
+    },
+    chatAccess: {
+      type: Boolean,
+      default: true
+    },
+    orderManagement: {
+      type: Boolean,
+      default: true
+    },
+    inventoryView: {
+      type: Boolean,
+      default: true
+    }
+  },
+  assignedStore: {
+    type: Schema.Types.ObjectId,
+    ref: 'Store'
+  },
+  
   // Campos específicos para Admin
   adminPermissions: {
     userManagement: {
@@ -384,6 +422,7 @@ userSchema.index({ location: '2dsphere' });
 userSchema.index({ referralCode: 1 });
 userSchema.index({ deliveryStatus: 1 });
 userSchema.index({ stores: 1 });
+userSchema.index({ assignedStore: 1 });
 
 // Métodos de instancia
 userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {

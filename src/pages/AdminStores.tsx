@@ -25,6 +25,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 import FreeStoreLocationMap from '../components/FreeStoreLocationMap';
+import { userService, User } from '../services/userService';
+import { API_BASE_URL } from '../config/api';
 
 interface Store {
   _id: string;
@@ -136,6 +138,12 @@ const AdminStores: React.FC = () => {
   // Estados para gestión de managers
   const [newManagerEmail, setNewManagerEmail] = useState('');
   
+  // Estados para usuarios disponibles
+  const [availableOwners, setAvailableOwners] = useState<User[]>([]);
+  const [availableManagers, setAvailableManagers] = useState<User[]>([]);
+  const [selectedOwner, setSelectedOwner] = useState<string>('');
+  const [selectedManagers, setSelectedManagers] = useState<string[]>([]);
+  
   // Estado para coordenadas del mapa
   const [selectedCoordinates, setSelectedCoordinates] = useState<{
     latitude: number;
@@ -176,7 +184,7 @@ const AdminStores: React.FC = () => {
         params.append('isActive', selectedStatus === 'active' ? 'true' : 'false');
       }
 
-      const response = await fetch(`http://localhost:5000/api/stores?${params}`, {
+      const response = await fetch(`${API_BASE_URL}/stores?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -220,10 +228,30 @@ const AdminStores: React.FC = () => {
     }
   };
 
+  // Función para cargar usuarios disponibles
+  const loadAvailableUsers = async () => {
+    try {
+      const [ownersResponse, managersResponse] = await Promise.all([
+        userService.getStoreOwners(),
+        userService.getStoreManagers()
+      ]);
+
+      if (ownersResponse.success && ownersResponse.data) {
+        setAvailableOwners(ownersResponse.data);
+      }
+
+      if (managersResponse.success && managersResponse.data) {
+        setAvailableManagers(managersResponse.data);
+      }
+    } catch (error) {
+      console.error('Error cargando usuarios disponibles:', error);
+    }
+  };
+
   // Cargar estadísticas
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/admin/stores/stats', {
+      const response = await fetch(`${API_BASE_URL}/admin/stores/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -243,6 +271,7 @@ const AdminStores: React.FC = () => {
     if (user && token) {
       fetchStores();
       fetchStats();
+      loadAvailableUsers();
     }
   }, [user, token, currentPage, searchTerm, selectedCity, selectedState, selectedStatus]);
 
@@ -259,9 +288,17 @@ const AdminStores: React.FC = () => {
       alert(t('adminStores.errors.requiredFields'));
       return;
     }
+
+    // Validar que se haya seleccionado un propietario
+    if (!selectedOwner) {
+      alert('Por favor selecciona un propietario para la tienda');
+      return;
+    }
     try {
       const storeData = {
         ...formData,
+        owner: selectedOwner,
+        managers: selectedManagers,
         coordinates: {
           latitude: Number(formData.latitude) || 0,
           longitude: Number(formData.longitude) || 0
@@ -275,7 +312,7 @@ const AdminStores: React.FC = () => {
         }
       };
 
-      const response = await fetch('http://localhost:5000/api/stores', {
+      const response = await fetch(`${API_BASE_URL}/stores`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -295,6 +332,8 @@ const AdminStores: React.FC = () => {
           deliveryRadius: '10', minimumOrder: '0', autoAcceptOrders: false
         });
         setSelectedCoordinates(null);
+        setSelectedOwner('');
+        setSelectedManagers([]);
         fetchStores();
         fetchStats();
         alert(t('adminStores.messages.storeCreated'));
@@ -333,7 +372,7 @@ const AdminStores: React.FC = () => {
          }
        };
 
-      const response = await fetch(`http://localhost:5000/api/stores/${selectedStore._id}`, {
+      const response = await fetch(`${API_BASE_URL}/stores/${selectedStore._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -364,7 +403,7 @@ const AdminStores: React.FC = () => {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/stores/${storeId}/deactivate`, {
+      const response = await fetch(`${API_BASE_URL}/stores/${storeId}/deactivate`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -391,7 +430,7 @@ const AdminStores: React.FC = () => {
     if (!selectedStore || !newManagerEmail) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/stores/${selectedStore._id}/managers`, {
+      const response = await fetch(`${API_BASE_URL}/stores/${selectedStore._id}/managers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -423,7 +462,7 @@ const AdminStores: React.FC = () => {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/stores/${selectedStore._id}/managers`, {
+      const response = await fetch(`${API_BASE_URL}/stores/${selectedStore._id}/managers`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -879,6 +918,53 @@ const AdminStores: React.FC = () => {
                 </div>
               </div>
 
+              {/* Selección de propietario y gestores */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
+                    Propietario de la tienda *
+                  </label>
+                  <select
+                    value={selectedOwner}
+                    onChange={(e) => setSelectedOwner(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-[#555555] dark:bg-[#444444] dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFC300]"
+                  >
+                    <option value="">Selecciona un propietario</option>
+                    {availableOwners.map((owner) => (
+                      <option key={owner._id} value={owner._id}>
+                        {owner.name} ({owner.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
+                    Gestores de la tienda (opcional)
+                  </label>
+                  <div className="max-h-32 overflow-y-auto border border-gray-300 dark:border-[#555555] rounded-md p-2">
+                    {availableManagers.map((manager) => (
+                      <label key={manager._id} className="flex items-center space-x-2 py-1">
+                        <input
+                          type="checkbox"
+                          checked={selectedManagers.includes(manager._id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedManagers([...selectedManagers, manager._id]);
+                            } else {
+                              setSelectedManagers(selectedManagers.filter(id => id !== manager._id));
+                            }
+                          }}
+                          className="rounded border-gray-300 text-[#FFC300] focus:ring-[#FFC300]"
+                        />
+                        <span className="text-sm text-gray-700 dark:text-white">
+                          {manager.name} ({manager.email})
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
                              {/* Mapa de ubicación */}
                <div className="mb-6">
                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">{t('adminStores.form.location')}</label>
@@ -967,6 +1053,8 @@ const AdminStores: React.FC = () => {
                    onClick={() => {
                      setShowCreateModal(false);
                      setSelectedCoordinates(null);
+                     setSelectedOwner('');
+                     setSelectedManagers([]);
                      setFormData({
                        name: '', description: '', address: '', city: '', state: '', zipCode: '',
                        country: 'Venezuela', phone: '', email: '', website: '', logo: '', banner: '',
