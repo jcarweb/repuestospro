@@ -22,10 +22,19 @@ try {
     console.log('⚠️  Error en archivo principal, continuando...');
   }
 
-  // Copiar package.json
+  // Copiar package.json y instalar dependencias
   if (fs.existsSync('package.json')) {
     fs.copyFileSync('package.json', path.join('dist', 'package.json'));
     console.log('📋 Copiado package.json a dist/');
+    
+    // Instalar dependencias en el directorio dist
+    console.log('📦 Instalando dependencias en dist/...');
+    try {
+      execSync('npm install --production', { cwd: 'dist', stdio: 'inherit' });
+      console.log('✅ Dependencias instaladas en dist/');
+    } catch (error) {
+      console.log('⚠️  Error instalando dependencias, continuando...');
+    }
   }
 
   // Crear un index.js básico si no se compiló
