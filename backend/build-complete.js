@@ -48,6 +48,15 @@ try {
     } catch (error) {
       console.log('⚠️  Error instalando dependencias, continuando...');
     }
+
+    // Corregir imports en archivos compilados
+    console.log('🔧 Corrigiendo imports...');
+    try {
+      execSync('node fix-imports.js', { stdio: 'inherit' });
+      console.log('✅ Imports corregidos');
+    } catch (error) {
+      console.log('⚠️  Error corrigiendo imports, continuando...');
+    }
   }
 
   // Verificar que el archivo principal existe
