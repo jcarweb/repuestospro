@@ -172,7 +172,7 @@ module.exports = AdminController;
     // Corregir rutas problemáticas
     console.log('🔧 Corrigiendo rutas...');
     try {
-      execSync('node fix-routes.js', { stdio: 'inherit' });
+      execSync('node fix-routes-definitive.js', { stdio: 'inherit' });
       console.log('✅ Rutas corregidas');
     } catch (error) {
       console.log('⚠️  Error corrigiendo rutas, continuando...');
