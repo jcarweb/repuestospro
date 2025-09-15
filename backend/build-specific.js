@@ -168,6 +168,15 @@ module.exports = AdminController;
     } catch (error) {
       console.log('⚠️  Error instalando dependencias, continuando...');
     }
+
+    // Corregir rutas problemáticas
+    console.log('🔧 Corrigiendo rutas...');
+    try {
+      execSync('node fix-routes.js', { stdio: 'inherit' });
+      console.log('✅ Rutas corregidas');
+    } catch (error) {
+      console.log('⚠️  Error corrigiendo rutas, continuando...');
+    }
   }
 
   // Verificar que el archivo principal existe
