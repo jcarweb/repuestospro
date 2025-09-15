@@ -9,7 +9,7 @@
     "dev:network": "node start-with-specific-ip.js",
     "dev:simple": "ts-node --transpile-only ./src/index.ts",
     "dev:windows": "ts-node --transpile-only ./src/index.ts",
-    "build": "tsc --noEmitOnError false --skipLibCheck true --allowJs --target ES2020 --module commonjs --outDir dist --rootDir src src/**/*.ts",
+    "build": "node build-simple.js",
     "build:simple": "tsc --project tsconfig.build.json --noEmitOnError false",
     "build:force": "tsc --project tsconfig.build.json --noEmitOnError false --skipLibCheck true",
     "build:tsnode": "ts-node --transpile-only src/index.ts --build",
