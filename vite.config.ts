@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite' 
 import react from '@vitejs/plugin-react' 
- 
+
 export default defineConfig({ 
   plugins: [react()], 
   server: { 
@@ -13,5 +13,13 @@ export default defineConfig({
         secure: false 
       } 
     } 
-  } 
-}); 
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'terser'
+  },
+  define: {
+    'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'https://piezasyaya-backend.onrender.com')
+  }
+});
