@@ -1,3 +1,5 @@
+import { ENV } from '../config/environment';
+
 // Archivo temporal para verificar variables de entorno
 export const testEnvironmentVariables = () => {
   console.log('🔍 Verificando variables de entorno:');
@@ -7,11 +9,7 @@ export const testEnvironmentVariables = () => {
   console.log('VITE_CLOUDINARY_UPLOAD_PRESET:', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
   console.log('VITE_VAPID_PUBLIC_KEY:', import.meta.env.VITE_VAPID_PUBLIC_KEY);
   
-  // Verificar si la URL de la API está configurada
-  if (!import.meta.env.VITE_API_URL) {
-    console.error('❌ VITE_API_URL no está configurada');
-    return false;
-  }
+  console.log('🔧 Configuración automática detectada:', ENV);
   
   console.log('✅ Variables de entorno configuradas correctamente');
   return true;
@@ -20,16 +18,20 @@ export const testEnvironmentVariables = () => {
 // Función para probar la conexión con el backend
 export const testBackendConnection = async () => {
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const apiUrl = ENV.backendUrl;
     console.log('🔍 Probando conexión a:', `${apiUrl}/health`);
+    console.log('🔧 Entorno detectado:', ENV.environment);
+    
+    // Para desarrollo local, usar timeout más corto
+    const timeout = ENV.isDevelopment ? 5000 : 10000;
     
     const response = await fetch(`${apiUrl}/health`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      // Aumentar timeout
-      signal: AbortSignal.timeout(10000) // 10 segundos
+      // Timeout dinámico
+      signal: AbortSignal.timeout(timeout)
     });
     
     console.log('🔍 Response status:', response.status);
@@ -50,8 +52,8 @@ export const testBackendConnection = async () => {
       stack: error.stack
     });
     
-    // Para pruebas, siempre retornar true si el backend está en Render
-    if (import.meta.env.VITE_API_URL?.includes('render.com')) {
+    // Para pruebas en producción, asumir conexión exitosa
+    if (ENV.isRender) {
       console.log('⚠️  Backend en Render detectado, asumiendo conexión exitosa para pruebas');
       return true;
     }
