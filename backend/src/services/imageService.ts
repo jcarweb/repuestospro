@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { deleteImage, getOptimizedUrl } from '../config/cloudinary';
+import { Request } from 'express';
 
 export interface ImageUploadResult {
   publicId: string;

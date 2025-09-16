@@ -4,6 +4,7 @@ import User from '../models/User';
 
 export interface CryptoAuthRequest extends Request {
   user?: any;
+  headers: any;
 }
 
 export const cryptoAuthMiddleware = async (req: CryptoAuthRequest, res: Response, next: NextFunction) => {

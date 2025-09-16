@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ISearchConfig extends Document {
+  _id: mongoose.Types.ObjectId;
   // Configuración de búsqueda semántica
   semanticSearchEnabled: boolean;
   semanticThreshold: number; // 0-1, umbral para considerar coincidencias semánticas
