@@ -57,16 +57,16 @@ router.get('/stores-needing-renewal', AdminController.getStoresNeedingRenewal);
 // ===== GESTIÓN DE PRODUCTOS =====
 
 // Generar productos de prueba
-router.post('/products/generate', AdminController.prototype.generateProducts);
+router.post('/products/generate', AdminController.generateProducts);
 
 // Regenerar productos con imágenes reales (método de prueba)
-router.post('/products/regenerate-images', AdminController.prototype.regenerateProductsWithRealImages);
+router.post('/products/regenerate-images', AdminController.regenerateProductsWithRealImages);
 
 // Buscar productos por ubicación
 router.get('/products/by-location', AdminController.findProductsByLocation);
 
 // Obtener estadísticas de productos
-router.get('/products/stats', AdminController.prototype.getProductStats);
+router.get('/products/stats', AdminController.getProductStats);
 
 // ===== GESTIÓN DE CLOUDINARY =====
 

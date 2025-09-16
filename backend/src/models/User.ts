@@ -36,7 +36,7 @@ export interface IUser extends Document {
   // Sistema de fidelización
   points: number;
   referralCode: string;
-  referredBy?: string;
+  referredBy?: mongoose.Types.ObjectId;
   totalPurchases: number;
   totalSpent: number;
   loyaltyLevel: 'bronze' | 'silver' | 'gold' | 'platinum';
@@ -504,7 +504,7 @@ userSchema.methods.generateBackupCodes = function(): string[] {
 // Middleware pre-save para generar referralCode si no existe
 userSchema.pre('save', async function(next) {
   try {
-    if (!this.referralCode) {
+    if (!(this as any).referralCode) {
       let referralCode = '';
       let isUnique = false;
       let attempts = 0;
@@ -520,17 +520,17 @@ userSchema.pre('save', async function(next) {
       }
       
       if (isUnique) {
-        this.referralCode = referralCode;
+        (this as any).referralCode = referralCode;
       } else {
         // Si no se puede generar un código único después de maxAttempts, usar timestamp
-        this.referralCode = Date.now().toString(36).toUpperCase();
+        (this as any).referralCode = Date.now().toString(36).toUpperCase();
       }
     }
 
     // Hash password si ha sido modificado y no está ya hasheado
-    if (this.isModified('password') && this.password && !this.password.startsWith('$argon2')) {
+    if (this.isModified('password') && (this as any).password && !(this as any).password.startsWith('$argon2')) {
       try {
-        this.password = await argon2.hash(this.password);
+        (this as any).password = await argon2.hash((this as any).password);
       } catch (error) {
         console.error('Error hashing password:', error);
         // Si hay error en el hash, mantener la contraseña original
@@ -538,9 +538,9 @@ userSchema.pre('save', async function(next) {
     }
 
     // Hash PIN si ha sido modificado y no está ya hasheado
-    if (this.isModified('pin') && this.pin && !this.pin.startsWith('$argon2')) {
+    if (this.isModified('pin') && (this as any).pin && !(this as any).pin.startsWith('$argon2')) {
       try {
-        this.pin = await argon2.hash(this.pin);
+        (this as any).pin = await argon2.hash((this as any).pin);
       } catch (error) {
         console.error('Error hashing PIN:', error);
         // Si hay error en el hash, mantener el PIN original

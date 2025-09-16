@@ -197,7 +197,7 @@ ClaimSchema.index({ warrantyId: 1 });
 ClaimSchema.index({ status: 1, priority: 1 });
 ClaimSchema.index({ assignedAgent: 1, status: 1 });
 ClaimSchema.index({ filedDate: -1 });
-ClaimSchema.index({ deadlineDate: 1, status: 'pending' });
+ClaimSchema.index({ deadlineDate: 1, status: 1 });
 
 // Pre-save middleware para generar claimNumber
 ClaimSchema.pre('save', function(next) {

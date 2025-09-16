@@ -14,7 +14,7 @@ class NotificationController {
   // Suscribirse a notificaciones push
   async subscribeToPush(req: Request, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       const { subscription } = req.body;
 
       if (!subscription) {
@@ -53,7 +53,7 @@ class NotificationController {
   // Desuscribirse de notificaciones push
   async unsubscribeFromPush(req: Request, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
 
       const user = await User.findById(userId);
       if (!user) {
