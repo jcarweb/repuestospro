@@ -1,6 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IDelivery extends Document {
+  _id: mongoose.Types.ObjectId;
+  save(): Promise<this>;
   orderId: mongoose.Types.ObjectId;
   storeId: mongoose.Types.ObjectId;
   customerId: mongoose.Types.ObjectId;

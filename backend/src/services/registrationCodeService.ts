@@ -108,6 +108,7 @@ export class RegistrationCodeService {
   // Listar códigos de registro
   static async listRegistrationCodes(
     adminId: string,
+    role: string,
     options: {
       page: number;
       limit: number;

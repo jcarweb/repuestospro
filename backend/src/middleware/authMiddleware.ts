@@ -17,6 +17,14 @@ export interface AuthenticatedRequest extends Request {
     isActive?: boolean;
     isEmailVerified?: boolean;
   };
+  body: any;
+  params: any;
+  query: any;
+  ip: string;
+  get: (name: string) => string | undefined;
+  file?: any;
+  files?: any;
+  headers: any;
 }
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {

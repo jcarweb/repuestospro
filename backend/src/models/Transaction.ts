@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ITransaction extends Document {
+  _id: mongoose.Types.ObjectId;
   transactionNumber: string;
   userId: mongoose.Types.ObjectId;
   storeId: mongoose.Types.ObjectId;
