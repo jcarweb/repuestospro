@@ -347,7 +347,7 @@ export class PromotionService {
       if (!hasProduct) return false;
 
       // Verificar si la promoción es válida
-      return promotion.isValid();
+      return (promotion as any).isValid();
     } catch (error) {
       return false;
     }

@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { ChatService } from '../services/ChatService';
 import Chat from '../models/Chat';
 import ChatMessage from '../models/ChatMessage';
@@ -13,7 +14,7 @@ export class ChatController {
   async createChat(req: Request, res: Response) {
     try {
       const { storeId, productId } = req.body;
-      const clientId = (req as any).user._id;
+      const clientId = (req as AuthenticatedRequest).user?._id;
       const userRole = (req as any).user.role;
 
       // Solo clientes pueden iniciar chats
@@ -74,7 +75,7 @@ export class ChatController {
   // Obtener chats del usuario
   async getUserChats(req: Request, res: Response) {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const userRole = (req as any).user.role;
 
       let chats;
@@ -100,7 +101,7 @@ export class ChatController {
         .populate('lastMessage')
         .populate('product', 'name sku images')
         .populate('participants.client', 'name email')
-        .sort({ lastActivity: -1 });
+        .sort({ lastActivity: -1 } as any);
       } else if (userRole === 'admin') {
         // Admins pueden ver todos los chats
         chats = await Chat.find({})
@@ -108,7 +109,7 @@ export class ChatController {
         .populate('product', 'name sku images')
         .populate('participants.client', 'name email')
         .populate('participants.store', 'name')
-        .sort({ lastActivity: -1 })
+        .sort({ lastActivity: -1 } as any)
         .limit(100); // Limitar para admins
       } else {
         return res.status(403).json({
@@ -137,7 +138,7 @@ export class ChatController {
   async getChatById(req: Request, res: Response) {
     try {
       const { chatId } = req.params;
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const userRole = (req as any).user.role;
 
       const chat = await this.chatService.getChatById(chatId);
@@ -193,7 +194,7 @@ export class ChatController {
     try {
       const { chatId } = req.params;
       const { page = 1, limit = 50 } = req.query;
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const userRole = (req as any).user.role;
 
       // Verificar acceso al chat (similar a getChatById)
@@ -234,7 +235,7 @@ export class ChatController {
         chatId,
         'validation.isBlocked': false // Solo mensajes no bloqueados
       })
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1 } as any)
       .skip(skip)
       .limit(limitNum)
       .populate('sender.userId', 'name email')
@@ -270,7 +271,7 @@ export class ChatController {
   async closeChat(req: Request, res: Response) {
     try {
       const { chatId } = req.params;
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const userRole = (req as any).user.role;
 
       const chat = await Chat.findById(chatId);
@@ -403,7 +404,7 @@ export class ChatController {
   async getStoreChats(req: Request, res: Response) {
     try {
       const { storeId } = req.params;
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const userRole = (req as any).user.role;
 
       // Verificar que el usuario tiene acceso a la tienda
@@ -437,7 +438,7 @@ export class ChatController {
       .populate('lastMessage')
       .populate('product', 'name sku images')
       .populate('participants.client', 'name email')
-      .sort({ lastActivity: -1 });
+      .sort({ lastActivity: -1 } as any);
 
       // Enriquecer con información adicional
       const enrichedChats = await Promise.all(chats.map(async (chat) => {
@@ -485,7 +486,7 @@ export class ChatController {
   async getStoreChatStats(req: Request, res: Response) {
     try {
       const { storeId } = req.params;
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const userRole = (req as any).user.role;
 
       // Verificar que el usuario tiene acceso a la tienda
@@ -543,7 +544,7 @@ export class ChatController {
         chatId: { $in: await Chat.find({ 'participants.store': storeId }).distinct('_id') },
         'sender.userType': 'store_manager',
         createdAt: { $gte: thirtyDaysAgo }
-      }).sort({ createdAt: 1 });
+      }).sort({ createdAt: 1 } as any);
 
       let totalResponseTime = 0;
       let responseCount = 0;
@@ -555,7 +556,7 @@ export class ChatController {
             chatId: message.chatId,
             'sender.userType': 'client',
             createdAt: { $lt: message.createdAt }
-          }).sort({ createdAt: -1 }).limit(1);
+          }).sort({ createdAt: -1 } as any).limit(1);
 
           if (clientMessages.length > 0) {
             const responseTime = message.createdAt.getTime() - clientMessages[0].createdAt.getTime();
@@ -594,7 +595,7 @@ export class ChatController {
   async blockChat(req: Request, res: Response) {
     try {
       const { chatId } = req.params;
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const userRole = (req as any).user.role;
 
       const chat = await Chat.findById(chatId);

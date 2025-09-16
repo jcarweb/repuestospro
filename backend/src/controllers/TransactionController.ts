@@ -143,7 +143,7 @@ export class TransactionController {
 
       // Verificar permisos
       if (userRole !== 'admin' && 
-          transaction.userId.toString() !== userId && 
+          transaction.userId?.toString() || '' !== userId && 
           transaction.storeId.toString() !== (req as any).user.storeId) {
         return res.status(403).json({
           success: false,
@@ -195,7 +195,7 @@ export class TransactionController {
 
       // Verificar permisos (solo admin, usuario propietario o store manager de la tienda)
       if (userRole !== 'admin' && 
-          transaction.userId.toString() !== userId && 
+          transaction.userId?.toString() || '' !== userId && 
           transaction.storeId.toString() !== (req as any).user.storeId) {
         return res.status(403).json({
           success: false,
@@ -360,7 +360,7 @@ export class TransactionController {
 
       // Verificar permisos
       if (userRole !== 'admin' && 
-          transaction.userId.toString() !== userId && 
+          transaction.userId?.toString() || '' !== userId && 
           transaction.storeId.toString() !== (req as any).user.storeId) {
         return res.status(403).json({
           success: false,
@@ -369,7 +369,7 @@ export class TransactionController {
       }
 
       // Verificar si se puede cancelar
-      if (!transaction.canBeCancelled()) {
+      if (!(transaction as any).canBeCancelled()) {
         return res.status(400).json({
           success: false,
           message: 'La transacción no puede ser cancelada en su estado actual'

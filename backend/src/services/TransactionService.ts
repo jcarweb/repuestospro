@@ -186,7 +186,7 @@ export class TransactionService {
         if (item.warrantyIncluded && item.warrantyType && item.warrantyType !== 'none') {
           await WarrantyService.createWarranty({
             type: 'purchase_protection',
-            userId: transaction.userId.toString(),
+            userId: transaction.userId?.toString() || '',
             storeId: transaction.storeId.toString(),
             transactionId: transaction._id.toString(),
             productId: item.productId.toString(),

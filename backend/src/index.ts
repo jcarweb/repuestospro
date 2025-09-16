@@ -356,9 +356,9 @@ app.get('/api/profile/admin', async (req, res) => {
     
     res.json({
       data: {
-        _id: user._id,
+        _id: (user as any)._id,
         name: user.name,
-        email: user.email,
+        email: (user as any).email,
         phone: user.phone,
         avatar: user.avatar || '/uploads/perfil/default-avatar.svg',
         role: user.role,
@@ -367,7 +367,7 @@ app.get('/api/profile/admin', async (req, res) => {
         pin: user.pin,
         fingerprintEnabled: user.fingerprintEnabled || false,
         twoFactorEnabled: user.twoFactorEnabled || false,
-        emailNotifications: user.emailNotifications !== undefined ? user.emailNotifications : true,
+        emailNotifications: (user as any).emailNotifications !== undefined ? (user as any).emailNotifications : true,
         pushNotifications: user.pushNotifications !== undefined ? user.pushNotifications : true,
         marketingEmails: user.marketingEmails || false,
         theme: user.theme || 'light',

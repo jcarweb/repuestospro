@@ -1,4 +1,6 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import Advertisement, { IAdvertisement } from '../models/Advertisement';
 import Store from '../models/Store';
 import User from '../models/User';
@@ -43,7 +45,7 @@ export const getAllAdvertisements = async (req: Request, res: Response) => {
       sort: { createdAt: -1 }
     };
 
-    const advertisements = await Advertisement.paginate(query, options);
+    const advertisements = await (Advertisement as any).paginate(query, options);
 
     res.json({
       success: true,
@@ -175,7 +177,7 @@ export const createAdvertisement = async (req: Request, res: Response) => {
       targetAudience,
       schedule,
       displaySettings,
-      createdBy: req.user?._id
+      createdBy: (req as AuthenticatedRequest).user?._id
     });
 
     await advertisement.save();
@@ -318,7 +320,7 @@ export const changeAdvertisementStatus = async (req: Request, res: Response) => 
     advertisement.status = status;
     
     if (status === 'approved') {
-      advertisement.approvedBy = req.user?._id;
+      advertisement.approvedBy = new mongoose.Types.ObjectId((req as AuthenticatedRequest).user?._id);
       advertisement.approvedAt = new Date();
     } else if (status === 'rejected') {
       advertisement.rejectionReason = rejectionReason;
@@ -565,7 +567,7 @@ export const recordImpression = async (req: Request, res: Response) => {
       });
     }
 
-    advertisement.recordImpression(userData);
+    (advertisement as any).recordImpression(userData);
     await advertisement.save();
 
     res.json({
@@ -603,7 +605,7 @@ export const recordClick = async (req: Request, res: Response) => {
       });
     }
 
-    advertisement.recordClick();
+    (advertisement as any).recordClick();
     await advertisement.save();
 
     res.json({
@@ -710,8 +712,8 @@ export const getAdvertisementTemplates = async (req: Request, res: Response) => 
 // Crear publicidad autogestionada (Nivel 1)
 export const createSelfManagedAdvertisement = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user._id;
-    const userRole = (req as any).user.role;
+    const userId = (req as AuthenticatedRequest).user?._id;
+    const userRole = (req as AuthenticatedRequest).user?.role;
     const advertisementData = req.body;
 
     // Validar datos requeridos para publicidad autogestionada
@@ -779,7 +781,7 @@ export const createSelfManagedAdvertisement = async (req: Request, res: Response
 // Solicitar publicidad premium gestionada (Nivel 2)
 export const requestPremiumAdvertisement = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user._id;
+    const userId = (req as AuthenticatedRequest).user?._id;
     const advertisementData = req.body;
 
     // Validar datos requeridos para publicidad premium
@@ -953,7 +955,7 @@ export const getAdvertisementRequests = async (req: Request, res: Response) => {
       }
     };
 
-    const requests = await Advertisement.paginate(query, options);
+    const requests = await (Advertisement as any).paginate(query, options);
 
     res.json({
       success: true,
@@ -979,7 +981,7 @@ export const approveAdvertisementRequest = async (req: Request, res: Response) =
   try {
     const { id } = req.params;
     const { notes } = req.body;
-    const adminId = (req as any).user._id;
+    const adminId = (req as AuthenticatedRequest).user?._id;
 
     const advertisement = await Advertisement.findById(id);
     if (!advertisement) {
@@ -990,7 +992,7 @@ export const approveAdvertisementRequest = async (req: Request, res: Response) =
     }
 
     advertisement.status = 'approved';
-    advertisement.approvedBy = adminId;
+    advertisement.approvedBy = new mongoose.Types.ObjectId(adminId);
     advertisement.approvedAt = new Date();
     
     if (notes) {
@@ -1019,7 +1021,7 @@ export const rejectAdvertisementRequest = async (req: Request, res: Response) =>
   try {
     const { id } = req.params;
     const { rejectionReason, notes } = req.body;
-    const adminId = (req as any).user._id;
+    const adminId = (req as AuthenticatedRequest).user?._id;
 
     if (!rejectionReason) {
       return res.status(400).json({
@@ -1038,7 +1040,7 @@ export const rejectAdvertisementRequest = async (req: Request, res: Response) =>
 
     advertisement.status = 'rejected';
     advertisement.rejectionReason = rejectionReason;
-    advertisement.approvedBy = adminId;
+    advertisement.approvedBy = new mongoose.Types.ObjectId(adminId);
     advertisement.approvedAt = new Date();
     
     if (notes) {
@@ -1067,7 +1069,7 @@ export const assignAdvertisementRequest = async (req: Request, res: Response) =>
   try {
     const { id } = req.params;
     const { assignedTo, estimatedCompletion, notes } = req.body;
-    const adminId = (req as any).user._id;
+    const adminId = (req as AuthenticatedRequest).user?._id;
 
     if (!assignedTo || !estimatedCompletion) {
       return res.status(400).json({
@@ -1087,7 +1089,7 @@ export const assignAdvertisementRequest = async (req: Request, res: Response) =>
     advertisement.status = 'in_progress';
     advertisement.assignedTo = assignedTo;
     advertisement.estimatedCompletion = new Date(estimatedCompletion);
-    advertisement.approvedBy = adminId;
+    advertisement.approvedBy = new mongoose.Types.ObjectId(adminId);
     advertisement.approvedAt = new Date();
     
     if (notes) {
@@ -1116,7 +1118,7 @@ export const completeAdvertisementRequest = async (req: Request, res: Response) 
   try {
     const { id } = req.params;
     const { notes } = req.body;
-    const adminId = (req as any).user._id;
+    const adminId = (req as AuthenticatedRequest).user?._id;
 
     const advertisement = await Advertisement.findById(id);
     if (!advertisement) {
@@ -1127,7 +1129,7 @@ export const completeAdvertisementRequest = async (req: Request, res: Response) 
     }
 
     advertisement.status = 'completed';
-    advertisement.approvedBy = adminId;
+    advertisement.approvedBy = new mongoose.Types.ObjectId(adminId);
     advertisement.approvedAt = new Date();
     
     if (notes) {

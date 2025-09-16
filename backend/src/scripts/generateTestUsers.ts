@@ -96,11 +96,11 @@ export async function generateTestUsers() {
     
     // Verificar si ya existen usuarios con estos emails
     const existingEmails = await User.find({
-      email: { $in: testUsers.map(user => user.email) }
+      email: { $in: testUsers.map(user => (user as any).email) }
     }).select('email');
     
-    const existingEmailSet = new Set(existingEmails.map(user => user.email));
-    const newUsers = testUsers.filter(user => !existingEmailSet.has(user.email));
+    const existingEmailSet = new Set(existingEmails.map(user => (user as any).email));
+    const newUsers = testUsers.filter(user => !existingEmailSet.has((user as any).email));
     
     if (newUsers.length === 0) {
       console.log('✅ Todos los usuarios de prueba ya existen en la base de datos');

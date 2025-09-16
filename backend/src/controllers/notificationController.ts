@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import User from '../models/User';
 import webpush from 'web-push';
 import config from '../config/env';
@@ -14,7 +15,7 @@ class NotificationController {
   // Suscribirse a notificaciones push
   async subscribeToPush(req: Request, res: Response) {
     try {
-      const userId = req.user?._id;
+      const userId = (req.user as any)?._id;
       const { subscription } = req.body;
 
       if (!subscription) {
@@ -53,7 +54,7 @@ class NotificationController {
   // Desuscribirse de notificaciones push
   async unsubscribeFromPush(req: Request, res: Response) {
     try {
-      const userId = req.user?._id;
+      const userId = (req.user as any)?._id;
 
       const user = await User.findById(userId);
       if (!user) {
@@ -170,7 +171,7 @@ class NotificationController {
         pushToken: { $exists: true, $ne: null }
       });
 
-      const userIds = users.map(user => user._id.toString());
+      const userIds = users.map(user => (user as any)._id.toString());
       return await this.sendPushToUsers(userIds, notification);
     } catch (error) {
       console.error('Error sending push to all users:', error);
@@ -203,7 +204,7 @@ class NotificationController {
         pushToken: { $exists: true, $ne: null }
       });
 
-      const userIds = users.map(user => user._id.toString());
+      const userIds = users.map(user => (user as any)._id.toString());
       return await this.sendPushToUsers(userIds, notification);
     } catch (error) {
       console.error('Error sending push by role:', error);
@@ -244,7 +245,7 @@ class NotificationController {
         }
       });
 
-      const userIds = users.map(user => user._id.toString());
+      const userIds = users.map(user => (user as any)._id.toString());
       return await this.sendPushToUsers(userIds, notification);
     } catch (error) {
       console.error('Error sending push by location:', error);

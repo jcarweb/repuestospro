@@ -799,7 +799,7 @@ const AdminController = {
         user: {
           id: (user as any)._id.toString(),
           name: user.name,
-          email: user.email,
+          email: (user as any).email,
           phone: user.phone,
           role: user.role,
           isEmailVerified: user.isEmailVerified,
@@ -841,7 +841,7 @@ const AdminController = {
       }
 
       // Verificar si el email ya existe en otro usuario
-      if (email !== user.email) {
+      if (email !== (user as any).email) {
         const existingUser = await User.findOne({ email, _id: { $ne: id } });
         if (existingUser) {
           return res.status(400).json({
@@ -853,7 +853,7 @@ const AdminController = {
 
       // Actualizar el usuario
       user.name = name;
-      user.email = email;
+      (user as any).email = email;
       user.phone = phone;
       user.role = role;
 
@@ -865,7 +865,7 @@ const AdminController = {
         user: {
           id: (user as any)._id.toString(),
           name: user.name,
-          email: user.email,
+          email: (user as any).email,
           phone: user.phone,
           role: user.role,
           isEmailVerified: user.isEmailVerified,
@@ -1023,7 +1023,7 @@ const AdminController = {
       await user.save();
 
       // Enviar email con contraseña temporal y enlace para cambiar
-      await emailService.sendAdminPasswordResetEmail(user.email, user.name, tempPassword, resetToken);
+      await emailService.sendAdminPasswordResetEmail((user as any).email, user.name, tempPassword, resetToken);
 
       res.json({
         success: true,

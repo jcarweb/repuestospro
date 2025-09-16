@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import User, { IUser } from '../models/User';
@@ -14,8 +15,8 @@ export class AuthController {
   private static generateToken(userId: string): string {
     return jwt.sign(
       { userId },
-      config.JWT_SECRET,
-      { expiresIn: config.JWT_EXPIRES_IN }
+      config.JWT_SECRET as string,
+      { expiresIn: config.JWT_EXPIRES_IN as string }
     );
   }
 
@@ -86,20 +87,20 @@ export class AuthController {
       console.log('📋 Datos del usuario a crear:', { ...userData, password: '[HIDDEN]' });
 
       const user = await User.create(userData);
-      console.log('✅ Usuario creado exitosamente:', user._id);
+      console.log('✅ Usuario creado exitosamente:', (user as any)._id);
 
       // Generar token de verificación de email
       console.log('🔍 Generando token de verificación...');
       const emailVerificationToken = AuthController.generateTemporaryToken();
-      user.emailVerificationToken = emailVerificationToken;
-      user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+      (user as any).emailVerificationToken = emailVerificationToken;
+      (user as any).emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
       await user.save();
       console.log('✅ Token de verificación generado');
 
       // Enviar email de verificación
       try {
         console.log('🔍 Enviando email de verificación...');
-        await emailService.sendEmailVerificationEmail(user.email, emailVerificationToken);
+        await emailService.sendEmailVerificationEmail((user as any).email, emailVerificationToken);
         console.log('✅ Email de verificación enviado');
       } catch (emailError) {
         console.error('❌ Error enviando email de verificación:', emailError);
@@ -111,7 +112,7 @@ export class AuthController {
       try {
         console.log('🔍 Registrando actividad...');
         await Activity.create({
-          userId: user._id,
+          userId: (user as any)._id,
           type: 'register',
           description: 'Usuario registrado exitosamente',
           metadata: { ip: req.ip, userAgent: req.get('User-Agent') }
@@ -124,7 +125,7 @@ export class AuthController {
 
       // Generar token JWT
       console.log('🔍 Generando token JWT...');
-      const token = AuthController.generateToken(user._id.toString());
+      const token = AuthController.generateToken((user as any)._id.toString());
       console.log('✅ Token JWT generado');
 
       console.log('🎉 Registro completado exitosamente');
@@ -134,9 +135,9 @@ export class AuthController {
         message: 'Usuario registrado exitosamente. Por favor verifica tu email.',
         data: {
           user: {
-            id: user._id,
+            id: (user as any)._id,
             name: user.name,
-            email: user.email,
+            email: (user as any).email,
             isEmailVerified: user.isEmailVerified,
             role: user.role
           },
@@ -219,9 +220,9 @@ export class AuthController {
           tempToken: tempToken,
           data: {
             user: {
-              id: user._id,
+              id: (user as any)._id,
               name: user.name,
-              email: user.email,
+              email: (user as any).email,
               isEmailVerified: user.isEmailVerified,
               role: user.role,
               fingerprintEnabled: user.fingerprintEnabled,
@@ -237,11 +238,11 @@ export class AuthController {
       await user.resetLoginAttempts();
 
       // Generar token
-      const token = AuthController.generateToken(user._id.toString());
+      const token = AuthController.generateToken((user as any)._id.toString());
 
       // Registrar actividad
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'login',
         description: 'Inicio de sesión exitoso',
         metadata: { ip: req.ip, userAgent: req.get('User-Agent') }
@@ -252,9 +253,9 @@ export class AuthController {
         message: 'Inicio de sesión exitoso',
         data: {
           user: {
-            id: user._id,
+            id: (user as any)._id,
             name: user.name,
-            email: user.email,
+            email: (user as any).email,
             isEmailVerified: user.isEmailVerified,
             role: user.role,
             fingerprintEnabled: user.fingerprintEnabled,
@@ -326,10 +327,10 @@ export class AuthController {
       }
 
       await user.resetLoginAttempts();
-      const token = AuthController.generateToken(user._id.toString());
+      const token = AuthController.generateToken((user as any)._id.toString());
 
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'login',
         description: 'Inicio de sesión con PIN exitoso',
         metadata: { ip: req.ip, userAgent: req.get('User-Agent') }
@@ -340,9 +341,9 @@ export class AuthController {
         message: 'Inicio de sesión exitoso',
         data: {
           user: {
-            id: user._id,
+            id: (user as any)._id,
             name: user.name,
-            email: user.email,
+            email: (user as any).email,
             role: user.role
           },
           token
@@ -358,10 +359,10 @@ export class AuthController {
   }
 
   // Configurar PIN
-  static async setupPin(req: Request, res: Response): Promise<void> {
+  static async setupPin(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { pin } = req.body;
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
 
       if (!pin || pin.length < 4 || pin.length > 6) {
         res.status(400).json({
@@ -384,7 +385,7 @@ export class AuthController {
       await user.save();
 
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'pin_setup',
         description: 'PIN configurado exitosamente'
       });
@@ -403,10 +404,10 @@ export class AuthController {
   }
 
   // Configurar huella digital
-  static async setupFingerprint(req: Request, res: Response): Promise<void> {
+  static async setupFingerprint(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { fingerprintData } = req.body;
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
 
       if (!fingerprintData) {
         res.status(400).json({
@@ -430,7 +431,7 @@ export class AuthController {
       await user.save();
 
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'fingerprint_setup',
         description: 'Huella digital configurada exitosamente'
       });
@@ -489,7 +490,7 @@ export class AuthController {
 
       // Enviar email de recuperación
       try {
-        await emailService.sendPasswordResetEmail(user.email, resetToken, user.name);
+        await emailService.sendPasswordResetEmail((user as any).email, resetToken);
       } catch (emailError) {
         console.error('Error enviando email de recuperación:', emailError);
         res.status(500).json({
@@ -500,7 +501,7 @@ export class AuthController {
       }
 
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'password_reset',
         description: 'Solicitud de recuperación de contraseña',
         metadata: { ip: req.ip }
@@ -543,7 +544,7 @@ export class AuthController {
       await user.save();
 
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'password_reset',
         description: 'Contraseña restablecida exitosamente'
       });
@@ -580,19 +581,19 @@ export class AuthController {
       }
 
       user.isEmailVerified = true;
-      user.emailVerificationToken = undefined;
-      user.emailVerificationExpires = undefined;
+      (user as any).emailVerificationToken = undefined;
+      (user as any).emailVerificationExpires = undefined;
       await user.save();
 
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'email_verification',
         description: 'Email verificado exitosamente'
       });
 
       // Enviar correo de bienvenida específico para cada rol después de la verificación
       try {
-        await emailService.sendWelcomeEmailByRole(user.email, user.name, user.role);
+        await (emailService as any).sendWelcomeEmailByRole((user as any).email, user.name, user.role);
       } catch (emailError) {
         console.error('Error enviando email de bienvenida:', emailError);
         // No fallar la verificación si el email falla
@@ -603,8 +604,8 @@ export class AuthController {
         success: true,
         message: 'Email verificado exitosamente',
         data: {
-          userId: user._id,
-          email: user.email,
+          userId: (user as any)._id,
+          email: (user as any).email,
           isEmailVerified: user.isEmailVerified
         }
       });
@@ -618,9 +619,9 @@ export class AuthController {
   }
 
   // Cerrar sesión
-  static async logout(req: Request, res: Response): Promise<void> {
+  static async logout(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
 
       await Activity.create({
         userId,
@@ -643,9 +644,9 @@ export class AuthController {
   }
 
   // Obtener perfil del usuario
-  static async getProfile(req: Request, res: Response): Promise<void> {
+  static async getProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
       console.log('getProfile - User ID:', userId);
 
       const user = await User.findById(userId).select('-password -fingerprintData -twoFactorSecret -backupCodes');
@@ -659,9 +660,9 @@ export class AuthController {
       }
 
       console.log('getProfile - User found:', {
-        id: user._id,
+        id: (user as any)._id,
         name: user.name,
-        email: user.email,
+        email: (user as any).email,
         role: user.role
       });
 
@@ -679,9 +680,9 @@ export class AuthController {
   }
 
   // Obtener historial de actividades
-  static async getActivityHistory(req: Request, res: Response): Promise<void> {
+  static async getActivityHistory(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
       const { page = 1, limit = 20 } = req.query;
 
       const skip = (Number(page) - 1) * Number(limit);
@@ -711,9 +712,9 @@ export class AuthController {
   }
 
   // Obtener actividades recientes
-  static async getRecentActivity(req: Request, res: Response): Promise<void> {
+  static async getRecentActivity(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
       const { limit = 5 } = req.query;
 
       const activities = await Activity.find({ userId })
@@ -736,9 +737,9 @@ export class AuthController {
 
 
   // Actualizar perfil del usuario
-  static async updateProfile(req: Request, res: Response): Promise<void> {
+  static async updateProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
       const { name, email, phone } = req.body;
 
       // Validar email si se está cambiando
@@ -843,11 +844,11 @@ export class AuthController {
       }
 
       // Generar token JWT
-      const token = AuthController.generateToken(user._id.toString());
+      const token = AuthController.generateToken((user as any)._id.toString());
 
       // Registrar actividad
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'login',
         description: 'Inicio de sesión con Google exitoso',
         metadata: { 
@@ -860,9 +861,9 @@ export class AuthController {
       // Redirigir al frontend con el token
       const frontendUrl = config.CORS_ORIGIN;
       res.redirect(`${frontendUrl}/google-callback?token=${token}&user=${encodeURIComponent(JSON.stringify({
-        id: user._id,
+        id: (user as any)._id,
         name: user.name,
-        email: user.email,
+        email: (user as any).email,
         isEmailVerified: user.isEmailVerified,
         role: user.role
       }))}`);
@@ -904,13 +905,13 @@ export class AuthController {
 
       // Generar nuevo token de verificación
       const emailVerificationToken = AuthController.generateTemporaryToken();
-      user.emailVerificationToken = emailVerificationToken;
-      user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+      (user as any).emailVerificationToken = emailVerificationToken;
+      (user as any).emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
       await user.save();
 
       // Enviar email de verificación
       try {
-        await emailService.sendEmailVerificationEmail(user.email, emailVerificationToken);
+        await emailService.sendEmailVerificationEmail((user as any).email, emailVerificationToken);
       } catch (emailError) {
         console.error('Error enviando email de verificación:', emailError);
         res.status(500).json({
@@ -922,7 +923,7 @@ export class AuthController {
 
       // Registrar actividad
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'email_verification',
         description: 'Email de verificación reenviado',
         metadata: { ip: req.ip }
@@ -991,11 +992,11 @@ export class AuthController {
         }
 
         user = await User.create(userData);
-        console.log('✅ Usuario creado exitosamente con Google:', user._id);
+        console.log('✅ Usuario creado exitosamente con Google:', (user as any)._id);
 
         // Registrar actividad
         await Activity.create({
-          userId: user._id,
+          userId: (user as any)._id,
           type: 'user_registration',
           description: 'Usuario registrado con Google',
           metadata: { 
@@ -1004,18 +1005,18 @@ export class AuthController {
           }
         });
       } else {
-        console.log('👤 Usuario existente encontrado:', user._id);
+        console.log('👤 Usuario existente encontrado:', (user as any)._id);
         
         // Actualizar información de Google si es necesario
         if (!user.googleId) {
           user.googleId = userInfo.id;
-          user.profilePicture = picture;
+          (user as any).profilePicture = picture;
           await user.save();
         }
 
         // Registrar actividad
         await Activity.create({
-          userId: user._id,
+          userId: (user as any)._id,
           type: 'user_login',
           description: 'Inicio de sesión con Google',
           metadata: { 
@@ -1026,9 +1027,9 @@ export class AuthController {
       }
 
       // Generar token JWT
-      const token = AuthController.generateToken(user._id);
+      const token = AuthController.generateToken((user as any)._id);
 
-      console.log('✅ Login con Google exitoso para usuario:', user._id);
+      console.log('✅ Login con Google exitoso para usuario:', (user as any)._id);
 
       res.json({
         success: true,
@@ -1036,11 +1037,11 @@ export class AuthController {
         data: {
           token,
           user: {
-            id: user._id,
+            id: (user as any)._id,
             name: user.name,
-            email: user.email,
+            email: (user as any).email,
             role: user.role,
-            profilePicture: user.profilePicture,
+            profilePicture: (user as any).profilePicture,
             isEmailVerified: user.isEmailVerified
           }
         }
@@ -1100,11 +1101,11 @@ export class AuthController {
       }
 
       // Generar token
-      const token = AuthController.generateToken(user._id.toString());
+      const token = AuthController.generateToken((user as any)._id.toString());
 
       // Registrar actividad
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'login',
         description: 'Inicio de sesión con huella digital exitoso',
         metadata: { 
@@ -1119,9 +1120,9 @@ export class AuthController {
         message: 'Inicio de sesión exitoso',
         data: {
           user: {
-            id: user._id,
+            id: (user as any)._id,
             name: user.name,
-            email: user.email,
+            email: (user as any).email,
             role: user.role
           },
           token
@@ -1137,9 +1138,9 @@ export class AuthController {
   }
 
   // Generar secreto 2FA
-  static async generateTwoFactorSecret(req: Request, res: Response): Promise<void> {
+  static async generateTwoFactorSecret(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
       const user = await User.findById(userId).select('+twoFactorSecret');
 
       if (!user) {
@@ -1152,7 +1153,7 @@ export class AuthController {
 
       // Generar secreto
       const secret = speakeasy.generateSecret({
-        name: `PiezasYA (${user.email})`,
+        name: `PiezasYA (${(user as any).email})`,
         issuer: 'PiezasYA'
       });
 
@@ -1180,9 +1181,9 @@ export class AuthController {
   }
 
   // Habilitar 2FA
-  static async enableTwoFactor(req: Request, res: Response): Promise<void> {
+  static async enableTwoFactor(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
       const { secret, code } = req.body;
 
       console.log('Habilitando 2FA para usuario:', userId);
@@ -1206,7 +1207,7 @@ export class AuthController {
         return;
       }
 
-      console.log('Usuario encontrado:', user.email);
+      console.log('Usuario encontrado:', (user as any).email);
 
       // Verificar código
       const isValid = speakeasy.totp.verify({
@@ -1240,7 +1241,7 @@ export class AuthController {
       console.log('Registrando actividad...');
       // Registrar actividad
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'two_factor_enabled',
         description: 'Autenticación de dos factores habilitada'
       });
@@ -1264,9 +1265,9 @@ export class AuthController {
   }
 
   // Deshabilitar 2FA
-  static async disableTwoFactor(req: Request, res: Response): Promise<void> {
+  static async disableTwoFactor(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
       const { code } = req.body;
 
       if (!code) {
@@ -1314,7 +1315,7 @@ export class AuthController {
 
       // Registrar actividad
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'two_factor_disabled',
         description: 'Autenticación de dos factores deshabilitada'
       });
@@ -1333,10 +1334,10 @@ export class AuthController {
   }
 
   // Verificar código 2FA
-  static async verifyTwoFactorCode(req: Request, res: Response): Promise<void> {
+  static async verifyTwoFactorCode(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { code } = req.body;
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
 
       if (!code) {
         res.status(400).json({
@@ -1455,11 +1456,11 @@ export class AuthController {
       await user.resetLoginAttempts();
 
       // Generar token final
-      const token = AuthController.generateToken(user._id.toString());
+      const token = AuthController.generateToken((user as any)._id.toString());
 
       // Registrar actividad
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'two_factor_verification',
         description: 'Verificación de dos factores exitosa durante login',
         metadata: { ip: req.ip, userAgent: req.get('User-Agent') }
@@ -1470,9 +1471,9 @@ export class AuthController {
         message: 'Inicio de sesión exitoso con 2FA',
         data: {
           user: {
-            id: user._id,
+            id: (user as any)._id,
             name: user.name,
-            email: user.email,
+            email: (user as any).email,
             isEmailVerified: user.isEmailVerified,
             role: user.role,
             fingerprintEnabled: user.fingerprintEnabled,
@@ -1491,12 +1492,12 @@ export class AuthController {
   }
 
   // Cambiar contraseña
-  static async changePassword(req: Request, res: Response): Promise<void> {
+  static async changePassword(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       console.log('🔍 ChangePassword - Request body:', req.body);
       console.log('🔍 ChangePassword - User from request:', (req as any).user);
       
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
       const { currentPassword, newPassword } = req.body;
 
       console.log('🔍 ChangePassword - UserId:', userId);
@@ -1563,7 +1564,7 @@ export class AuthController {
 
       // Registrar actividad
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'password_changed',
         description: 'Contraseña cambiada exitosamente',
         metadata: { ip: req.ip, userAgent: req.get('User-Agent') }
@@ -1583,9 +1584,9 @@ export class AuthController {
   }
 
   // Generar nuevos códigos de respaldo
-  static async generateNewBackupCodes(req: Request, res: Response): Promise<void> {
+  static async generateNewBackupCodes(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
       const user = await User.findById(userId).select('+backupCodes');
 
       if (!user) {
@@ -1611,7 +1612,7 @@ export class AuthController {
 
       // Registrar actividad
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'backup_codes_regenerated',
         description: 'Códigos de respaldo regenerados'
       });
@@ -1633,9 +1634,9 @@ export class AuthController {
   }
 
   // Verificar token
-  static async verifyToken(req: Request, res: Response): Promise<void> {
+  static async verifyToken(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
       const user = await User.findById(userId).select('-password -twoFactorSecret -backupCodes');
 
       if (!user) {
@@ -1651,9 +1652,9 @@ export class AuthController {
         message: 'Token válido',
         data: {
           user: {
-            id: user._id,
+            id: (user as any)._id,
             name: user.name,
-            email: user.email,
+            email: (user as any).email,
             phone: user.phone,
             role: user.role,
             isEmailVerified: user.isEmailVerified,
@@ -1661,7 +1662,7 @@ export class AuthController {
             pin: user.pin,
             fingerprintEnabled: user.fingerprintEnabled,
             twoFactorEnabled: user.twoFactorEnabled,
-            emailNotifications: user.emailNotifications,
+            emailNotifications: (user as any).emailNotifications,
             pushNotifications: user.pushNotifications,
             marketingEmails: user.marketingEmails,
             points: user.points,
@@ -1708,44 +1709,7 @@ export class AuthController {
   }
 
   // Verificar código de doble factor
-  static async verifyTwoFactorCode(req: Request, res: Response): Promise<void> {
-    try {
-      const { email, code } = req.body;
-
-      if (!email || !code) {
-        res.status(400).json({ error: 'Email y código requeridos' });
-        return;
-      }
-
-      const user = await User.findOne({ email }).select('+twoFactorSecret');
-
-      if (!user) {
-        res.status(404).json({ error: 'Usuario no encontrado' });
-        return;
-      }
-
-      if (!user.twoFactorEnabled) {
-        res.status(400).json({ error: '2FA no está habilitado para este usuario' });
-        return;
-      }
-
-      // Verificar el código usando la librería speakeasy
-      const verified = speakeasy.totp.verify({
-        secret: user.twoFactorSecret,
-        encoding: 'base32',
-        token: code,
-        window: 2 // Permitir 2 códigos antes y después
-      });
-
-      res.json({
-        valid: verified,
-        message: verified ? 'Código válido' : 'Código inválido'
-      });
-    } catch (error) {
-      console.error('❌ Error verificando código 2FA:', error);
-      res.status(500).json({ error: 'Error interno del servidor' });
-    }
-  }
+  // Función duplicada eliminada
 
   // Obtener configuración de autenticación del usuario
   static async getUserAuthSettings(req: Request, res: Response): Promise<void> {

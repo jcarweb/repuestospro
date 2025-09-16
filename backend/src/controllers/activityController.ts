@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import Activity from '../models/Activity';
 import { IActivity } from '../models/Activity';
 
 class ActivityController {
   // Obtener actividades del usuario autenticado
-  async getUserActivities(req: Request, res: Response) {
+  async getUserActivities(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       const limit = parseInt(req.query.limit as string) || 50;
       const skip = parseInt(req.query.skip as string) || 0;
 
@@ -17,7 +18,7 @@ class ActivityController {
         });
       }
 
-      const activities = await Activity.getUserActivities(userId, limit, skip);
+      const activities = await (Activity as any).getUserActivities(userId, limit, skip);
 
       res.json({
         success: true,
@@ -33,9 +34,9 @@ class ActivityController {
   }
 
   // Obtener estadísticas de actividades del usuario
-  async getActivityStats(req: Request, res: Response) {
+  async getActivityStats(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       const days = parseInt(req.query.days as string) || 30;
 
       if (!userId) {
@@ -45,7 +46,7 @@ class ActivityController {
         });
       }
 
-      const stats = await Activity.getActivityStats(userId, days);
+      const stats = await (Activity as any).getActivityStats(userId, days);
 
       res.json({
         success: true,
@@ -61,9 +62,9 @@ class ActivityController {
   }
 
   // Crear una nueva actividad (usado internamente)
-  async createActivity(req: Request, res: Response) {
+  async createActivity(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       const { type, description, metadata, success, errorMessage } = req.body;
 
       if (!userId) {
@@ -80,7 +81,7 @@ class ActivityController {
         });
       }
 
-      const activity = await Activity.createActivity(
+      const activity = await (Activity as any).createActivity(
         userId,
         type,
         description,

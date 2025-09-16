@@ -84,8 +84,8 @@ class ClientNotificationController {
         });
       }
 
-      const notifications = await Notification.getUnread(userId.toString(), Number(limit));
-      const unreadCount = await Notification.countUnread(userId.toString());
+      const notifications = await (Notification as any).getUnread(userId?.toString() || '', Number(limit));
+      const unreadCount = await (Notification as any).countUnread(userId?.toString() || '');
 
       res.json({
         success: true,
@@ -116,7 +116,7 @@ class ClientNotificationController {
         });
       }
 
-      const notification = await Notification.markAsRead(notificationId, userId.toString());
+      const notification = await (Notification as any).markAsRead(notificationId, userId?.toString() || '');
       
       if (!notification) {
         return res.status(404).json({
@@ -126,7 +126,7 @@ class ClientNotificationController {
       }
 
       // Obtener nuevo conteo de no leídas
-      const unreadCount = await Notification.countUnread(userId.toString());
+      const unreadCount = await (Notification as any).countUnread(userId?.toString() || '');
 
       res.json({
         success: true,
@@ -165,10 +165,10 @@ class ClientNotificationController {
         });
       }
 
-      await Notification.markMultipleAsRead(notificationIds, userId.toString());
+      await (Notification as any).markMultipleAsRead(notificationIds, userId?.toString() || '');
       
       // Obtener nuevo conteo de no leídas
-      const unreadCount = await Notification.countUnread(userId.toString());
+      const unreadCount = await (Notification as any).countUnread(userId?.toString() || '');
 
       res.json({
         success: true,
@@ -198,7 +198,7 @@ class ClientNotificationController {
         });
       }
 
-      await Notification.markAllAsRead(userId.toString());
+      await (Notification as any).markAllAsRead(userId?.toString() || '');
 
       res.json({
         success: true,
@@ -229,7 +229,7 @@ class ClientNotificationController {
         });
       }
 
-      const notification = await Notification.archive(notificationId, userId.toString());
+      const notification = await (Notification as any).archive(notificationId, userId?.toString() || '');
       
       if (!notification) {
         return res.status(404).json({
@@ -335,7 +335,7 @@ class ClientNotificationController {
         isArchived: false
       });
 
-      const unreadCount = await Notification.countUnread(userId.toString());
+      const unreadCount = await (Notification as any).countUnread(userId?.toString() || '');
 
       res.json({
         success: true,
@@ -370,7 +370,7 @@ class ClientNotificationController {
         });
       }
 
-      const notification = await Notification.createForUser(userId.toString(), {
+      const notification = await (Notification as any).createForUser(userId?.toString() || '', {
         title: 'Notificación de Prueba',
         message: 'Esta es una notificación de prueba para verificar el sistema.',
         type,

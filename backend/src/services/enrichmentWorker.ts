@@ -62,7 +62,7 @@ export class EnrichmentWorker {
           await this.enrichPhoto(photo);
         } catch (error) {
           console.error(`Error enriqueciendo foto ${photo._id}:`, error);
-          await this.markPhotoAsError(photo._id, error.message);
+          await this.markPhotoAsError(photo._id, String((error as any).message || 'Error desconocido'));
         }
       }
     } catch (error) {

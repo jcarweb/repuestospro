@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import StorePhoto from '../models/StorePhoto';
 import { enrichmentWorker } from '../services/enrichmentWorker';
 import { CryptoAuth } from '../utils/cryptoAuth';
@@ -39,7 +40,7 @@ export class StorePhotoController {
           imageUrl,
           lat: parseFloat(lat),
           lng: parseFloat(lng),
-          uploadedBy: user._id,
+          uploadedBy: (user as any)._id,
           status: 'pending'
         });
 
@@ -83,7 +84,7 @@ export class StorePhotoController {
 
       // Solo admin puede ver todas las fotos, otros usuarios solo las suyas
       if (user.role !== 'admin') {
-        filter.uploadedBy = user._id;
+        filter.uploadedBy = (user as any)._id;
       }
 
       const photos = await StorePhoto.find(filter)
@@ -132,7 +133,7 @@ export class StorePhotoController {
       }
 
       // Verificar permisos
-      if (user.role !== 'admin' && photo.uploadedBy._id.toString() !== user._id.toString()) {
+      if (user.role !== 'admin' && photo.uploadedBy._id.toString() !== (user as any)._id.toString()) {
         return res.status(403).json({
           success: false,
           message: 'Acceso denegado'
@@ -176,7 +177,7 @@ export class StorePhotoController {
         }
       } else {
         // Procesar todas las fotos pendientes
-        await enrichmentWorker.processPendingPhotos();
+        await (enrichmentWorker as any).processPendingPhotos();
         
         res.json({
           success: true,
@@ -264,7 +265,7 @@ export class StorePhotoController {
       }
 
       // Verificar permisos
-      if (user.role !== 'admin' && photo.uploadedBy.toString() !== user._id.toString()) {
+      if (user.role !== 'admin' && photo.uploadedBy.toString() !== (user as any)._id.toString()) {
         return res.status(403).json({
           success: false,
           message: 'Acceso denegado'

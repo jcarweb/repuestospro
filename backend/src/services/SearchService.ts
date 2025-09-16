@@ -193,7 +193,7 @@ class SearchService {
     }
 
     // Puntuación por coincidencia exacta
-    const exactMatch = product.name.toLowerCase().includes(query.toLowerCase()) ||
+    const exactMatch = (product as any).name.toLowerCase().includes(query.toLowerCase()) ||
                       product.description.toLowerCase().includes(query.toLowerCase());
     if (exactMatch) score += 5;
 
@@ -224,11 +224,11 @@ class SearchService {
     
     allProducts.forEach(product => {
       const words = [
-        ...(product.name?.toString() || '').toLowerCase().split(/\s+/) || [],
+        ...((product as any).name?.toString() || '').toLowerCase().split(/\s+/) || [],
         ...(product.description?.toString() || '').toLowerCase().split(/\s+/) || [],
         ...(product.category?.toString() || '').toLowerCase().split(/\s+/) || [],
         ...(product.brand?.toString() || '').toLowerCase().split(/\s+/) || [],
-        ...(product.sku?.toString() || '').toLowerCase().split(/\s+/) || [],
+        ...((product as any).sku?.toString() || '').toLowerCase().split(/\s+/) || [],
         ...(product.originalPartCode?.toString() || '').toLowerCase().split(/\s+/) || []
       ];
       words.forEach(word => dictionary.add(word));

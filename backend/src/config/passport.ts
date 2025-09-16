@@ -22,7 +22,7 @@ if (config.GOOGLE_CLIENT_ID && config.GOOGLE_CLIENT_SECRET) {
         if (user) {
           // Usuario ya existe, actualizar información
           user.name = profile.displayName || user.name;
-          user.email = profile.emails?.[0]?.value || user.email;
+          (user as any).email = profile.emails?.[0]?.value || (user as any).email;
           user.googleId = profile.id;
           user.isEmailVerified = true; // Google ya verificó el email
           await user.save();
