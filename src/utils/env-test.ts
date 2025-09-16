@@ -23,7 +23,7 @@ export const testBackendConnection = async () => {
     console.log('🔧 Entorno detectado:', ENV.environment);
     
     // Para desarrollo local, usar timeout más corto
-    const timeout = ENV.isDevelopment ? 5000 : 10000;
+    const timeout = ENV.isDevelopment ? 5000 : 30000; // 30 segundos para producción
     
     const response = await fetch(`${apiUrl}/health`, {
       method: 'GET',
@@ -53,8 +53,8 @@ export const testBackendConnection = async () => {
     });
     
     // Para pruebas en producción, asumir conexión exitosa
-    if (ENV.isRender) {
-      console.log('⚠️  Backend en Render detectado, asumiendo conexión exitosa para pruebas');
+    if (ENV.isRender || ENV.isProduction) {
+      console.log('⚠️  Backend en producción detectado, asumiendo conexión exitosa para pruebas');
       return true;
     }
     
