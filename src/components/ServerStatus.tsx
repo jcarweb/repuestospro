@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Server, Wifi, WifiOff } from 'lucide-react';
+import { ENV } from '../config/environment';
 
 interface ServerStatusProps {
   className?: string;
@@ -14,16 +15,22 @@ const ServerStatus: React.FC<ServerStatusProps> = ({ className = '' }) => {
     
     setIsChecking(true);
     try {
-      const response = await fetch('http://localhost:5000/health', {
+      const healthUrl = `${ENV.backendUrl}/health`;
+      console.log('🔍 ServerStatus verificando:', healthUrl);
+      
+      const response = await fetch(healthUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        // Timeout de 5 segundos
-        signal: AbortSignal.timeout(5000)
+        // Timeout dinámico
+        signal: AbortSignal.timeout(ENV.isDevelopment ? 5000 : 15000)
       });
+      
+      console.log('🔍 ServerStatus response:', response.status, response.ok);
       setIsOnline(response.ok);
     } catch (error) {
+      console.error('❌ ServerStatus error:', error);
       setIsOnline(false);
     } finally {
       setIsChecking(false);
