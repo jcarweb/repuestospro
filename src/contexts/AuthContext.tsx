@@ -223,6 +223,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const hasRole = (role: UserRole): boolean => {
+    console.log('🔍 hasRole check:', { userRole: user?.role, requestedRole: role, match: user?.role === role });
     return user?.role === role;
   };
 
