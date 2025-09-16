@@ -20,7 +20,8 @@ export const testEnvironmentVariables = () => {
 // Función para probar la conexión con el backend
 export const testBackendConnection = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/health`);
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const response = await fetch(`${apiUrl}/health`);
     const data = await response.json();
     console.log('✅ Backend conectado:', data);
     return true;
