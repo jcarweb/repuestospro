@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import SearchService from '../services/SearchService';
 import { authenticateToken, requireAdmin } from '../middleware';
 
@@ -147,7 +148,7 @@ class SearchController {
         autocompleteMaxSuggestions,
         queryAnalysisEnabled,
         intentRecognitionEnabled
-      }, user._id, user.name, user.email);
+      }, (user as any)._id, user.name, (user as any).email);
 
       res.json({
         success: true,

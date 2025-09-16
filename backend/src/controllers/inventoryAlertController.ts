@@ -316,8 +316,8 @@ class InventoryAlertController {
             product: alert.product._id,
             alert: alert._id,
             type: alert.alertType,
-            title: `Alerta de Stock - ${alert.product.name}`,
-            message: `El producto ${alert.product.name} (${alert.product.sku}) tiene ${currentStock} unidades disponibles. Umbral: ${alert.threshold}`,
+            title: `Alerta de Stock - ${(alert.product as any).name}`,
+            message: `El producto ${(alert.product as any).name} (${(alert.product as any).sku}) tiene ${currentStock} unidades disponibles. Umbral: ${alert.threshold}`,
             currentStock,
             threshold: alert.threshold,
             isSent: false

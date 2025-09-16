@@ -3,6 +3,8 @@ import * as argon2 from 'argon2';
 import crypto from 'crypto';
 
 export interface IUser extends Document {
+  _id: mongoose.Types.ObjectId;
+  id: string;
   name: string;
   email: string;
   password: string;
@@ -24,6 +26,11 @@ export interface IUser extends Document {
   passwordResetExpires?: Date;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
+  storeId?: string;
+  rating?: {
+    average: number;
+    totalReviews: number;
+  };
   
   // Ubicación GPS
   location?: {
@@ -410,6 +417,21 @@ const userSchema = new Schema<IUser>({
       type: Boolean,
       default: true
     }
+  },
+  
+  // Campos adicionales
+  storeId: {
+    type: String
+  },
+  rating: {
+    average: {
+      type: Number,
+      default: 0
+    },
+    totalReviews: {
+      type: Number,
+      default: 0
+    }
   }
 }, {
   timestamps: true
@@ -533,7 +555,7 @@ userSchema.pre('save', async function(next) {
         (this as any).password = await argon2.hash((this as any).password);
       } catch (error) {
         console.error('Error hashing password:', error);
-        // Si hay error en el hash, mantener la contraseña original
+        // Si hay error en el hash, timeCost: mantener la contraseña original
       }
     }
 
@@ -543,7 +565,7 @@ userSchema.pre('save', async function(next) {
         (this as any).pin = await argon2.hash((this as any).pin);
       } catch (error) {
         console.error('Error hashing PIN:', error);
-        // Si hay error en el hash, mantener el PIN original
+        // Si hay error en el hash, timeCost: mantener el PIN original
       }
     }
 

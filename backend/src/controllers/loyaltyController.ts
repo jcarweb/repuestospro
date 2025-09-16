@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { LoyaltyService } from '../services/loyaltyService';
 import User from '../models/User';
 import Review from '../models/Review';
@@ -10,8 +11,8 @@ export class LoyaltyController {
   // Obtener estadísticas de fidelización del usuario
   static async getLoyaltyStats(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
-      const stats = await LoyaltyService.getLoyaltyStats(userId.toString());
+      const userId = (req as AuthenticatedRequest).user?._id;
+      const stats = await LoyaltyService.getLoyaltyStats(userId?.toString() || '');
       
       res.json({
         success: true,
@@ -29,8 +30,8 @@ export class LoyaltyController {
   // Obtener premios disponibles
   static async getAvailableRewards(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
-      const rewards = await LoyaltyService.getAvailableRewards(userId.toString());
+      const userId = (req as AuthenticatedRequest).user?._id;
+      const rewards = await LoyaltyService.getAvailableRewards(userId?.toString() || '');
       
       res.json({
         success: true,
@@ -48,7 +49,7 @@ export class LoyaltyController {
   // Canjear premio
   static async redeemReward(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const { rewardId, shippingAddress } = req.body;
 
       if (!rewardId) {
@@ -60,7 +61,7 @@ export class LoyaltyController {
       }
 
       const redemption = await LoyaltyService.redeemReward(
-        userId.toString(),
+        userId?.toString() || '',
         rewardId,
         shippingAddress
       );
@@ -82,7 +83,7 @@ export class LoyaltyController {
   // Enviar calificación
   static async submitReview(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const { productId, orderId, rating, title, comment, category } = req.body;
 
       if (!rating || !comment || !category) {
@@ -102,7 +103,7 @@ export class LoyaltyController {
       }
 
       const result = await LoyaltyService.processReview({
-        userId: userId.toString(),
+        userId: userId?.toString() || '',
         productId,
         orderId,
         rating,
@@ -131,7 +132,7 @@ export class LoyaltyController {
   // Obtener código de referido
   static async getReferralCode(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const user = await User.findById(userId);
 
       if (!user) {
@@ -206,12 +207,12 @@ export class LoyaltyController {
   // Obtener historial de canjes
   static async getRedemptionHistory(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const { page = 1, limit = 10 } = req.query;
 
       const redemptions = await RewardRedemption.find({ userId })
         .populate('rewardId', 'name description image')
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: -1 } as any)
         .limit(Number(limit))
         .skip((Number(page) - 1) * Number(limit));
 
@@ -241,13 +242,13 @@ export class LoyaltyController {
   // Obtener calificaciones del usuario
   static async getUserReviews(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const { page = 1, limit = 10 } = req.query;
 
       const reviews = await Review.find({ userId })
         .populate('productId', 'name image')
         .populate('orderId', 'orderNumber')
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: -1 } as any)
         .limit(Number(limit))
         .skip((Number(page) - 1) * Number(limit));
 
@@ -277,7 +278,7 @@ export class LoyaltyController {
   // Registrar compartir de código de referido
   static async trackReferralShare(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const { platform, shareUrl, shareText } = req.body;
 
       const user = await User.findById(userId);
@@ -290,7 +291,7 @@ export class LoyaltyController {
       }
 
       const tracking = await LoyaltyService.trackReferralShare(
-        userId.toString(),
+        userId?.toString() || '',
         user.referralCode,
         platform,
         shareUrl,
@@ -334,8 +335,8 @@ export class LoyaltyController {
   // Obtener estadísticas de tracking de referidos
   static async getReferralTrackingStats(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
-      const stats = await LoyaltyService.getReferralTrackingStats(userId.toString());
+      const userId = (req as AuthenticatedRequest).user?._id;
+      const stats = await LoyaltyService.getReferralTrackingStats(userId?.toString() || '');
 
       res.json({
         success: true,
@@ -355,7 +356,7 @@ export class LoyaltyController {
   // Obtener todos los premios (admin)
   static async getAllRewards(req: Request, res: Response): Promise<void> {
     try {
-      const rewards = await Reward.find().sort({ createdAt: -1 });
+      const rewards = await Reward.find().sort({ createdAt: -1 } as any);
       
       res.json({
         success: true,
@@ -390,7 +391,7 @@ export class LoyaltyController {
         category,
         stock: Number(stock),
         isActive: isActive === 'true' || isActive === true,
-        createdBy: (req as any).user._id
+        createdBy: (req as AuthenticatedRequest).user?._id
       });
 
       await reward.save();
@@ -461,7 +462,7 @@ export class LoyaltyController {
       const redemptions = await RewardRedemption.find()
         .populate('userId', 'name email')
         .populate('rewardId', 'name description image')
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 } as any);
 
       res.json({
         success: true,
@@ -552,7 +553,7 @@ export class LoyaltyController {
   // Obtener políticas de puntos (admin)
   static async getPointsPolicies(req: Request, res: Response): Promise<void> {
     try {
-      const policies = await PointsPolicy.find().sort({ action: 1 });
+      const policies = await PointsPolicy.find().sort({ action: 1 } as any);
       
       res.json({
         success: true,
@@ -579,7 +580,7 @@ export class LoyaltyController {
       const newPolicies = await PointsPolicy.insertMany(
         policies.map((policy: any) => ({
           ...policy,
-          createdBy: (req as any).user._id
+          createdBy: (req as AuthenticatedRequest).user?._id
         }))
       );
 

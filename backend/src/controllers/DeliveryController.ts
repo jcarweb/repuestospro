@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import Delivery, { IDelivery } from '../models/Delivery';
 import Rider, { IRider } from '../models/Rider';
 import Order from '../models/Order';
@@ -64,7 +65,7 @@ export class DeliveryController {
       });
 
       // Generar código de tracking
-      delivery.trackingCode = delivery.generateTrackingCode();
+      delivery.trackingCode = (delivery as any).generateTrackingCode();
 
       await delivery.save();
 
@@ -295,7 +296,7 @@ export class DeliveryController {
    */
   static async getPersonalDeliveryStats(req: Request, res: Response) {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
 
       // Obtener deliveries asignados al usuario
       const deliveries = await Delivery.find({ riderId: userId });
@@ -406,9 +407,9 @@ export class DeliveryController {
   /**
    * Actualizar estado de disponibilidad del delivery
    */
-  static async updateDeliveryStatus(req: Request, res: Response) {
+  static async updateDeliveryAvailability(req: Request, res: Response) {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const { deliveryStatus, currentLocation } = req.body;
 
       // Actualizar estado del usuario
@@ -447,7 +448,7 @@ export class DeliveryController {
    */
   static async getDeliveryProfile(req: Request, res: Response) {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
 
       const user = await User.findById(userId);
       if (!user) {
@@ -458,10 +459,10 @@ export class DeliveryController {
       const rider = await Rider.findOne({ userId });
 
       const profile = {
-        _id: user._id,
+        _id: (user as any)._id,
         firstName: user.name.split(' ')[0] || user.name,
         lastName: user.name.split(' ').slice(1).join(' ') || '',
-        email: user.email,
+        email: (user as any).email,
         phone: user.phone,
         deliveryStatus: user.deliveryStatus || 'unavailable',
         autoStatusMode: user.autoStatusMode || false,
@@ -566,7 +567,7 @@ export class DeliveryController {
 
       // Si es calificación del cliente, actualizar estadísticas del rider
       if (type === 'customer' && delivery.riderId) {
-        await DeliveryAssignmentService.updateRiderStats(delivery.riderId.toString());
+        await (DeliveryAssignmentService as any).updateRiderStats(delivery.riderId.toString());
       }
 
       res.json({
@@ -601,7 +602,7 @@ export class DeliveryController {
         });
       }
 
-      await delivery.updateStatus('cancelled', reason, req.user?.email);
+      await (delivery as any).updateStatus('cancelled', reason, (req.user as any)?.email);
 
       res.json({
         success: true,

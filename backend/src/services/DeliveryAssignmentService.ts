@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Delivery, { IDelivery } from '../models/Delivery';
 import Rider, { IRider } from '../models/Rider';
 import Order from '../models/Order';
@@ -257,7 +258,7 @@ export class DeliveryAssignmentService {
     config: AssignmentConfig
   ): Promise<RiderCandidate | null> {
     // Verificar distancia
-    const distance = rider.calculateDistanceFrom(
+    const distance = (rider as any).calculateDistanceFrom(
       delivery.pickupLocation.coordinates.lat,
       delivery.pickupLocation.coordinates.lng
     );
@@ -267,7 +268,7 @@ export class DeliveryAssignmentService {
     }
 
     // Verificar si está en zona de servicio
-    if (!rider.isInServiceArea(
+    if (!(rider as any).isInServiceArea(
       delivery.pickupLocation.coordinates.lat,
       delivery.pickupLocation.coordinates.lng
     )) {
@@ -291,7 +292,7 @@ export class DeliveryAssignmentService {
     const availability = this.calculateAvailabilityScore(rider);
 
     // Calcular costo (comisión del rider)
-    const cost = rider.calculateCommission(delivery.deliveryFee);
+    const cost = (rider as any).calculateCommission(delivery.deliveryFee);
 
     // Calcular score final
     const score = this.calculateRiderScore({
@@ -392,7 +393,7 @@ export class DeliveryAssignmentService {
     delivery: IDelivery, 
     rider: IRider
   ): Promise<void> {
-    delivery.riderId = rider._id;
+    delivery.riderId = rider._id as mongoose.Types.ObjectId;
     delivery.riderType = rider.type;
     delivery.riderName = `${rider.firstName} ${rider.lastName}`;
     delivery.riderPhone = rider.phone;
@@ -408,7 +409,7 @@ export class DeliveryAssignmentService {
 
     // Generar código de tracking si no existe
     if (!delivery.trackingCode) {
-      delivery.trackingCode = delivery.generateTrackingCode();
+      delivery.trackingCode = (delivery as any).generateTrackingCode();
     }
 
     // Generar URL de tracking
@@ -425,7 +426,7 @@ export class DeliveryAssignmentService {
     await delivery.save();
 
     // Actualizar estadísticas del rider
-    await this.updateRiderStats(rider._id);
+    await this.updateRiderStats(rider._id.toString());
   }
 
   /**
@@ -443,14 +444,15 @@ export class DeliveryAssignmentService {
         .reduce((sum, d) => sum + d.riderPayment, 0),
       totalDistance: deliveries
         .filter(d => d.status === 'delivered')
-        .reduce((sum, d) => sum + (d.calculateDistance(
+        .reduce((sum, d) => sum + ((d as any).calculateDistance(
           d.pickupLocation.coordinates.lat,
           d.pickupLocation.coordinates.lng,
           d.deliveryLocation.coordinates.lat,
           d.deliveryLocation.coordinates.lng
         )), 0),
       onTimeDeliveries: 0, // Se calcula basado en tiempos estimados vs reales
-      lateDeliveries: 0
+      lateDeliveries: 0,
+      averageDeliveryTime: 0
     };
 
     // Calcular entregas a tiempo vs tardías
@@ -478,7 +480,7 @@ export class DeliveryAssignmentService {
           totalTime += (delivery_time.getTime() - pickup.getTime()) / (1000 * 60); // minutos
         }
       }
-      stats.averageDeliveryTime = totalTime / completedDeliveries.length;
+      (stats as any).averageDeliveryTime = totalTime / completedDeliveries.length;
     }
 
     await Rider.findByIdAndUpdate(riderId, { stats });
@@ -501,15 +503,15 @@ export class DeliveryAssignmentService {
     const availableRiders: IRider[] = [];
 
     for (const rider of riders) {
-      const distance = rider.calculateDistanceFrom(lat, lng);
-      if (distance <= maxDistance && rider.isInServiceArea(lat, lng)) {
+      const distance = (rider as any).calculateDistanceFrom(lat, lng);
+      if (distance <= maxDistance && (rider as any).isInServiceArea(lat, lng)) {
         availableRiders.push(rider);
       }
     }
 
     return availableRiders.sort((a, b) => {
-      const distanceA = a.calculateDistanceFrom(lat, lng);
-      const distanceB = b.calculateDistanceFrom(lat, lng);
+      const distanceA = (a as any).calculateDistanceFrom(lat, lng);
+      const distanceB = (b as any).calculateDistanceFrom(lat, lng);
       return distanceA - distanceB;
     });
   }
@@ -531,7 +533,7 @@ export class DeliveryAssignmentService {
       }
 
       // Actualizar asignación
-      delivery.riderId = newRider._id;
+      delivery.riderId = newRider._id as mongoose.Types.ObjectId;
       delivery.riderType = newRider.type;
       delivery.riderName = `${newRider.firstName} ${newRider.lastName}`;
       delivery.riderPhone = newRider.phone;

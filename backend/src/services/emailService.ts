@@ -81,7 +81,7 @@ class EmailService {
 
     await this.transporter.sendMail({
       from: `"PiezasYA" <${config.EMAIL_USER}>`,
-      to: user.email,
+      to: (user as any).email,
       subject: '¡Bienvenido a PiezasYA!',
       html
     });

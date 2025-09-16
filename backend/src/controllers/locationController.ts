@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import User from '../models/User';
 import Activity from '../models/Activity';
 import State from '../models/State';
@@ -9,7 +10,7 @@ class LocationController {
   // Actualizar ubicación del usuario
   static async updateLocation(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const { latitude, longitude, enabled } = req.body;
 
       if (typeof latitude !== 'number' || typeof longitude !== 'number') {
@@ -57,7 +58,7 @@ class LocationController {
 
       // Registrar actividad
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: 'location_update',
         description: 'Ubicación GPS actualizada',
         metadata: { 
@@ -90,7 +91,7 @@ class LocationController {
   // Obtener ubicación actual del usuario
   static async getLocation(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
 
       const user = await User.findById(userId).select('location locationEnabled lastLocationUpdate');
       if (!user) {
@@ -121,7 +122,7 @@ class LocationController {
   // Habilitar/deshabilitar ubicación
   static async toggleLocation(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const { enabled } = req.body;
 
       if (typeof enabled !== 'boolean') {
@@ -151,7 +152,7 @@ class LocationController {
 
       // Registrar actividad
       await Activity.create({
-        userId: user._id,
+        userId: (user as any)._id,
         type: enabled ? 'location_enabled' : 'location_disabled',
         description: enabled ? 'GPS habilitado' : 'GPS deshabilitado',
         metadata: { 
@@ -181,7 +182,7 @@ class LocationController {
   // Verificar si el usuario tiene ubicación habilitada
   static async checkLocationStatus(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
 
       const user = await User.findById(userId).select('locationEnabled location lastLocationUpdate');
       if (!user) {
@@ -214,7 +215,7 @@ class LocationController {
     try {
       const states = await State.find({ isActive: true })
         .select('name code capital region')
-        .sort({ name: 1 });
+        .sort({ name: 1 } as any);
 
       res.json({
         success: true,
@@ -246,7 +247,7 @@ class LocationController {
         isActive: true 
       })
         .select('name code capital')
-        .sort({ name: 1 });
+        .sort({ name: 1 } as any);
 
       res.json({
         success: true,
@@ -278,7 +279,7 @@ class LocationController {
         isActive: true 
       })
         .select('name code')
-        .sort({ name: 1 });
+        .sort({ name: 1 } as any);
 
       res.json({
         success: true,

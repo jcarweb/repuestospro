@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import VehicleType from '../models/VehicleType';
 import Brand from '../models/Brand';
 import Category from '../models/Category';

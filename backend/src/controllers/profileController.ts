@@ -1,19 +1,12 @@
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import User from '../models/User';
 import Activity from '../models/Activity';
 import * as argon2 from 'argon2';
 import { generateTwoFactorSecret, verifyTwoFactorCode, generateGoogleAuthenticatorUrl } from '../utils/twoFactorUtils';
 import { profileUpload, deleteImage } from '../config/cloudinary';
 
-// Extend Request interface to include user
-interface AuthenticatedRequest extends Request {
-  user?: {
-    _id: string;
-    id: string;
-    email: string;
-    role: string;
-  };
-}
+// AuthenticatedRequest is imported from middleware
 
 class ProfileController {
   // Obtener perfil del usuario
@@ -58,7 +51,7 @@ class ProfileController {
       }
 
       // Verificar si el email ya existe (si se está cambiando)
-      if (email && email !== user.email) {
+      if (email && email !== (user as any).email) {
         const existingUser = await User.findOne({ email, _id: { $ne: userId } });
         if (existingUser) {
           return res.status(400).json({
@@ -74,8 +67,8 @@ class ProfileController {
         user.name = name;
         updatedFields.push('name');
       }
-      if (email && email !== user.email) {
-        user.email = email;
+      if (email && email !== (user as any).email) {
+        (user as any).email = email;
         updatedFields.push('email');
       }
       if (phone !== undefined && phone !== user.phone) {
@@ -88,13 +81,10 @@ class ProfileController {
       // Registrar actividad
       if (updatedFields.length > 0) {
         await Activity.create({
-          userId: {
-          userId: {
-          userId,
-          type: 'type: type: profile_update',
-          description: 'description: description: `Usuario actualizó su perfil: ${updatedFields.join(',
-          metadata: metadata: '
-        })}`
+          userId: userId,
+          type: 'profile_update',
+          description: `Usuario actualizó su perfil: ${updatedFields.join(', ')}`,
+          metadata: { updatedFields }
         });
       }
 
@@ -103,7 +93,7 @@ class ProfileController {
         message: 'Perfil actualizado correctamente',
         data: {
           name: user.name,
-          email: user.email,
+          email: (user as any).email,
           phone: user.phone,
           avatar: user.avatar
         }
@@ -162,12 +152,10 @@ class ProfileController {
       // Registrar actividad
       try {
         await Activity.create({
-          userId: {
           userId: userId,
-          type: 'type: password_changed',
-          description: 'description: Usuario cambió su contraseña',
-          metadata: metadata: {}
-        }
+          type: 'password_changed',
+          description: 'Usuario cambió su contraseña',
+          metadata: {}
         });
       } catch (activityError) {
         console.error('Error creating activity:', activityError);
@@ -223,13 +211,11 @@ class ProfileController {
 
       // Registrar actividad
       await Activity.create({
-          userId: {
-          userId: userId,
-          type: 'type: pin_setup',
-          description: 'description: Usuario configuró PIN de acceso',
-          metadata: metadata: {}
-        }
-        });
+        userId: userId,
+        type: 'pin_setup',
+        description: 'Usuario configuró PIN de acceso',
+        metadata: {}
+      });
 
       res.json({
         success: true,
@@ -273,13 +259,11 @@ class ProfileController {
 
       // Registrar actividad
       await Activity.create({
-          userId: {
-          userId: userId,
-          type: 'type: fingerprint_setup',
-          description: 'description: `Usuario ${enabled ? configuró : deshabilitó} acceso por huella digital`',
-          metadata: metadata: { enabled }
-        }
-        });
+        userId: userId,
+        type: 'fingerprint_setup',
+        description: `Usuario ${enabled ? 'configuró' : 'deshabilitó'} acceso por huella digital`,
+        metadata: { enabled }
+      });
 
       res.json({
         success: true,
@@ -353,13 +337,11 @@ class ProfileController {
 
       // Registrar actividad
       await Activity.create({
-          userId: {
-          userId: userId,
-          type: 'type: enabled ? two_factor_enabled : two_factor_disabled',
-          description: 'description: `Usuario ${enabled ? habilitó : deshabilitó} autenticación de dos factores`',
-          metadata: metadata: { enabled }
-        }
-        });
+        userId: userId,
+        type: enabled ? 'two_factor_enabled' : 'two_factor_disabled',
+        description: `Usuario ${enabled ? 'habilitó' : 'deshabilitó'} autenticación de dos factores`,
+        metadata: { enabled }
+      });
 
       res.json({
         success: true,
@@ -367,7 +349,7 @@ class ProfileController {
         data: enabled ? {
           secret: user.twoFactorSecret,
           backupCodes: user.backupCodes,
-          googleAuthUrl: generateGoogleAuthenticatorUrl(user.twoFactorSecret, user.email)
+          googleAuthUrl: generateGoogleAuthenticatorUrl(user.twoFactorSecret, (user as any).email)
         } : undefined
       });
     } catch (error) {
@@ -395,8 +377,8 @@ class ProfileController {
       }
 
       const updatedFields: string[] = [];
-      if (emailNotifications !== undefined && emailNotifications !== user.emailNotifications) {
-        user.emailNotifications = emailNotifications;
+      if (emailNotifications !== undefined && emailNotifications !== (user as any).emailNotifications) {
+        (user as any).emailNotifications = emailNotifications;
         updatedFields.push('emailNotifications');
       }
       if (pushNotifications !== undefined && pushNotifications !== user.pushNotifications) {
@@ -413,12 +395,10 @@ class ProfileController {
       // Registrar actividad
       if (updatedFields.length > 0) {
         await Activity.create({
-          userId: {
           userId: userId,
-          type: 'type: notifications_update',
-          description: 'description: `Usuario actualizó configuraciones de notificaciones: ${updatedFields.join(',
-          metadata: metadata: '
-        })}`
+          type: 'notifications_update',
+          description: `Usuario actualizó configuraciones de notificaciones: ${updatedFields.join(', ')}`,
+          metadata: { updatedFields }
         });
       }
 
@@ -469,12 +449,10 @@ class ProfileController {
       // Registrar actividad
       if (updatedFields.length > 0) {
         await Activity.create({
-          userId: {
           userId: userId,
-          type: 'type: privacy_update',
-          description: 'description: Usuario actualizó configuraciones de privacidad',
-          metadata: metadata: { updatedFields }
-        }
+          type: 'privacy_update',
+          description: 'Usuario actualizó configuraciones de privacidad',
+          metadata: { updatedFields }
         });
       }
 
@@ -521,12 +499,10 @@ class ProfileController {
       // Registrar actividad
       if (updatedFields.length > 0) {
         await Activity.create({
-          userId: {
           userId: userId,
-          type: 'type: preferences_update',
-          description: 'description: Usuario actualizó preferencias de tema e idioma',
-          metadata: metadata: { updatedFields }
-        }
+          type: 'preferences_update',
+          description: 'Usuario actualizó preferencias de tema e idioma',
+          metadata: { updatedFields }
         });
       }
 
@@ -573,12 +549,10 @@ class ProfileController {
       // Registrar actividad
       if (updatedFields.length > 0) {
         await Activity.create({
-          userId: {
           userId: userId,
-          type: 'type: push_notifications_update',
-          description: 'description: Usuario actualizó configuraciones de notificaciones push',
-          metadata: metadata: { updatedFields }
-        }
+          type: 'push_notifications_update',
+          description: 'Usuario actualizó configuraciones de notificaciones push',
+          metadata: { updatedFields }
         });
       }
 
@@ -641,13 +615,11 @@ class ProfileController {
 
       // Registrar actividad
       await Activity.create({
-          userId: {
-          userId: userId,
-          type: 'type: avatar_upload',
-          description: 'description: Usuario subió nueva foto de perfil',
-          metadata: metadata: { avatarUrl }
-        }
-        });
+        userId: userId,
+        type: 'avatar_upload',
+        description: 'Usuario subió nueva foto de perfil',
+        metadata: { avatarUrl }
+      });
 
       res.json({
         success: true,
@@ -704,12 +676,10 @@ class ProfileController {
       // Registrar actividad
       try {
         await Activity.create({
-          userId: {
           userId: userId,
-          type: 'type: avatar_deleted',
-          description: 'description: Usuario eliminó su foto de perfil',
-          metadata: metadata: {}
-        }
+          type: 'avatar_deleted',
+          description: 'Usuario eliminó su foto de perfil',
+          metadata: {}
         });
       } catch (activityError) {
         console.warn('Error registrando actividad:', activityError);
@@ -740,7 +710,7 @@ class ProfileController {
       const skip = parseInt(req.query.skip as string) || 0;
 
       const activities = await Activity.find({ userId })
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: -1 } as any)
         .limit(limit)
         .skip(skip);
 

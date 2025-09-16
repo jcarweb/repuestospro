@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import User from '../models/User';
 import { CryptoAuth } from '../utils/cryptoAuth';
 
@@ -51,8 +52,8 @@ export class CryptoAuthController {
 
       // Generar token con crypto
       const token = CryptoAuth.generateToken({
-        id: user._id.toString(),
-        email: user.email,
+        id: (user as any)._id.toString(),
+        email: (user as any).email,
         role: user.role
       });
 
@@ -62,9 +63,9 @@ export class CryptoAuthController {
         data: {
           token,
           user: {
-            id: user._id,
+            id: (user as any)._id,
             name: user.name,
-            email: user.email,
+            email: (user as any).email,
             role: user.role,
             avatar: user.avatar,
             isEmailVerified: user.isEmailVerified
@@ -117,8 +118,8 @@ export class CryptoAuthController {
 
       // Generar token
       const token = CryptoAuth.generateToken({
-        id: user._id.toString(),
-        email: user.email,
+        id: (user as any)._id.toString(),
+        email: (user as any).email,
         role: user.role
       });
 
@@ -128,9 +129,9 @@ export class CryptoAuthController {
         data: {
           token,
           user: {
-            id: user._id,
+            id: (user as any)._id,
             name: user.name,
-            email: user.email,
+            email: (user as any).email,
             role: user.role,
             avatar: user.avatar,
             isEmailVerified: user.isEmailVerified
@@ -184,9 +185,9 @@ export class CryptoAuthController {
         success: true,
         data: {
           user: {
-            id: user._id,
+            id: (user as any)._id,
             name: user.name,
-            email: user.email,
+            email: (user as any).email,
             role: user.role,
             avatar: user.avatar,
             isEmailVerified: user.isEmailVerified
@@ -213,9 +214,9 @@ export class CryptoAuthController {
         success: true,
         data: {
           user: {
-            id: user._id,
+            id: (user as any)._id,
             name: user.name,
-            email: user.email,
+            email: (user as any).email,
             role: user.role,
             avatar: user.avatar,
             phone: user.phone,

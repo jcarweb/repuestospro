@@ -544,13 +544,13 @@ export class MonetizationController {
       let commissionType = 'N/A';
 
       if (commission) {
-        commissionRate = commission.value;
+        commissionRate = commission.baseRate;
         commissionType = commission.type;
         
         if (commission.type === 'percentage') {
-          commissionAmount = (saleAmount * commission.value) / 100;
+          commissionAmount = (saleAmount * commission.baseRate) / 100;
         } else {
-          commissionAmount = commission.value;
+          commissionAmount = commission.baseRate;
         }
       }
 
@@ -558,7 +558,7 @@ export class MonetizationController {
       const taxBreakdown = taxes.map(tax => {
         let taxAmount = 0;
         
-        if (tax.type === 'percentage') {
+        if (tax.type === 'IVA' || tax.type === 'ISLR') {
           taxAmount = (saleAmount * tax.rate) / 100;
         } else {
           taxAmount = tax.rate;

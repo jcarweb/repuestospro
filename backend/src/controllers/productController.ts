@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import Product from '../models/Product';
 import Store from '../models/Store';
 import multer from 'multer';
@@ -318,7 +319,7 @@ class ProductController {
         isFeatured: true,
         deleted: { $ne: true }
       })
-        .sort({ popularity: -1 })
+        .sort({ popularity: -1 } as any)
         .limit(8)
         .select('name price images category brand');
 
@@ -404,7 +405,7 @@ class ProductController {
       const VehicleType = require('../models/VehicleType').default;
       
       const vehicleTypes = await VehicleType.find({ isActive: true })
-        .sort({ name: 1 })
+        .sort({ name: 1 } as any)
         .select('name description icon deliveryType');
 
       res.json({
@@ -699,7 +700,7 @@ class ProductController {
 
       const products = await Product.find(filter)
         .populate('store', 'name city state')
-        .sort({ deletedAt: -1 })
+        .sort({ deletedAt: -1 } as any)
         .limit(Number(limit))
         .skip(skip)
         .select('-__v');
@@ -814,7 +815,7 @@ class ProductController {
       }
 
       const { storeId } = req.body; // ID de la tienda desde el formulario
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const userRole = (req as any).user.role;
 
       // Verificar permisos de tienda
@@ -1084,7 +1085,7 @@ class ProductController {
         storeId // Filtrar por tienda específica
       } = req.query;
 
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
 
       // Obtener las tiendas del usuario
       const userStores = await Store.find({
@@ -1196,7 +1197,7 @@ class ProductController {
   // Obtener estadísticas de productos
   async getProductStats(req: Request, res: Response) {
     try {
-      const userId = (req as any).user._id;
+      const userId = (req as AuthenticatedRequest).user?._id;
       const userRole = (req as any).user.role;
 
       let filter: any = {
@@ -1351,7 +1352,7 @@ class ProductController {
       })
       .populate('store', 'name city state coordinates')
       .limit(maxResults)
-      .sort({ popularity: -1, price: 1 });
+      .sort({ popularity: -1, price: 1 } as any);
 
       // Calcular distancia para cada producto
       const productsWithDistance = products.map(product => {

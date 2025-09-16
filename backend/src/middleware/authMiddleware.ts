@@ -6,6 +6,19 @@ export interface AuthRequest extends Request {
   user?: any;
 }
 
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    _id: string;
+    id: string;
+    email: string;
+    role: string;
+    storeId?: string;
+    name?: string;
+    isActive?: boolean;
+    isEmailVerified?: boolean;
+  };
+}
+
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
