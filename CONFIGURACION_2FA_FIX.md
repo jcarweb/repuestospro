@@ -26,6 +26,14 @@
 - Creado archivo `public/_redirects` como alternativa
 - Creado `vercel-simple.json` como configuración alternativa
 
+### 4. Error de Deployment: "routes cannot be present with rewrites"
+**Causa**: Configuración incorrecta de Vercel que mezclaba `routes` con `rewrites`.
+
+**Solución aplicada**:
+- Corregido `vercel.json` para usar solo `rewrites`
+- Simplificado la configuración para evitar conflictos
+- Creado `vercel-simple.json` como alternativa mínima
+
 ## Archivos Modificados
 
 1. `backend/build-working.js` - Agregado soporte para 2FA
@@ -77,10 +85,12 @@ VITE_VAPID_PUBLIC_KEY=your_vapid_public_key_here
 
 Si sigues viendo el error de MIME type, prueba estas opciones:
 
-### Opción 1: Usar vercel-simple.json
+### Opción 1: Usar vercel-simple.json (Recomendado)
 1. Renombra `vercel.json` a `vercel-complex.json`
 2. Renombra `vercel-simple.json` a `vercel.json`
 3. Redespliega
+
+**Nota**: El archivo `vercel.json` actual ya está corregido para evitar el error de deployment.
 
 ### Opción 2: Verificar configuración de Vercel
 1. En el dashboard de Vercel, ve a Settings > Functions
