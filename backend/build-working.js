@@ -70,11 +70,14 @@ class AuthController {
 
       // Para testing, aceptar cualquier email/password
       if (email === 'admin@repuestospro.com' && password === 'Test123!') {
-        const token = AuthController.generateToken('admin-user-id');
+        // Simular que el admin tiene 2FA habilitado
+        const tempToken = crypto.randomBytes(32).toString('hex');
         
         return res.json({
           success: true,
-          message: 'Inicio de sesión exitoso',
+          message: 'Verificación de dos factores requerida',
+          requiresTwoFactor: true,
+          tempToken: tempToken,
           data: {
             user: {
               id: 'admin-user-id',
@@ -83,10 +86,9 @@ class AuthController {
               isEmailVerified: true,
               role: 'admin',
               fingerprintEnabled: false,
-              twoFactorEnabled: false,
+              twoFactorEnabled: true,
               stores: []
-            },
-            token
+            }
           }
         });
       }
@@ -214,6 +216,54 @@ class AuthController {
     }
   }
 
+  static async completeLoginWithTwoFactor(req, res) {
+    try {
+      const { email, code, tempToken } = req.body;
+      
+      if (!email || !code || !tempToken) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email, código y token temporal requeridos'
+        });
+      }
+      
+      // Para testing, aceptar cualquier código 2FA
+      if (email === 'admin@repuestospro.com') {
+        const token = AuthController.generateToken('admin-user-id');
+        
+        return res.json({
+          success: true,
+          message: 'Verificación de dos factores exitosa',
+          data: {
+            user: {
+              id: 'admin-user-id',
+              name: 'Admin User',
+              email: email,
+              isEmailVerified: true,
+              role: 'admin',
+              fingerprintEnabled: false,
+              twoFactorEnabled: true,
+              stores: []
+            },
+            token
+          }
+        });
+      }
+      
+      res.status(400).json({
+        success: false,
+        message: 'Código inválido'
+      });
+      
+    } catch (error) {
+      console.error('Error en verificación 2FA:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
   static async logout(req, res) {
     res.json({
       success: true,
@@ -331,6 +381,7 @@ const router = express.Router();
 
 router.post('/login', AuthController.login);
 router.post('/register', AuthController.register);
+router.post('/login/2fa/complete', AuthController.completeLoginWithTwoFactor);
 router.get('/verify', AuthController.verifyToken);
 router.get('/profile', AuthController.getProfile);
 router.post('/logout', AuthController.logout);
