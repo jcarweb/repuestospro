@@ -198,13 +198,84 @@ class AuthController {
 
   static async getProfile(req, res) {
     try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      
+      if (!token) {
+        return res.status(401).json({
+          success: false,
+          message: 'Token no proporcionado'
+        });
+      }
+
+      // Para testing, devolver perfil de admin
+      if (token.includes('admin-user-id')) {
+        return res.json({
+          success: true,
+          data: {
+            _id: 'admin-user-id',
+            name: 'Admin User',
+            email: 'admin@repuestospro.com',
+            phone: '+584121234567',
+            avatar: '/uploads/perfil/default-avatar.svg',
+            role: 'admin',
+            isEmailVerified: true,
+            isActive: true,
+            pin: null,
+            fingerprintEnabled: false,
+            twoFactorEnabled: true,
+            emailNotifications: true,
+            pushNotifications: true,
+            marketingEmails: false,
+            theme: 'light',
+            language: 'es',
+            profileVisibility: 'private',
+            showEmail: false,
+            showPhone: false,
+            pushEnabled: false,
+            pushToken: null,
+            points: 1000,
+            loyaltyLevel: 'platinum',
+            location: null,
+            locationEnabled: false,
+            lastLocationUpdate: null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        });
+      }
+
+      // Para otros usuarios, devolver perfil básico
       res.json({
         success: true,
         data: {
-          id: 'user-123',
+          _id: 'user-123',
           name: 'Test User',
           email: 'test@example.com',
-          role: 'client'
+          phone: '+584121234567',
+          avatar: '/uploads/perfil/default-avatar.svg',
+          role: 'client',
+          isEmailVerified: true,
+          isActive: true,
+          pin: null,
+          fingerprintEnabled: false,
+          twoFactorEnabled: false,
+          emailNotifications: true,
+          pushNotifications: true,
+          marketingEmails: false,
+          theme: 'light',
+          language: 'es',
+          profileVisibility: 'private',
+          showEmail: false,
+          showPhone: false,
+          pushEnabled: false,
+          pushToken: null,
+          points: 100,
+          loyaltyLevel: 'bronze',
+          location: null,
+          locationEnabled: false,
+          lastLocationUpdate: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         }
       });
     } catch (error) {
@@ -257,6 +328,43 @@ class AuthController {
       
     } catch (error) {
       console.error('Error en verificación 2FA:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  static async updateProfile(req, res) {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      
+      if (!token) {
+        return res.status(401).json({
+          success: false,
+          message: 'Token no proporcionado'
+        });
+      }
+
+      const { name, email, phone } = req.body;
+
+      // Para testing, simular actualización exitosa
+      res.json({
+        success: true,
+        message: 'Perfil actualizado exitosamente',
+        data: {
+          _id: 'admin-user-id',
+          name: name || 'Admin User',
+          email: email || 'admin@repuestospro.com',
+          phone: phone || '+584121234567',
+          role: 'admin',
+          isEmailVerified: true,
+          isActive: true,
+          updatedAt: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('Error actualizando perfil:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
@@ -486,6 +594,30 @@ app.get('/api/health', (req, res) => {
     uptime: process.uptime(),
     memory: process.memoryUsage()
   });
+});
+
+// Ruta directa para perfil
+app.get('/api/profile', (req, res) => {
+  const { AuthController } = require('./controllers/authController');
+  AuthController.getProfile(req, res);
+});
+
+// Ruta para actualizar perfil
+app.put('/api/profile', (req, res) => {
+  const { AuthController } = require('./controllers/authController');
+  AuthController.updateProfile(req, res);
+});
+
+// Ruta para obtener usuarios (admin)
+app.get('/api/admin/users', (req, res) => {
+  const { AdminController } = require('./controllers/adminController');
+  AdminController.getUsers(req, res);
+});
+
+// Ruta para obtener dashboard de admin
+app.get('/api/admin/dashboard', (req, res) => {
+  const { AdminController } = require('./controllers/adminController');
+  AdminController.getDashboard(req, res);
 });
 
 // Importar y usar rutas

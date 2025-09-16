@@ -87,13 +87,15 @@ class ProfileController {
 
       // Registrar actividad
       if (updatedFields.length > 0) {
-        await Activity.createActivity(
+        await Activity.create({
+          userId: {
+          userId: {
           userId,
-          'profile_update',
-          `Usuario actualizó su perfil: ${updatedFields.join(', ')}`,
-          { updatedFields },
-          true
-        );
+          type: 'type: type: profile_update',
+          description: 'description: description: `Usuario actualizó su perfil: ${updatedFields.join(',
+          metadata: metadata: '
+        })}`
+        });
       }
 
       res.json({
@@ -159,13 +161,14 @@ class ProfileController {
 
       // Registrar actividad
       try {
-        await Activity.createActivity(
-          userId,
-          'password_changed',
-          'Usuario cambió su contraseña',
-          {},
-          true
-        );
+        await Activity.create({
+          userId: {
+          userId: userId,
+          type: 'type: password_changed',
+          description: 'description: Usuario cambió su contraseña',
+          metadata: metadata: {}
+        }
+        });
       } catch (activityError) {
         console.error('Error creating activity:', activityError);
         // No fallar el cambio de contraseña si la actividad falla
@@ -219,13 +222,14 @@ class ProfileController {
       await user.save();
 
       // Registrar actividad
-      await Activity.createActivity(
-        userId,
-        'pin_setup',
-        'Usuario configuró PIN de acceso',
-        {},
-        true
-      );
+      await Activity.create({
+          userId: {
+          userId: userId,
+          type: 'type: pin_setup',
+          description: 'description: Usuario configuró PIN de acceso',
+          metadata: metadata: {}
+        }
+        });
 
       res.json({
         success: true,
@@ -268,13 +272,14 @@ class ProfileController {
       await user.save();
 
       // Registrar actividad
-      await Activity.createActivity(
-        userId,
-        'fingerprint_setup',
-        `Usuario ${enabled ? 'configuró' : 'deshabilitó'} acceso por huella digital`,
-        { enabled },
-        true
-      );
+      await Activity.create({
+          userId: {
+          userId: userId,
+          type: 'type: fingerprint_setup',
+          description: 'description: `Usuario ${enabled ? configuró : deshabilitó} acceso por huella digital`',
+          metadata: metadata: { enabled }
+        }
+        });
 
       res.json({
         success: true,
@@ -347,13 +352,14 @@ class ProfileController {
       console.log('✅ Usuario guardado');
 
       // Registrar actividad
-      await Activity.createActivity(
-        userId,
-        enabled ? 'two_factor_enabled' : 'two_factor_disabled',
-        `Usuario ${enabled ? 'habilitó' : 'deshabilitó'} autenticación de dos factores`,
-        { enabled },
-        true
-      );
+      await Activity.create({
+          userId: {
+          userId: userId,
+          type: 'type: enabled ? two_factor_enabled : two_factor_disabled',
+          description: 'description: `Usuario ${enabled ? habilitó : deshabilitó} autenticación de dos factores`',
+          metadata: metadata: { enabled }
+        }
+        });
 
       res.json({
         success: true,
@@ -406,13 +412,14 @@ class ProfileController {
 
       // Registrar actividad
       if (updatedFields.length > 0) {
-        await Activity.createActivity(
-          userId,
-          'notifications_update',
-          `Usuario actualizó configuraciones de notificaciones: ${updatedFields.join(', ')}`,
-          { updatedFields },
-          true
-        );
+        await Activity.create({
+          userId: {
+          userId: userId,
+          type: 'type: notifications_update',
+          description: 'description: `Usuario actualizó configuraciones de notificaciones: ${updatedFields.join(',
+          metadata: metadata: '
+        })}`
+        });
       }
 
       res.json({
@@ -461,13 +468,14 @@ class ProfileController {
 
       // Registrar actividad
       if (updatedFields.length > 0) {
-        await Activity.createActivity(
-          userId,
-          'privacy_update',
-          'Usuario actualizó configuraciones de privacidad',
-          { updatedFields },
-          true
-        );
+        await Activity.create({
+          userId: {
+          userId: userId,
+          type: 'type: privacy_update',
+          description: 'description: Usuario actualizó configuraciones de privacidad',
+          metadata: metadata: { updatedFields }
+        }
+        });
       }
 
       res.json({
@@ -512,13 +520,14 @@ class ProfileController {
 
       // Registrar actividad
       if (updatedFields.length > 0) {
-        await Activity.createActivity(
-          userId,
-          'preferences_update',
-          'Usuario actualizó preferencias de tema e idioma',
-          { updatedFields },
-          true
-        );
+        await Activity.create({
+          userId: {
+          userId: userId,
+          type: 'type: preferences_update',
+          description: 'description: Usuario actualizó preferencias de tema e idioma',
+          metadata: metadata: { updatedFields }
+        }
+        });
       }
 
       res.json({
@@ -563,13 +572,14 @@ class ProfileController {
 
       // Registrar actividad
       if (updatedFields.length > 0) {
-        await Activity.createActivity(
-          userId,
-          'push_notifications_update',
-          'Usuario actualizó configuraciones de notificaciones push',
-          { updatedFields },
-          true
-        );
+        await Activity.create({
+          userId: {
+          userId: userId,
+          type: 'type: push_notifications_update',
+          description: 'description: Usuario actualizó configuraciones de notificaciones push',
+          metadata: metadata: { updatedFields }
+        }
+        });
       }
 
       res.json({
@@ -630,13 +640,14 @@ class ProfileController {
       await user.save();
 
       // Registrar actividad
-      await Activity.createActivity(
-        userId,
-        'avatar_upload',
-        'Usuario subió nueva foto de perfil',
-        { avatarUrl },
-        true
-      );
+      await Activity.create({
+          userId: {
+          userId: userId,
+          type: 'type: avatar_upload',
+          description: 'description: Usuario subió nueva foto de perfil',
+          metadata: metadata: { avatarUrl }
+        }
+        });
 
       res.json({
         success: true,
@@ -692,13 +703,14 @@ class ProfileController {
 
       // Registrar actividad
       try {
-        await Activity.createActivity(
-          userId,
-          'avatar_deleted',
-          'Usuario eliminó su foto de perfil',
-          {},
-          true
-        );
+        await Activity.create({
+          userId: {
+          userId: userId,
+          type: 'type: avatar_deleted',
+          description: 'description: Usuario eliminó su foto de perfil',
+          metadata: metadata: {}
+        }
+        });
       } catch (activityError) {
         console.warn('Error registrando actividad:', activityError);
         // Continuar aunque falle el registro de actividad
@@ -727,7 +739,10 @@ class ProfileController {
       const limit = parseInt(req.query.limit as string) || 20;
       const skip = parseInt(req.query.skip as string) || 0;
 
-      const activities = await Activity.getUserActivities(userId, limit, skip);
+      const activities = await Activity.find({ userId })
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .skip(skip);
 
       res.json({
         success: true,

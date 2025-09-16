@@ -119,7 +119,7 @@ const SecureTransactionSchema = new Schema<ISecureTransaction>({
 SecureTransactionSchema.index({ transactionId: 1 }, { unique: true });
 SecureTransactionSchema.index({ userId: 1, protectionStatus: 1 });
 SecureTransactionSchema.index({ storeId: 1, protectionStatus: 1 });
-SecureTransactionSchema.index({ protectionEndDate: 1, protectionStatus: 'protected' });
+SecureTransactionSchema.index({ protectionEndDate: 1, protectionStatus: 1 });
 SecureTransactionSchema.index({ purchaseDate: 1 });
 SecureTransactionSchema.index({ riskScore: -1 });
 

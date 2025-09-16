@@ -75,7 +75,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
           isEmailVerified: true,
           createdAt: new Date(),
           updatedAt: new Date()
-        };
+        } as any;
       } else {
         return res.status(401).json({
           success: false,
