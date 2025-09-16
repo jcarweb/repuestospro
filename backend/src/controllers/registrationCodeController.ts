@@ -113,6 +113,7 @@ export class RegistrationCodeController {
 
       const codes = await RegistrationCodeService.listRegistrationCodes(
         userId?.toString() || '',
+        role as string || '',
         {
           page: Number(page),
           limit: Number(limit),
