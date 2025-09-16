@@ -111,7 +111,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // Verificar token con el backend
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/verify`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/auth/verify`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${storedToken}`,
@@ -147,10 +148,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const loginAsync = async (email: string, password: string) => {
     try {
-      console.log('🌐 Enviando request a:', `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/login`);
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      console.log('🌐 Enviando request a:', `${apiUrl}/auth/login`);
       
       // Verificar si el servidor está disponible antes de hacer la petición
-      const serverCheck = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/health`, {
+      const serverCheck = await fetch(`${apiUrl}/health`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +163,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error('El servidor backend no está disponible. Por favor, asegúrate de que el servidor esté ejecutándose en el puerto 5000.');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/login`, {
+      const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
