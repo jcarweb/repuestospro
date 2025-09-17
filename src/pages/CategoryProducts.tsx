@@ -20,6 +20,7 @@ import {
   Circle
 } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import { API_BASE_URL } from '../../config/api';
 import { getBrandsByVehicleType } from '../data/vehicleBrands';
 
 interface Product {
@@ -171,7 +172,7 @@ const CategoryProducts: React.FC = () => {
     const fetchBrands = async () => {
       if (filters.vehicleType && filters.vehicleType.trim() !== '') {
         try {
-          const response = await fetch(`http://localhost:5000/api/products/brands/vehicle-type/${filters.vehicleType}`);
+          const response = await fetch(`API_BASE_URL/products/brands/vehicle-type/${filters.vehicleType}`);
           const data = await response.json();
           
           if (data.success) {
@@ -198,7 +199,7 @@ const CategoryProducts: React.FC = () => {
       } else {
         // Si no hay tipo de vehículo seleccionado, obtener todas las marcas de la base de datos
         try {
-          const response = await fetch('http://localhost:5000/api/products/brands');
+          const response = await fetch('API_BASE_URL/products/brands');
           const data = await response.json();
           
           if (data.success) {
@@ -255,7 +256,7 @@ const CategoryProducts: React.FC = () => {
       console.log('🔍 Filtros actuales:', filters);
       console.log('🔍 Parámetros construidos:', params.toString());
 
-      const url = `http://localhost:5000/api/products/category/${category}?${params}`;
+      const url = `API_BASE_URL/products/category/${category}?${params}`;
       console.log('🔍 Cargando productos desde:', url);
       console.log('📋 Categoría:', category);
       console.log('📋 Parámetros:', params.toString());

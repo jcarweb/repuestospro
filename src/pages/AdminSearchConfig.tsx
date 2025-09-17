@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../../config/api';
 import { useLanguage } from '../contexts/LanguageContext';
 import { 
   Search, 
@@ -55,7 +56,7 @@ const AdminSearchConfig: React.FC = () => {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/search/config', {
+      const response = await fetch('API_BASE_URL/search/config', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -78,7 +79,7 @@ const AdminSearchConfig: React.FC = () => {
 
     setSaving(true);
     try {
-      const response = await fetch('http://localhost:5000/api/search/config', {
+      const response = await fetch('API_BASE_URL/search/config', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

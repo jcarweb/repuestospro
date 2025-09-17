@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   CheckCircle, 
@@ -44,7 +45,7 @@ const EmailVerification: React.FC = () => {
 
   const verifyEmail = async (token: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/auth/verify-email/${token}`, {
+      const response = await fetch(`API_BASE_URL/auth/verify-email/${token}`, {
         method: 'GET'
       });
 
@@ -69,7 +70,7 @@ const EmailVerification: React.FC = () => {
     setMessage('Reenviando email de verificación...');
     
     try {
-      const response = await fetch('http://localhost:5000/api/auth/resend-verification', {
+      const response = await fetch('API_BASE_URL/auth/resend-verification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

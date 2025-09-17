@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { profileService } from '../services/profileService';
+import { API_BASE_URL } from '../../config/api';
 import { CheckCircle, XCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 
 const AuthDiagnostic: React.FC = () => {
@@ -95,7 +96,7 @@ const AuthDiagnostic: React.FC = () => {
 
     // 5. Verificar API
     try {
-      const response = await fetch('http://localhost:5000/api/health');
+      const response = await fetch('API_BASE_URL/health');
       results.push({
         name: 'API Backend',
         status: response.ok ? 'success' : 'error',

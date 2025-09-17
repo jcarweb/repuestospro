@@ -24,11 +24,11 @@ export class DynamicAPIConfig {
     if (this.isInitialized) return;
 
     try {
-      // FORZAR localhost para conexión móvil
+      // Configuración para producción (Render)
       this.currentConfig = {
-        baseUrl: 'http://localhost:5000/api',
-        isLocal: true,
-        networkName: 'Localhost',
+        baseUrl: 'https://piezasyaya-backend.onrender.com/api',
+        isLocal: false,
+        networkName: 'Render Production',
         lastTested: Date.now(),
         isWorking: true,
       };
@@ -38,9 +38,9 @@ export class DynamicAPIConfig {
       console.error('Error initializing API config:', error);
       // Fallback a configuración por defecto
       this.currentConfig = {
-        baseUrl: 'http://localhost:5000/api',
-        isLocal: true,
-        networkName: 'Backend Local',
+        baseUrl: 'https://piezasyaya-backend.onrender.com/api',
+        isLocal: false,
+        networkName: 'Render Production',
         lastTested: Date.now(),
         isWorking: false,
       };
@@ -53,7 +53,7 @@ export class DynamicAPIConfig {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    return this.currentConfig?.baseUrl || 'http://localhost:5000/api';
+    return this.currentConfig?.baseUrl || 'https://piezasyaya-backend.onrender.com/api';
   }
 
   // Obtener la configuración completa
@@ -66,11 +66,11 @@ export class DynamicAPIConfig {
 
   // Forzar rescan de la red
   async rescan(): Promise<NetworkConfig> {
-    // FORZAR localhost en lugar de hacer rescan
+    // Configuración para producción (Render)
     this.currentConfig = {
-      baseUrl: 'http://localhost:5000/api',
-      isLocal: true,
-      networkName: 'Localhost',
+      baseUrl: 'https://piezasyaya-backend.onrender.com/api',
+      isLocal: false,
+      networkName: 'Render Production',
       lastTested: Date.now(),
       isWorking: true,
     };

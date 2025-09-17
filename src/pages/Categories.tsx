@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api';
 import { useNavigate } from 'react-router-dom';
 import { 
   Package, 
@@ -110,9 +111,9 @@ const Categories: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      console.log('🔍 Cargando categorías desde:', 'http://localhost:5000/api/products/categories');
+      console.log('🔍 Cargando categorías desde:', 'API_BASE_URL/products/categories');
       
-      const response = await fetch('http://localhost:5000/api/products/categories');
+      const response = await fetch('API_BASE_URL/products/categories');
       const data = await response.json();
       
       console.log('📊 Respuesta del servidor:', data);

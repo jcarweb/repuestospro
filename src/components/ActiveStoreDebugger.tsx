@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveStore } from '../contexts/ActiveStoreContext';
+import { API_BASE_URL } from '../../config/api';
 import { RefreshCw, AlertTriangle, CheckCircle, Clock, Bug } from 'lucide-react';
 
 const ActiveStoreDebugger: React.FC = () => {
@@ -43,7 +44,7 @@ const ActiveStoreDebugger: React.FC = () => {
     try {
       console.log('ActiveStoreDebugger: Test directo iniciado...');
       
-      const response = await fetch('http://localhost:5000/api/user/stores/complete', {
+      const response = await fetch('API_BASE_URL/user/stores/complete', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

@@ -13,6 +13,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '../../config/api';
 
 const AdminDataEnrichmentUpload: React.FC = () => {
   const { user } = useAuth();
@@ -113,7 +114,7 @@ const AdminDataEnrichmentUpload: React.FC = () => {
       submitData.append('lng', formData.lng);
       submitData.append('image', formData.image);
 
-      const response = await fetch('http://localhost:5000/api/store-photos', {
+      const response = await fetch('API_BASE_URL/store-photos', {
         method: 'POST',
         body: submitData,
       });

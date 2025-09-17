@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import AdvertisementForm from '../components/AdvertisementForm';
+import { API_BASE_URL } from '../../config/api';
 import { 
   Megaphone, 
   Plus, 
@@ -195,9 +196,9 @@ const AdminAdvertisements: React.FC = () => {
       if (selectedPlatform !== 'all') params.append('targetPlatform', selectedPlatform);
 
       console.log('🔍 Cargando publicidades con token:', token ? 'Token presente' : 'Sin token');
-      console.log('🔗 URL:', `http://localhost:5000/api/advertisements/admin?${params}`);
+      console.log('🔗 URL:', `API_BASE_URL/advertisements/admin?${params}`);
       
-      const response = await fetch(`http://localhost:5000/api/advertisements/admin?${params}`, {
+      const response = await fetch(`API_BASE_URL/advertisements/admin?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -226,7 +227,7 @@ const AdminAdvertisements: React.FC = () => {
   // Cargar tiendas
   const fetchStores = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/stores', {
+      const response = await fetch('API_BASE_URL/stores', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -249,7 +250,7 @@ const AdminAdvertisements: React.FC = () => {
   // Cargar estadísticas
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/advertisements/admin/stats', {
+      const response = await fetch('API_BASE_URL/advertisements/admin/stats', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -296,7 +297,7 @@ const AdminAdvertisements: React.FC = () => {
   // Cambiar estado de publicidad
   const handleChangeStatus = async (advertisementId: string, newStatus: string, rejectionReason?: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/advertisements/admin/${advertisementId}/status`, {
+      const response = await fetch(`API_BASE_URL/advertisements/admin/${advertisementId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -323,7 +324,7 @@ const AdminAdvertisements: React.FC = () => {
   // Crear publicidad
   const handleCreateAdvertisement = async (formData: any) => {
     try {
-      const response = await fetch('http://localhost:5000/api/advertisements/admin', {
+      const response = await fetch('API_BASE_URL/advertisements/admin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -356,7 +357,7 @@ const AdminAdvertisements: React.FC = () => {
       console.log('🔍 Editando publicidad:', selectedAdvertisement._id);
       console.log('📊 Datos del formulario:', JSON.stringify(formData, null, 2));
       
-      const response = await fetch(`http://localhost:5000/api/advertisements/admin/${selectedAdvertisement._id}`, {
+      const response = await fetch(`API_BASE_URL/advertisements/admin/${selectedAdvertisement._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -400,7 +401,7 @@ const AdminAdvertisements: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/advertisements/admin/${advertisementId}`, {
+      const response = await fetch(`API_BASE_URL/advertisements/admin/${advertisementId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

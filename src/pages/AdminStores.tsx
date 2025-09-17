@@ -25,8 +25,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 import FreeStoreLocationMap from '../components/FreeStoreLocationMap';
-import { userService, User } from '../services/userService';
 import { API_BASE_URL } from '../config/api';
+import { userService, User } from '../services/userService';
 
 interface Store {
   _id: string;

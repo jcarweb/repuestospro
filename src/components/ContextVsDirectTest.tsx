@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveStore } from '../contexts/ActiveStoreContext';
+import { API_BASE_URL } from '../../config/api';
 import { RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
 
 const ContextVsDirectTest: React.FC = () => {
@@ -17,7 +18,7 @@ const ContextVsDirectTest: React.FC = () => {
     try {
       console.log('ContextVsDirectTest: Iniciando test directo a API...');
       
-      const response = await fetch('http://localhost:5000/api/user/stores/complete', {
+      const response = await fetch('API_BASE_URL/user/stores/complete', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

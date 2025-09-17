@@ -17,6 +17,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '../../config/api';
 
 interface StorePhoto {
   _id: string;
@@ -56,7 +57,7 @@ const AdminDataEnrichment: React.FC = () => {
   const fetchStorePhotos = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/store-photos');
+      const response = await fetch('API_BASE_URL/store-photos');
       const data = await response.json();
       setStorePhotos(data.data || []);
     } catch (error) {
@@ -70,7 +71,7 @@ const AdminDataEnrichment: React.FC = () => {
   const runEnrichment = async () => {
     try {
       setEnriching(true);
-      const response = await fetch('http://localhost:5000/api/admin/enrichment/run', {
+      const response = await fetch('API_BASE_URL/admin/enrichment/run', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

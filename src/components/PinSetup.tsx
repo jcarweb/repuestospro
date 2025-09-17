@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../../config/api';
 import { Key, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface PinSetupProps {
@@ -44,7 +45,7 @@ const PinSetup: React.FC<PinSetupProps> = ({ onPinSet, onCancel }) => {
 
     try {
       // Aquí se enviaría al servidor para guardar el PIN
-      const response = await fetch('http://localhost:5000/api/auth/setup-pin', {
+      const response = await fetch('API_BASE_URL/auth/setup-pin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../../config/api';
 import { useLanguage } from '../contexts/LanguageContext';
 import { 
   Users, 
@@ -64,7 +65,7 @@ const StoreManagerSellers: React.FC = () => {
   const fetchSellers = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/admin/users?role=seller&limit=1000', {
+      const response = await fetch('API_BASE_URL/admin/users?role=seller&limit=1000', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -94,7 +95,7 @@ const StoreManagerSellers: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/admin/registration-codes', {
+      const response = await fetch('API_BASE_URL/admin/registration-codes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

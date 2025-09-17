@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User, UserRole } from '../types';
+import { API_BASE_URL } from '../../config/api';
 
 interface AuthContextType {
   user: User | null | undefined;
@@ -111,7 +112,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // Verificar token con el backend
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'API_BASE_URL';
       const response = await fetch(`${apiUrl}/auth/verify`, {
         method: 'GET',
         headers: {
@@ -148,7 +149,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const loginAsync = async (email: string, password: string) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'API_BASE_URL';
       console.log('🌐 Enviando request a:', `${apiUrl}/auth/login`);
       
       // Verificar si el servidor está disponible antes de hacer la petición
@@ -196,7 +197,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Manejar errores específicos de red
       if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-        throw new Error('No se pudo conectar con el servidor. Verifica que el backend esté ejecutándose en http://localhost:5000');
+        throw new Error('No se pudo conectar con el servidor. Verifica que el backend esté ejecutándose en API_BASE_URL');
       }
       
       throw error;

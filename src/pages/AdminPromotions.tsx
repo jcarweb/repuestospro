@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import PromotionForm from '../components/PromotionForm';
+import { API_BASE_URL } from '../../config/api';
 import { 
   Gift, 
   Plus, 
@@ -131,7 +132,7 @@ const AdminPromotions: React.FC = () => {
         params.append('isActive', selectedStatus === 'active' ? 'true' : 'false');
       }
 
-      const response = await fetch(`http://localhost:5000/api/promotions?${params}`, {
+      const response = await fetch(`API_BASE_URL/promotions?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -157,7 +158,7 @@ const AdminPromotions: React.FC = () => {
     if (user?.role !== 'admin') return;
     
     try {
-      const response = await fetch('http://localhost:5000/api/promotions/stores/available', {
+      const response = await fetch('API_BASE_URL/promotions/stores/available', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -181,7 +182,7 @@ const AdminPromotions: React.FC = () => {
         params.append('storeId', selectedStore);
       }
 
-      const response = await fetch(`http://localhost:5000/api/promotions/products/available?${params}`, {
+      const response = await fetch(`API_BASE_URL/promotions/products/available?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -200,7 +201,7 @@ const AdminPromotions: React.FC = () => {
   // Cargar categorías
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/promotions/categories/available', {
+      const response = await fetch('API_BASE_URL/promotions/categories/available', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -219,7 +220,7 @@ const AdminPromotions: React.FC = () => {
   // Cargar estadísticas
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/promotions/stats/overview', {
+      const response = await fetch('API_BASE_URL/promotions/stats/overview', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -248,7 +249,7 @@ const AdminPromotions: React.FC = () => {
   // Crear promoción
   const handleCreatePromotion = async (formData: any) => {
     try {
-      const response = await fetch('http://localhost:5000/api/promotions', {
+      const response = await fetch('API_BASE_URL/promotions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -278,7 +279,7 @@ const AdminPromotions: React.FC = () => {
     if (!selectedPromotion) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/promotions/${selectedPromotion._id}`, {
+      const response = await fetch(`API_BASE_URL/promotions/${selectedPromotion._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -309,7 +310,7 @@ const AdminPromotions: React.FC = () => {
     try {
       console.log('🔍 Debug - Toggle status para promoción:', promotionId);
       
-      const response = await fetch(`http://localhost:5000/api/promotions/${promotionId}/toggle`, {
+      const response = await fetch(`API_BASE_URL/promotions/${promotionId}/toggle`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -340,7 +341,7 @@ const AdminPromotions: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/promotions/${promotionId}`, {
+      const response = await fetch(`API_BASE_URL/promotions/${promotionId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

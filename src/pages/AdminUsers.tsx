@@ -3,6 +3,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useLanguageChange } from '../hooks/useLanguageChange';
 import { Users, Search, Filter, MoreVertical, Edit, Trash2, Eye, Plus, X, Save, UserPlus, Key } from 'lucide-react';
 import type { User, UserRole } from '../types';
+import { API_BASE_URL } from '../../config/api';
 
 interface UserFormData {
   name: string;
@@ -65,7 +66,7 @@ const AdminUsers: React.FC = () => {
         ...(hasIdFilter && { hasId: 'true' })
       });
       
-      const response = await fetch(`http://localhost:5000/api/admin/users?${params}`, {
+      const response = await fetch(`API_BASE_URL/admin/users?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -146,7 +147,7 @@ const AdminUsers: React.FC = () => {
 
       console.log('📤 Enviando datos desde frontend:', formData);
 
-      const response = await fetch('http://localhost:5000/api/admin/users', {
+      const response = await fetch('API_BASE_URL/admin/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -183,7 +184,7 @@ const AdminUsers: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/users/${selectedUser.id}`, {
+      const response = await fetch(`API_BASE_URL/admin/users/${selectedUser.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -222,7 +223,7 @@ const AdminUsers: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/deactivate`, {
+      const response = await fetch(`API_BASE_URL/admin/users/${userId}/deactivate`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -256,7 +257,7 @@ const AdminUsers: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/reset-password`, {
+      const response = await fetch(`API_BASE_URL/admin/users/${userId}/reset-password`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

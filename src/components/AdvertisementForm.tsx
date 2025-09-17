@@ -16,6 +16,7 @@ import {
   Eye,
   Zap
 } from 'lucide-react';
+import { API_BASE_URL } from '../../config/api';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface Store {
@@ -134,7 +135,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
     try {
       console.log('🔍 AdvertisementForm - Cargando tiendas...');
       
-      const response = await fetch('http://localhost:5000/api/stores', {
+      const response = await fetch('API_BASE_URL/stores', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -159,7 +160,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
   // Cargar datos de analytics
   const fetchAnalyticsData = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/advertisements/admin/analytics', {
+      const response = await fetch('API_BASE_URL/advertisements/admin/analytics', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Store, CheckCircle, AlertCircle } from 'lucide-react';
 import StoreRegistrationForm from '../components/StoreRegistrationForm';
 import Layout from '../components/Layout';
+import { API_BASE_URL } from '../../config/api';
 
 const StoreRegistration: React.FC = () => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ const StoreRegistration: React.FC = () => {
         throw new Error('No hay sesión activa');
       }
 
-      const response = await fetch('http://localhost:5000/api/stores', {
+      const response = await fetch('API_BASE_URL/stores', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
