@@ -1,4 +1,4 @@
-import { Server as SocketIOServer } from 'socket.io';
+import SocketIOServer from 'socket.io';
 import { Server as HTTPServer } from 'http';
 import Chat, { IChat } from '../models/Chat';
 import ChatMessage, { IChatMessage } from '../models/ChatMessage';

@@ -6,8 +6,17 @@ declare module 'cloudinary' {
 }
 
 declare module 'multer-storage-cloudinary' {
-  const storage: any;
-  export default storage;
+  interface CloudinaryStorageOptions {
+    cloudinary: any;
+    params?: any;
+  }
+
+  class CloudinaryStorage {
+    constructor(options: CloudinaryStorageOptions);
+    _handleFile(req: any, file: any, callback: (error?: any, info?: any) => void): void;
+    _removeFile(req: any, file: any, callback: (error: Error) => void): void;
+  }
+  export = CloudinaryStorage;
 }
 
 declare module 'multer' {
@@ -47,12 +56,20 @@ declare module 'multer' {
 
   function multer(options?: Options): any;
   export = multer;
+  export const diskStorage: (options: any) => StorageEngine;
+  export const memoryStorage: () => StorageEngine;
 }
 
 declare module 'mongoose' {
-  import { Document, Schema, Model, Connection } from 'mongoose';
+  import { Document, Schema, Model, Connection, Types } from 'mongoose';
   export * from 'mongoose';
-  export { Document, Schema, Model, Connection };
+  export { Document, Schema, Model, Connection, Types };
+  
+  // Agregar propiedades estáticas que faltan
+  export function connect(uri: string, options?: any): Promise<typeof import('mongoose')>;
+  export function disconnect(): Promise<void>;
+  export const connection: Connection;
+  export const model: <T = Document>(name: string, schema?: Schema, collection?: string) => Model<T>;
 }
 
 declare module 'mongoose-paginate-v2' {
@@ -105,6 +122,7 @@ declare module 'dotenv' {
 
   function config(options?: DotenvConfigOptions): DotenvConfigOutput;
   export = config;
+  export { config };
 }
 
 declare module 'passport' {
@@ -145,12 +163,21 @@ declare module 'passport-google-oauth20' {
   }
 
   export = GoogleStrategy;
+  export { Strategy };
 }
 
 declare module 'express' {
-  import { Request, Response, NextFunction } from 'express';
+  import { Request, Response, NextFunction, Router, Application } from 'express';
   export * from 'express';
-  export { Request, Response, NextFunction };
+  export { Request, Response, NextFunction, Router, Application };
+  
+  // Agregar propiedades estáticas que faltan
+  function express(): Application;
+  export = express;
+  export const Router: () => Router;
+  export const static: (root: string, options?: any) => any;
+  export const json: (options?: any) => any;
+  export const urlencoded: (options?: any) => any;
 }
 
 declare module 'cors' {
@@ -274,12 +301,21 @@ declare module 'jsonwebtoken' {
     clockTimestamp?: number;
   }
 
+  class JsonWebTokenError extends Error {
+    name: 'JsonWebTokenError';
+  }
+
+  class TokenExpiredError extends Error {
+    name: 'TokenExpiredError';
+    expiredAt: Date;
+  }
+
   function sign(payload: string | object | Buffer, secretOrPrivateKey: string | Buffer, options?: SignOptions): string;
   function verify(token: string, secretOrPublicKey: string | Buffer, options?: VerifyOptions): any;
   function decode(token: string, options?: any): any;
 
-  export { sign, verify, decode };
-  export default { sign, verify, decode };
+  export { sign, verify, decode, JsonWebTokenError, TokenExpiredError };
+  export default { sign, verify, decode, JsonWebTokenError, TokenExpiredError };
 }
 
 declare module 'speakeasy' {
@@ -301,6 +337,7 @@ declare module 'speakeasy' {
     qr_codes?: boolean;
     google_auth_qr?: boolean;
     otpauth_url?: boolean;
+    issuer?: string;
   }
 
   interface VerifyOptions {
@@ -318,6 +355,13 @@ declare module 'speakeasy' {
   export function verifyOTP(options: VerifyOptions): boolean;
   export function timeUsed(options: TotpOptions): number;
   export function timeRemaining(options: TotpOptions): number;
+  export const totp: {
+    generateSecret(options?: GenerateSecretOptions): any;
+    generate(options: TotpOptions): string;
+    verify(options: VerifyOptions): boolean;
+    timeUsed(options: TotpOptions): number;
+    timeRemaining(options: TotpOptions): number;
+  };
 }
 
 declare module 'argon2' {
@@ -359,8 +403,16 @@ declare module 'socket.io' {
     in(room: string): any;
   }
 
-  function Server(server?: any, options?: any): Server;
+  class Server {
+    constructor(server?: any, options?: any);
+    on(event: string, listener: (...args: any[]) => void): this;
+    emit(event: string, ...args: any[]): this;
+    to(room: string): any;
+    in(room: string): any;
+  }
+
   export = Server;
+  export { Server };
 }
 
 declare module 'web-push' {
@@ -464,8 +516,9 @@ declare module 'nodemailer' {
   }
 
   function createTransporter(options: CreateTransportOptions): Transporter;
-  export { createTransporter };
-  export default { createTransporter };
+  function createTransport(options: CreateTransportOptions): Transporter;
+  export { createTransporter, createTransport };
+  export default { createTransporter, createTransport };
 }
 
 // Extender el namespace Express para Multer
@@ -483,4 +536,23 @@ declare namespace Express {
       buffer: Buffer;
     }
   }
+}
+
+// Extender el namespace nodemailer
+declare namespace nodemailer {
+  interface Transporter {
+    sendMail(mailOptions: any): Promise<any>;
+  }
+
+  interface CreateTransportOptions {
+    host?: string;
+    port?: number;
+    secure?: boolean;
+    auth?: {
+      user: string;
+      pass: string;
+    };
+  }
+
+  function createTransport(options: CreateTransportOptions): Transporter;
 }
