@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, Users, Gift, Star, ArrowRight } from 'lucide-react';
 import AuthModal from '../components/AuthModal';
+import { API_BASE_URL } from '../../config/api';
 
 const ReferralLanding: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -22,7 +23,7 @@ const ReferralLanding: React.FC = () => {
 
   const trackReferralClick = async (code: string) => {
     try {
-      await fetch(`http://localhost:5000/api/loyalty/track-click/${code}`, {
+      await fetch(`API_BASE_URL/loyalty/track-click/${code}`, {
         method: 'GET'
       });
     } catch (error) {
@@ -32,7 +33,7 @@ const ReferralLanding: React.FC = () => {
 
   const verifyReferralCode = async (code: string) => {
     try {
-      const response = await fetch('http://localhost:5000/api/loyalty/verify-referral', {
+      const response = await fetch('API_BASE_URL/loyalty/verify-referral', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

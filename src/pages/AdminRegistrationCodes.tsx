@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../../config/api';
 import { useLanguage } from '../contexts/LanguageContext';
 import {
   Users,
@@ -72,7 +73,7 @@ const AdminRegistrationCodes: React.FC = () => {
 
   const fetchCodes = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/registration-codes/all', {
+      const response = await fetch('API_BASE_URL/registration-codes/all', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -92,7 +93,7 @@ const AdminRegistrationCodes: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/registration-codes/stats', {
+      const response = await fetch('API_BASE_URL/registration-codes/stats', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -133,7 +134,7 @@ const AdminRegistrationCodes: React.FC = () => {
     setMessage(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/registration-codes/create', {
+      const response = await fetch('API_BASE_URL/registration-codes/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,7 +164,7 @@ const AdminRegistrationCodes: React.FC = () => {
     if (!confirm(t('adminRegistrationCodes.confirmRevoke'))) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/registration-codes/revoke/${codeId}`, {
+      const response = await fetch(`API_BASE_URL/registration-codes/revoke/${codeId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -185,7 +186,7 @@ const AdminRegistrationCodes: React.FC = () => {
 
   const handleCleanExpired = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/registration-codes/clean-expired', {
+      const response = await fetch('API_BASE_URL/registration-codes/clean-expired', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

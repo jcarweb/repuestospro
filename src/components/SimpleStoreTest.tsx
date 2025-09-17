@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../../config/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const SimpleStoreTest: React.FC = () => {
@@ -15,7 +16,7 @@ const SimpleStoreTest: React.FC = () => {
     
     try {
       console.log('SimpleStoreTest: Haciendo petición directa...');
-      const response = await fetch('http://localhost:5000/api/user/stores/complete', {
+      const response = await fetch('API_BASE_URL/user/stores/complete', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

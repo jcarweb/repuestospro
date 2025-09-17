@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { API_BASE_URL } from '../../config/api';
 import { io, Socket } from 'socket.io-client';
 
 export interface ChatMessage {
@@ -116,7 +117,7 @@ export const useChat = (options: UseChatOptions): UseChat => {
 
   // Inicializar conexión Socket.IO
   useEffect(() => {
-    const serverUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    const serverUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'API_BASE_URL';
     
     socketRef.current = io(serverUrl, {
       transports: ['websocket', 'polling'],

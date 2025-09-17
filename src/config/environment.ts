@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../../config/api';
 // Configuración de entorno automática
 export const getEnvironmentConfig = () => {
   const isDevelopment = import.meta.env.DEV;
@@ -6,7 +7,7 @@ export const getEnvironmentConfig = () => {
   const isRender = window.location.hostname.includes('render.com');
   
   // URLs del backend
-  const localBackend = 'http://localhost:5000/api';
+  const localBackend = 'API_BASE_URL';
   const productionBackend = 'https://piezasya-back.onrender.com/api';
   
   // Detectar entorno automáticamente

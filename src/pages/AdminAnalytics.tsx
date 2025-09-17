@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../../config/api';
 import { useLanguage } from '../contexts/LanguageContext';
 import {
   BarChart3,
@@ -89,7 +90,7 @@ const AdminAnalytics: React.FC = () => {
 
   const fetchConfiguration = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/analytics/configuration', {
+      const response = await fetch('API_BASE_URL/analytics/configuration', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -135,7 +136,7 @@ const AdminAnalytics: React.FC = () => {
     setMessage(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/analytics/configuration', {
+      const response = await fetch('API_BASE_URL/analytics/configuration', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -167,7 +168,7 @@ const AdminAnalytics: React.FC = () => {
 
   const handleToggleAnalytics = async (enabled: boolean) => {
     try {
-      const response = await fetch('http://localhost:5000/api/analytics/toggle', {
+      const response = await fetch('API_BASE_URL/analytics/toggle', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

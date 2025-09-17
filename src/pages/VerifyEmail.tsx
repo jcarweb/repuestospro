@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../../config/api';
 import { CheckCircle, XCircle, Mail, AlertCircle, ArrowLeft } from 'lucide-react';
 
 const VerifyEmail: React.FC = () => {
@@ -20,7 +21,7 @@ const VerifyEmail: React.FC = () => {
     hasVerified.current = true;
     
     try {
-      const response = await fetch(`http://localhost:5000/api/auth/verify-email/${token}`);
+      const response = await fetch(`API_BASE_URL/auth/verify-email/${token}`);
       console.log('VerifyEmail - Response status:', response.status);
       console.log('VerifyEmail - Response ok:', response.ok);
       
@@ -71,7 +72,7 @@ const VerifyEmail: React.FC = () => {
 
   const handleResendVerification = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/resend-verification', {
+      const response = await fetch('API_BASE_URL/auth/resend-verification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

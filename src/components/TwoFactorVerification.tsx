@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api';
 
 interface TwoFactorVerificationProps {
   isOpen: boolean;
@@ -38,7 +39,7 @@ const TwoFactorVerification: React.FC<TwoFactorVerificationProps> = ({
     try {
       console.log('🔐 Enviando verificación 2FA...', { email, code: code.trim(), tempToken: tempToken.substring(0, 20) + '...' });
       
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'API_BASE_URL';
       const response = await fetch(`${apiUrl}/auth/login/2fa/complete`, {
         method: 'POST',
         headers: {

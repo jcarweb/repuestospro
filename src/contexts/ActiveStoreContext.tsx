@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { API_BASE_URL } from '../../config/api';
 import { useAuth } from './AuthContext';
 
 interface Store {
@@ -94,7 +95,7 @@ export const ActiveStoreProvider: React.FC<ActiveStoreProviderProps> = ({ childr
       setLoading(true);
       console.log('ActiveStoreContext: Haciendo petición a /api/user/stores/complete...');
       
-      const response = await fetch('http://localhost:5000/api/user/stores/complete', {
+      const response = await fetch('API_BASE_URL/user/stores/complete', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

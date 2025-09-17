@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, X, Filter, ChevronDown, ChevronUp, Sparkles, AlertCircle } from 'lucide-react';
+import { API_BASE_URL } from '../../config/api';
 import { useNavigate } from 'react-router-dom';
 
 interface SearchResult {
@@ -97,7 +98,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
 
   const fetchSuggestions = async (searchQuery: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/search/autocomplete?query=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`API_BASE_URL/search/autocomplete?query=${encodeURIComponent(searchQuery)}`);
       const data: SearchResponse = await response.json();
       
       if (data.success) {
@@ -114,7 +115,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
 
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/search/products', {
+      const response = await fetch('API_BASE_URL/search/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api';
 import { useAuth } from '../contexts/AuthContext';
 
 interface LocationState {
@@ -71,7 +72,7 @@ export const useLocation = (): UseLocationReturn => {
       // Enviar al servidor si hay token
       if (token) {
         try {
-          const response = await fetch('http://localhost:5000/api/location/update', {
+          const response = await fetch('API_BASE_URL/location/update', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -128,7 +129,7 @@ export const useLocation = (): UseLocationReturn => {
     localStorage.removeItem('location');
     // También limpiar en el servidor si hay token
     if (token) {
-      fetch('http://localhost:5000/api/location/toggle', {
+      fetch('API_BASE_URL/location/toggle', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

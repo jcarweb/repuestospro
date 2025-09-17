@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../../config/api';
 import { useNavigate } from 'react-router-dom';
 import { 
   Store, 
@@ -99,7 +100,7 @@ const StoreSetup: React.FC = () => {
           setTimeout(() => reject(new Error('Timeout')), 10000);
         });
 
-        const fetchPromise = fetch('http://localhost:5000/api/user/stores', {
+        const fetchPromise = fetch('API_BASE_URL/user/stores', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -195,7 +196,7 @@ const StoreSetup: React.FC = () => {
         }
       };
 
-      const response = await fetch('http://localhost:5000/api/stores', {
+      const response = await fetch('API_BASE_URL/stores', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

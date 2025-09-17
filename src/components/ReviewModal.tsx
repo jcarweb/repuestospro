@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Star, MessageSquare, Package, Truck, Smartphone } from 'lucide-react';
+import { API_BASE_URL } from '../../config/api';
 import { useAuth } from '../contexts/AuthContext';
 
 interface ReviewModalProps {
@@ -33,7 +34,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
     setMessage(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/loyalty/review', {
+      const response = await fetch('API_BASE_URL/loyalty/review', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

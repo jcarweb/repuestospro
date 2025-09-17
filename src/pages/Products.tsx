@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useLanguageChange } from '../hooks/useLanguageChange';
 import ProductCard from '../components/ProductCard';
-import { 
+import { API_BASE_URL } from '../config/api';
+import {
   Search, 
   Filter, 
   Grid, 
@@ -89,7 +90,7 @@ const Products: React.FC = () => {
         ...(priceRange.max && { maxPrice: priceRange.max })
       });
 
-      const response = await fetch(`http://localhost:5000/api/products?${params}`);
+      const response = await fetch(`API_BASE_URL/products?${params}`);
       const data = await response.json();
       
       if (data.success) {
@@ -112,7 +113,7 @@ const Products: React.FC = () => {
   // Cargar categorías
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/categories');
+      const response = await fetch('API_BASE_URL/categories');
       const data = await response.json();
       
       if (data.success) {
@@ -126,7 +127,7 @@ const Products: React.FC = () => {
   // Cargar marcas únicas
   const fetchBrands = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/products/brands');
+      const response = await fetch('API_BASE_URL/products/brands');
       const data = await response.json();
       
       if (data.success) {
@@ -199,11 +200,11 @@ const Products: React.FC = () => {
     
     // Si es una URL relativa, construir la URL completa
     if (imageUrl.startsWith('/')) {
-      return `http://localhost:5000${imageUrl}`;
+      return `API_BASE_URL${imageUrl}`;
     }
     
     // Si no tiene protocolo, asumir que es relativa al backend
-    return `http://localhost:5000/${imageUrl}`;
+    return `API_BASE_URL/${imageUrl}`;
   };
 
   // Renderizado de productos usando ProductCard

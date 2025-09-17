@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api';
 import { 
   Shield, 
   QrCode, 
@@ -48,7 +49,7 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
       console.log('Generando secreto 2FA...');
       console.log('Token:', token ? 'Presente' : 'Ausente');
       
-      const response = await fetch('http://localhost:5000/api/auth/2fa/generate-secret', {
+      const response = await fetch('API_BASE_URL/auth/2fa/generate-secret', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -88,7 +89,7 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
       console.log('Habilitando 2FA...');
       console.log('Datos enviados:', { secret: secret ? '***' : 'undefined', code: verificationCode });
       
-      const response = await fetch('http://localhost:5000/api/auth/2fa/enable', {
+      const response = await fetch('API_BASE_URL/auth/2fa/enable', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

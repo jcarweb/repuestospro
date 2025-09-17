@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import ShareModal from '../components/ShareModal';
 import ReferralModal from '../components/ReferralModal';
+import { API_BASE_URL } from '../../config/api';
 import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics';
 
 interface LoyaltyStats {
@@ -52,7 +53,7 @@ const Loyalty: React.FC = () => {
 
   const fetchLoyaltyStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/loyalty/stats', {
+      const response = await fetch('API_BASE_URL/loyalty/stats', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -71,7 +72,7 @@ const Loyalty: React.FC = () => {
 
   const fetchTrackingStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/loyalty/tracking-stats', {
+      const response = await fetch('API_BASE_URL/loyalty/tracking-stats', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -89,7 +90,7 @@ const Loyalty: React.FC = () => {
   const fetchAvailableRewards = async () => {
     setLoadingRewards(true);
     try {
-      const response = await fetch('http://localhost:5000/api/loyalty/available-rewards', {
+      const response = await fetch('API_BASE_URL/loyalty/available-rewards', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -112,7 +113,7 @@ const Loyalty: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/loyalty/redeem', {
+      const response = await fetch('API_BASE_URL/loyalty/redeem', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
