@@ -68,8 +68,11 @@ class UserService {
     console.log('🔍 UserService - Making request:', {
       endpoint,
       fullUrl,
+      API_BASE_URL,
       hasToken: !!token,
-      tokenPreview: token ? token.substring(0, 20) + '...' : 'none'
+      tokenPreview: token ? token.substring(0, 20) + '...' : 'none',
+      hostname: window.location.hostname,
+      isVercel: window.location.hostname.includes('vercel.app')
     });
     
     const response = await fetch(fullUrl, {
@@ -91,6 +94,16 @@ class UserService {
       const errorText = await response.text();
       console.error('🔍 UserService - Error response:', errorText);
       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+    }
+
+    // Verificar si la respuesta es HTML en lugar de JSON
+    const contentType = response.headers.get('content-type');
+    console.log('🔍 UserService - Response content-type:', contentType);
+    
+    if (!contentType || !contentType.includes('application/json')) {
+      const responseText = await response.text();
+      console.error('🔍 UserService - Non-JSON response received:', responseText.substring(0, 200));
+      throw new Error(`Expected JSON but received ${contentType || 'unknown content type'}`);
     }
 
     const data = await response.json();
