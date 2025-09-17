@@ -63,8 +63,16 @@ export interface UserResponse {
 class UserService {
   private async makeRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
     const token = localStorage.getItem('token');
+    const fullUrl = `${API_BASE_URL}${endpoint}`;
     
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    console.log('🔍 UserService - Making request:', {
+      endpoint,
+      fullUrl,
+      hasToken: !!token,
+      tokenPreview: token ? token.substring(0, 20) + '...' : 'none'
+    });
+    
+    const response = await fetch(fullUrl, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -73,11 +81,21 @@ class UserService {
       },
     });
 
+    console.log('🔍 UserService - Response:', {
+      status: response.status,
+      ok: response.ok,
+      url: response.url
+    });
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      console.error('🔍 UserService - Error response:', errorText);
+      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log('🔍 UserService - Response data:', data);
+    return data;
   }
 
   async getAllUsers(params: {
@@ -88,6 +106,8 @@ class UserService {
     search?: string;
   } = {}): Promise<UserResponse> {
     try {
+      console.log('🔍 UserService - getAllUsers called with params:', params);
+      
       const queryParams = new URLSearchParams();
       
       if (params.page) queryParams.append('page', params.page.toString());
@@ -96,8 +116,16 @@ class UserService {
       if (params.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
       if (params.search) queryParams.append('search', params.search);
 
-      const endpoint = `/api/admin/users${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const endpoint = `/admin/users${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      console.log('🔍 UserService - Final endpoint:', endpoint);
+      
       const response = await this.makeRequest(endpoint);
+      
+      console.log('🔍 UserService - Processed response:', {
+        success: true,
+        dataLength: response.data?.length || 0,
+        total: response.total || 0
+      });
       
       return {
         success: true,
@@ -108,7 +136,7 @@ class UserService {
         totalPages: response.totalPages || 1
       };
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('🔍 UserService - Error fetching users:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Error al cargar usuarios'
@@ -119,7 +147,7 @@ class UserService {
   async getStoreOwners(): Promise<UserResponse> {
     try {
       // Usar el endpoint específico para obtener usuarios con rol store_owner
-      const response = await this.makeRequest('/api/admin/users?role=store_owner');
+      const response = await this.makeRequest('/admin/users?role=store_owner');
       
       return {
         success: true,
@@ -139,7 +167,7 @@ class UserService {
   async getStoreManagers(): Promise<UserResponse> {
     try {
       // Usar el endpoint específico para obtener usuarios con rol store_manager
-      const response = await this.makeRequest('/api/admin/users?role=store_manager');
+      const response = await this.makeRequest('/admin/users?role=store_manager');
       
       return {
         success: true,
@@ -160,8 +188,8 @@ class UserService {
     try {
       // Obtener usuarios con roles store_owner y store_manager por separado
       const [ownersResponse, managersResponse] = await Promise.all([
-        this.makeRequest('/api/admin/users?role=store_owner'),
-        this.makeRequest('/api/admin/users?role=store_manager')
+        this.makeRequest('/admin/users?role=store_owner'),
+        this.makeRequest('/admin/users?role=store_manager')
       ]);
       
       const allUsers = [
