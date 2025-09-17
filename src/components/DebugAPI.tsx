@@ -175,6 +175,31 @@ const DebugAPI: React.FC = () => {
     }
   };
 
+  // Función para decodificar el token actual
+  const getCurrentTokenInfo = () => {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const payload = JSON.parse(atob(parts[1]));
+        return {
+          userId: payload.userId || payload.sub,
+          role: payload.role,
+          exp: payload.exp,
+          iat: payload.iat,
+          isExpired: payload.exp ? payload.exp < Date.now() / 1000 : false
+        };
+      }
+    } catch (e) {
+      console.log('Error decodificando token:', e);
+    }
+    return null;
+  };
+
+  const currentTokenInfo = getCurrentTokenInfo();
+
   return (
     <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg m-4">
       <h3 className="text-lg font-bold mb-4">🔍 Debug API</h3>
@@ -184,6 +209,15 @@ const DebugAPI: React.FC = () => {
         <p><strong>Hostname:</strong> {window.location.hostname}</p>
         <p><strong>Is Vercel:</strong> {window.location.hostname.includes('vercel.app') ? 'Yes' : 'No'}</p>
         <p><strong>Has Token:</strong> {localStorage.getItem('token') ? 'Yes' : 'No'}</p>
+        {currentTokenInfo && (
+          <div className="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900 rounded">
+            <p><strong>Token Info:</strong></p>
+            <p><strong>User ID:</strong> {currentTokenInfo.userId}</p>
+            <p><strong>Role:</strong> {currentTokenInfo.role}</p>
+            <p><strong>Expired:</strong> {currentTokenInfo.isExpired ? 'Yes' : 'No'}</p>
+            <p><strong>Expires:</strong> {currentTokenInfo.exp ? new Date(currentTokenInfo.exp * 1000).toLocaleString() : 'Unknown'}</p>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2 mb-4">
