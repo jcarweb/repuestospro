@@ -23,7 +23,7 @@ const AvatarImageSimple: React.FC<AvatarImageProps> = ({
 
   // Construir la URL del avatar
   const getAvatarUrl = () => {
-    const baseUrl = import.meta.env.VITE_API_URL || 'API_BASE_URL';
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
     
     console.log('AvatarImageSimple - Avatar recibido:', avatar);
     

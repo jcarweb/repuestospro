@@ -16,7 +16,7 @@ const AvatarImage: React.FC<AvatarImageProps> = ({
 }) => {
   // Construir la URL del avatar usando useMemo para evitar recálculos
   const avatarUrl = React.useMemo(() => {
-    const baseUrl = import.meta.env.VITE_API_URL || 'API_BASE_URL';
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
     
     if (!avatar || avatar === '/uploads/perfil/default-avatar.svg') {
       return '/default-avatar.svg'; // Usar avatar del frontend

@@ -112,7 +112,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // Verificar token con el backend
-      const apiUrl = import.meta.env.VITE_API_URL || 'API_BASE_URL';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const response = await fetch(`${apiUrl}/auth/verify`, {
         method: 'GET',
         headers: {
@@ -149,7 +149,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const loginAsync = async (email: string, password: string) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'API_BASE_URL';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       console.log('🌐 Enviando request a:', `${apiUrl}/auth/login`);
       
       // Verificar si el servidor está disponible antes de hacer la petición
