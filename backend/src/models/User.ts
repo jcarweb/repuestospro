@@ -438,10 +438,10 @@ const userSchema = new Schema<IUser>({
 });
 
 // Índices para optimizar consultas
-userSchema.index({ email: 1 });
+// email ya tiene índice único automático por unique: true
+// referralCode ya tiene índice único automático por unique: true
 userSchema.index({ role: 1 });
 userSchema.index({ location: '2dsphere' });
-userSchema.index({ referralCode: 1 });
 userSchema.index({ deliveryStatus: 1 });
 userSchema.index({ stores: 1 });
 userSchema.index({ assignedStore: 1 });

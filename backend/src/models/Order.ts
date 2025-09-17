@@ -445,7 +445,7 @@ const OrderSchema = new Schema<IOrder>({
 });
 
 // Índices para optimizar consultas
-OrderSchema.index({ orderNumber: 1 }, { unique: true });
+// orderNumber ya tiene índice único automático por unique: true
 OrderSchema.index({ transactionId: 1 });
 OrderSchema.index({ userId: 1, orderStatus: 1 });
 OrderSchema.index({ storeId: 1, orderStatus: 1 });

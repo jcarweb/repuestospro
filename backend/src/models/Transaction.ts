@@ -225,7 +225,7 @@ const TransactionSchema = new Schema<ITransaction>({
 });
 
 // Índices para optimizar consultas
-TransactionSchema.index({ transactionNumber: 1 }, { unique: true });
+// transactionNumber ya tiene índice único automático por unique: true
 TransactionSchema.index({ userId: 1, status: 1 });
 TransactionSchema.index({ storeId: 1, status: 1 });
 TransactionSchema.index({ createdAt: -1 });
