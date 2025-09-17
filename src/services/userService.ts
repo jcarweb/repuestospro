@@ -129,7 +129,7 @@ class UserService {
       if (params.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
       if (params.search) queryParams.append('search', params.search);
 
-      const endpoint = `/admin/users${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const endpoint = `/debug/users${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       console.log('🔍 UserService - Final endpoint:', endpoint);
       
       const response = await this.makeRequest(endpoint);

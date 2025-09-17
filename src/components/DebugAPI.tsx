@@ -9,7 +9,7 @@ const DebugAPI: React.FC = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const fullUrl = `${API_BASE_URL}/admin/users`;
+      const fullUrl = `${API_BASE_URL}/debug/users`;
       
       console.log('🔍 DebugAPI - Testing API:', {
         API_BASE_URL,
