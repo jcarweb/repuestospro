@@ -1783,4 +1783,5 @@ const AdminController = {
   }
 };
 
+export { AdminController };
 export default AdminController;
