@@ -1,5 +1,5 @@
 import express from 'express';
-import { AdminController } from '../controllers';
+import { AdminController } from '../controllers/adminController.js';
 import { authMiddleware as authenticateToken, adminMiddleware as requireAdmin } from '../middleware/authMiddleware';
 import Store from '../models/Store';
 import Product from '../models/Product';
