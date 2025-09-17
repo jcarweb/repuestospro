@@ -70,6 +70,35 @@ declare module 'mongoose' {
   export function disconnect(): Promise<void>;
   export const connection: Connection;
   export const model: <T = Document>(name: string, schema?: Schema, collection?: string) => Model<T>;
+  
+  // Agregar ConnectOptions
+  interface ConnectOptions {
+    useNewUrlParser?: boolean;
+    useUnifiedTopology?: boolean;
+    useCreateIndex?: boolean;
+    useFindAndModify?: boolean;
+    bufferCommands?: boolean;
+    bufferMaxEntries?: number;
+    maxPoolSize?: number;
+    serverSelectionTimeoutMS?: number;
+    socketTimeoutMS?: number;
+    family?: number;
+    authSource?: string;
+    user?: string;
+    pass?: string;
+    dbName?: string;
+    retryWrites?: boolean;
+    w?: string | number;
+    j?: boolean;
+    readPreference?: string;
+    readConcern?: any;
+    maxIdleTimeMS?: number;
+    minPoolSize?: number;
+    maxIdleTimeMS?: number;
+    serverApi?: any;
+  }
+  
+  export { ConnectOptions };
 }
 
 declare module 'mongoose-paginate-v2' {
