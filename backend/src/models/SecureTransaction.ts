@@ -116,7 +116,7 @@ const SecureTransactionSchema = new Schema<ISecureTransaction>({
 }, { timestamps: true });
 
 // Índices para optimizar consultas
-SecureTransactionSchema.index({ transactionId: 1 }, { unique: true });
+// transactionId ya tiene índice único automático por unique: true
 SecureTransactionSchema.index({ userId: 1, protectionStatus: 1 });
 SecureTransactionSchema.index({ storeId: 1, protectionStatus: 1 });
 SecureTransactionSchema.index({ protectionEndDate: 1, protectionStatus: 1 });
