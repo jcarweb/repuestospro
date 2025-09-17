@@ -291,7 +291,7 @@ const DeliverySchema = new Schema<IDelivery>({
 DeliverySchema.index({ status: 1, createdAt: -1 });
 DeliverySchema.index({ storeId: 1, status: 1 });
 DeliverySchema.index({ riderId: 1, status: 1 });
-DeliverySchema.index({ trackingCode: 1 });
+// trackingCode ya tiene índice único automático por unique: true e index: true
 
 // Método para generar código de tracking único
 DeliverySchema.methods.generateTrackingCode = function(): string {
