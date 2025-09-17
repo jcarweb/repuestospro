@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "PiezasYA",
-    "slug": "piezasya-mobile",
+    "slug": "piezasya",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/piezasya.png",
@@ -36,7 +36,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "f683bfe1-a6cd-46f7-956f-9940ee5de216"
       }
     },
     "development": {

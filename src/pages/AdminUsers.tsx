@@ -4,6 +4,7 @@ import { useLanguageChange } from '../hooks/useLanguageChange';
 import { Users, Search, Filter, MoreVertical, Edit, Trash2, Eye, Plus, X, Save, UserPlus, Key } from 'lucide-react';
 import type { User, UserRole } from '../types';
 import { API_BASE_URL } from '../../config/api';
+import DebugAPI from '../components/DebugAPI';
 
 interface UserFormData {
   name: string;
@@ -344,6 +345,9 @@ const AdminUsers: React.FC = () => {
 
   return (
     <div>
+      {/* Debug Component - Temporal */}
+      <DebugAPI />
+      
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
