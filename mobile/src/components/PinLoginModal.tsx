@@ -9,7 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -208,7 +208,7 @@ const PinLoginModal: React.FC<PinLoginModalProps> = ({
               disabled={isLocked}
             >
               {digit === 'delete' ? (
-                <Icon name="backspace" size={24} color={colors.textPrimary} />
+                <Ionicons name="backspace" size={24} color={colors.textPrimary} />
               ) : digit ? (
                 <Text style={[styles.keypadText, { color: colors.textPrimary }]}>
                   {digit}
@@ -231,7 +231,7 @@ const PinLoginModal: React.FC<PinLoginModalProps> = ({
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.headerBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Icon name="close" size={24} color={colors.textPrimary} />
+            <Ionicons name="close" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
             Login con PIN
@@ -241,7 +241,7 @@ const PinLoginModal: React.FC<PinLoginModalProps> = ({
 
         <View style={styles.content}>
           <View style={styles.header}>
-            <Icon name="keypad" size={48} color={colors.primary} />
+            <Ionicons name="keypad" size={48} color={colors.primary} />
             <Text style={[styles.title, { color: colors.textPrimary }]}>
               Ingresa tu PIN
             </Text>
@@ -254,7 +254,7 @@ const PinLoginModal: React.FC<PinLoginModalProps> = ({
 
           {isLocked ? (
             <View style={[styles.lockContainer, { backgroundColor: colors.error + '20', borderColor: colors.error }]}>
-              <Icon name="lock-closed" size={32} color={colors.error} />
+              <Ionicons name="lock-closed" size={32} color={colors.error} />
               <Text style={[styles.lockText, { color: colors.error }]}>
                 Cuenta bloqueada
               </Text>
@@ -295,7 +295,7 @@ const PinLoginModal: React.FC<PinLoginModalProps> = ({
 
           {attempts > 0 && !isLocked && (
             <View style={[styles.attemptsContainer, { backgroundColor: colors.warning + '20', borderColor: colors.warning }]}>
-              <Icon name="warning" size={20} color={colors.warning} />
+              <Ionicons name="warning" size={20} color={colors.warning} />
               <Text style={[styles.attemptsText, { color: colors.warning }]}>
                 Intentos fallidos: {attempts}/3
               </Text>

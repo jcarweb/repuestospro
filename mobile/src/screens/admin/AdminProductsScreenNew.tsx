@@ -18,7 +18,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { productService, Product, Store } from '../../services/productService';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 
 const AdminProductsScreen: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -335,7 +335,7 @@ const AdminProductsScreen: React.FC = () => {
               ]}
               onPress={() => toggleProductStatus(item._id, item.isActive)}
             >
-              <Icon
+              <Ionicons
                 name={item.isActive ? 'checkmark' : 'close'}
                 size={16}
                 color="white"
@@ -347,7 +347,7 @@ const AdminProductsScreen: React.FC = () => {
               style={styles.deleteButton}
               onPress={() => deleteProduct(item._id, item.name || 'Producto')}
             >
-              <Icon name="trash" size={16} color="#EF4444" />
+              <Ionicons name="trash" size={16} color="#EF4444" />
             </TouchableOpacity>
           )}
         </View>
@@ -389,7 +389,7 @@ const AdminProductsScreen: React.FC = () => {
         </Text>
         {item.isFeatured && (
           <View style={styles.featuredBadge}>
-            <Icon name="star" size={12} color="#F59E0B" />
+            <Ionicons name="star" size={12} color="#F59E0B" />
             <Text style={styles.featuredText}>Destacado</Text>
           </View>
         )}
@@ -435,7 +435,7 @@ const AdminProductsScreen: React.FC = () => {
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
         <View style={styles.accessDeniedContainer}>
-          <Icon name="lock-closed" size={64} color="#EF4444" />
+          <Ionicons name="lock-closed" size={64} color="#EF4444" />
           <Text style={styles.accessDeniedTitle}>Acceso Denegado</Text>
           <Text style={styles.accessDeniedMessage}>
             No tienes permisos para acceder a la gestión de productos.
@@ -461,7 +461,7 @@ const AdminProductsScreen: React.FC = () => {
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <Icon name="search" size={20} color="#6B7280" style={styles.searchIcon} />
+        <Ionicons name="search" size={20} color="#6B7280" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar productos..."
@@ -530,7 +530,7 @@ const AdminProductsScreen: React.FC = () => {
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Icon name="cube-outline" size={64} color="#9CA3AF" />
+              <Ionicons name="cube-outline" size={64} color="#9CA3AF" />
               <Text style={styles.emptyTitle}>No se encontraron productos</Text>
               <Text style={styles.emptyMessage}>
                 Intenta ajustar los filtros de búsqueda

@@ -18,7 +18,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { productService, Product } from '../../services/productService';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 
 type AdminStackParamList = {
   AdminProducts: undefined;
@@ -365,7 +365,7 @@ const AdminCreateProductScreen: React.FC = () => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-back" size={24} color="#374151" />
+          <Ionicons name="arrow-back" size={24} color="#374151" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
           {isEditing ? 'Editar Producto' : 'Nuevo Producto'}
@@ -376,7 +376,7 @@ const AdminCreateProductScreen: React.FC = () => {
             onPress={handleDelete}
             disabled={isSaving}
           >
-            <Icon name="trash" size={24} color="#EF4444" />
+            <Ionicons name="trash" size={24} color="#EF4444" />
           </TouchableOpacity>
         )}
       </View>

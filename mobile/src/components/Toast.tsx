@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -99,15 +99,15 @@ const Toast: React.FC<ToastProps> = ({
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <Icon name="checkmark-circle" size={20} color="white" />;
+        return <Ionicons name="checkmark-circle" size={20} color="white" />;
       case 'error':
-        return <Icon name="alert-circle" size={20} color="white" />;
+        return <Ionicons name="alert-circle" size={20} color="white" />;
       case 'warning':
-        return <Icon name="warning" size={20} color="white" />;
+        return <Ionicons name="warning" size={20} color="white" />;
       case 'info':
-        return <Icon name="information-circle" size={20} color="white" />;
+        return <Ionicons name="information-circle" size={20} color="white" />;
       default:
-        return <Icon name="information-circle" size={20} color="white" />;
+        return <Ionicons name="information-circle" size={20} color="white" />;
     }
   };
 
@@ -136,7 +136,7 @@ const Toast: React.FC<ToastProps> = ({
           <Text style={styles.message}>{message}</Text>
         </View>
         <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-          <Icon name="close" size={16} color="white" />
+          <Ionicons name="close" size={16} color="white" />
         </TouchableOpacity>
       </View>
     </Animated.View>

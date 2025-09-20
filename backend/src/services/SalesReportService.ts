@@ -360,13 +360,13 @@ export class SalesReportService {
 
     return topProducts.map(product => {
       const productInfo = products.find(p => p._id.toString() === product._id.toString());
-      const costPrice = (productInfo as any)?.costPrice || 0;
+      const costPrice = productInfo?.costPrice || 0;
       const profitMargin = product.averagePrice > 0 ? ((product.averagePrice - costPrice) / product.averagePrice) * 100 : 0;
 
       return {
         productId: product._id,
         productName: product.productName,
-        sku: (product as any).sku,
+        sku: product.sku,
         category: productInfo?.category || 'Sin categoría',
         quantitySold: product.quantitySold,
         totalRevenue: product.totalRevenue,
@@ -778,12 +778,12 @@ export class SalesReportService {
         return;
       }
 
-      console.log(`Usuario encontrado: ${user.name} (${(user as any).email})`);
+      console.log(`Usuario encontrado: ${user.name} (${user.email})`);
 
       // Obtener las tiendas asociadas al usuario
       const userStores = await mongoose.model('Store').find({ 
         $or: [
-          { managers: (user as any)._id },
+          { managers: user._id },
           { _id: { $in: user.stores || [] } }
         ]
       });
@@ -936,7 +936,7 @@ export class SalesReportService {
       });
 
       Object.entries(statsByStore).forEach(([storeName, stats]) => {
-        console.log(`   - ${storeName}: ${(stats as any).orders} órdenes, $${(stats as any).total.toFixed(2)}`);
+        console.log(`   - ${storeName}: ${stats.orders} órdenes, $${stats.total.toFixed(2)}`);
       });
 
       // Mostrar distribución temporal
@@ -952,7 +952,7 @@ export class SalesReportService {
 
       console.log(`📈 Distribución semanal:`);
       Object.entries(weeklyStats).sort().forEach(([week, stats]) => {
-        console.log(`   - Semana ${week}: ${(stats as any).orders} órdenes, $${(stats as any).total.toFixed(2)}`);
+        console.log(`   - Semana ${week}: ${stats.orders} órdenes, $${stats.total.toFixed(2)}`);
       });
 
     } catch (error) {

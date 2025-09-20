@@ -36,7 +36,7 @@ const ParishSchema = new Schema<IParish>({
 
 // Índices para optimizar consultas
 ParishSchema.index({ name: 'text' });
-// code ya está incluido en el índice compuesto único
+ParishSchema.index({ code: 1 });
 ParishSchema.index({ municipality: 1 });
 ParishSchema.index({ isActive: 1 });
 ParishSchema.index({ municipality: 1, name: 1 }); // Para búsquedas por municipio y parroquia

@@ -37,7 +37,7 @@ const StoreLocationMap: React.FC<StoreLocationMapProps> = ({
         setError(null);
 
         const loader = new Loader({
-          apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY', // Reemplazar con tu API key
+          apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY', // Reemplazar con tu API key
           version: 'weekly',
           libraries: ['places']
         });

@@ -169,7 +169,7 @@ const InventoryTransferSchema = new Schema<IInventoryTransfer>({
 });
 
 // Índices
-// transferId ya tiene índice único automático por unique: true
+InventoryTransferSchema.index({ transferId: 1 }, { unique: true });
 InventoryTransferSchema.index({ fromStore: 1, status: 1 });
 InventoryTransferSchema.index({ toStore: 1, status: 1 });
 InventoryTransferSchema.index({ status: 1 });

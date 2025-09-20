@@ -1,6 +1,4 @@
 import { Request, Response } from 'express';
-import mongoose from 'mongoose';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import AdvertisementRequest from '../models/AdvertisementRequest';
 import Advertisement from '../models/Advertisement';
 import User from '../models/User';
@@ -9,7 +7,7 @@ import emailService from '../services/emailService';
 
 export class AdvertisementRequestController {
   // Crear nueva solicitud de publicidad
-  static async createRequest(req: AuthenticatedRequest, res: Response) {
+  static async createRequest(req: Request, res: Response) {
     try {
       const {
         campaignName,
@@ -37,7 +35,7 @@ export class AdvertisementRequestController {
       }
 
       // Buscar la tienda del gestor
-      const store = await Store.findOne({ managers: (req as any).user._id });
+      const store = await Store.findOne({ managers: req.user._id });
       if (!store) {
         return res.status(404).json({
           success: false,
@@ -47,7 +45,7 @@ export class AdvertisementRequestController {
 
       // Crear la solicitud
       const request = new AdvertisementRequest({
-        storeManager: (req as any).user._id,
+        storeManager: req.user._id,
         store: store._id,
         campaignName,
         campaignObjective,
@@ -66,7 +64,7 @@ export class AdvertisementRequestController {
       });
 
       // Calcular estimaciones
-      const estimates = (request as any).calculateEstimates();
+      const estimates = request.calculateEstimates();
       request.estimatedReach = estimates.estimatedReach;
       request.estimatedClicks = estimates.estimatedClicks;
       request.estimatedCost = estimates.estimatedCost;
@@ -76,7 +74,7 @@ export class AdvertisementRequestController {
       // Enviar email de confirmación al gestor
       try {
         await emailService.sendAdvertisementRequestConfirmation(
-          req.user?.email || '',
+          req.user.email,
           request.campaignName,
           estimates
         );
@@ -108,7 +106,7 @@ export class AdvertisementRequestController {
   }
 
   // Obtener solicitudes del gestor de tienda
-  static async getStoreManagerRequests(req: AuthenticatedRequest, res: Response) {
+  static async getStoreManagerRequests(req: Request, res: Response) {
     try {
       const requests = await AdvertisementRequest.find({ storeManager: req.user?._id })
         .populate('store', 'name city')
@@ -130,7 +128,7 @@ export class AdvertisementRequestController {
   }
 
   // Obtener una solicitud específica
-  static async getRequestById(req: AuthenticatedRequest, res: Response) {
+  static async getRequestById(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const request = await AdvertisementRequest.findById(id)
@@ -168,7 +166,7 @@ export class AdvertisementRequestController {
   }
 
   // Actualizar solicitud (solo borrador)
-  static async updateRequest(req: AuthenticatedRequest, res: Response) {
+  static async updateRequest(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const updateData = req.body;
@@ -198,7 +196,7 @@ export class AdvertisementRequestController {
 
       // Recalcular estimaciones si cambió el presupuesto
       if (updateData.budget) {
-        const estimates = (request as any).calculateEstimates();
+        const estimates = request.calculateEstimates();
         updateData.estimatedReach = estimates.estimatedReach;
         updateData.estimatedClicks = estimates.estimatedClicks;
         updateData.estimatedCost = estimates.estimatedCost;
@@ -225,7 +223,7 @@ export class AdvertisementRequestController {
   }
 
   // Enviar solicitud para revisión
-  static async submitRequest(req: AuthenticatedRequest, res: Response) {
+  static async submitRequest(req: Request, res: Response) {
     try {
       const { id } = req.params;
 
@@ -252,7 +250,7 @@ export class AdvertisementRequestController {
       }
 
       // Validar que la solicitud esté completa
-      if (!(request as any).validateSchedule()) {
+      if (!request.validateSchedule()) {
         return res.status(400).json({
           success: false,
           message: 'Las fechas de la campaña no son válidas'
@@ -291,7 +289,7 @@ export class AdvertisementRequestController {
   }
 
   // ADMIN: Obtener todas las solicitudes
-  static async getAllRequests(req: AuthenticatedRequest, res: Response) {
+  static async getAllRequests(req: Request, res: Response) {
     try {
       const { status, page = 1, limit = 10 } = req.query;
       
@@ -330,7 +328,7 @@ export class AdvertisementRequestController {
   }
 
   // ADMIN: Aprobar solicitud
-  static async approveRequest(req: AuthenticatedRequest, res: Response) {
+  static async approveRequest(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const { adminNotes } = req.body;
@@ -382,15 +380,15 @@ export class AdvertisementRequestController {
       // Actualizar la solicitud
       request.status = 'approved';
       request.adminNotes = adminNotes;
-      request.approvedBy = new mongoose.Types.ObjectId(req.user?._id);
+      request.approvedBy = req.user?._id;
       request.approvedAt = new Date();
-      request.createdAdvertisement = advertisement._id as mongoose.Types.ObjectId;
+      request.createdAdvertisement = advertisement._id;
       await request.save();
 
       // Enviar email de aprobación al gestor
       try {
         await emailService.sendAdvertisementApproval(
-          (request.storeManager as any).email,
+          request.storeManager.email,
           request.campaignName,
           advertisement._id.toString(),
           adminNotes
@@ -421,7 +419,7 @@ export class AdvertisementRequestController {
   }
 
   // ADMIN: Rechazar solicitud
-  static async rejectRequest(req: AuthenticatedRequest, res: Response) {
+  static async rejectRequest(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const { rejectionReason } = req.body;
@@ -445,14 +443,14 @@ export class AdvertisementRequestController {
 
       request.status = 'rejected';
       request.rejectionReason = rejectionReason;
-      request.approvedBy = new mongoose.Types.ObjectId(req.user?._id);
+      request.approvedBy = req.user?._id;
       request.approvedAt = new Date();
       await request.save();
 
       // Enviar email de rechazo al gestor
       try {
         await emailService.sendAdvertisementRejection(
-          (request.storeManager as any).email,
+          request.storeManager.email,
           request.campaignName,
           rejectionReason
         );
@@ -475,7 +473,7 @@ export class AdvertisementRequestController {
   }
 
   // ADMIN: Cambiar estado de revisión
-  static async changeReviewStatus(req: AuthenticatedRequest, res: Response) {
+  static async changeReviewStatus(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const { status } = req.body;
@@ -513,7 +511,7 @@ export class AdvertisementRequestController {
   }
 
   // Cancelar solicitud (gestor de tienda)
-  static async cancelRequest(req: AuthenticatedRequest, res: Response) {
+  static async cancelRequest(req: Request, res: Response) {
     try {
       const { id } = req.params;
 

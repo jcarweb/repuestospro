@@ -14,7 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 
 interface CreateUserData {
   name: string;
@@ -266,7 +266,7 @@ const AdminCreateUserScreen: React.FC = () => {
                   style={styles.passwordToggle}
                   onPress={() => setShowPassword(!showPassword)}
                 >
-                  <Icon 
+                  <Ionicons 
                     name={showPassword ? 'eye-off' : 'eye'} 
                     size={20} 
                     color="#8E8E93" 
@@ -290,7 +290,7 @@ const AdminCreateUserScreen: React.FC = () => {
                   style={styles.passwordToggle}
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  <Icon 
+                  <Ionicons 
                     name={showConfirmPassword ? 'eye-off' : 'eye'} 
                     size={20} 
                     color="#8E8E93" 
@@ -310,7 +310,7 @@ const AdminCreateUserScreen: React.FC = () => {
               <ActivityIndicator size="small" color="#fff" />
             ) : (
               <>
-                <Icon name="person-add" size={20} color="#fff" />
+                <Ionicons name="person-add" size={20} color="#fff" />
                 <Text style={styles.submitButtonText}>Crear Usuario</Text>
               </>
             )}

@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 
 
 interface Product {
@@ -319,7 +319,7 @@ const ClientHomeScreen: React.FC = () => {
       style={[styles.suggestionItem, { backgroundColor: colors.surfaceSecondary }]}
       onPress={() => handleSuggestionPress(item)}
     >
-      <Icon name="search" size={16} color={colors.textTertiary} />
+      <Ionicons name="search" size={16} color={colors.textTertiary} />
       <Text style={[styles.suggestionText, { color: colors.textPrimary }]} numberOfLines={1}>
         {item}
       </Text>
@@ -342,7 +342,7 @@ const ClientHomeScreen: React.FC = () => {
       {/* Barra de búsqueda */}
       <View style={[styles.searchContainer, { backgroundColor: colors.surface }]}>
         <View style={[styles.searchBar, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}>
-          <Icon name="search" size={20} color={colors.textTertiary} />
+          <Ionicons name="search" size={20} color={colors.textTertiary} />
           <TextInput
             style={[styles.searchInput, { color: colors.textPrimary }]}
             placeholder="Buscar productos..."
@@ -353,7 +353,7 @@ const ClientHomeScreen: React.FC = () => {
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={clearSearch}>
-              <Icon name="close-circle" size={20} color={colors.textTertiary} />
+              <Ionicons name="close-circle" size={20} color={colors.textTertiary} />
             </TouchableOpacity>
           )}
         </View>
@@ -401,7 +401,7 @@ const ClientHomeScreen: React.FC = () => {
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Icon name="search-outline" size={64} color={colors.textTertiary} />
+              <Ionicons name="search-outline" size={64} color={colors.textTertiary} />
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                 No se encontraron productos
               </Text>

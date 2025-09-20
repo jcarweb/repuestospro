@@ -13,7 +13,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 
 interface RegisterScreenProps {
   navigation: any;
@@ -111,7 +111,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
           <View style={styles.form}>
             {error && (
               <View style={[styles.errorContainer, { backgroundColor: colors.error + '20', borderColor: colors.error }]}>
-                <Icon name="alert-circle" size={20} color={colors.error} />
+                <Ionicons name="alert-circle" size={20} color={colors.error} />
                 <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
               </View>
             )}
@@ -128,7 +128,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                   onChangeText={(value) => handleInputChange('name', value)}
                   autoCapitalize="words"
                 />
-                <Icon
+                <Ionicons
                   name="person-outline"
                   size={20}
                   color={colors.textTertiary}
@@ -151,7 +151,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
-                <Icon
+                <Ionicons
                   name="mail-outline"
                   size={20}
                   color={colors.textTertiary}
@@ -172,7 +172,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                   onChangeText={(value) => handleInputChange('phone', value)}
                   keyboardType="phone-pad"
                 />
-                <Icon
+                <Ionicons
                   name="call-outline"
                   size={20}
                   color={colors.textTertiary}
@@ -198,13 +198,13 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                   onPress={() => setShowPassword(!showPassword)}
                   style={styles.passwordToggle}
                 >
-                  <Icon
+                  <Ionicons
                     name={showPassword ? 'eye-off' : 'eye'}
                     size={20}
                     color={colors.textTertiary}
                   />
                 </TouchableOpacity>
-                <Icon
+                <Ionicons
                   name="lock-closed-outline"
                   size={20}
                   color={colors.textTertiary}
@@ -230,13 +230,13 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                   style={styles.passwordToggle}
                 >
-                  <Icon
+                  <Ionicons
                     name={showConfirmPassword ? 'eye-off' : 'eye'}
                     size={20}
                     color={colors.textTertiary}
                   />
                 </TouchableOpacity>
-                <Icon
+                <Ionicons
                   name="lock-closed-outline"
                   size={20}
                   color={colors.textTertiary}

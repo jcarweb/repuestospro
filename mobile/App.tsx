@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, ActivityIndicator, Text, StatusBar } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { View, ActivityIndicator, Text } from 'react-native';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { ThemeProvider } from './src/contexts/ThemeContext';
 import { ToastProvider } from './src/contexts/ToastContext';
@@ -7,18 +8,19 @@ import { NetworkProvider } from './src/contexts/NetworkContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import SplashScreen from './src/components/SplashScreen';
 
+// Componente de carga simple
 const LoadingScreen = () => (
-  <View style={{
-    flex: 1,
-    backgroundColor: '#1A1A1A',
-    justifyContent: 'center',
-    alignItems: 'center'
+  <View style={{ 
+    flex: 1, 
+    backgroundColor: '#1A1A1A', 
+    justifyContent: 'center', 
+    alignItems: 'center' 
   }}>
     <ActivityIndicator size="large" color="#FFC300" />
-    <Text style={{
-      color: '#FFFFFF',
-      marginTop: 16,
-      fontSize: 16
+    <Text style={{ 
+      color: '#FFFFFF', 
+      marginTop: 16, 
+      fontSize: 16 
     }}>
       Cargando PiezasYA...
     </Text>
@@ -35,22 +37,21 @@ export default function App() {
   if (showSplash) {
     return (
       <>
-        <StatusBar barStyle="light-content" backgroundColor="#1A1A1A" />
+        <StatusBar style="light" />
         <SplashScreen onFinish={handleSplashFinish} />
       </>
     );
   }
 
   return (
-    <NetworkProvider>
-      <ThemeProvider>
-        <ToastProvider>
-          <AuthProvider>
-            <StatusBar barStyle="light-content" backgroundColor="#1A1A1A" />
-            <AppNavigator />
-          </AuthProvider>
-        </ToastProvider>
-      </ThemeProvider>
-    </NetworkProvider>
+    <ThemeProvider>
+      <ToastProvider>
+        {/* TEMPORAL: Deshabilitar NetworkProvider para evitar errores de conexión */}
+        <AuthProvider>
+          <StatusBar style="light" />
+          <AppNavigator />
+        </AuthProvider>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }

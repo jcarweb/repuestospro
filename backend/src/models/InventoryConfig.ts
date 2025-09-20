@@ -65,7 +65,7 @@ const InventoryConfigSchema = new Schema<IInventoryConfig>({
 });
 
 // Índices
-// store ya tiene índice único automático por unique: true
+InventoryConfigSchema.index({ store: 1 });
 InventoryConfigSchema.index({ parentStore: 1 });
 InventoryConfigSchema.index({ childStores: 1 });
 InventoryConfigSchema.index({ inventoryType: 1 });

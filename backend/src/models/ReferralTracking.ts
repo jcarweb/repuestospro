@@ -80,7 +80,7 @@ const referralTrackingSchema = new Schema<IReferralTracking>({
 });
 
 // Índices para optimizar consultas
-// referralCode ya tiene índice único automático por unique: true
+referralTrackingSchema.index({ referralCode: 1 });
 referralTrackingSchema.index({ referrerId: 1 });
 referralTrackingSchema.index({ platform: 1 });
 referralTrackingSchema.index({ createdAt: -1 });

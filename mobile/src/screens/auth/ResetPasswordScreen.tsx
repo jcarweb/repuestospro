@@ -11,7 +11,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface ResetPasswordScreenProps {
@@ -92,7 +92,7 @@ const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({ navigation, r
               style={styles.backButton}
               onPress={handleBackToLogin}
             >
-              <Icon name="arrow-back" size={24} color="#6B7280" />
+              <Ionicons name="arrow-back" size={24} color="#6B7280" />
             </TouchableOpacity>
           </View>
 
@@ -117,7 +117,7 @@ const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({ navigation, r
           <View style={styles.form}>
             {error && (
               <View style={styles.errorContainer}>
-                <Icon name="alert-circle" size={20} color="#DC2626" />
+                <Ionicons name="alert-circle" size={20} color="#DC2626" />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             )}
@@ -140,7 +140,7 @@ const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({ navigation, r
                   onPress={() => setShowPassword(!showPassword)}
                   style={styles.eyeButton}
                 >
-                  <Icon
+                  <Ionicons
                     name={showPassword ? "eye-off" : "eye"}
                     size={20}
                     color="#9CA3AF"
@@ -167,7 +167,7 @@ const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({ navigation, r
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                   style={styles.eyeButton}
                 >
-                  <Icon
+                  <Ionicons
                     name={showConfirmPassword ? "eye-off" : "eye"}
                     size={20}
                     color="#9CA3AF"
@@ -184,7 +184,7 @@ const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({ navigation, r
             >
               {isLoading ? (
                 <View style={styles.loadingContainer}>
-                  <Icon name="hourglass-outline" size={20} color="#FFFFFF" />
+                  <Ionicons name="hourglass-outline" size={20} color="#FFFFFF" />
                   <Text style={styles.resetButtonText}>Actualizando...</Text>
                 </View>
               ) : (

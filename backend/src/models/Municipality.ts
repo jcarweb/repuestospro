@@ -42,7 +42,7 @@ const MunicipalitySchema = new Schema<IMunicipality>({
 
 // Índices para optimizar consultas
 MunicipalitySchema.index({ name: 'text', capital: 'text' });
-// code ya está incluido en el índice compuesto único
+MunicipalitySchema.index({ code: 1 });
 MunicipalitySchema.index({ state: 1 });
 MunicipalitySchema.index({ isActive: 1 });
 MunicipalitySchema.index({ state: 1, name: 1 }); // Para búsquedas por estado y municipio

@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import Category, { ICategory } from '../models/Category';
 import Activity from '../models/Activity';
 import Product from '../models/Product';
@@ -21,7 +20,7 @@ export class CategoryController {
 
       const categories = await Category.find(filter)
         .populate('parentCategory', 'name')
-        .sort({ order: 1, name: 1 } as any)
+        .sort({ order: 1, name: 1 })
         .select('-__v');
 
       // Obtener conteo de productos para cada categoría
@@ -125,7 +124,7 @@ export class CategoryController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as AuthenticatedRequest).user?._id,
+        userId: (req as any).user._id,
         type: 'category_created',
         description: `Categoría "${category.name}" creada`,
         metadata: { categoryId: category._id }
@@ -189,16 +188,16 @@ export class CategoryController {
       // Actualizar campos
       if (name !== undefined) category.name = name.trim();
       if (description !== undefined) category.description = description.trim();
-      if (image !== undefined) (category as any).image = image.trim();
-      if (parentCategory !== undefined) (category as any).parentCategory = parentCategory || undefined;
+      if (image !== undefined) category.image = image.trim();
+      if (parentCategory !== undefined) category.parentCategory = parentCategory || undefined;
       if (isActive !== undefined) category.isActive = isActive;
-      if (order !== undefined) (category as any).order = order;
+      if (order !== undefined) category.order = order;
 
       await category.save();
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as AuthenticatedRequest).user?._id,
+        userId: (req as any).user._id,
         type: 'category_updated',
         description: `Categoría "${category.name}" actualizada`,
         metadata: { categoryId: category._id }
@@ -259,7 +258,7 @@ export class CategoryController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as AuthenticatedRequest).user?._id,
+        userId: (req as any).user._id,
         type: 'category_deleted',
         description: `Categoría "${category.name}" eliminada`,
         metadata: { categoryId: category._id }
@@ -298,7 +297,7 @@ export class CategoryController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as AuthenticatedRequest).user?._id,
+        userId: (req as any).user._id,
         type: 'category_status_changed',
         description: `Categoría "${category.name}" ${category.isActive ? 'activada' : 'desactivada'}`,
         metadata: { categoryId: category._id }

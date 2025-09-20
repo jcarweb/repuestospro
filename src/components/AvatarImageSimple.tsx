@@ -1,5 +1,4 @@
 import React from 'react';
-import { API_BASE_URL } from '../../config/api';
 
 interface AvatarImageProps {
   avatar?: string;
@@ -23,7 +22,7 @@ const AvatarImageSimple: React.FC<AvatarImageProps> = ({
 
   // Construir la URL del avatar
   const getAvatarUrl = () => {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     
     console.log('AvatarImageSimple - Avatar recibido:', avatar);
     

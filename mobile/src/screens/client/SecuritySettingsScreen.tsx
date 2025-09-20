@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import * as LocalAuthentication from 'expo-local-authentication';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import TwoFactorSetupModal from '../../components/TwoFactorSetupModal';
@@ -286,7 +286,7 @@ const SecuritySettingsScreen: React.FC = () => {
           
           <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.settingLeft}>
-              <Icon 
+              <Ionicons 
                 name={biometricAvailable ? "finger-print-outline" : "finger-print-outline"} 
                 size={24} 
                 color={biometricAvailable ? colors.primary : colors.textTertiary} 
@@ -314,7 +314,7 @@ const SecuritySettingsScreen: React.FC = () => {
 
           <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.settingLeft}>
-              <Icon name="keypad-outline" size={24} color={colors.primary} />
+              <Ionicons name="keypad-outline" size={24} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                   PIN de Acceso
@@ -334,7 +334,7 @@ const SecuritySettingsScreen: React.FC = () => {
 
           <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.settingLeft}>
-              <Icon name="shield-checkmark-outline" size={24} color={colors.primary} />
+              <Ionicons name="shield-checkmark-outline" size={24} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                   Verificación en Dos Pasos
@@ -364,7 +364,7 @@ const SecuritySettingsScreen: React.FC = () => {
             onPress={handleChangePassword}
           >
             <View style={styles.settingLeft}>
-              <Icon name="lock-closed-outline" size={24} color={colors.primary} />
+              <Ionicons name="lock-closed-outline" size={24} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                   Cambiar Contraseña
@@ -374,7 +374,7 @@ const SecuritySettingsScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>
 
@@ -389,7 +389,7 @@ const SecuritySettingsScreen: React.FC = () => {
             onPress={handleLoginHistory}
           >
             <View style={styles.settingLeft}>
-              <Icon name="time-outline" size={24} color={colors.primary} />
+              <Ionicons name="time-outline" size={24} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                   Historial de Inicios de Sesión
@@ -399,7 +399,7 @@ const SecuritySettingsScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -407,7 +407,7 @@ const SecuritySettingsScreen: React.FC = () => {
             onPress={handleEncryptionStatus}
           >
             <View style={styles.settingLeft}>
-              <Icon name="lock-closed-outline" size={24} color={colors.primary} />
+              <Ionicons name="lock-closed-outline" size={24} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                   Estado de Encriptación
@@ -417,7 +417,7 @@ const SecuritySettingsScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>
       </ScrollView>

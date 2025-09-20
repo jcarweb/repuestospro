@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import PromotionService from '../services/promotionService';
 import { SubscriptionService } from '../services/subscriptionService';
 import Product from '../models/Product';
@@ -11,7 +10,7 @@ export class PromotionController {
   // Crear nueva promoción
   static async createPromotion(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const userRole = (req as any).user.role;
       const promotionData = req.body;
 
@@ -165,7 +164,7 @@ export class PromotionController {
   // Obtener todas las promociones
   static async getAllPromotions(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const userRole = (req as any).user.role;
       const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', search, type, status, store } = req.query;
 
@@ -242,7 +241,7 @@ export class PromotionController {
            .populate('categories', 'name')
            .populate('createdBy', 'name email')
            .populate('targetBranches', 'name')
-           .sort(sort as any)
+           .sort(sort)
            .skip(skip)
            .limit(parseInt(limit as string));
            
@@ -263,7 +262,7 @@ export class PromotionController {
            .populate('categories', 'name')
            .populate('createdBy', 'name email')
            .populate('targetBranches', 'name')
-           .sort(sort as any)
+           .sort(sort)
            .skip(skip)
            .limit(parseInt(limit as string));
        }
@@ -300,7 +299,7 @@ export class PromotionController {
   // Verificar acceso a promociones
   static async checkPromotionsAccess(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const userRole = (req as any).user.role;
       const { storeId } = req.query;
 
@@ -464,7 +463,7 @@ export class PromotionController {
   // Obtener productos disponibles para promociones
   static async getAvailableProducts(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const userRole = (req as any).user.role;
       const { storeId } = req.query; // Para admin que puede especificar tienda
 
@@ -498,7 +497,7 @@ export class PromotionController {
         .select('name price image description category store')
         .populate('category', 'name')
         .populate('store', 'name')
-        .sort({ name: 1 } as any);
+        .sort({ name: 1 });
 
       res.json({
         success: true,
@@ -528,7 +527,7 @@ export class PromotionController {
 
       const stores = await Store.find({ isActive: true })
         .select('name description address city state')
-        .sort({ name: 1 } as any);
+        .sort({ name: 1 });
 
       res.json({
         success: true,
@@ -548,7 +547,7 @@ export class PromotionController {
     try {
       const categories = await Category.find({ isActive: true })
         .select('name description')
-        .sort({ name: 1 } as any);
+        .sort({ name: 1 });
 
       res.json({
         success: true,

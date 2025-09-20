@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { API_BASE_URL } from '../../config/api';
 import { useActiveStore } from '../contexts/ActiveStoreContext';
 import { 
   Settings, 
@@ -68,7 +67,7 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
 
     setLoading(true);
     try {
-      const response = await fetch(`API_BASE_URL/inventory/config/${activeStore._id}`, {
+      const response = await fetch(`http://localhost:5000/api/inventory/config/${activeStore._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -121,7 +120,7 @@ const InventoryConfigModal: React.FC<InventoryConfigModalProps> = ({
     try {
       console.log('Enviando configuración:', config);
       
-      const response = await fetch(`API_BASE_URL/inventory/config/${activeStore._id}`, {
+      const response = await fetch(`http://localhost:5000/api/inventory/config/${activeStore._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

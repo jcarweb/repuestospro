@@ -1,8 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IDelivery extends Document {
-  _id: mongoose.Types.ObjectId;
-  save(): Promise<this>;
   orderId: mongoose.Types.ObjectId;
   storeId: mongoose.Types.ObjectId;
   customerId: mongoose.Types.ObjectId;
@@ -291,7 +289,7 @@ const DeliverySchema = new Schema<IDelivery>({
 DeliverySchema.index({ status: 1, createdAt: -1 });
 DeliverySchema.index({ storeId: 1, status: 1 });
 DeliverySchema.index({ riderId: 1, status: 1 });
-// trackingCode ya tiene índice único automático por unique: true e index: true
+DeliverySchema.index({ trackingCode: 1 });
 
 // Método para generar código de tracking único
 DeliverySchema.methods.generateTrackingCode = function(): string {

@@ -11,7 +11,7 @@ const upload = multer({
     if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
       cb(null, true);
     } else {
-      cb(new Error('Solo se permiten archivos CSV'), false);
+      cb(new Error('Solo se permiten archivos CSV'));
     }
   },
   limits: {

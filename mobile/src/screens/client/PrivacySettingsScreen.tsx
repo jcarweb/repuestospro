@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 
 const PrivacySettingsScreen: React.FC = () => {
   const { colors } = useTheme();
@@ -208,7 +208,7 @@ const PrivacySettingsScreen: React.FC = () => {
             onPress={handleProfileVisibilityChange}
           >
             <View style={styles.settingLeft}>
-              <Icon name="eye-outline" size={24} color={colors.primary} />
+              <Ionicons name="eye-outline" size={24} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                   Visibilidad del Perfil
@@ -218,7 +218,7 @@ const PrivacySettingsScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>
 
@@ -230,7 +230,7 @@ const PrivacySettingsScreen: React.FC = () => {
           
           <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.settingLeft}>
-              <Icon name="analytics-outline" size={24} color={colors.primary} />
+              <Ionicons name="analytics-outline" size={24} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                   Recopilación de Datos
@@ -250,7 +250,7 @@ const PrivacySettingsScreen: React.FC = () => {
 
           <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.settingLeft}>
-              <Icon name="bar-chart-outline" size={24} color={colors.primary} />
+              <Ionicons name="bar-chart-outline" size={24} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                   Analíticas de Uso
@@ -277,7 +277,7 @@ const PrivacySettingsScreen: React.FC = () => {
           
           <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.settingLeft}>
-              <Icon name="location-outline" size={24} color={colors.primary} />
+              <Ionicons name="location-outline" size={24} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                   Seguimiento de Ubicación
@@ -304,7 +304,7 @@ const PrivacySettingsScreen: React.FC = () => {
           
           <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.settingLeft}>
-              <Icon name="megaphone-outline" size={24} color={colors.primary} />
+              <Ionicons name="megaphone-outline" size={24} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                   Personalización de Anuncios
@@ -331,7 +331,7 @@ const PrivacySettingsScreen: React.FC = () => {
           
           <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.settingLeft}>
-              <Icon name="share-outline" size={24} color={colors.primary} />
+              <Ionicons name="share-outline" size={24} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                   Compartir con Terceros
@@ -361,7 +361,7 @@ const PrivacySettingsScreen: React.FC = () => {
             onPress={handleDownloadData}
           >
             <View style={styles.settingLeft}>
-              <Icon name="download-outline" size={24} color={colors.primary} />
+              <Ionicons name="download-outline" size={24} color={colors.primary} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                   Descargar Mis Datos
@@ -371,7 +371,7 @@ const PrivacySettingsScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -379,7 +379,7 @@ const PrivacySettingsScreen: React.FC = () => {
             onPress={handleDeleteData}
           >
             <View style={styles.settingLeft}>
-              <Icon name="trash-outline" size={24} color={colors.error} />
+              <Ionicons name="trash-outline" size={24} color={colors.error} />
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: colors.error }]}>
                   Eliminar Datos Personales
@@ -389,7 +389,7 @@ const PrivacySettingsScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            <Icon name="chevron-forward" size={20} color={colors.error} />
+            <Ionicons name="chevron-forward" size={20} color={colors.error} />
           </TouchableOpacity>
         </View>
       </ScrollView>

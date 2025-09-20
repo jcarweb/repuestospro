@@ -8,7 +8,7 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -132,14 +132,14 @@ const PINVerificationScreen: React.FC<PINVerificationScreenProps> = ({
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Icon name="arrow-back" size={24} color={colors.textTertiary} />
+            <Ionicons name="arrow-back" size={24} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>
 
         {/* Icono */}
         <View style={styles.iconContainer}>
           <View style={[styles.iconCircle, { backgroundColor: colors.primary + '20' }]}>
-            <Icon name="keypad" size={60} color={colors.primary} />
+            <Ionicons name="keypad" size={60} color={colors.primary} />
           </View>
         </View>
 
@@ -186,7 +186,7 @@ const PINVerificationScreen: React.FC<PINVerificationScreenProps> = ({
               onPress={handleDelete}
               disabled={isLoading || pin.length === 0}
             >
-              <Icon 
+              <Ionicons 
                 name="backspace-outline" 
                 size={24} 
                 color={pin.length > 0 ? colors.textPrimary : colors.textTertiary} 

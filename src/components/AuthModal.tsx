@@ -5,7 +5,6 @@ import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics';
 import { useLocation } from '../hooks/useLocation';
 import LocationPermissionModal from './LocationPermissionModal';
 import TwoFactorVerification from './TwoFactorVerification';
-import { API_BASE_URL } from '../../config/api';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -152,7 +151,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           }
         }
       } else if (mode === 'register') {
-        const response = await fetch('API_BASE_URL/auth/register', {
+        const response = await fetch('http://localhost:5000/api/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -182,7 +181,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           setError(result.message || 'Error en el registro');
         }
       } else if (mode === 'pin-login') {
-        const response = await fetch('API_BASE_URL/auth/login/pin', {
+        const response = await fetch('http://localhost:5000/api/auth/login/pin', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -204,7 +203,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           setError(result.message || 'Error en la autenticación');
         }
       } else if (mode === 'forgot-password') {
-        const response = await fetch('API_BASE_URL/auth/forgot-password', {
+        const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -261,7 +260,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setError('');
     
     // Redirigir a Google OAuth
-    window.location.href = 'API_BASE_URL/auth/google';
+    window.location.href = 'http://localhost:5000/api/auth/google';
   };
 
   const handleFingerprintLogin = async () => {
@@ -296,7 +295,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
       if (credential) {
         // Enviar al servidor para verificar
-        const response = await fetch('API_BASE_URL/auth/login/fingerprint', {
+        const response = await fetch('http://localhost:5000/api/auth/login/fingerprint', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

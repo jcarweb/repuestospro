@@ -7,21 +7,16 @@ interface AdminRouteProps {
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { isAuthenticated, hasRole, user } = useAuth();
-
-  console.log('🔍 AdminRoute check:', { isAuthenticated, userRole: user?.role, hasAdminRole: hasRole('admin') });
+  const { isAuthenticated, hasRole } = useAuth();
 
   if (!isAuthenticated) {
-    console.log('❌ AdminRoute: No autenticado, redirigiendo a login');
     return <Navigate to="/login" replace />;
   }
 
   if (!hasRole('admin')) {
-    console.log('❌ AdminRoute: No tiene rol admin, redirigiendo a home');
     return <Navigate to="/" replace />;
   }
 
-  console.log('✅ AdminRoute: Acceso permitido');
   return <>{children}</>;
 };
 

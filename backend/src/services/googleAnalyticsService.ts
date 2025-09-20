@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import GoogleAnalytics, { IGoogleAnalytics } from '../models/GoogleAnalytics';
 import User from '../models/User';
 
@@ -71,7 +70,7 @@ export class GoogleAnalyticsService {
       }
 
       config.isEnabled = enabled;
-      config.lastConfiguredBy = new mongoose.Types.ObjectId(adminId);
+      config.lastConfiguredBy = adminId;
       config.lastConfiguredAt = new Date();
       await config.save();
 

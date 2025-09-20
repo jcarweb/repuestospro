@@ -3,7 +3,7 @@
 
 export const GOOGLE_CONFIG = {
   // Obtén estas credenciales desde: https://console.cloud.google.com/
-  CLIENT_ID: 'your_google_client_id_here', // REEMPLAZAR CON TU CLIENT ID REAL
+  CLIENT_ID: '85298102499-p19rfmi23b119lt2jqrllei7u129q6en.apps.googleusercontent.com', // Tu Client ID real
   
   // NOTA: Para aplicaciones móviles Android, Google NO proporciona Client Secret
   // El Client Secret solo se usa en aplicaciones web por seguridad

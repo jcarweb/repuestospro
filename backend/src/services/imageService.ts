@@ -1,6 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { deleteImage, getOptimizedUrl } from '../config/cloudinary';
-import { Request } from 'express';
 
 export interface ImageUploadResult {
   publicId: string;
@@ -86,19 +85,26 @@ class ImageService {
    * Convertir archivo a base64
    */
   async fileToBase64(file: Express.Multer.File): Promise<Base64ImageData> {
-    try {
-      const base64Data = file.buffer.toString('base64');
-      const format = file.mimetype.split('/')[1] || 'jpg';
-      const dataUrl = `data:${file.mimetype};base64,${base64Data}`;
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
       
-      return {
-        data: dataUrl,
-        format: format,
-        filename: file.originalname
+      reader.onload = () => {
+        const result = reader.result as string;
+        const format = file.mimetype.split('/')[1] || 'jpg';
+        
+        resolve({
+          data: result,
+          format: format,
+          filename: file.originalname
+        });
       };
-    } catch (error) {
-      throw new Error('Error convirtiendo archivo a base64');
-    }
+      
+      reader.onerror = () => {
+        reject(new Error('Error convirtiendo archivo a base64'));
+      };
+      
+      reader.readAsDataURL(file);
+    });
   }
 
   /**
@@ -176,17 +182,80 @@ class ImageService {
   }
 
   /**
-   * Obtener información básica de imagen base64
+   * Obtener información de imagen sin subirla
    */
-  getImageInfo(base64Data: string): { size: number; format: string } {
-    try {
-      return {
-        size: Math.ceil((base64Data.length * 3) / 4), // Aproximación del tamaño en bytes
-        format: base64Data.split(';')[0].split('/')[1]
+  async getImageInfo(base64Data: string): Promise<{ width: number; height: number; size: number; format: string }> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      
+      img.onload = () => {
+        resolve({
+          width: img.width,
+          height: img.height,
+          size: Math.ceil((base64Data.length * 3) / 4), // Aproximación del tamaño en bytes
+          format: base64Data.split(';')[0].split('/')[1]
+        });
       };
-    } catch (error) {
-      throw new Error('Error obteniendo información de la imagen');
-    }
+      
+      img.onerror = () => {
+        reject(new Error('Error obteniendo información de la imagen'));
+      };
+      
+      img.src = base64Data;
+    });
+  }
+
+  /**
+   * Comprimir imagen base64 antes de subir
+   */
+  async compressBase64Image(
+    base64Data: string, 
+    maxWidth: number = 800, 
+    maxHeight: number = 600, 
+    quality: number = 0.8
+  ): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        if (!ctx) {
+          reject(new Error('No se pudo obtener el contexto del canvas'));
+          return;
+        }
+
+        // Calcular nuevas dimensiones manteniendo proporción
+        let { width, height } = img;
+        
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        if (height > maxHeight) {
+          width = (width * maxHeight) / height;
+          height = maxHeight;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Dibujar imagen redimensionada
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convertir a base64 con calidad especificada
+        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedBase64);
+      };
+      
+      img.onerror = () => {
+        reject(new Error('Error cargando la imagen'));
+      };
+      
+      img.src = base64Data;
+    });
   }
 }
 

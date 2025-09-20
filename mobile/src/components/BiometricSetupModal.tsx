@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
@@ -143,7 +143,7 @@ const BiometricSetupModal: React.FC<BiometricSetupModalProps> = ({
   const renderCheckStep = () => (
     <ScrollView style={styles.stepContainer}>
       <View style={styles.header}>
-        <Icon name="finger-print" size={48} color={colors.primary} />
+        <Ionicons name="finger-print" size={48} color={colors.primary} />
         <Text style={[styles.title, { color: colors.textPrimary }]}>
           Verificar Biometría
         </Text>
@@ -154,7 +154,7 @@ const BiometricSetupModal: React.FC<BiometricSetupModalProps> = ({
 
       <View style={[styles.statusContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.statusRow}>
-          <Icon 
+          <Ionicons 
             name={isAvailable ? "checkmark-circle" : "close-circle"} 
             size={24} 
             color={isAvailable ? colors.success : colors.error} 
@@ -165,7 +165,7 @@ const BiometricSetupModal: React.FC<BiometricSetupModalProps> = ({
         </View>
 
         <View style={styles.statusRow}>
-          <Icon 
+          <Ionicons 
             name={isEnrolled ? "checkmark-circle" : "close-circle"} 
             size={24} 
             color={isEnrolled ? colors.success : colors.error} 
@@ -177,7 +177,7 @@ const BiometricSetupModal: React.FC<BiometricSetupModalProps> = ({
 
         {biometricType && (
           <View style={styles.statusRow}>
-            <Icon name="information-circle" size={24} color={colors.primary} />
+            <Ionicons name="information-circle" size={24} color={colors.primary} />
             <Text style={[styles.statusText, { color: colors.textPrimary }]}>
               Tipo: {biometricType}
             </Text>
@@ -187,7 +187,7 @@ const BiometricSetupModal: React.FC<BiometricSetupModalProps> = ({
 
       {!isAvailable && (
         <View style={[styles.warningContainer, { backgroundColor: colors.warning + '20', borderColor: colors.warning }]}>
-          <Icon name="warning" size={24} color={colors.warning} />
+          <Ionicons name="warning" size={24} color={colors.warning} />
           <Text style={[styles.warningText, { color: colors.warning }]}>
             {!isEnrolled 
               ? `Necesitas configurar ${biometricType} en la configuración de tu dispositivo primero.`
@@ -243,7 +243,7 @@ const BiometricSetupModal: React.FC<BiometricSetupModalProps> = ({
   const renderSetupStep = () => (
     <ScrollView style={styles.stepContainer}>
       <View style={styles.header}>
-        <Icon name="shield-checkmark" size={48} color={colors.primary} />
+        <Ionicons name="shield-checkmark" size={48} color={colors.primary} />
         <Text style={[styles.title, { color: colors.textPrimary }]}>
           Configurar {biometricType}
         </Text>
@@ -257,19 +257,19 @@ const BiometricSetupModal: React.FC<BiometricSetupModalProps> = ({
           Beneficios:
         </Text>
         <View style={styles.benefitItem}>
-          <Icon name="flash" size={20} color={colors.success} />
+          <Ionicons name="flash" size={20} color={colors.success} />
           <Text style={[styles.benefitText, { color: colors.textSecondary }]}>
             Acceso rápido y seguro
           </Text>
         </View>
         <View style={styles.benefitItem}>
-          <Icon name="shield" size={20} color={colors.success} />
+          <Ionicons name="shield" size={20} color={colors.success} />
           <Text style={[styles.benefitText, { color: colors.textSecondary }]}>
             Mayor protección de tu cuenta
           </Text>
         </View>
         <View style={styles.benefitItem}>
-          <Icon name="lock-closed" size={20} color={colors.success} />
+          <Ionicons name="lock-closed" size={20} color={colors.success} />
           <Text style={[styles.benefitText, { color: colors.textSecondary }]}>
             No necesitas recordar contraseñas
           </Text>
@@ -277,7 +277,7 @@ const BiometricSetupModal: React.FC<BiometricSetupModalProps> = ({
       </View>
 
       <View style={[styles.warningContainer, { backgroundColor: colors.info + '20', borderColor: colors.info }]}>
-        <Icon name="information-circle" size={24} color={colors.info} />
+        <Ionicons name="information-circle" size={24} color={colors.info} />
         <Text style={[styles.warningText, { color: colors.info }]}>
           Se te pedirá que verifiques tu {biometricType} para completar la configuración.
         </Text>
@@ -311,7 +311,7 @@ const BiometricSetupModal: React.FC<BiometricSetupModalProps> = ({
   const renderTestStep = () => (
     <ScrollView style={styles.stepContainer}>
       <View style={styles.header}>
-        <Icon name="checkmark-circle" size={48} color={colors.success} />
+        <Ionicons name="checkmark-circle" size={48} color={colors.success} />
         <Text style={[styles.title, { color: colors.textPrimary }]}>
           ¡Configuración Exitosa!
         </Text>
@@ -321,7 +321,7 @@ const BiometricSetupModal: React.FC<BiometricSetupModalProps> = ({
       </View>
 
       <View style={[styles.successContainer, { backgroundColor: colors.success + '20', borderColor: colors.success }]}>
-        <Icon name="checkmark-circle" size={32} color={colors.success} />
+        <Ionicons name="checkmark-circle" size={32} color={colors.success} />
         <Text style={[styles.successText, { color: colors.success }]}>
           La autenticación biométrica está activa
         </Text>
@@ -380,7 +380,7 @@ const BiometricSetupModal: React.FC<BiometricSetupModalProps> = ({
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.headerBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Icon name="close" size={24} color={colors.textPrimary} />
+            <Ionicons name="close" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
             Configurar Biometría

@@ -12,7 +12,7 @@ import {
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -113,7 +113,7 @@ const AdminDashboardScreen: React.FC = () => {
   const renderStatCard = (icon: string, title: string, value: string, color: string) => (
     <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={[styles.statIcon, { backgroundColor: color }]}>
-        <Icon name={icon as any} size={24} color="white" />
+        <Ionicons name={icon as any} size={24} color="white" />
       </View>
       <View style={styles.statContent}>
         <Text style={[styles.statValue, { color: colors.textPrimary }]}>
@@ -132,7 +132,7 @@ const AdminDashboardScreen: React.FC = () => {
       onPress={onPress}
     >
       <View style={[styles.menuIcon, { backgroundColor: colors.primary }]}>
-        <Icon name={icon as any} size={24} color="#000000" />
+        <Ionicons name={icon as any} size={24} color="#000000" />
       </View>
       <View style={styles.menuContent}>
         <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>
@@ -142,7 +142,7 @@ const AdminDashboardScreen: React.FC = () => {
           {subtitle}
         </Text>
       </View>
-      <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
+      <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
     </TouchableOpacity>
   );
 
@@ -160,7 +160,7 @@ const AdminDashboardScreen: React.FC = () => {
   if (!stats) {
     return (
       <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
-        <Icon name="alert-circle-outline" size={64} color={colors.error} />
+        <Ionicons name="alert-circle-outline" size={64} color={colors.error} />
         <Text style={[styles.errorText, { color: colors.textSecondary }]}>
           No se pudieron cargar las estadísticas
         </Text>
@@ -254,7 +254,7 @@ const AdminDashboardScreen: React.FC = () => {
               }}
             >
               <View style={[styles.enrichmentIcon, { backgroundColor: '#10B981' }]}>
-                <Icon name="camera" size={24} color="white" />
+                <Ionicons name="camera" size={24} color="white" />
               </View>
               <View style={styles.enrichmentContent}>
                 <Text style={[styles.enrichmentTitle, { color: colors.textPrimary }]}>
@@ -264,7 +264,7 @@ const AdminDashboardScreen: React.FC = () => {
                   Tomar fotos de locales con GPS
                 </Text>
               </View>
-              <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
+              <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -274,7 +274,7 @@ const AdminDashboardScreen: React.FC = () => {
               }}
             >
               <View style={[styles.enrichmentIcon, { backgroundColor: '#8B5CF6' }]}>
-                <Icon name="list" size={24} color="white" />
+                <Ionicons name="list" size={24} color="white" />
               </View>
               <View style={styles.enrichmentContent}>
                 <Text style={[styles.enrichmentTitle, { color: colors.textPrimary }]}>
@@ -284,7 +284,7 @@ const AdminDashboardScreen: React.FC = () => {
                   Gestionar fotos y resultados
                 </Text>
               </View>
-              <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
+              <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
             </TouchableOpacity>
           </View>
 
@@ -294,25 +294,25 @@ const AdminDashboardScreen: React.FC = () => {
             </Text>
             <View style={styles.featuresList}>
               <View style={styles.featureItem}>
-                <Icon name="eye" size={16} color="#8B5CF6" />
+                <Ionicons name="eye" size={16} color="#8B5CF6" />
                 <Text style={[styles.featureText, { color: colors.textSecondary }]}>
                   OCR con Tesseract.js
                 </Text>
               </View>
               <View style={styles.featureItem}>
-                <Icon name="search" size={16} color="#8B5CF6" />
+                <Ionicons name="search" size={16} color="#8B5CF6" />
                 <Text style={[styles.featureText, { color: colors.textSecondary }]}>
                   Búsqueda en MercadoLibre
                 </Text>
               </View>
               <View style={styles.featureItem}>
-                <Icon name="globe" size={16} color="#8B5CF6" />
+                <Ionicons name="globe" size={16} color="#8B5CF6" />
                 <Text style={[styles.featureText, { color: colors.textSecondary }]}>
                   Consultas a DuckDuckGo
                 </Text>
               </View>
               <View style={styles.featureItem}>
-                <Icon name="logo-instagram" size={16} color="#8B5CF6" />
+                <Ionicons name="logo-instagram" size={16} color="#8B5CF6" />
                 <Text style={[styles.featureText, { color: colors.textSecondary }]}>
                   Análisis de Instagram
                 </Text>
@@ -416,7 +416,7 @@ const AdminDashboardScreen: React.FC = () => {
                 navigation.navigate('AdminProducts');
               }}
             >
-              <Icon name="add-circle-outline" size={32} color={colors.primary} />
+              <Ionicons name="add-circle-outline" size={32} color={colors.primary} />
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
                 Nuevo Producto
               </Text>
@@ -429,7 +429,7 @@ const AdminDashboardScreen: React.FC = () => {
                 // navigation.navigate('CreateStore');
               }}
             >
-              <Icon name="business-outline" size={32} color={colors.primary} />
+              <Ionicons name="business-outline" size={32} color={colors.primary} />
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
                 Nueva Tienda
               </Text>
@@ -441,7 +441,7 @@ const AdminDashboardScreen: React.FC = () => {
                 navigation.navigate('AdminReports');
               }}
             >
-              <Icon name="analytics-outline" size={32} color={colors.primary} />
+              <Ionicons name="analytics-outline" size={32} color={colors.primary} />
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
                 Ver Reportes
               </Text>
@@ -453,7 +453,7 @@ const AdminDashboardScreen: React.FC = () => {
                 navigation.navigate('AdminSettings');
               }}
             >
-              <Icon name="settings-outline" size={32} color={colors.primary} />
+              <Ionicons name="settings-outline" size={32} color={colors.primary} />
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
                 Configuración
               </Text>

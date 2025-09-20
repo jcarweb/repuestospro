@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import Product from '../models/Product';
 import Store from '../models/Store';
 import multer from 'multer';
@@ -31,7 +30,7 @@ export const upload = multer({
     if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
       cb(null, true);
     } else {
-      cb(new Error('Solo se permiten archivos CSV'), false);
+      cb(new Error('Solo se permiten archivos CSV'));
     }
   },
   limits: {
@@ -319,7 +318,7 @@ class ProductController {
         isFeatured: true,
         deleted: { $ne: true }
       })
-        .sort({ popularity: -1 } as any)
+        .sort({ popularity: -1 })
         .limit(8)
         .select('name price images category brand');
 
@@ -405,7 +404,7 @@ class ProductController {
       const VehicleType = require('../models/VehicleType').default;
       
       const vehicleTypes = await VehicleType.find({ isActive: true })
-        .sort({ name: 1 } as any)
+        .sort({ name: 1 })
         .select('name description icon deliveryType');
 
       res.json({
@@ -700,7 +699,7 @@ class ProductController {
 
       const products = await Product.find(filter)
         .populate('store', 'name city state')
-        .sort({ deletedAt: -1 } as any)
+        .sort({ deletedAt: -1 })
         .limit(Number(limit))
         .skip(skip)
         .select('-__v');
@@ -815,7 +814,7 @@ class ProductController {
       }
 
       const { storeId } = req.body; // ID de la tienda desde el formulario
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const userRole = (req as any).user.role;
 
       // Verificar permisos de tienda
@@ -1085,7 +1084,7 @@ class ProductController {
         storeId // Filtrar por tienda específica
       } = req.query;
 
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
 
       // Obtener las tiendas del usuario
       const userStores = await Store.find({
@@ -1197,7 +1196,7 @@ class ProductController {
   // Obtener estadísticas de productos
   async getProductStats(req: Request, res: Response) {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const userRole = (req as any).user.role;
 
       let filter: any = {
@@ -1352,7 +1351,7 @@ class ProductController {
       })
       .populate('store', 'name city state coordinates')
       .limit(maxResults)
-      .sort({ popularity: -1, price: 1 } as any);
+      .sort({ popularity: -1, price: 1 });
 
       // Calcular distancia para cada producto
       const productsWithDistance = products.map(product => {

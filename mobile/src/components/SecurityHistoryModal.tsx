@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import sessionManager from '../services/sessionManager';
@@ -250,7 +250,7 @@ const SecurityHistoryModal: React.FC<SecurityHistoryModalProps> = ({
     <View key={event.id} style={[styles.eventItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.eventHeader}>
         <View style={styles.eventIconContainer}>
-          <Icon 
+          <Ionicons 
             name={getEventIcon(event.type)} 
             size={24} 
             color={getEventColor(event.type)} 
@@ -266,7 +266,7 @@ const SecurityHistoryModal: React.FC<SecurityHistoryModalProps> = ({
         </View>
         {event.type === 'suspicious_activity' && (
           <View style={[styles.alertBadge, { backgroundColor: colors.error }]}>
-            <Icon name="alert" size={16} color="white" />
+            <Ionicons name="alert" size={16} color="white" />
           </View>
         )}
       </View>
@@ -277,7 +277,7 @@ const SecurityHistoryModal: React.FC<SecurityHistoryModalProps> = ({
       
       {event.deviceInfo && (
         <View style={styles.deviceInfo}>
-          <Icon name="phone-portrait" size={16} color={colors.textTertiary} />
+          <Ionicons name="phone-portrait" size={16} color={colors.textTertiary} />
           <Text style={[styles.deviceText, { color: colors.textTertiary }]}>
             {event.deviceInfo.platform} • {event.deviceInfo.deviceId?.substring(0, 8)}...
           </Text>
@@ -296,13 +296,13 @@ const SecurityHistoryModal: React.FC<SecurityHistoryModalProps> = ({
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.headerBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Icon name="close" size={24} color={colors.textPrimary} />
+            <Ionicons name="close" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
             Historial de Seguridad
           </Text>
           <TouchableOpacity onPress={clearHistory} style={styles.clearButton}>
-            <Icon name="trash" size={20} color={colors.error} />
+            <Ionicons name="trash" size={20} color={colors.error} />
           </TouchableOpacity>
         </View>
 
@@ -350,7 +350,7 @@ const SecurityHistoryModal: React.FC<SecurityHistoryModalProps> = ({
             </View>
           ) : filteredEvents.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Icon name="shield-checkmark" size={64} color={colors.textTertiary} />
+              <Ionicons name="shield-checkmark" size={64} color={colors.textTertiary} />
               <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>
                 No hay eventos
               </Text>

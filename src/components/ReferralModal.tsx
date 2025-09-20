@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { X, CheckCircle, AlertCircle, Users, Gift } from 'lucide-react';
-import { API_BASE_URL } from '../../config/api';
 import { useAuth } from '../contexts/AuthContext';
 
 interface ReferralModalProps {
@@ -30,7 +29,7 @@ const ReferralModal: React.FC<ReferralModalProps> = ({
     setMessage(null);
 
     try {
-      const response = await fetch('API_BASE_URL/loyalty/verify-referral', {
+      const response = await fetch('http://localhost:5000/api/loyalty/verify-referral', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

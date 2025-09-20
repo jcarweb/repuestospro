@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 
 interface CartItem {
   _id: string;
@@ -158,7 +158,7 @@ const CartScreen: React.FC = () => {
           style={[styles.quantityButton, { backgroundColor: colors.surfaceSecondary }]}
           onPress={() => updateQuantity(item._id, item.quantity - 1)}
         >
-          <Icon name="remove" size={16} color={colors.textPrimary} />
+          <Ionicons name="remove" size={16} color={colors.textPrimary} />
         </TouchableOpacity>
         
         <Text style={[styles.quantityText, { color: colors.textPrimary }]}>
@@ -170,7 +170,7 @@ const CartScreen: React.FC = () => {
           onPress={() => updateQuantity(item._id, item.quantity + 1)}
           disabled={item.quantity >= item.product.stock}
         >
-          <Icon name="add" size={16} color={colors.textPrimary} />
+          <Ionicons name="add" size={16} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -183,7 +183,7 @@ const CartScreen: React.FC = () => {
           style={[styles.removeButton, { backgroundColor: colors.error }]}
           onPress={() => removeItem(item._id)}
         >
-          <Icon name="trash-outline" size={16} color="white" />
+          <Ionicons name="trash-outline" size={16} color="white" />
         </TouchableOpacity>
       </View>
     </View>
@@ -216,7 +216,7 @@ const CartScreen: React.FC = () => {
         {/* Lista de productos */}
         {cartItems.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Icon name="cart-outline" size={64} color={colors.textTertiary} />
+            <Ionicons name="cart-outline" size={64} color={colors.textTertiary} />
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               Tu carrito está vacío
             </Text>

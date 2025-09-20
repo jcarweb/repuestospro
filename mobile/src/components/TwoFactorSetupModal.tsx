@@ -10,7 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -150,7 +150,7 @@ const TwoFactorSetupModal: React.FC<TwoFactorSetupModalProps> = ({
   const renderSetupStep = () => (
     <ScrollView style={styles.stepContainer}>
       <View style={styles.header}>
-        <Icon name="shield-checkmark" size={48} color={colors.primary} />
+        <Ionicons name="shield-checkmark" size={48} color={colors.primary} />
         <Text style={[styles.title, { color: colors.textPrimary }]}>
           Configurar 2FA
         </Text>
@@ -161,7 +161,7 @@ const TwoFactorSetupModal: React.FC<TwoFactorSetupModalProps> = ({
 
       <View style={[styles.qrContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={[styles.qrPlaceholder, { backgroundColor: colors.background }]}>
-          <Icon name="qr-code" size={120} color={colors.textTertiary} />
+          <Ionicons name="qr-code" size={120} color={colors.textTertiary} />
           <Text style={[styles.qrText, { color: colors.textSecondary }]}>
             Código QR
           </Text>
@@ -187,7 +187,7 @@ const TwoFactorSetupModal: React.FC<TwoFactorSetupModalProps> = ({
             copyToClipboard(secret);
           }}
         >
-          <Icon name="copy" size={16} color="white" />
+          <Ionicons name="copy" size={16} color="white" />
           <Text style={styles.copyButtonText}>Copiar Código</Text>
         </TouchableOpacity>
       </View>
@@ -226,7 +226,7 @@ const TwoFactorSetupModal: React.FC<TwoFactorSetupModalProps> = ({
   const renderVerifyStep = () => (
     <ScrollView style={styles.stepContainer}>
       <View style={styles.header}>
-        <Icon name="checkmark-circle" size={48} color={colors.primary} />
+        <Ionicons name="checkmark-circle" size={48} color={colors.primary} />
         <Text style={[styles.title, { color: colors.textPrimary }]}>
           Verificar Código
         </Text>
@@ -236,7 +236,7 @@ const TwoFactorSetupModal: React.FC<TwoFactorSetupModalProps> = ({
       </View>
 
       <View style={[styles.timerContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Icon name="time" size={24} color={colors.primary} />
+        <Ionicons name="time" size={24} color={colors.primary} />
         <Text style={[styles.timerText, { color: colors.textPrimary }]}>
           Tiempo restante: {timeLeft}s
         </Text>
@@ -302,7 +302,7 @@ const TwoFactorSetupModal: React.FC<TwoFactorSetupModalProps> = ({
   const renderBackupStep = () => (
     <ScrollView style={styles.stepContainer}>
       <View style={styles.header}>
-        <Icon name="key" size={48} color={colors.primary} />
+        <Ionicons name="key" size={48} color={colors.primary} />
         <Text style={[styles.title, { color: colors.textPrimary }]}>
           Códigos de Respaldo
         </Text>
@@ -312,7 +312,7 @@ const TwoFactorSetupModal: React.FC<TwoFactorSetupModalProps> = ({
       </View>
 
       <View style={[styles.warningContainer, { backgroundColor: colors.warning + '20', borderColor: colors.warning }]}>
-        <Icon name="warning" size={24} color={colors.warning} />
+        <Ionicons name="warning" size={24} color={colors.warning} />
         <Text style={[styles.warningText, { color: colors.warning }]}>
           Estos códigos te permitirán acceder a tu cuenta si pierdes tu dispositivo
         </Text>
@@ -337,7 +337,7 @@ const TwoFactorSetupModal: React.FC<TwoFactorSetupModalProps> = ({
           showToast('Códigos guardados localmente', 'success');
         }}
       >
-        <Icon name="download" size={20} color="white" />
+        <Ionicons name="download" size={20} color="white" />
         <Text style={styles.downloadButtonText}>Guardar Códigos</Text>
       </TouchableOpacity>
 
@@ -365,7 +365,7 @@ const TwoFactorSetupModal: React.FC<TwoFactorSetupModalProps> = ({
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.headerBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Icon name="close" size={24} color={colors.textPrimary} />
+            <Ionicons name="close" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
             Configurar 2FA

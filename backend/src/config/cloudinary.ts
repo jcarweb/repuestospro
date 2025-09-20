@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
-import CloudinaryStorage from 'multer-storage-cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
 
 // Configuración de Cloudinary
@@ -75,7 +75,7 @@ export const productUpload = multer({
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Solo se permiten archivos de imagen'), false);
+      cb(new Error('Solo se permiten archivos de imagen'));
     }
   }
 });
@@ -90,7 +90,7 @@ export const profileUpload = multer({
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Solo se permiten archivos de imagen'), false);
+      cb(new Error('Solo se permiten archivos de imagen'));
     }
   }
 });
@@ -105,7 +105,7 @@ export const rewardUpload = multer({
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Solo se permiten archivos de imagen'), false);
+      cb(new Error('Solo se permiten archivos de imagen'));
     }
   }
 });
@@ -120,7 +120,7 @@ export const advertisementUpload = multer({
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Solo se permiten archivos de imagen'), false);
+      cb(new Error('Solo se permiten archivos de imagen'));
     }
   }
 });
@@ -149,7 +149,7 @@ export const storePhotoUpload = multer({
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Solo se permiten archivos de imagen'), false);
+      cb(new Error('Solo se permiten archivos de imagen'));
     }
   }
 });

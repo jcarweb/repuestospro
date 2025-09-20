@@ -10,7 +10,7 @@ import {
   FlatList,
   RefreshControl,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import apiService from '../../services/api';
 import { Product, Category } from '../../types';
@@ -87,7 +87,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       onPress={() => handleCategoryPress(item)}
     >
       <View style={styles.categoryIcon}>
-        <Icon name="grid-outline" size={24} color="#FFC300" />
+        <Ionicons name="grid-outline" size={24} color="#FFC300" />
       </View>
       <Text style={styles.categoryName} numberOfLines={2}>
         {item.name}
@@ -133,13 +133,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               style={styles.iconButton}
               onPress={() => navigation.navigate('Cart')}
             >
-              <Icon name="cart-outline" size={24} color="#111827" />
+              <Ionicons name="cart-outline" size={24} color="#111827" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.iconButton}
               onPress={() => navigation.navigate('Profile')}
             >
-              <Icon name="person-outline" size={24} color="#111827" />
+              <Ionicons name="person-outline" size={24} color="#111827" />
             </TouchableOpacity>
           </View>
         </View>
@@ -147,7 +147,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchInputContainer}>
-            <Icon name="search" size={20} color="#9CA3AF" />
+            <Ionicons name="search" size={20} color="#9CA3AF" />
             <TextInput
               style={styles.searchInput}
               placeholder="Buscar productos..."
@@ -158,7 +158,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Icon name="close-circle" size={20} color="#9CA3AF" />
+                <Ionicons name="close-circle" size={20} color="#9CA3AF" />
               </TouchableOpacity>
             )}
           </View>
@@ -226,21 +226,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               style={styles.quickAction}
               onPress={() => navigation.navigate('Orders')}
             >
-              <Icon name="receipt-outline" size={24} color="#FFC300" />
+              <Ionicons name="receipt-outline" size={24} color="#FFC300" />
               <Text style={styles.quickActionText}>Mis Pedidos</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.quickAction}
               onPress={() => navigation.navigate('Stores')}
             >
-              <Icon name="location-outline" size={24} color="#FFC300" />
+              <Ionicons name="location-outline" size={24} color="#FFC300" />
               <Text style={styles.quickActionText}>Tiendas</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.quickAction}
               onPress={() => navigation.navigate('Support')}
             >
-              <Icon name="help-circle-outline" size={24} color="#FFC300" />
+              <Ionicons name="help-circle-outline" size={24} color="#FFC300" />
               <Text style={styles.quickActionText}>Soporte</Text>
             </TouchableOpacity>
           </View>

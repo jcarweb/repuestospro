@@ -10,7 +10,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -107,14 +107,14 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({ navig
               style={styles.backButton}
               onPress={handleBackToLogin}
             >
-              <Icon name="arrow-back" size={24} color={colors.textTertiary} />
+              <Ionicons name="arrow-back" size={24} color={colors.textTertiary} />
             </TouchableOpacity>
           </View>
 
           {/* Icono de verificación */}
           <View style={styles.iconContainer}>
             <View style={[styles.iconCircle, { backgroundColor: colors.primary + '20' }]}>
-              <Icon name="mail" size={60} color={colors.primary} />
+              <Ionicons name="mail" size={60} color={colors.primary} />
             </View>
           </View>
 
@@ -137,19 +137,19 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({ navig
               Para continuar, necesitas:
             </Text>
             <View style={styles.instructionItem}>
-              <Icon name="checkmark-circle" size={20} color={colors.success} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.success} />
               <Text style={[styles.instructionText, { color: colors.textSecondary }]}>
                 Revisar tu bandeja de entrada
               </Text>
             </View>
             <View style={styles.instructionItem}>
-              <Icon name="checkmark-circle" size={20} color={colors.success} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.success} />
               <Text style={[styles.instructionText, { color: colors.textSecondary }]}>
                 Hacer clic en el enlace de verificación
               </Text>
             </View>
             <View style={styles.instructionItem}>
-              <Icon name="checkmark-circle" size={20} color={colors.success} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.success} />
               <Text style={[styles.instructionText, { color: colors.textSecondary }]}>
                 Volver a la aplicación
               </Text>

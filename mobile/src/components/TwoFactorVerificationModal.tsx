@@ -9,7 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 
@@ -103,7 +103,7 @@ const TwoFactorVerificationModal: React.FC<TwoFactorVerificationModalProps> = ({
   const renderMainVerification = () => (
     <View style={styles.stepContainer}>
       <View style={styles.header}>
-        <Icon name="shield-checkmark" size={48} color={colors.primary} />
+        <Ionicons name="shield-checkmark" size={48} color={colors.primary} />
         <Text style={[styles.title, { color: colors.textPrimary }]}>
           Verificación en Dos Pasos
         </Text>
@@ -113,7 +113,7 @@ const TwoFactorVerificationModal: React.FC<TwoFactorVerificationModalProps> = ({
       </View>
 
       <View style={[styles.timerContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Icon name="time" size={24} color={colors.primary} />
+        <Ionicons name="time" size={24} color={colors.primary} />
         <Text style={[styles.timerText, { color: colors.textPrimary }]}>
           Tiempo restante: {timeLeft}s
         </Text>
@@ -142,7 +142,7 @@ const TwoFactorVerificationModal: React.FC<TwoFactorVerificationModalProps> = ({
         style={[styles.resendButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
         onPress={handleResendCode}
       >
-        <Icon name="refresh" size={16} color={colors.primary} />
+        <Ionicons name="refresh" size={16} color={colors.primary} />
         <Text style={[styles.resendButtonText, { color: colors.primary }]}>
           Reenviar código
         </Text>
@@ -164,7 +164,7 @@ const TwoFactorVerificationModal: React.FC<TwoFactorVerificationModalProps> = ({
         style={[styles.backupButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
         onPress={() => setUseBackup(true)}
       >
-        <Icon name="key" size={16} color={colors.textSecondary} />
+        <Ionicons name="key" size={16} color={colors.textSecondary} />
         <Text style={[styles.backupButtonText, { color: colors.textSecondary }]}>
           Usar código de respaldo
         </Text>
@@ -175,7 +175,7 @@ const TwoFactorVerificationModal: React.FC<TwoFactorVerificationModalProps> = ({
   const renderBackupVerification = () => (
     <View style={styles.stepContainer}>
       <View style={styles.header}>
-        <Icon name="key" size={48} color={colors.primary} />
+        <Ionicons name="key" size={48} color={colors.primary} />
         <Text style={[styles.title, { color: colors.textPrimary }]}>
           Código de Respaldo
         </Text>
@@ -185,7 +185,7 @@ const TwoFactorVerificationModal: React.FC<TwoFactorVerificationModalProps> = ({
       </View>
 
       <View style={[styles.warningContainer, { backgroundColor: colors.warning + '20', borderColor: colors.warning }]}>
-        <Icon name="warning" size={24} color={colors.warning} />
+        <Ionicons name="warning" size={24} color={colors.warning} />
         <Text style={[styles.warningText, { color: colors.warning }]}>
           Los códigos de respaldo solo se pueden usar una vez
         </Text>
@@ -243,7 +243,7 @@ const TwoFactorVerificationModal: React.FC<TwoFactorVerificationModalProps> = ({
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.headerBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Icon name="close" size={24} color={colors.textPrimary} />
+            <Ionicons name="close" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
             Verificación 2FA

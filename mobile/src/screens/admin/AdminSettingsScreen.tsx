@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -175,7 +175,7 @@ const AdminSettingsScreen: React.FC = () => {
     >
       <View style={styles.settingRowLeft}>
         <View style={[styles.settingIcon, { backgroundColor: colors.primary }]}>
-          <Icon name={icon as any} size={20} color="#000000" />
+          <Ionicons name={icon as any} size={20} color="#000000" />
         </View>
         <View style={styles.settingInfo}>
           <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
@@ -223,7 +223,7 @@ const AdminSettingsScreen: React.FC = () => {
       icon,
       title,
       description,
-      <Icon name="chevron-forward" size={20} color={colors.textTertiary} />,
+      <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />,
       onPress
     )
   );
@@ -423,7 +423,7 @@ const AdminSettingsScreen: React.FC = () => {
                   'map-outline',
                   'Google Maps',
                   'API Key para mapas y geolocalización',
-                  <Icon name="checkmark-circle" size={20} color="#10B981" />
+                  <Ionicons name="checkmark-circle" size={20} color="#10B981" />
                 )}
                 {renderSettingRow(
                   'card-outline',

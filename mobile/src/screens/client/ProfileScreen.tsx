@@ -12,7 +12,7 @@ import {
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -147,7 +147,7 @@ const ProfileScreen: React.FC = () => {
             <Image source={{ uri: profileImage }} style={styles.profileImage} />
           ) : (
             <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.primary }]}>
-              <Icon name="person" size={40} color="white" />
+              <Ionicons name="person" size={40} color="white" />
             </View>
           )}
         </View>
@@ -163,7 +163,7 @@ const ProfileScreen: React.FC = () => {
           style={[styles.editButton, { backgroundColor: colors.primary }]}
           onPress={handleEditProfile}
         >
-          <Icon name="pencil" size={16} color="#000000" />
+          <Ionicons name="pencil" size={16} color="#000000" />
           <Text style={[styles.editButtonText, { color: '#000000' }]}>
             Editar
           </Text>
@@ -252,7 +252,7 @@ const ProfileScreen: React.FC = () => {
             style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={handleOrdersPress}
           >
-            <Icon name="bag-outline" size={24} color={colors.primary} />
+            <Ionicons name="bag-outline" size={24} color={colors.primary} />
             <Text style={[styles.statNumber, { color: colors.textPrimary }]}>12</Text>
             <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Pedidos</Text>
           </TouchableOpacity>
@@ -261,7 +261,7 @@ const ProfileScreen: React.FC = () => {
             style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={handleFavoritesPress}
           >
-            <Icon name="heart-outline" size={24} color={colors.primary} />
+            <Ionicons name="heart-outline" size={24} color={colors.primary} />
             <Text style={[styles.statNumber, { color: colors.textPrimary }]}>8</Text>
             <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Favoritos</Text>
           </TouchableOpacity>
@@ -270,7 +270,7 @@ const ProfileScreen: React.FC = () => {
             style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={handleRatingPress}
           >
-            <Icon name="star-outline" size={24} color={colors.primary} />
+            <Ionicons name="star-outline" size={24} color={colors.primary} />
             <Text style={[styles.statNumber, { color: colors.textPrimary }]}>4.8</Text>
             <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Calificación</Text>
           </TouchableOpacity>
@@ -288,7 +288,7 @@ const ProfileScreen: React.FC = () => {
           onPress={handleSettingsPress}
         >
           <View style={styles.settingsButtonContent}>
-            <Icon name="settings-outline" size={24} color={colors.primary} />
+            <Ionicons name="settings-outline" size={24} color={colors.primary} />
             <View style={styles.settingsButtonText}>
               <Text style={[styles.settingsButtonTitle, { color: colors.textPrimary }]}>
                 Configuración General
@@ -297,7 +297,7 @@ const ProfileScreen: React.FC = () => {
                 Notificaciones, seguridad y privacidad
               </Text>
             </View>
-            <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
+            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
           </View>
         </TouchableOpacity>
       </View>
@@ -308,7 +308,7 @@ const ProfileScreen: React.FC = () => {
           style={[styles.logoutButton, { backgroundColor: colors.error }]}
           onPress={handleLogout}
         >
-          <Icon name="log-out-outline" size={20} color="white" />
+          <Ionicons name="log-out-outline" size={20} color="white" />
           <Text style={styles.logoutButtonText}>
             Cerrar Sesión
           </Text>

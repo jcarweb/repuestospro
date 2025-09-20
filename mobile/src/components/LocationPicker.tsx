@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 
 interface LocationPickerProps {
@@ -221,7 +221,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   return (
     <View style={[styles.container, { backgroundColor: colors.surface }]}>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <Icon name="location" size={24} color={colors.primary} />
+        <Ionicons name="location" size={24} color={colors.primary} />
         <Text style={[styles.title, { color: colors.textPrimary }]}>
           Seleccionar Ubicación
         </Text>
@@ -232,7 +232,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
         {location ? (
           <View style={styles.mapContent}>
             <View style={[styles.mapPin, { backgroundColor: colors.primary }]}>
-              <Icon name="location" size={32} color="white" />
+              <Ionicons name="location" size={32} color="white" />
             </View>
             <Text style={[styles.coordinatesText, { color: colors.textPrimary }]}>
               {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
@@ -244,13 +244,13 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
             {/* Información adicional */}
             <View style={styles.locationDetails}>
               <View style={styles.detailRow}>
-                <Icon name="globe" size={16} color={colors.textTertiary} />
+                <Ionicons name="globe" size={16} color={colors.textTertiary} />
                 <Text style={[styles.detailText, { color: colors.textTertiary }]}>
                   Latitud: {location.latitude.toFixed(4)}°
                 </Text>
               </View>
               <View style={styles.detailRow}>
-                <Icon name="compass" size={16} color={colors.textTertiary} />
+                <Ionicons name="compass" size={16} color={colors.textTertiary} />
                 <Text style={[styles.detailText, { color: colors.textTertiary }]}>
                   Longitud: {location.longitude.toFixed(4)}°
                 </Text>
@@ -259,7 +259,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
           </View>
         ) : (
           <View style={styles.mapPlaceholder}>
-            <Icon name="map-outline" size={64} color={colors.textTertiary} />
+            <Ionicons name="map-outline" size={64} color={colors.textTertiary} />
             <Text style={[styles.placeholderText, { color: colors.textTertiary }]}>
               No hay ubicación seleccionada
             </Text>
@@ -277,7 +277,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
           onPress={getCurrentLocation}
           disabled={isLoading || !hasPermission}
         >
-          <Icon 
+          <Ionicons 
             name="location" 
             size={20} 
             color="white" 
@@ -291,7 +291,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
           style={[styles.actionButton, { backgroundColor: colors.info }]}
           onPress={handleManualLocation}
         >
-          <Icon name="create" size={20} color="white" />
+          <Ionicons name="create" size={20} color="white" />
           <Text style={styles.actionButtonText}>Manual</Text>
         </TouchableOpacity>
 
@@ -299,7 +299,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
           style={[styles.actionButton, { backgroundColor: colors.warning }]}
           onPress={selectFromPresetLocations}
         >
-          <Icon name="list" size={20} color="white" />
+          <Ionicons name="list" size={20} color="white" />
           <Text style={styles.actionButtonText}>Predefinidas</Text>
         </TouchableOpacity>
 
@@ -308,7 +308,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
             style={[styles.actionButton, { backgroundColor: colors.error }]}
             onPress={clearLocation}
           >
-            <Icon name="trash" size={20} color="white" />
+            <Ionicons name="trash" size={20} color="white" />
             <Text style={styles.actionButtonText}>Limpiar</Text>
           </TouchableOpacity>
         )}
@@ -317,7 +317,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
       {/* Información de Permisos */}
       {hasPermission === false && (
         <View style={[styles.permissionWarning, { backgroundColor: colors.warning }]}>
-          <Icon name="warning" size={20} color="white" />
+          <Ionicons name="warning" size={20} color="white" />
           <Text style={styles.permissionText}>
             Permisos de ubicación requeridos para usar esta función
           </Text>
@@ -326,7 +326,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
       {/* Instrucciones */}
       <View style={[styles.instructions, { backgroundColor: colors.surfaceSecondary }]}>
-        <Icon name="information-circle" size={16} color={colors.textSecondary} />
+        <Ionicons name="information-circle" size={16} color={colors.textSecondary} />
         <Text style={styles.instructionsText}>
           Selecciona ubicación actual, ingresa coordenadas manualmente o elige de ubicaciones predefinidas
         </Text>

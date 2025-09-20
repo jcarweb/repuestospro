@@ -1,12 +1,11 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { RegistrationCodeService } from '../services/registrationCodeService';
 
 export class RegistrationCodeController {
   // Crear código de registro (solo admin)
   static async createCode(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const { email, role, expiresInDays = 7 } = req.body;
 
       if (!email || !role) {
@@ -26,7 +25,7 @@ export class RegistrationCodeController {
       }
 
       const registrationCode = await RegistrationCodeService.createRegistrationCode(
-        userId?.toString() || '',
+        userId.toString(),
         email,
         role,
         expiresInDays
@@ -98,7 +97,7 @@ export class RegistrationCodeController {
   // Listar códigos de registro (solo admin)
   static async listCodes(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const { page = 1, limit = 10, status, role } = req.query;
 
       const filters: any = { createdBy: userId };
@@ -112,8 +111,7 @@ export class RegistrationCodeController {
       }
 
       const codes = await RegistrationCodeService.listRegistrationCodes(
-        userId?.toString() || '',
-        role as string || '',
+        userId.toString(),
         {
           page: Number(page),
           limit: Number(limit),
@@ -138,7 +136,7 @@ export class RegistrationCodeController {
   // Revocar código de registro (solo admin)
   static async revokeCode(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const { codeId } = req.params;
 
       if (!codeId) {
@@ -149,8 +147,8 @@ export class RegistrationCodeController {
         return;
       }
 
-      const result = await (RegistrationCodeService as any).revokeRegistrationCode(
-        userId?.toString() || '',
+      const result = await RegistrationCodeService.revokeRegistrationCode(
+        userId.toString(),
         codeId
       );
 
@@ -178,9 +176,9 @@ export class RegistrationCodeController {
   // Obtener estadísticas de códigos (solo admin)
   static async getStats(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
 
-      const stats = await (RegistrationCodeService as any).getRegistrationCodeStats(userId?.toString() || '');
+      const stats = await RegistrationCodeService.getRegistrationCodeStats(userId.toString());
 
       res.json({
         success: true,
@@ -199,7 +197,7 @@ export class RegistrationCodeController {
   // Reenviar código de registro (solo admin)
   static async resendCode(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const { codeId } = req.params;
 
       if (!codeId) {
@@ -210,8 +208,8 @@ export class RegistrationCodeController {
         return;
       }
 
-      const result = await (RegistrationCodeService as any).resendRegistrationCode(
-        userId?.toString() || '',
+      const result = await RegistrationCodeService.resendRegistrationCode(
+        userId.toString(),
         codeId
       );
 
@@ -239,7 +237,7 @@ export class RegistrationCodeController {
   // Obtener códigos por rol (solo admin)
   static async getCodesByRole(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const { role } = req.params;
       const { page = 1, limit = 10 } = req.query;
 
@@ -251,8 +249,8 @@ export class RegistrationCodeController {
         return;
       }
 
-      const codes = await (RegistrationCodeService as any).getRegistrationCodesByRole(
-        userId?.toString() || '',
+      const codes = await RegistrationCodeService.getRegistrationCodesByRole(
+        userId.toString(),
         role,
         {
           page: Number(page),
@@ -277,9 +275,9 @@ export class RegistrationCodeController {
   // Limpiar códigos expirados (solo admin)
   static async cleanExpiredCodes(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
 
-      const result = await RegistrationCodeService.cleanExpiredCodes(userId?.toString() || '');
+      const result = await RegistrationCodeService.cleanExpiredCodes(userId.toString());
 
       res.json({
         success: true,
@@ -298,9 +296,9 @@ export class RegistrationCodeController {
   // Obtener todos los códigos de registro (solo admin)
   static async getAllCodes(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
 
-      const codes = await RegistrationCodeService.getAllRegistrationCodes(userId?.toString() || '');
+      const codes = await RegistrationCodeService.getAllRegistrationCodes(userId.toString());
 
       res.json({
         success: true,
@@ -362,7 +360,7 @@ export class RegistrationCodeController {
   // Completar registro con código (requiere autenticación)
   static async completeRegistration(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const { code } = req.body;
 
       if (!code) {
@@ -373,7 +371,7 @@ export class RegistrationCodeController {
         return;
       }
 
-      const success = await RegistrationCodeService.completeRegistration(userId?.toString() || '', code);
+      const success = await RegistrationCodeService.completeRegistration(userId.toString(), code);
 
       if (!success) {
         res.status(404).json({

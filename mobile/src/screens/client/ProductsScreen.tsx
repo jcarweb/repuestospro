@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
-import Icon from 'react-native-vector-icons/Icon';
+import { Ionicons } from '@expo/vector-icons';
 
 interface Product {
   _id: string;
@@ -225,7 +225,7 @@ const ProductsScreen: React.FC = () => {
       {/* Barra de búsqueda y filtros */}
       <View style={[styles.searchContainer, { backgroundColor: colors.surface }]}>
         <View style={[styles.searchBar, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}>
-          <Icon name="search" size={20} color={colors.textTertiary} />
+          <Ionicons name="search" size={20} color={colors.textTertiary} />
           <TextInput
             style={[styles.searchInput, { color: colors.textPrimary }]}
             placeholder="Buscar productos..."
@@ -271,7 +271,7 @@ const ProductsScreen: React.FC = () => {
             style={[styles.orderButton, { backgroundColor: colors.primary }]}
             onPress={toggleSortOrder}
           >
-            <Icon 
+            <Ionicons 
               name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'} 
               size={16} 
               color="#000000" 
@@ -309,7 +309,7 @@ const ProductsScreen: React.FC = () => {
 
           {filteredProducts.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Icon name="grid-outline" size={64} color={colors.textTertiary} />
+              <Ionicons name="grid-outline" size={64} color={colors.textTertiary} />
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                 No se encontraron productos
               </Text>

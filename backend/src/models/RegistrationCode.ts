@@ -76,7 +76,7 @@ const registrationCodeSchema = new Schema<IRegistrationCode>({
 });
 
 // Índices para optimizar consultas
-// code ya tiene índice único automático por unique: true
+registrationCodeSchema.index({ code: 1 });
 registrationCodeSchema.index({ email: 1 });
 registrationCodeSchema.index({ status: 1 });
 registrationCodeSchema.index({ role: 1 });

@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import Order from '../models/Order';
 import Product from '../models/Product';
 import User from '../models/User';
@@ -11,7 +10,7 @@ export class AnalyticsController {
   /**
    * Verificar acceso a analytics basado en suscripción
    */
-  static async checkAnalyticsAccess(req: AuthenticatedRequest, res: Response) {
+  static async checkAnalyticsAccess(req: Request, res: Response) {
     try {
       const { storeId } = req.query;
       
@@ -31,11 +30,11 @@ export class AnalyticsController {
       const subscription = await Subscription.findOne({ 
         storeId, 
         status: 'active' 
-      }).sort({ createdAt: -1 } as any);
+      }).sort({ createdAt: -1 });
 
       console.log('🔍 AnalyticsController - Suscripción encontrada:', subscription ? 'Sí' : 'No');
       if (subscription) {
-        console.log('🔍 AnalyticsController - Plan:', (subscription as any).planName, 'Tipo:', (subscription as any).planType);
+        console.log('🔍 AnalyticsController - Plan:', subscription.planName, 'Tipo:', subscription.planType);
       }
 
       if (!subscription) {
@@ -53,16 +52,16 @@ export class AnalyticsController {
       }
 
       // Verificar si el plan incluye analytics
-      const hasAnalyticsAccess = ['pro', 'elite'].includes((subscription as any).planType);
+      const hasAnalyticsAccess = ['pro', 'elite'].includes(subscription.planType);
 
       if (!hasAnalyticsAccess) {
         return res.json({
           success: true,
           hasAccess: false,
-          reason: `Plan ${(subscription as any).planName} no incluye analytics avanzado. Actualiza a Pro o Elite.`,
+          reason: `Plan ${subscription.planName} no incluye analytics avanzado. Actualiza a Pro o Elite.`,
           subscription: {
-            name: (subscription as any).planName,
-            type: (subscription as any).planType,
+            name: subscription.planName,
+            type: subscription.planType,
             price: subscription.price
           },
           requiresUpgrade: true
@@ -73,10 +72,10 @@ export class AnalyticsController {
         success: true,
         hasAccess: true,
         subscription: {
-          name: (subscription as any).planName,
-          type: (subscription as any).planType,
+          name: subscription.planName,
+          type: subscription.planType,
           price: subscription.price,
-          expiresAt: (subscription as any).expiresAt
+          expiresAt: subscription.expiresAt
         }
       });
 
@@ -92,7 +91,7 @@ export class AnalyticsController {
   /**
    * Obtener datos de analytics para una tienda
    */
-  static async getStoreAnalytics(req: AuthenticatedRequest, res: Response) {
+  static async getStoreAnalytics(req: Request, res: Response) {
     try {
       const { storeId } = req.params;
       const { dateFrom, dateTo } = req.query;
@@ -101,9 +100,9 @@ export class AnalyticsController {
       const subscription = await Subscription.findOne({ 
         storeId, 
         status: 'active' 
-      }).sort({ createdAt: -1 } as any);
+      }).sort({ createdAt: -1 });
 
-      if (!subscription || !['pro', 'elite'].includes((subscription as any).planType)) {
+      if (!subscription || !['pro', 'elite'].includes(subscription.planType)) {
         return res.status(403).json({
           success: false,
           message: 'No tienes acceso a analytics avanzado'
@@ -121,7 +120,7 @@ export class AnalyticsController {
       }).populate('customerId');
 
       // Obtener productos de la tienda
-      const products = await Product.find({ store: storeId });
+      const products = await Product.find({ storeId });
 
       // Calcular métricas de ventas
       const salesData = await AnalyticsController.calculateSalesMetrics(orders, startDate, endDate);
@@ -162,12 +161,12 @@ export class AnalyticsController {
    * Calcular métricas de ventas
    */
   private static async calculateSalesMetrics(orders: any[], startDate: Date, endDate: Date) {
-    const totalSales = orders.reduce((sum, order) => sum + ((order as any).totalAmount || 0), 0);
+    const totalSales = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
     
     // Ventas del mes actual
     const currentMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     const currentMonthOrders = orders.filter(order => order.createdAt >= currentMonthStart);
-    const thisMonthSales = currentMonthOrders.reduce((sum, order) => sum + ((order as any).totalAmount || 0), 0);
+    const thisMonthSales = currentMonthOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
     
     // Ventas del mes anterior
     const lastMonthStart = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1);
@@ -175,7 +174,7 @@ export class AnalyticsController {
     const lastMonthOrders = orders.filter(order => 
       order.createdAt >= lastMonthStart && order.createdAt <= lastMonthEnd
     );
-    const lastMonthSales = lastMonthOrders.reduce((sum, order) => sum + ((order as any).totalAmount || 0), 0);
+    const lastMonthSales = lastMonthOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
     
     // Cálculo de crecimiento
     const growth = lastMonthSales > 0 ? ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100 : 0;
@@ -191,7 +190,7 @@ export class AnalyticsController {
       const dayOrders = orders.filter(order => 
         order.createdAt >= dayStart && order.createdAt < dayEnd
       );
-      const daySales = dayOrders.reduce((sum, order) => sum + ((order as any).totalAmount || 0), 0);
+      const daySales = dayOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
       
       dailyData.push({
         date: date.toLocaleDateString('es-VE', { month: 'short', day: 'numeric' }),
@@ -210,7 +209,7 @@ export class AnalyticsController {
       const monthOrders = orders.filter(order => 
         order.createdAt >= monthStart && order.createdAt <= monthEnd
       );
-      const monthSales = monthOrders.reduce((sum, order) => sum + ((order as any).totalAmount || 0), 0);
+      const monthSales = monthOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
       
       monthlyData.push({
         month: date.toLocaleDateString('es-VE', { month: 'short', year: 'numeric' }),
@@ -256,7 +255,7 @@ export class AnalyticsController {
         return {
           name: product?.name || 'Producto Desconocido',
           sales: sales as number,
-          percentage: (totalSales as number) > 0 ? ((sales as number) / (totalSales as number)) * 100 : 0
+          percentage: totalSales > 0 ? ((sales as number) / totalSales) * 100 : 0
         };
       })
       .sort((a, b) => b.sales - a.sales)
@@ -301,7 +300,7 @@ export class AnalyticsController {
     const returning = Object.values(customerOrderCounts).filter((count: any) => count > 1).length;
 
     // Valor promedio por pedido
-    const totalRevenue = orders.reduce((sum, order) => sum + ((order as any).totalAmount || 0), 0);
+    const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
     const averageOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
 
     // Segmentación de clientes
@@ -370,12 +369,12 @@ export class AnalyticsController {
    * Calcular métricas de ingresos
    */
   private static async calculateRevenueMetrics(orders: any[]) {
-    const total = orders.reduce((sum, order) => sum + ((order as any).totalAmount || 0), 0);
+    const total = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
     
     // Ingresos del mes actual
     const currentMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     const currentMonthOrders = orders.filter(order => order.createdAt >= currentMonthStart);
-    const thisMonth = currentMonthOrders.reduce((sum, order) => sum + ((order as any).totalAmount || 0), 0);
+    const thisMonth = currentMonthOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
     
     // Ingresos del mes anterior
     const lastMonthStart = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1);
@@ -383,7 +382,7 @@ export class AnalyticsController {
     const lastMonthOrders = orders.filter(order => 
       order.createdAt >= lastMonthStart && order.createdAt <= lastMonthEnd
     );
-    const lastMonth = lastMonthOrders.reduce((sum, order) => sum + ((order as any).totalAmount || 0), 0);
+    const lastMonth = lastMonthOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
     
     // Cálculo de crecimiento
     const growth = lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth) * 100 : 0;

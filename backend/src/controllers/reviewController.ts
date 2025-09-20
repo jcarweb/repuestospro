@@ -1,12 +1,10 @@
 import { Request, Response } from 'express';
-import mongoose from 'mongoose';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import Review from '../models/Review';
 import User from '../models/User';
 import Product from '../models/Product';
 import Order from '../models/Order';
 import Store from '../models/Store';
-import { ContentFilterService } from '../middleware/contentFilter';
+import { ContentFilter } from '../middleware/contentFilter';
 
 export class ReviewController {
   // Obtener todas las reseñas de una tienda
@@ -29,7 +27,7 @@ export class ReviewController {
       const filters: any = {};
       
       // Filtrar por productos de la tienda
-      const storeProducts = await Product.find({ store: storeId }).select('_id');
+      const storeProducts = await Product.find({ storeId }).select('_id');
       const productIds = storeProducts.map(p => p._id);
       filters.productId = { $in: productIds };
 
@@ -96,7 +94,7 @@ export class ReviewController {
           },
           stats: {
             averageRating: stats.length > 0 ? Math.round(stats[0].averageRating * 10) / 10 : 0,
-            totalReviews: stats.length > 0 ? (stats[0] as any).totalReviews : 0,
+            totalReviews: stats.length > 0 ? stats[0].totalReviews : 0,
             ratingDistribution
           }
         }
@@ -187,7 +185,7 @@ export class ReviewController {
           },
           stats: {
             averageRating: stats.length > 0 ? Math.round(stats[0].averageRating * 10) / 10 : 0,
-            totalReviews: stats.length > 0 ? (stats[0] as any).totalReviews : 0,
+            totalReviews: stats.length > 0 ? stats[0].totalReviews : 0,
             ratingDistribution
           }
         }
@@ -206,7 +204,7 @@ export class ReviewController {
     try {
       const { reviewId } = req.params;
       const { reply } = req.body;
-      const storeManagerId = (req as AuthenticatedRequest).user?._id;
+      const storeManagerId = (req as any).user._id;
 
       if (!reply || reply.trim().length === 0) {
         res.status(400).json({
@@ -217,12 +215,12 @@ export class ReviewController {
       }
 
       // Validar contenido de la respuesta
-      const contentValidation = await ContentFilterService.validateReviewContent(reply);
+      const contentValidation = await ContentFilter.validateReviewContent(reply);
       if (!contentValidation.isValid) {
         res.status(400).json({
           success: false,
           message: 'La respuesta contiene contenido inapropiado',
-          details: (contentValidation as any).reasons
+          details: contentValidation.reasons
         });
         return;
       }
@@ -240,7 +238,7 @@ export class ReviewController {
 
       // Verificar que el producto pertenece a la tienda del store manager
       const product = await Product.findById(review.productId);
-      if (!product || product.store.toString() !== storeManagerId.toString()) {
+      if (!product || product.storeId.toString() !== storeManagerId.toString()) {
         res.status(403).json({
           success: false,
           message: 'No tienes permisos para responder a esta reseña'
@@ -251,7 +249,7 @@ export class ReviewController {
       // Agregar la respuesta
       review.reply = {
         text: reply,
-        authorId: new mongoose.Types.ObjectId(storeManagerId),
+        authorId: storeManagerId,
         createdAt: new Date()
       };
 
@@ -275,7 +273,7 @@ export class ReviewController {
   static async markReviewHelpful(req: Request, res: Response): Promise<void> {
     try {
       const { reviewId } = req.params;
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
 
       const review = await Review.findById(reviewId);
       if (!review) {
@@ -309,7 +307,7 @@ export class ReviewController {
     try {
       const { reviewId } = req.params;
       const { reason, description } = req.body;
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
 
       if (!reason) {
         res.status(400).json({
@@ -334,7 +332,7 @@ export class ReviewController {
       }
 
       review.reports.push({
-        userId: new mongoose.Types.ObjectId(userId),
+        userId,
         reason,
         description,
         createdAt: new Date()
@@ -358,11 +356,11 @@ export class ReviewController {
   // Obtener estadísticas de reseñas para dashboard
   static async getReviewStats(req: Request, res: Response): Promise<void> {
     try {
-      const storeManagerId = (req as AuthenticatedRequest).user?._id;
+      const storeManagerId = (req as any).user._id;
       const { period = '30d' } = req.query;
 
       // Obtener productos de la tienda
-      const storeProducts = await Product.find({ store: storeManagerId }).select('_id');
+      const storeProducts = await Product.find({ storeId: storeManagerId }).select('_id');
       const productIds = storeProducts.map(p => p._id);
 
       // Calcular fecha de inicio según el período
@@ -445,7 +443,7 @@ export class ReviewController {
       })
         .populate('userId', 'name email avatar')
         .populate('productId', 'name image')
-        .sort({ createdAt: -1 } as any)
+        .sort({ createdAt: -1 })
         .limit(5);
 
       // Productos más reseñados
@@ -504,11 +502,11 @@ export class ReviewController {
   // Obtener reseñas pendientes de respuesta
   static async getPendingReplies(req: Request, res: Response): Promise<void> {
     try {
-      const storeManagerId = (req as AuthenticatedRequest).user?._id;
+      const storeManagerId = (req as any).user._id;
       const { page = 1, limit = 20 } = req.query;
 
       // Obtener productos de la tienda
-      const storeProducts = await Product.find({ store: storeManagerId }).select('_id');
+      const storeProducts = await Product.find({ storeId: storeManagerId }).select('_id');
       const productIds = storeProducts.map(p => p._id);
 
       const reviews = await Review.find({
@@ -517,7 +515,7 @@ export class ReviewController {
       })
         .populate('userId', 'name email avatar')
         .populate('productId', 'name image price')
-        .sort({ createdAt: -1 } as any)
+        .sort({ createdAt: -1 })
         .limit(Number(limit))
         .skip((Number(page) - 1) * Number(limit));
 
