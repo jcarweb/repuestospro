@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { X, Copy, Share2, MessageCircle, Mail, Link } from 'lucide-react';
-import { API_BASE_URL } from '../../config/api';
 import { useAuth } from '../contexts/AuthContext';
 
 interface ShareModalProps {
@@ -118,7 +117,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
     
     // Registrar el compartir en el backend
     try {
-      await fetch('API_BASE_URL/loyalty/track-share', {
+      await fetch('http://localhost:5000/api/loyalty/track-share', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

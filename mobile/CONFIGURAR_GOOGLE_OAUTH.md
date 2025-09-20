@@ -53,7 +53,7 @@ piezasya://auth
 
 ```typescript
 export const GOOGLE_CONFIG = {
-  CLIENT_ID:'your_google_client_id_here', // Ejemplo: 123456789-abcdef.apps.googleusercontent.com
+  CLIENT_ID:'85298102499-p19rfmi23b119lt2jqrllei7u129q6en.apps.googleusercontent.com', // Ejemplo: 123456789-abcdef.apps.googleusercontent.com
   CLIENT_SECRET: 'TU_CLIENT_SECRET_AQUI',
   REDIRECT_URI: 'piezasya://auth',
   SCOPES: ['openid', 'profile', 'email'],

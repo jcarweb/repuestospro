@@ -6,7 +6,6 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { AdminCard, AdminButton, AdminTable } from './ui';
 import BranchForm from './BranchForm';
 import BusinessHoursForm from './BusinessHoursForm';
-import { API_BASE_URL } from '../../config/api';
 import { 
   Store, 
   MapPin, 
@@ -159,7 +158,7 @@ const StoreBranchesManager: React.FC = () => {
       setActionLoading(true);
       
       console.log('Enviando request con token:', token ? 'Token presente' : 'Sin token');
-      const response = await fetch('API_BASE_URL/stores', {
+      const response = await fetch('http://localhost:5000/api/stores', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -215,7 +214,7 @@ const StoreBranchesManager: React.FC = () => {
     try {
       setActionLoading(true);
       
-      const response = await fetch(`API_BASE_URL/stores/${editingStore._id}`, {
+      const response = await fetch(`http://localhost:5000/api/stores/${editingStore._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -246,7 +245,7 @@ const StoreBranchesManager: React.FC = () => {
     try {
       setActionLoading(true);
       
-      const response = await fetch(`API_BASE_URL/stores/${selectedStore._id}/business-hours`, {
+      const response = await fetch(`http://localhost:5000/api/stores/${selectedStore._id}/business-hours`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -275,7 +274,7 @@ const StoreBranchesManager: React.FC = () => {
     try {
       setActionLoading(true);
       
-      const response = await fetch(`API_BASE_URL/stores/${storeId}/set-main`, {
+      const response = await fetch(`http://localhost:5000/api/stores/${storeId}/set-main`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -302,7 +301,7 @@ const StoreBranchesManager: React.FC = () => {
     try {
       setActionLoading(true);
       
-      const response = await fetch(`API_BASE_URL/stores/${storeId}/toggle-status`, {
+      const response = await fetch(`http://localhost:5000/api/stores/${storeId}/toggle-status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -331,7 +330,7 @@ const StoreBranchesManager: React.FC = () => {
     try {
       setActionLoading(true);
       
-      const response = await fetch(`API_BASE_URL/stores/${storeId}`, {
+      const response = await fetch(`http://localhost:5000/api/stores/${storeId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

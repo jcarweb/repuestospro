@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { GoogleAnalyticsService } from '../services/googleAnalyticsService';
 
 export class GoogleAnalyticsController {
@@ -24,7 +23,7 @@ export class GoogleAnalyticsController {
   // Actualizar configuración (solo admin)
   static async updateConfiguration(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const {
         measurementId,
         propertyId,
@@ -43,7 +42,7 @@ export class GoogleAnalyticsController {
       }
 
       const config = await GoogleAnalyticsService.updateConfiguration(
-        userId?.toString() || '',
+        userId.toString(),
         measurementId,
         propertyId,
         trackingCode,
@@ -75,7 +74,7 @@ export class GoogleAnalyticsController {
   // Habilitar/deshabilitar Google Analytics (solo admin)
   static async toggleAnalytics(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const { enabled } = req.body;
 
       if (typeof enabled !== 'boolean') {
@@ -86,7 +85,7 @@ export class GoogleAnalyticsController {
         return;
       }
 
-      const config = await GoogleAnalyticsService.toggleAnalytics(userId?.toString() || '', enabled);
+      const config = await GoogleAnalyticsService.toggleAnalytics(userId.toString(), enabled);
 
       res.json({
         success: true,

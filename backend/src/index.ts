@@ -92,51 +92,15 @@ app.use(passport.session());
 app.use(helmet());
 
 // Configurar CORS
-const corsOptions = {
-  origin: function (origin: string | undefined, callback: Function) {
-    // Permitir requests sin origin (como mobile apps o Postman)
-    if (!origin) return callback(null, true);
-    
-    // Lista de orígenes permitidos
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001', 
-      'https://piezasya.vercel.app',
-      'https://piezasya-front.vercel.app',
-      'https://piezasya-git-main.vercel.app'
-    ];
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('CORS: Origin not allowed:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+app.use(cors({
+  origin: true, // Permitir todos los orígenes en desarrollo
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-};
-
-app.use(cors(corsOptions));
-
-// Manejar preflight requests
-app.options('*', cors(corsOptions));
+}));
 
 // Middleware de logging
 app.use(morgan('combined'));
-
-// Middleware de logging para CORS
-app.use((req, res, next) => {
-  console.log('🌐 Request details:', {
-    method: req.method,
-    url: req.url,
-    origin: req.headers.origin,
-    userAgent: req.headers['user-agent'],
-    referer: req.headers.referer
-  });
-  next();
-});
 
 // Configurar archivos estáticos para uploads (ANTES del rate limiter)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
@@ -392,9 +356,9 @@ app.get('/api/profile/admin', async (req, res) => {
     
     res.json({
       data: {
-        _id: (user as any)._id,
+        _id: user._id,
         name: user.name,
-        email: (user as any).email,
+        email: user.email,
         phone: user.phone,
         avatar: user.avatar || '/uploads/perfil/default-avatar.svg',
         role: user.role,
@@ -403,7 +367,7 @@ app.get('/api/profile/admin', async (req, res) => {
         pin: user.pin,
         fingerprintEnabled: user.fingerprintEnabled || false,
         twoFactorEnabled: user.twoFactorEnabled || false,
-        emailNotifications: (user as any).emailNotifications !== undefined ? (user as any).emailNotifications : true,
+        emailNotifications: user.emailNotifications !== undefined ? user.emailNotifications : true,
         pushNotifications: user.pushNotifications !== undefined ? user.pushNotifications : true,
         marketingEmails: user.marketingEmails || false,
         theme: user.theme || 'light',

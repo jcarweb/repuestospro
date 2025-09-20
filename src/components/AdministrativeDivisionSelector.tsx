@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, MapPin } from 'lucide-react';
-import { API_BASE_URL } from '../../config/api';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface State {
@@ -115,7 +114,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
   const loadStates = async () => {
     setLoading(prev => ({ ...prev, states: true }));
     try {
-      const response = await fetch('API_BASE_URL/locations/states');
+      const response = await fetch('http://localhost:5000/api/locations/states');
       const data = await response.json();
       if (data.success) {
         setStates(data.data);
@@ -130,7 +129,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
   const loadMunicipalities = async (stateId: string) => {
     setLoading(prev => ({ ...prev, municipalities: true }));
     try {
-      const response = await fetch(`API_BASE_URL/locations/states/${stateId}/municipalities`);
+      const response = await fetch(`http://localhost:5000/api/locations/states/${stateId}/municipalities`);
       const data = await response.json();
       if (data.success) {
         setMunicipalities(data.data);
@@ -145,7 +144,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
   const loadParishes = async (municipalityId: string) => {
     setLoading(prev => ({ ...prev, parishes: true }));
     try {
-      const response = await fetch(`API_BASE_URL/locations/municipalities/${municipalityId}/parishes`);
+      const response = await fetch(`http://localhost:5000/api/locations/municipalities/${municipalityId}/parishes`);
       const data = await response.json();
       if (data.success) {
         setParishes(data.data);

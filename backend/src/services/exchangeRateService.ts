@@ -9,8 +9,6 @@ export interface ExchangeRateResult {
   rate?: number;
   message?: string;
   source?: string;
-  sourceUrl?: string;
-  isActive?: boolean;
   lastUpdated?: Date;
 }
 
@@ -80,8 +78,6 @@ export class ExchangeRateService {
           success: true,
           rate,
           source: 'BCV',
-          sourceUrl: targetUrl,
-          isActive: true,
           lastUpdated: new Date()
         };
 
@@ -145,10 +141,12 @@ export class ExchangeRateService {
     try {
       const message = `⚠️ Error al obtener tasa BCV\n\nURL: ${url}\nError: ${error.message}\nFecha: ${new Date().toLocaleString()}\n\nPor favor, configure la tasa manualmente en el panel de administración.`;
       
-      await sendNotificationToAdmin(
-        'Error en Tasa de Cambio BCV',
-        message
-      );
+      await sendNotificationToAdmin({
+        title: 'Error en Tasa de Cambio BCV',
+        message,
+        type: 'error',
+        priority: 'high'
+      });
 
       console.log('Notificación enviada al administrador');
     } catch (notificationError) {
@@ -177,8 +175,6 @@ export class ExchangeRateService {
         success: true,
         rate: rate.rate,
         source: rate.source,
-        sourceUrl: rate.sourceUrl,
-        isActive: rate.isActive,
         lastUpdated: rate.lastUpdated
       };
     } catch (error) {

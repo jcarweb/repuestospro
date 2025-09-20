@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import Brand, { IBrand } from '../models/Brand';
 import Activity from '../models/Activity';
 
@@ -14,7 +13,7 @@ export class BrandController {
       if (isActive !== undefined) filter.isActive = isActive === 'true';
 
       const brands = await Brand.find(filter)
-        .sort({ order: 1, name: 1 } as any)
+        .sort({ order: 1, name: 1 })
         .select('-__v');
 
       res.json({
@@ -102,7 +101,7 @@ export class BrandController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as AuthenticatedRequest).user?._id,
+        userId: (req as any).user._id,
         type: 'brand_created',
         description: `Marca "${brand.name}" creada`,
         metadata: { brandId: brand._id, vehicleType }
@@ -142,7 +141,7 @@ export class BrandController {
       if (name && name.trim() !== brand.name) {
         const existingBrand = await Brand.findOne({ 
           name: name.trim(), 
-          vehicleType: vehicleType || (brand as any).vehicleType,
+          vehicleType: vehicleType || brand.vehicleType,
           _id: { $ne: id }
         });
 
@@ -158,9 +157,9 @@ export class BrandController {
       // Actualizar campos
       if (name !== undefined) brand.name = name.trim();
       if (description !== undefined) brand.description = description.trim();
-      if (vehicleType !== undefined) (brand as any).vehicleType = vehicleType;
+      if (vehicleType !== undefined) brand.vehicleType = vehicleType;
       if (isActive !== undefined) brand.isActive = isActive;
-      if (order !== undefined) (brand as any).order = order;
+      if (order !== undefined) brand.order = order;
       if (logo !== undefined) brand.logo = logo.trim();
       if (country !== undefined) brand.country = country.trim();
       if (website !== undefined) brand.website = website.trim();
@@ -169,10 +168,10 @@ export class BrandController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as AuthenticatedRequest).user?._id,
+        userId: (req as any).user._id,
         type: 'brand_updated',
         description: `Marca "${brand.name}" actualizada`,
-        metadata: { brandId: brand._id, vehicleType: (brand as any).vehicleType }
+        metadata: { brandId: brand._id, vehicleType: brand.vehicleType }
       });
 
       res.json({
@@ -208,10 +207,10 @@ export class BrandController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as AuthenticatedRequest).user?._id,
+        userId: (req as any).user._id,
         type: 'brand_deleted',
         description: `Marca "${brand.name}" eliminada`,
-        metadata: { brandId: brand._id, vehicleType: (brand as any).vehicleType }
+        metadata: { brandId: brand._id, vehicleType: brand.vehicleType }
       });
 
       res.json({
@@ -247,10 +246,10 @@ export class BrandController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as AuthenticatedRequest).user?._id,
+        userId: (req as any).user._id,
         type: 'brand_status_changed',
         description: `Marca "${brand.name}" ${brand.isActive ? 'activada' : 'desactivada'}`,
-        metadata: { brandId: brand._id, vehicleType: (brand as any).vehicleType }
+        metadata: { brandId: brand._id, vehicleType: brand.vehicleType }
       });
 
       res.json({

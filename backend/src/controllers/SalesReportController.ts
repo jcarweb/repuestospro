@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { SalesReportService, SalesReportFilters } from '../services/SalesReportService';
 import mongoose from 'mongoose';
 
@@ -295,8 +294,8 @@ export class SalesReportController {
       // Generar token con el secreto correcto
       const token = jwt.sign(
         {
-          userId: (user as any)._id,
-          email: (user as any).email,
+          userId: user._id,
+          email: user.email,
           role: user.role,
           stores: user.stores
         },
@@ -309,8 +308,8 @@ export class SalesReportController {
         message: 'Token generado correctamente',
         token: token,
         user: {
-          id: (user as any)._id,
-          email: (user as any).email,
+          id: user._id,
+          email: user.email,
           role: user.role,
           stores: user.stores
         }

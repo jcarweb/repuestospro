@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import Subcategory, { ISubcategory } from '../models/Subcategory';
 import Category from '../models/Category';
 import Activity from '../models/Activity';
@@ -28,7 +27,7 @@ export class SubcategoryController {
 
       const subcategories = await Subcategory.find(filter)
         .populate('categoryId', 'name vehicleType')
-        .sort({ order: 1, name: 1 } as any)
+        .sort({ order: 1, name: 1 })
         .select('-__v');
 
       console.log('📊 Subcategorías encontradas:', subcategories.length);
@@ -157,7 +156,7 @@ export class SubcategoryController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as AuthenticatedRequest).user?._id,
+        userId: (req as any).user._id,
         type: 'subcategory_created',
         description: `Subcategoría "${subcategory.name}" creada`,
         metadata: { subcategoryId: subcategory._id, categoryId, vehicleType }
@@ -246,7 +245,7 @@ export class SubcategoryController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as AuthenticatedRequest).user?._id,
+        userId: (req as any).user._id,
         type: 'subcategory_updated',
         description: `Subcategoría "${updatedSubcategory.name}" actualizada`,
         metadata: { subcategoryId: updatedSubcategory._id, categoryId, vehicleType }
@@ -295,10 +294,10 @@ export class SubcategoryController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as AuthenticatedRequest).user?._id,
+        userId: (req as any).user._id,
         type: 'subcategory_deleted',
         description: `Subcategoría "${subcategory.name}" eliminada`,
-        metadata: { subcategoryId: subcategory._id, categoryId: subcategory.category }
+        metadata: { subcategoryId: subcategory._id, categoryId: subcategory.categoryId }
       });
 
       res.json({
@@ -335,7 +334,7 @@ export class SubcategoryController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as AuthenticatedRequest).user?._id,
+        userId: (req as any).user._id,
         type: 'subcategory_status_changed',
         description: `Subcategoría "${subcategory.name}" ${subcategory.isActive ? 'activada' : 'desactivada'}`,
         metadata: { subcategoryId: subcategory._id, isActive: subcategory.isActive }

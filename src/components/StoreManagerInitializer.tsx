@@ -6,7 +6,6 @@ import { useActiveStore } from '../contexts/ActiveStoreContext';
 import FreeStoreLocationMap from './FreeStoreLocationMap';
 import AdministrativeDivisionSelector from './AdministrativeDivisionSelector';
 import InventoryConfigModal from './InventoryConfigModal';
-import { API_BASE_URL } from '../../config/api';
 import { 
   Store, 
   MapPin, 
@@ -210,7 +209,7 @@ const StoreManagerInitializer: React.FC = () => {
   const handleCreateStore = async () => {
     setLoading(true);
     try {
-      const response = await fetch('API_BASE_URL/stores', {
+      const response = await fetch('http://localhost:5000/api/stores', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

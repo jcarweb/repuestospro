@@ -46,7 +46,7 @@ const StateSchema = new Schema<IState>({
 
 // Índices para optimizar consultas
 StateSchema.index({ name: 'text', capital: 'text' });
-// code ya tiene índice único automático por unique: true
+StateSchema.index({ code: 1 });
 StateSchema.index({ region: 1 });
 StateSchema.index({ isActive: 1 });
 

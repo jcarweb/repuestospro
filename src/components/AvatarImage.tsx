@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { API_BASE_URL } from '../../config/api';
 
 interface AvatarImageProps {
   avatar?: string;
@@ -16,7 +15,7 @@ const AvatarImage: React.FC<AvatarImageProps> = ({
 }) => {
   // Construir la URL del avatar usando useMemo para evitar recálculos
   const avatarUrl = React.useMemo(() => {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     
     if (!avatar || avatar === '/uploads/perfil/default-avatar.svg') {
       return '/default-avatar.svg'; // Usar avatar del frontend

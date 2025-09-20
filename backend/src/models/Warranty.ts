@@ -97,7 +97,7 @@ const WarrantySchema = new Schema<IWarranty>({
 WarrantySchema.index({ userId: 1, status: 1 });
 WarrantySchema.index({ transactionId: 1 });
 WarrantySchema.index({ storeId: 1, status: 1 });
-WarrantySchema.index({ expirationDate: 1, status: 1 });
+WarrantySchema.index({ expirationDate: 1, status: 'active' });
 WarrantySchema.index({ type: 1, status: 1 });
 
 // Método para verificar si la garantía está activa

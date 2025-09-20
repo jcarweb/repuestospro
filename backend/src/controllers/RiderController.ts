@@ -1,6 +1,4 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
-import mongoose from 'mongoose';
 import Rider, { IRider } from '../models/Rider';
 import User from '../models/User';
 import * as argon2 from 'argon2';
@@ -68,7 +66,7 @@ export class RiderController {
         });
 
         await user.save();
-        rider.userId = (user as any)._id as mongoose.Types.ObjectId;
+        rider.userId = user._id;
       }
 
       await rider.save();
@@ -224,7 +222,7 @@ export class RiderController {
         return res.status(404).json({ message: 'Rider no encontrado' });
       }
 
-      await (rider as any).updateStatus(status, reason, (req.user as any)?.email);
+      await rider.updateStatus(status, reason, req.user?.email);
 
       res.json({
         success: true,

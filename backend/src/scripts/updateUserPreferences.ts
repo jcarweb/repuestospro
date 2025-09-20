@@ -43,13 +43,13 @@ async function updateUserPreferences() {
       if (!user.profileVisibility) updateData.profileVisibility = 'public';
       if (!user.showEmail) updateData.showEmail = false;
       if (!user.showPhone) updateData.showPhone = false;
-      if (!(user as any).emailNotifications) updateData.emailNotifications = true;
+      if (!user.emailNotifications) updateData.emailNotifications = true;
       if (!user.pushNotifications) updateData.pushNotifications = true;
       if (!user.marketingEmails) updateData.marketingEmails = false;
       if (!user.pushEnabled) updateData.pushEnabled = true;
 
-      await User.findByIdAndUpdate((user as any)._id, updateData);
-      console.log(`✅ Usuario ${(user as any).email} actualizado`);
+      await User.findByIdAndUpdate(user._id, updateData);
+      console.log(`✅ Usuario ${user.email} actualizado`);
     }
 
     console.log('✅ Todos los usuarios han sido actualizados exitosamente');

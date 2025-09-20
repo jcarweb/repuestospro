@@ -189,7 +189,7 @@ const ClaimSchema = new Schema<IClaim>({
 }, { timestamps: true });
 
 // Índices para optimizar consultas
-// claimNumber ya tiene índice único automático por unique: true
+ClaimSchema.index({ claimNumber: 1 }, { unique: true });
 ClaimSchema.index({ userId: 1, status: 1 });
 ClaimSchema.index({ storeId: 1, status: 1 });
 ClaimSchema.index({ transactionId: 1 });
@@ -197,7 +197,7 @@ ClaimSchema.index({ warrantyId: 1 });
 ClaimSchema.index({ status: 1, priority: 1 });
 ClaimSchema.index({ assignedAgent: 1, status: 1 });
 ClaimSchema.index({ filedDate: -1 });
-ClaimSchema.index({ deadlineDate: 1, status: 1 });
+ClaimSchema.index({ deadlineDate: 1, status: 'pending' });
 
 // Pre-save middleware para generar claimNumber
 ClaimSchema.pre('save', function(next) {

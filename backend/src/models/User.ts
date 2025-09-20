@@ -3,8 +3,6 @@ import * as argon2 from 'argon2';
 import crypto from 'crypto';
 
 export interface IUser extends Document {
-  _id: mongoose.Types.ObjectId;
-  id: string;
   name: string;
   email: string;
   password: string;
@@ -26,11 +24,6 @@ export interface IUser extends Document {
   passwordResetExpires?: Date;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
-  storeId?: string;
-  rating?: {
-    average: number;
-    totalReviews: number;
-  };
   
   // Ubicación GPS
   location?: {
@@ -43,7 +36,7 @@ export interface IUser extends Document {
   // Sistema de fidelización
   points: number;
   referralCode: string;
-  referredBy?: mongoose.Types.ObjectId;
+  referredBy?: string;
   totalPurchases: number;
   totalSpent: number;
   loyaltyLevel: 'bronze' | 'silver' | 'gold' | 'platinum';
@@ -417,31 +410,16 @@ const userSchema = new Schema<IUser>({
       type: Boolean,
       default: true
     }
-  },
-  
-  // Campos adicionales
-  storeId: {
-    type: String
-  },
-  rating: {
-    average: {
-      type: Number,
-      default: 0
-    },
-    totalReviews: {
-      type: Number,
-      default: 0
-    }
   }
 }, {
   timestamps: true
 });
 
 // Índices para optimizar consultas
-// email ya tiene índice único automático por unique: true
-// referralCode ya tiene índice único automático por unique: true
+userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ location: '2dsphere' });
+userSchema.index({ referralCode: 1 });
 userSchema.index({ deliveryStatus: 1 });
 userSchema.index({ stores: 1 });
 userSchema.index({ assignedStore: 1 });
@@ -526,7 +504,7 @@ userSchema.methods.generateBackupCodes = function(): string[] {
 // Middleware pre-save para generar referralCode si no existe
 userSchema.pre('save', async function(next) {
   try {
-    if (!(this as any).referralCode) {
+    if (!this.referralCode) {
       let referralCode = '';
       let isUnique = false;
       let attempts = 0;
@@ -542,30 +520,30 @@ userSchema.pre('save', async function(next) {
       }
       
       if (isUnique) {
-        (this as any).referralCode = referralCode;
+        this.referralCode = referralCode;
       } else {
         // Si no se puede generar un código único después de maxAttempts, usar timestamp
-        (this as any).referralCode = Date.now().toString(36).toUpperCase();
+        this.referralCode = Date.now().toString(36).toUpperCase();
       }
     }
 
     // Hash password si ha sido modificado y no está ya hasheado
-    if (this.isModified('password') && (this as any).password && !(this as any).password.startsWith('$argon2')) {
+    if (this.isModified('password') && this.password && !this.password.startsWith('$argon2')) {
       try {
-        (this as any).password = await argon2.hash((this as any).password);
+        this.password = await argon2.hash(this.password);
       } catch (error) {
         console.error('Error hashing password:', error);
-        // Si hay error en el hash, timeCost: mantener la contraseña original
+        // Si hay error en el hash, mantener la contraseña original
       }
     }
 
     // Hash PIN si ha sido modificado y no está ya hasheado
-    if (this.isModified('pin') && (this as any).pin && !(this as any).pin.startsWith('$argon2')) {
+    if (this.isModified('pin') && this.pin && !this.pin.startsWith('$argon2')) {
       try {
-        (this as any).pin = await argon2.hash((this as any).pin);
+        this.pin = await argon2.hash(this.pin);
       } catch (error) {
         console.error('Error hashing PIN:', error);
-        // Si hay error en el hash, timeCost: mantener el PIN original
+        // Si hay error en el hash, mantener el PIN original
       }
     }
 

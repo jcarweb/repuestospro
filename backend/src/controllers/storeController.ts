@@ -1,6 +1,4 @@
 import { Request, Response } from 'express';
-import mongoose from 'mongoose';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import Store from '../models/Store';
 import User from '../models/User';
 import State from '../models/State';
@@ -14,7 +12,7 @@ class StoreController {
       const users = await User.find({ 
         role: 'store_manager', 
         isActive: true 
-      }).select('name email role isActive').sort({ name: 1 } as any);
+      }).select('name email role isActive').sort({ name: 1 });
       
       // Mapear los usuarios para incluir el campo 'id' además de '_id'
       const mappedUsers = users.map(user => ({
@@ -70,7 +68,7 @@ class StoreController {
         .populate('stateRef', 'name code')
         .populate('municipalityRef', 'name')
         .populate('parishRef', 'name')
-        .sort({ createdAt: -1 } as any)
+        .sort({ createdAt: -1 })
         .limit(Number(limit))
         .skip(skip)
         .select('-__v');
@@ -134,7 +132,7 @@ class StoreController {
   // Obtener tiendas del usuario (para gestores de tienda)
   async getUserStores(req: Request, res: Response) {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       console.log('getUserStores: Usuario ID:', userId);
 
       const stores = await Store.find({
@@ -149,7 +147,7 @@ class StoreController {
         .populate('stateRef', 'name code')
         .populate('municipalityRef', 'name')
         .populate('parishRef', 'name')
-        .sort({ createdAt: -1 } as any)
+        .sort({ createdAt: -1 })
         .select('-__v');
 
       console.log('getUserStores: Tiendas encontradas:', stores.length);
@@ -169,7 +167,7 @@ class StoreController {
   // Debug: Obtener información detallada de tiendas del usuario
   async getUserStoresDebug(req: Request, res: Response) {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       console.log('getUserStoresDebug: Usuario ID:', userId);
 
       // Buscar todas las tiendas (sin filtro de isActive)
@@ -195,7 +193,8 @@ class StoreController {
           userId,
           totalStores: allStores.length,
           activeStores: activeStores.length,
-          allStores
+          allStores,
+          activeStores
         }
       });
     } catch (error) {
@@ -210,7 +209,7 @@ class StoreController {
   // Debug: Obtener tiendas completas del usuario
   async getUserStoresComplete(req: Request, res: Response) {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       console.log('getUserStoresComplete: Usuario ID:', userId);
 
       const stores = await Store.find({
@@ -225,7 +224,7 @@ class StoreController {
         .populate('stateRef', 'name code')
         .populate('municipalityRef', 'name')
         .populate('parishRef', 'name')
-        .sort({ createdAt: -1 } as any)
+        .sort({ createdAt: -1 })
         .select('-__v');
 
       console.log('getUserStoresComplete: Tiendas encontradas:', stores.length);
@@ -372,7 +371,7 @@ class StoreController {
         });
       }
 
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
 
       const store = new Store({
         name,
@@ -437,11 +436,11 @@ class StoreController {
         });
       }
 
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
 
       // Verificar permisos (solo owner o managers pueden actualizar)
-      if (store.owner.toString() !== userId?.toString() && 
-          !store.managers.includes(new mongoose.Types.ObjectId(userId))) {
+      if (store.owner.toString() !== userId.toString() && 
+          !store.managers.includes(userId)) {
         return res.status(403).json({
           success: false,
           message: 'No tienes permisos para actualizar esta tienda'
@@ -501,10 +500,10 @@ class StoreController {
         });
       }
 
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
 
       // Solo el owner puede agregar managers
-      if (store.owner.toString() !== userId?.toString() || '') {
+      if (store.owner.toString() !== userId.toString()) {
         return res.status(403).json({
           success: false,
           message: 'Solo el propietario puede agregar managers'
@@ -564,10 +563,10 @@ class StoreController {
         });
       }
 
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
 
       // Solo el owner puede remover managers
-      if (store.owner.toString() !== userId?.toString() || '') {
+      if (store.owner.toString() !== userId.toString()) {
         return res.status(403).json({
           success: false,
           message: 'Solo el propietario puede remover managers'
@@ -619,10 +618,10 @@ class StoreController {
         });
       }
 
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
 
       // Solo el owner puede desactivar la tienda
-      if (store.owner.toString() !== userId?.toString() || '') {
+      if (store.owner.toString() !== userId.toString()) {
         return res.status(403).json({
           success: false,
           message: 'Solo el propietario puede desactivar la tienda'
@@ -730,7 +729,7 @@ class StoreController {
         .populate('stateRef', 'name code')
         .populate('municipalityRef', 'name')
         .populate('parishRef', 'name')
-        .sort({ createdAt: -1 } as any)
+        .sort({ createdAt: -1 })
         .limit(Number(limit))
         .skip(skip)
         .select('-__v');
@@ -771,10 +770,10 @@ class StoreController {
         });
       }
 
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
 
       // Solo el owner puede cambiar el status de la tienda
-      if (store.owner.toString() !== userId?.toString() || '') {
+      if (store.owner.toString() !== userId.toString()) {
         return res.status(403).json({
           success: false,
           message: 'Solo el propietario puede cambiar el estado de la tienda'
@@ -813,10 +812,10 @@ class StoreController {
         });
       }
 
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
 
       // Solo el owner puede establecer la tienda principal
-      if (store.owner.toString() !== userId?.toString() || '') {
+      if (store.owner.toString() !== userId.toString()) {
         return res.status(403).json({
           success: false,
           message: 'Solo el propietario puede establecer la tienda principal'
@@ -853,7 +852,7 @@ class StoreController {
   // Obtener sucursales de la tienda principal
   async getBranches(req: Request, res: Response) {
     try {
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const userRole = (req as any).user.role;
 
       let branches;
@@ -869,7 +868,7 @@ class StoreController {
           .populate('stateRef', 'name code')
           .populate('municipalityRef', 'name')
           .populate('parishRef', 'name')
-          .sort({ name: 1 } as any)
+          .sort({ name: 1 })
           .select('-__v');
       } else {
         // Store manager solo ve sucursales de su tienda principal
@@ -900,7 +899,7 @@ class StoreController {
           .populate('stateRef', 'name code')
           .populate('municipalityRef', 'name')
           .populate('parishRef', 'name')
-          .sort({ name: 1 } as any)
+          .sort({ name: 1 })
           .select('-__v');
       }
 
@@ -930,11 +929,11 @@ class StoreController {
         });
       }
 
-      const userId = (req as AuthenticatedRequest).user?._id;
+      const userId = (req as any).user._id;
       const user = (req as any).user;
 
       // Solo el owner o admin pueden eliminar la tienda
-      if (store.owner.toString() !== userId?.toString() && user.role !== 'admin') {
+      if (store.owner.toString() !== userId.toString() && user.role !== 'admin') {
         return res.status(403).json({
           success: false,
           message: 'Solo el propietario o un administrador pueden eliminar la tienda'

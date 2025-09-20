@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { API_BASE_URL } from '../../config/api';
 import { useActiveStore } from '../contexts/ActiveStoreContext';
 import { 
   Package, 
@@ -60,7 +59,7 @@ const InventoryStatusCard: React.FC<InventoryStatusCardProps> = ({ onConfigureCl
     setError(null);
 
     try {
-      const response = await fetch(`API_BASE_URL/inventory/config/${activeStore._id}`, {
+      const response = await fetch(`http://localhost:5000/api/inventory/config/${activeStore._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

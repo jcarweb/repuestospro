@@ -1,8 +1,9 @@
 {
   "expo": {
     "name": "PiezasYA",
-    "slug": "piezasya",
+    "slug": "piezasya-mobile",
     "version": "1.0.0",
+    "sdkVersion": "54.0.0",
     "orientation": "portrait",
     "icon": "./assets/piezasya.png",
     "userInterfaceStyle": "dark",
@@ -36,7 +37,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "f683bfe1-a6cd-46f7-956f-9940ee5de216"
+        "projectId": "your-project-id"
       }
     },
     "development": {

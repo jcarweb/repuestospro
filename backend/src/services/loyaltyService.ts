@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import mongoose from 'mongoose';
 import User from '../models/User';
 import Review from '../models/Review';
 import Reward from '../models/Reward';
@@ -74,7 +73,7 @@ export class LoyaltyService {
 
     // Registrar actividad
     await Activity.create({
-      userId: (user as any)._id,
+      userId: user._id,
       type: 'points_earned',
       description: `Puntos ganados: ${points} - ${reason}`,
       metadata: {
@@ -107,7 +106,7 @@ export class LoyaltyService {
     });
 
     // Actualizar referido en el nuevo usuario
-    newUser.referredBy = new mongoose.Types.ObjectId(referrerId);
+    newUser.referredBy = referrerId;
     await newUser.save();
   }
 
@@ -175,7 +174,7 @@ export class LoyaltyService {
 
     // Registrar actividad
     await Activity.create({
-      userId: (user as any)._id,
+      userId: user._id,
       type: 'reward_redeemed',
       description: `Premio canjeado: ${reward.name}`,
       metadata: {
@@ -198,12 +197,12 @@ export class LoyaltyService {
     const reviews = await Review.find({ userId }).countDocuments();
     const redemptions = await RewardRedemption.find({ userId }).countDocuments();
     const totalPointsEarned = await Review.aggregate([
-      { $match: { userId: (user as any)._id } },
+      { $match: { userId: user._id } },
       { $group: { _id: null, total: { $sum: '$pointsEarned' } } }
     ]);
 
     const totalPointsSpent = await RewardRedemption.aggregate([
-      { $match: { userId: (user as any)._id } },
+      { $match: { userId: user._id } },
       { $group: { _id: null, total: { $sum: '$pointsSpent' } } }
     ]);
 
@@ -235,11 +234,9 @@ export class LoyaltyService {
         { startDate: { $exists: false } },
         { startDate: { $lte: now } }
       ],
-      $and: [
-        { $or: [
-          { endDate: { $exists: false } },
-          { endDate: { $gte: now } }
-        ]}
+      $or: [
+        { endDate: { $exists: false } },
+        { endDate: { $gte: now } }
       ]
     }).sort({ pointsRequired: 1 });
 

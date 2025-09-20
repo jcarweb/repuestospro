@@ -1,7 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ITransaction extends Document {
-  _id: mongoose.Types.ObjectId;
   transactionNumber: string;
   userId: mongoose.Types.ObjectId;
   storeId: mongoose.Types.ObjectId;
@@ -225,7 +224,7 @@ const TransactionSchema = new Schema<ITransaction>({
 });
 
 // Índices para optimizar consultas
-// transactionNumber ya tiene índice único automático por unique: true
+TransactionSchema.index({ transactionNumber: 1 }, { unique: true });
 TransactionSchema.index({ userId: 1, status: 1 });
 TransactionSchema.index({ storeId: 1, status: 1 });
 TransactionSchema.index({ createdAt: -1 });

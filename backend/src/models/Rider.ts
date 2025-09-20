@@ -1,7 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IRider extends Document {
-  _id: mongoose.Types.ObjectId;
   // Información básica
   userId?: mongoose.Types.ObjectId; // Para riders internos
   externalId?: string; // Para riders externos

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { API_BASE_URL } from '../../config/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const ApiTestComponent: React.FC = () => {
@@ -10,7 +9,7 @@ const ApiTestComponent: React.FC = () => {
   const testApi = async () => {
     setLoading(true);
     try {
-      const response = await fetch('API_BASE_URL/user/stores/complete', {
+      const response = await fetch('http://localhost:5000/api/user/stores/complete', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

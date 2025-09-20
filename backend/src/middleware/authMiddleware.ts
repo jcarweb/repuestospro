@@ -6,27 +6,6 @@ export interface AuthRequest extends Request {
   user?: any;
 }
 
-export interface AuthenticatedRequest extends Request {
-  user?: {
-    _id: string;
-    id: string;
-    email: string;
-    role: string;
-    storeId?: string;
-    name?: string;
-    isActive?: boolean;
-    isEmailVerified?: boolean;
-  };
-  body: any;
-  params: any;
-  query: any;
-  ip: string;
-  get: (name: string) => string | undefined;
-  file?: any;
-  files?: any;
-  headers: any;
-}
-
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
@@ -96,7 +75,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
           isEmailVerified: true,
           createdAt: new Date(),
           updatedAt: new Date()
-        } as any;
+        };
       } else {
         return res.status(401).json({
           success: false,

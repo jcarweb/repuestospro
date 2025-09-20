@@ -1,11 +1,9 @@
 import { Request, Response } from 'express';
-import mongoose from 'mongoose';
 import InventoryConfig from '../models/InventoryConfig';
 import ProductInventory from '../models/ProductInventory';
 import InventoryTransfer from '../models/InventoryTransfer';
 import Store from '../models/Store';
 import Product from '../models/Product';
-import User from '../models/User';
 
 class InventoryController {
   // Configurar tipo de inventario para una tienda
@@ -113,7 +111,7 @@ class InventoryController {
             } else {
               console.log(`Actualizando configuración para sucursal: ${childStoreId}`);
               childConfig.inventoryType = 'global';
-              childConfig.parentStore = new mongoose.Types.ObjectId(storeId); // La tienda principal es el padre
+              childConfig.parentStore = storeId; // La tienda principal es el padre
               childConfig.allowLocalStock = allowLocalStock || false;
               childConfig.autoDistribute = false; // Las sucursales no distribuyen automáticamente
               childConfig.distributionRules = {
@@ -703,11 +701,11 @@ class InventoryController {
       // Identificar y eliminar duplicados
       let deletedCount = 0;
       for (const [storeId, storeConfigs] of Object.entries(configsByStore)) {
-        if ((storeConfigs as any).length > 1) {
-          console.log(`Tienda ${storeId} tiene ${(storeConfigs as any).length} configuraciones`);
+        if (storeConfigs.length > 1) {
+          console.log(`Tienda ${storeId} tiene ${storeConfigs.length} configuraciones`);
           
           // Mantener la más reciente y eliminar las demás
-          const sortedConfigs = (storeConfigs as any).sort((a: any, b: any) => 
+          const sortedConfigs = storeConfigs.sort((a, b) => 
             new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
           );
           
@@ -740,7 +738,7 @@ class InventoryController {
             console.log(`Limpiando childStores duplicados en configuración ${config._id}`);
             console.log(`Antes: ${config.childStores.length}, Después: ${uniqueChildStores.length}`);
             
-            config.childStores = uniqueChildStores.map(id => new mongoose.Types.ObjectId(id));
+            config.childStores = uniqueChildStores;
             await config.save();
             cleanedChildStores++;
           }
@@ -810,8 +808,8 @@ class InventoryController {
         query = ProductInventory.find({
           ...filters,
           $or: [
-            { '(product as any).name': searchRegex },
-            { '(product as any).sku': searchRegex },
+            { 'product.name': searchRegex },
+            { 'product.sku': searchRegex },
             { 'store.name': searchRegex }
           ]
         })
@@ -837,7 +835,7 @@ class InventoryController {
   async getAdminStats(req: Request, res: Response) {
     try {
       const totalProducts = await ProductInventory.countDocuments();
-      const totalStores = (await ProductInventory.distinct('store')).length;
+      const totalStores = await ProductInventory.distinct('store').length;
       const lowStockItems = await ProductInventory.countDocuments({ 'alerts.lowStock': true });
       const outOfStockItems = await ProductInventory.countDocuments({ 'alerts.outOfStock': true });
       
@@ -903,8 +901,8 @@ class InventoryController {
         query = ProductInventory.find({
           ...filters,
           $or: [
-            { '(product as any).name': searchRegex },
-            { '(product as any).sku': searchRegex },
+            { 'product.name': searchRegex },
+            { 'product.sku': searchRegex },
             { 'store.name': searchRegex }
           ]
         })
@@ -927,7 +925,7 @@ class InventoryController {
         else if (item.alerts.lowStock) estado = 'Stock Bajo';
         else if (item.alerts.overStock) estado = 'Stock Alto';
         
-        return `"${(product as any).name}","${(product as any).sku}",${product.price},"${product.category}","${product.brand}","${store.name}","${item.inventoryType}",${item.mainStock.quantity},${item.mainStock.available},${item.mainStock.reserved},${item.mainStock.minStock},${item.mainStock.maxStock},"${estado}","${item.lastUpdated.toISOString()}"`;
+        return `"${product.name}","${product.sku}",${product.price},"${product.category}","${product.brand}","${store.name}","${item.inventoryType}",${item.mainStock.quantity},${item.mainStock.available},${item.mainStock.reserved},${item.mainStock.minStock},${item.mainStock.maxStock},"${estado}","${item.lastUpdated.toISOString()}"`;
       }).join('\n');
 
       const csvContent = csvHeader + csvRows;
@@ -1079,8 +1077,8 @@ class InventoryController {
         query = ProductInventory.find({
           ...filters,
           $or: [
-            { '(product as any).name': searchRegex },
-            { '(product as any).sku': searchRegex }
+            { 'product.name': searchRegex },
+            { 'product.sku': searchRegex }
           ]
         })
         .populate('product', 'name sku price category brand')
@@ -1251,8 +1249,8 @@ class InventoryController {
         query = ProductInventory.find({
           ...filters,
           $or: [
-            { '(product as any).name': searchRegex },
-            { '(product as any).sku': searchRegex }
+            { 'product.name': searchRegex },
+            { 'product.sku': searchRegex }
           ]
         })
         .populate('product', 'name sku price category brand')
@@ -1274,7 +1272,7 @@ class InventoryController {
         else if (item.alerts.lowStock) estado = 'Stock Bajo';
         else if (item.alerts.overStock) estado = 'Stock Alto';
         
-        return `"${(product as any).name}","${(product as any).sku}",${product.price},"${product.category}","${product.brand}","${store.name}","${item.inventoryType}",${item.mainStock.quantity},${item.mainStock.available},${item.mainStock.reserved},${item.mainStock.minStock},${item.mainStock.maxStock},"${estado}","${item.lastUpdated.toISOString()}"`;
+        return `"${product.name}","${product.sku}",${product.price},"${product.category}","${product.brand}","${store.name}","${item.inventoryType}",${item.mainStock.quantity},${item.mainStock.available},${item.mainStock.reserved},${item.mainStock.minStock},${item.mainStock.maxStock},"${estado}","${item.lastUpdated.toISOString()}"`;
       }).join('\n');
 
       const csvContent = csvHeader + csvRows;

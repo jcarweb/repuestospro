@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../../config/api';
 import { MapPin, Search, Navigation, Store, Package } from 'lucide-react';
 
 interface Product {
@@ -87,7 +86,7 @@ const LocationBasedSearch: React.FC = () => {
       if (selectedCategory) params.append('category', selectedCategory);
       if (selectedBrand) params.append('brand', selectedBrand);
 
-      const response = await fetch(`API_BASE_URL/products/nearby?${params}`);
+      const response = await fetch(`http://localhost:5000/api/products/nearby?${params}`);
       const result = await response.json();
 
       if (result.success) {

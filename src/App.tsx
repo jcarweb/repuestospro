@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { testEnvironmentVariables, testBackendConnection } from './utils/env-test';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
@@ -117,19 +116,6 @@ import QuickStoreCheck from './components/QuickStoreCheck';
 function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isAuthenticated, hasRole, user, isLoading } = useAuth();
-
-  // Test de conexión al backend
-  useEffect(() => {
-    console.log('🚀 Iniciando test de conexión...');
-    testEnvironmentVariables();
-    testBackendConnection().then(success => {
-      if (success) {
-        console.log('✅ Backend conectado correctamente');
-      } else {
-        console.error('❌ No se pudo conectar con el backend');
-      }
-    });
-  }, []);
 
   // Mostrar loading mientras se inicializa la autenticación
   if (isLoading) {

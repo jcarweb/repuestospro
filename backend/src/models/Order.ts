@@ -1,7 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IOrder extends Document {
-  _id: mongoose.Types.ObjectId;
   orderNumber: string;
   transactionId: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
@@ -445,7 +444,7 @@ const OrderSchema = new Schema<IOrder>({
 });
 
 // Índices para optimizar consultas
-// orderNumber ya tiene índice único automático por unique: true
+OrderSchema.index({ orderNumber: 1 }, { unique: true });
 OrderSchema.index({ transactionId: 1 });
 OrderSchema.index({ userId: 1, orderStatus: 1 });
 OrderSchema.index({ storeId: 1, orderStatus: 1 });
