@@ -26,7 +26,7 @@ export class DynamicAPIConfig {
     try {
       // Configuración para producción (Render)
       this.currentConfig = {
-        baseUrl: 'https://piezasyaya-backend.onrender.com/api',
+        baseUrl: 'https://piezasya-back.onrender.com',
         isLocal: false,
         networkName: 'Render Production',
         lastTested: Date.now(),
@@ -38,7 +38,7 @@ export class DynamicAPIConfig {
       console.error('Error initializing API config:', error);
       // Fallback a configuración por defecto
       this.currentConfig = {
-        baseUrl: 'https://piezasyaya-backend.onrender.com/api',
+        baseUrl: 'https://piezasya-back.onrender.com',
         isLocal: false,
         networkName: 'Render Production',
         lastTested: Date.now(),
@@ -53,7 +53,7 @@ export class DynamicAPIConfig {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    return this.currentConfig?.baseUrl || 'https://piezasyaya-backend.onrender.com/api';
+    return this.currentConfig?.baseUrl || 'https://piezasya-back.onrender.com';
   }
 
   // Obtener la configuración completa
@@ -68,7 +68,7 @@ export class DynamicAPIConfig {
   async rescan(): Promise<NetworkConfig> {
     // Configuración para producción (Render)
     this.currentConfig = {
-      baseUrl: 'https://piezasyaya-backend.onrender.com/api',
+      baseUrl: 'https://piezasya-back.onrender.com',
       isLocal: false,
       networkName: 'Render Production',
       lastTested: Date.now(),

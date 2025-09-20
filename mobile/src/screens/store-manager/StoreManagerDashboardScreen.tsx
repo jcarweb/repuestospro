@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 
 interface StoreStats {
   totalProducts: number;
@@ -56,7 +56,7 @@ const StoreManagerDashboardScreen: React.FC = () => {
   const renderStatCard = (icon: string, title: string, value: string, subtitle?: string, color?: string) => (
     <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={[styles.statIcon, { backgroundColor: color || colors.primary }]}>
-        <Ionicons name={icon as any} size={24} color="white" />
+        <Icon name={icon as any} size={24} color="white" />
       </View>
       <View style={styles.statContent}>
         <Text style={[styles.statValue, { color: colors.textPrimary }]}>
@@ -80,7 +80,7 @@ const StoreManagerDashboardScreen: React.FC = () => {
       onPress={onPress}
     >
       <View style={[styles.menuIcon, { backgroundColor: colors.primary }]}>
-        <Ionicons name={icon as any} size={24} color="#000000" />
+        <Icon name={icon as any} size={24} color="#000000" />
       </View>
       <View style={styles.menuContent}>
         <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>
@@ -90,7 +90,7 @@ const StoreManagerDashboardScreen: React.FC = () => {
           {subtitle}
         </Text>
       </View>
-      <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+      <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
     </TouchableOpacity>
   );
 
@@ -108,7 +108,7 @@ const StoreManagerDashboardScreen: React.FC = () => {
   if (!stats) {
     return (
       <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
-        <Ionicons name="alert-circle-outline" size={64} color={colors.error} />
+        <Icon name="alert-circle-outline" size={64} color={colors.error} />
         <Text style={[styles.errorText, { color: colors.textSecondary }]}>
           No se pudieron cargar las estadísticas de la tienda
         </Text>
@@ -189,7 +189,7 @@ const StoreManagerDashboardScreen: React.FC = () => {
           
           {stats.lowStockProducts > 0 && (
             <View style={[styles.alertCard, { backgroundColor: colors.warning + '20', borderColor: colors.warning }]}>
-              <Ionicons name="warning-outline" size={24} color={colors.warning} />
+              <Icon name="warning-outline" size={24} color={colors.warning} />
               <View style={styles.alertContent}>
                 <Text style={[styles.alertTitle, { color: colors.textPrimary }]}>
                   Productos con stock bajo
@@ -203,7 +203,7 @@ const StoreManagerDashboardScreen: React.FC = () => {
           
           {stats.pendingOrders > 0 && (
             <View style={[styles.alertCard, { backgroundColor: colors.info + '20', borderColor: colors.info }]}>
-              <Ionicons name="time-outline" size={24} color={colors.info} />
+              <Icon name="time-outline" size={24} color={colors.info} />
               <View style={styles.alertContent}>
                 <Text style={[styles.alertTitle, { color: colors.textPrimary }]}>
                   Pedidos pendientes
@@ -297,7 +297,7 @@ const StoreManagerDashboardScreen: React.FC = () => {
                 // navigation.navigate('AddProduct');
               }}
             >
-              <Ionicons name="add-circle-outline" size={32} color={colors.primary} />
+              <Icon name="add-circle-outline" size={32} color={colors.primary} />
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
                 Nuevo Producto
               </Text>
@@ -310,7 +310,7 @@ const StoreManagerDashboardScreen: React.FC = () => {
                 // navigation.navigate('PendingOrders');
               }}
             >
-              <Ionicons name="time-outline" size={32} color={colors.warning} />
+              <Icon name="time-outline" size={32} color={colors.warning} />
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
                 Pedidos Pendientes
               </Text>
@@ -323,7 +323,7 @@ const StoreManagerDashboardScreen: React.FC = () => {
                 // navigation.navigate('LowStock');
               }}
             >
-              <Ionicons name="warning-outline" size={32} color={colors.warning} />
+              <Icon name="warning-outline" size={32} color={colors.warning} />
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
                 Stock Bajo
               </Text>
@@ -336,7 +336,7 @@ const StoreManagerDashboardScreen: React.FC = () => {
                 // navigation.navigate('Reports');
               }}
             >
-              <Ionicons name="analytics-outline" size={32} color={colors.primary} />
+              <Icon name="analytics-outline" size={32} color={colors.primary} />
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
                 Ver Reportes
               </Text>

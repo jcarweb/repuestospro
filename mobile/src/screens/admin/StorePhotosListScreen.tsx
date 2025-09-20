@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 
 interface StorePhoto {
   _id: string;
@@ -307,7 +307,7 @@ const StorePhotosListScreen: React.FC = () => {
           <View style={styles.metricsRow}>
             {item.metrics.mercadoLibre?.found && (
               <View style={styles.metricItem}>
-                <Ionicons name="storefront" size={16} color="#FFC300" />
+                <Icon name="storefront" size={16} color="#FFC300" />
                 <Text style={styles.metricText}>
                   ML: {item.metrics.mercadoLibre.results?.length || 0} resultados
                 </Text>
@@ -315,13 +315,13 @@ const StorePhotosListScreen: React.FC = () => {
             )}
             {item.metrics.duckduckgo?.found && (
               <View style={styles.metricItem}>
-                <Ionicons name="search" size={16} color="#007AFF" />
+                <Icon name="search" size={16} color="#007AFF" />
                 <Text style={styles.metricText}>DDG: Encontrado</Text>
               </View>
             )}
             {item.metrics.instagram?.found && (
               <View style={styles.metricItem}>
-                <Ionicons name="logo-instagram" size={16} color="#E4405F" />
+                <Icon name="logo-instagram" size={16} color="#E4405F" />
                 <Text style={styles.metricText}>
                   IG: {item.metrics.instagram.followers} seguidores
                 </Text>
@@ -345,7 +345,7 @@ const StorePhotosListScreen: React.FC = () => {
             // navigation.navigate('PhotoDetails', { photoId: item._id });
           }}
         >
-          <Ionicons name="eye" size={20} color="#007AFF" />
+          <Icon name="eye" size={20} color="#007AFF" />
           <Text style={styles.actionButtonText}>Ver Detalles</Text>
         </TouchableOpacity>
 
@@ -353,7 +353,7 @@ const StorePhotosListScreen: React.FC = () => {
           style={[styles.actionButton, { backgroundColor: '#FF3B30' }]}
           onPress={() => deletePhoto(item._id, item.name)}
         >
-          <Ionicons name="trash" size={20} color="#fff" />
+          <Icon name="trash" size={20} color="#fff" />
           <Text style={[styles.actionButtonText, { color: '#fff' }]}>Eliminar</Text>
         </TouchableOpacity>
       </View>
@@ -430,7 +430,7 @@ const StorePhotosListScreen: React.FC = () => {
           {isRunningEnrichment ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
-            <Ionicons name="refresh" size={20} color="#fff" />
+            <Icon name="refresh" size={20} color="#fff" />
           )}
           <Text style={styles.actionButtonText}>
             {isRunningEnrichment ? 'Procesando...' : 'Ejecutar Enriquecimiento'}
@@ -441,7 +441,7 @@ const StorePhotosListScreen: React.FC = () => {
           style={[styles.actionButton, styles.refreshButton]}
           onPress={refreshData}
         >
-          <Ionicons name="reload" size={20} color="#007AFF" />
+          <Icon name="reload" size={20} color="#007AFF" />
           <Text style={[styles.actionButtonText, { color: '#007AFF' }]}>Actualizar</Text>
         </TouchableOpacity>
       </View>
@@ -462,7 +462,7 @@ const StorePhotosListScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="camera-outline" size={64} color="#8E8E93" />
+            <Icon name="camera-outline" size={64} color="#8E8E93" />
             <Text style={styles.emptyText}>No hay fotos de locales disponibles</Text>
             <Text style={styles.emptySubtext}>
               Usa la función de captura para agregar fotos de locales

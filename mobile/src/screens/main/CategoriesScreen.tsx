@@ -8,7 +8,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 
 interface Category {
   id: string;
@@ -64,14 +64,14 @@ const CategoriesScreen: React.FC = () => {
   const renderCategory = ({ item }: { item: Category }) => (
     <TouchableOpacity style={styles.categoryCard}>
       <View style={styles.categoryIcon}>
-        <Ionicons name="car-sport" size={32} color="#FFC300" />
+        <Icon name="car-sport" size={32} color="#FFC300" />
       </View>
       <View style={styles.categoryInfo}>
         <Text style={styles.categoryName}>{item.name}</Text>
         <Text style={styles.categoryDescription}>{item.description}</Text>
         <Text style={styles.productCount}>{item.productCount} productos</Text>
       </View>
-      <Ionicons name="chevron-forward" size={24} color="#9CA3AF" />
+      <Icon name="chevron-forward" size={24} color="#9CA3AF" />
     </TouchableOpacity>
   );
 

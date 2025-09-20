@@ -5,7 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -42,7 +42,7 @@ const EmailVerificationSuccessScreen: React.FC<EmailVerificationSuccessScreenPro
       <View style={styles.content}>
         {/* Icono de éxito */}
         <View style={[styles.iconContainer, { backgroundColor: colors.success + '20' }]}>
-          <Ionicons name="checkmark-circle" size={80} color={colors.success} />
+          <Icon name="checkmark-circle" size={80} color={colors.success} />
         </View>
 
         {/* Título y mensaje */}

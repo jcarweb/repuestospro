@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -189,7 +189,7 @@ const ProductDetailScreen: React.FC = () => {
     return (
       <View style={styles.starsContainer}>
         {[1, 2, 3, 4, 5].map((star) => (
-          <Ionicons
+          <Icon
             key={star}
             name={star <= rating ? "star" : "star-outline"}
             size={size}
@@ -262,7 +262,7 @@ const ProductDetailScreen: React.FC = () => {
       
       <View style={styles.reviewFooter}>
         <TouchableOpacity style={styles.helpfulButton}>
-          <Ionicons name="thumbs-up-outline" size={16} color={colors.textTertiary} />
+          <Icon name="thumbs-up-outline" size={16} color={colors.textTertiary} />
           <Text style={[styles.helpfulText, { color: colors.textTertiary }]}>
             Útil ({item.helpful})
           </Text>
@@ -285,7 +285,7 @@ const ProductDetailScreen: React.FC = () => {
   if (!product) {
     return (
       <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
-        <Ionicons name="alert-circle" size={64} color={colors.error} />
+        <Icon name="alert-circle" size={64} color={colors.error} />
         <Text style={[styles.errorText, { color: colors.textSecondary }]}>
           Producto no encontrado
         </Text>
@@ -311,7 +311,7 @@ const ProductDetailScreen: React.FC = () => {
               </Text>
             </View>
             <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteButton}>
-              <Ionicons
+              <Icon
                 name={isFavorite ? "heart" : "heart-outline"}
                 size={24}
                 color={isFavorite ? colors.error : colors.textTertiary}
@@ -358,7 +358,7 @@ const ProductDetailScreen: React.FC = () => {
                 style={[styles.quantityButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
                 onPress={() => setQuantity(Math.max(1, quantity - 1))}
               >
-                <Ionicons name="remove" size={20} color={colors.textPrimary} />
+                <Icon name="remove" size={20} color={colors.textPrimary} />
               </TouchableOpacity>
               <Text style={[styles.quantityText, { color: colors.textPrimary }]}>
                 {quantity}
@@ -367,7 +367,7 @@ const ProductDetailScreen: React.FC = () => {
                 style={[styles.quantityButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
                 onPress={() => setQuantity(Math.min(product.stock, quantity + 1))}
               >
-                <Ionicons name="add" size={20} color={colors.textPrimary} />
+                <Icon name="add" size={20} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
           </View>
@@ -378,7 +378,7 @@ const ProductDetailScreen: React.FC = () => {
               style={[styles.addToCartButton, { backgroundColor: colors.surface, borderColor: colors.primary }]}
               onPress={handleAddToCart}
             >
-              <Ionicons name="cart-outline" size={20} color={colors.primary} />
+              <Icon name="cart-outline" size={20} color={colors.primary} />
               <Text style={[styles.addToCartText, { color: colors.primary }]}>
                 Agregar al Carrito
               </Text>
@@ -388,7 +388,7 @@ const ProductDetailScreen: React.FC = () => {
               style={[styles.buyNowButton, { backgroundColor: colors.primary }]}
               onPress={handleBuyNow}
             >
-              <Ionicons name="flash" size={20} color="white" />
+              <Icon name="flash" size={20} color="white" />
               <Text style={styles.buyNowText}>
                 Comprar Ahora
               </Text>
@@ -400,7 +400,7 @@ const ProductDetailScreen: React.FC = () => {
             style={[styles.chatButton, { backgroundColor: colors.success, borderColor: colors.success }]}
             onPress={handleChatWithCompany}
           >
-            <Ionicons name="chatbubbles-outline" size={20} color="white" />
+            <Icon name="chatbubbles-outline" size={20} color="white" />
             <Text style={styles.chatButtonText}>
               Chat con {product.brand}
             </Text>
@@ -408,7 +408,7 @@ const ProductDetailScreen: React.FC = () => {
               <Text style={styles.chatBadgeText}>En línea</Text>
             </View>
             <View style={styles.chatIcon}>
-              <Ionicons name="information-circle" size={16} color="white" />
+              <Icon name="information-circle" size={16} color="white" />
             </View>
           </TouchableOpacity>
 
@@ -473,7 +473,7 @@ const ProductDetailScreen: React.FC = () => {
                 </Text>
                 {product.features.map((feature, index) => (
                   <View key={index} style={styles.featureItem}>
-                    <Ionicons name="checkmark-circle" size={16} color={colors.success} />
+                    <Icon name="checkmark-circle" size={16} color={colors.success} />
                     <Text style={[styles.featureText, { color: colors.textSecondary }]}>
                       {feature}
                     </Text>
@@ -482,7 +482,7 @@ const ProductDetailScreen: React.FC = () => {
                 
                 <View style={styles.infoCards}>
                   <View style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                    <Ionicons name="shield-checkmark" size={24} color={colors.primary} />
+                    <Icon name="shield-checkmark" size={24} color={colors.primary} />
                     <Text style={[styles.infoCardTitle, { color: colors.textPrimary }]}>
                       Garantía
                     </Text>
@@ -492,7 +492,7 @@ const ProductDetailScreen: React.FC = () => {
                   </View>
                   
                   <View style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                    <Ionicons name="car" size={24} color={colors.primary} />
+                    <Icon name="car" size={24} color={colors.primary} />
                     <Text style={[styles.infoCardTitle, { color: colors.textPrimary }]}>
                       Envío
                     </Text>

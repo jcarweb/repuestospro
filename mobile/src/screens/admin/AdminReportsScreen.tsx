@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -159,7 +159,7 @@ const AdminReportsScreen: React.FC = () => {
   const renderStatCard = (icon: string, title: string, value: string, subtitle: string, color: string) => (
     <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={[styles.statIcon, { backgroundColor: color }]}>
-        <Ionicons name={icon as any} size={24} color="white" />
+        <Icon name={icon as any} size={24} color="white" />
       </View>
       <View style={styles.statContent}>
         <Text style={[styles.statValue, { color: colors.textPrimary }]}>
@@ -216,7 +216,7 @@ const AdminReportsScreen: React.FC = () => {
       onPress={onPress}
     >
       <View style={[styles.reportIcon, { backgroundColor: colors.primary }]}>
-        <Ionicons name={icon as any} size={24} color="#000000" />
+        <Icon name={icon as any} size={24} color="#000000" />
       </View>
       <View style={styles.reportContent}>
         <Text style={[styles.reportTitle, { color: colors.textPrimary }]}>
@@ -226,7 +226,7 @@ const AdminReportsScreen: React.FC = () => {
           {description}
         </Text>
       </View>
-      <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+      <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
     </TouchableOpacity>
   );
 

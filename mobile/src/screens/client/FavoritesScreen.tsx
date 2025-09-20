@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 
 interface FavoriteProduct {
   _id: string;
@@ -183,14 +183,14 @@ const FavoritesScreen: React.FC = () => {
           onPress={() => addToCart(item.product)}
           disabled={item.product.stock === 0}
         >
-          <Ionicons name="cart-outline" size={16} color="#000000" />
+          <Icon name="cart-outline" size={16} color="#000000" />
         </TouchableOpacity>
         
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: colors.error }]}
           onPress={() => removeFavorite(item._id)}
         >
-          <Ionicons name="heart-dislike-outline" size={16} color="white" />
+          <Icon name="heart-dislike-outline" size={16} color="white" />
         </TouchableOpacity>
       </View>
     </View>
@@ -223,7 +223,7 @@ const FavoritesScreen: React.FC = () => {
         {/* Lista de favoritos */}
         {favorites.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="heart-outline" size={64} color={colors.textTertiary} />
+            <Icon name="heart-outline" size={64} color={colors.textTertiary} />
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               No tienes favoritos aún
             </Text>

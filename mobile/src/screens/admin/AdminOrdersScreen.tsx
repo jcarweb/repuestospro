@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -260,7 +260,7 @@ const AdminOrdersScreen: React.FC = () => {
   const renderStatCard = (icon: string, title: string, value: string, color: string) => (
     <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={[styles.statIcon, { backgroundColor: color }]}>
-        <Ionicons name={icon as any} size={20} color="white" />
+        <Icon name={icon as any} size={20} color="white" />
       </View>
       <View style={styles.statContent}>
         <Text style={[styles.statValue, { color: colors.textPrimary }]}>
@@ -299,21 +299,21 @@ const AdminOrdersScreen: React.FC = () => {
 
       <View style={styles.orderDetails}>
         <View style={styles.customerInfo}>
-          <Ionicons name="person-outline" size={16} color={colors.textSecondary} />
+          <Icon name="person-outline" size={16} color={colors.textSecondary} />
           <Text style={[styles.customerName, { color: colors.textPrimary }]}>
             {order.customer.name}
           </Text>
         </View>
         
         <View style={styles.storeInfo}>
-          <Ionicons name="storefront-outline" size={16} color={colors.textSecondary} />
+          <Icon name="storefront-outline" size={16} color={colors.textSecondary} />
           <Text style={[styles.storeName, { color: colors.textSecondary }]}>
             {order.store.name} - {order.store.city}
           </Text>
         </View>
 
         <View style={styles.deliveryInfo}>
-          <Ionicons 
+          <Icon 
             name={order.deliveryType === 'delivery' ? 'car-outline' : 'location-outline'} 
             size={16} 
             color={colors.textSecondary} 
@@ -349,7 +349,7 @@ const AdminOrdersScreen: React.FC = () => {
             style={[styles.actionButton, { backgroundColor: '#10B981' }]}
             onPress={() => updateOrderStatus(order._id, 'confirmed')}
           >
-            <Ionicons name="checkmark" size={16} color="white" />
+            <Icon name="checkmark" size={16} color="white" />
             <Text style={styles.actionButtonText}>Confirmar</Text>
           </TouchableOpacity>
         )}
@@ -359,7 +359,7 @@ const AdminOrdersScreen: React.FC = () => {
             style={[styles.actionButton, { backgroundColor: '#8B5CF6' }]}
             onPress={() => updateOrderStatus(order._id, 'preparing')}
           >
-            <Ionicons name="construct-outline" size={16} color="white" />
+            <Icon name="construct-outline" size={16} color="white" />
             <Text style={styles.actionButtonText}>Preparar</Text>
           </TouchableOpacity>
         )}
@@ -369,7 +369,7 @@ const AdminOrdersScreen: React.FC = () => {
             style={[styles.actionButton, { backgroundColor: '#10B981' }]}
             onPress={() => updateOrderStatus(order._id, 'ready')}
           >
-            <Ionicons name="checkmark-circle" size={16} color="white" />
+            <Icon name="checkmark-circle" size={16} color="white" />
             <Text style={styles.actionButtonText}>Lista</Text>
           </TouchableOpacity>
         )}
@@ -379,7 +379,7 @@ const AdminOrdersScreen: React.FC = () => {
             style={[styles.actionButton, { backgroundColor: '#059669' }]}
             onPress={() => updateOrderStatus(order._id, 'delivered')}
           >
-            <Ionicons name="checkmark-done" size={16} color="white" />
+            <Icon name="checkmark-done" size={16} color="white" />
             <Text style={styles.actionButtonText}>Entregada</Text>
           </TouchableOpacity>
         )}
@@ -389,7 +389,7 @@ const AdminOrdersScreen: React.FC = () => {
             style={[styles.actionButton, { backgroundColor: '#EF4444' }]}
             onPress={() => updateOrderStatus(order._id, 'cancelled')}
           >
-            <Ionicons name="close" size={16} color="white" />
+            <Icon name="close" size={16} color="white" />
             <Text style={styles.actionButtonText}>Cancelar</Text>
           </TouchableOpacity>
         )}
@@ -527,7 +527,7 @@ const AdminOrdersScreen: React.FC = () => {
           
           {orders.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="receipt-outline" size={64} color={colors.textTertiary} />
+              <Icon name="receipt-outline" size={64} color={colors.textTertiary} />
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                 No hay órdenes disponibles
               </Text>

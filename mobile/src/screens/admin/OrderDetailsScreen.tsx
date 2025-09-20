@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -246,7 +246,7 @@ const OrderDetailsScreen: React.FC = () => {
       disabled={!onPress}
     >
       <View style={styles.infoRowLeft}>
-        <Ionicons name={icon as any} size={20} color={colors.textSecondary} />
+        <Icon name={icon as any} size={20} color={colors.textSecondary} />
         <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
           {label}:
         </Text>
@@ -256,7 +256,7 @@ const OrderDetailsScreen: React.FC = () => {
           {value}
         </Text>
         {onPress && (
-          <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+          <Icon name="chevron-forward" size={16} color={colors.textTertiary} />
         )}
       </View>
     </TouchableOpacity>
@@ -267,7 +267,7 @@ const OrderDetailsScreen: React.FC = () => {
       style={[styles.statusButton, { backgroundColor: color }]}
       onPress={() => updateOrderStatus(status)}
     >
-      <Ionicons name={icon as any} size={20} color="white" />
+      <Icon name={icon as any} size={20} color="white" />
       <Text style={styles.statusButtonText}>{label}</Text>
     </TouchableOpacity>
   );
@@ -286,7 +286,7 @@ const OrderDetailsScreen: React.FC = () => {
   if (!order) {
     return (
       <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
-        <Ionicons name="alert-circle-outline" size={64} color={colors.error} />
+        <Icon name="alert-circle-outline" size={64} color={colors.error} />
         <Text style={[styles.errorText, { color: colors.textSecondary }]}>
           No se pudo cargar la orden
         </Text>
@@ -323,7 +323,7 @@ const OrderDetailsScreen: React.FC = () => {
               style={styles.backButton}
               onPress={() => navigation.goBack()}
             >
-              <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+              <Icon name="arrow-back" size={24} color={colors.textPrimary} />
             </TouchableOpacity>
             <View style={styles.headerInfo}>
               <Text style={[styles.orderNumber, { color: colors.textPrimary }]}>

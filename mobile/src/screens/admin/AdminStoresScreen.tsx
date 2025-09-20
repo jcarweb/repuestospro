@@ -23,7 +23,7 @@ import { storeService, Store, StoreStats } from '../../services/storeService';
 import { userService, User } from '../../services/userService';
 import { administrativeDivisionService, State, Municipality, Parish } from '../../services/administrativeDivisionService';
 import { requestCache, circuitBreaker } from '../../utils/requestUtils';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 
 const AdminStoresScreen: React.FC = () => {
   const [stores, setStores] = useState<Store[]>([]);
@@ -491,7 +491,7 @@ const AdminStoresScreen: React.FC = () => {
             ]}
           onPress={() => toggleStoreStatus(item._id, item.isActive)}
         >
-          <Ionicons 
+          <Icon 
               name={item.isActive ? 'checkmark' : 'close'}
               size={16}
             color="white" 
@@ -501,25 +501,25 @@ const AdminStoresScreen: React.FC = () => {
             style={styles.actionButton}
             onPress={() => openViewModal(item)}
           >
-            <Ionicons name="eye" size={16} color="#3B82F6" />
+            <Icon name="eye" size={16} color="#3B82F6" />
         </TouchableOpacity>
         <TouchableOpacity
             style={styles.actionButton}
             onPress={() => openEditModal(item)}
           >
-            <Ionicons name="pencil" size={16} color="#F59E0B" />
+            <Icon name="pencil" size={16} color="#F59E0B" />
         </TouchableOpacity>
         <TouchableOpacity
             style={styles.actionButton}
             onPress={() => openManagersModal(item)}
           >
-            <Ionicons name="people" size={16} color="#8B5CF6" />
+            <Icon name="people" size={16} color="#8B5CF6" />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.deleteButton}
           onPress={() => deleteStore(item._id, item.name)}
         >
-            <Ionicons name="trash" size={16} color="#EF4444" />
+            <Icon name="trash" size={16} color="#EF4444" />
         </TouchableOpacity>
       </View>
     </View>
@@ -599,7 +599,7 @@ const AdminStoresScreen: React.FC = () => {
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
         <View style={styles.accessDeniedContainer}>
-          <Ionicons name="lock-closed" size={64} color="#EF4444" />
+          <Icon name="lock-closed" size={64} color="#EF4444" />
           <Text style={styles.accessDeniedTitle}>Acceso Denegado</Text>
           <Text style={styles.accessDeniedMessage}>
             No tienes permisos para acceder a la gestión de tiendas.
@@ -644,7 +644,7 @@ const AdminStoresScreen: React.FC = () => {
 
       {/* Search Bar and Controls */}
         <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#6B7280" style={styles.searchIcon} />
+        <Icon name="search" size={20} color="#6B7280" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Buscar tiendas..."
@@ -656,7 +656,7 @@ const AdminStoresScreen: React.FC = () => {
           style={styles.addButton}
           onPress={openCreateModal}
         >
-          <Ionicons name="add" size={20} color="white" />
+          <Icon name="add" size={20} color="white" />
         </TouchableOpacity>
         </View>
 
@@ -682,7 +682,7 @@ const AdminStoresScreen: React.FC = () => {
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Ionicons name="storefront-outline" size={64} color="#9CA3AF" />
+              <Icon name="storefront-outline" size={64} color="#9CA3AF" />
               <Text style={styles.emptyTitle}>No se encontraron tiendas</Text>
               <Text style={styles.emptyMessage}>
                 Intenta ajustar los filtros de búsqueda
@@ -711,7 +711,7 @@ const AdminStoresScreen: React.FC = () => {
                 setSelectedStore(null);
               }}
             >
-              <Ionicons name="close" size={24} color="#6B7280" />
+              <Icon name="close" size={24} color="#6B7280" />
             </TouchableOpacity>
           </View>
           
@@ -961,7 +961,7 @@ const AdminStoresScreen: React.FC = () => {
                 setSelectedStore(null);
               }}
             >
-              <Ionicons name="close" size={24} color="#6B7280" />
+              <Icon name="close" size={24} color="#6B7280" />
             </TouchableOpacity>
       </View>
 
@@ -1032,7 +1032,7 @@ const AdminStoresScreen: React.FC = () => {
                 setNewManagerEmail('');
         }}
       >
-              <Ionicons name="close" size={24} color="#6B7280" />
+              <Icon name="close" size={24} color="#6B7280" />
       </TouchableOpacity>
           </View>
           
@@ -1066,7 +1066,7 @@ const AdminStoresScreen: React.FC = () => {
                       style={styles.removeManagerButton}
                       onPress={() => removeManager(manager._id)}
                     >
-                      <Ionicons name="trash" size={16} color="#EF4444" />
+                      <Icon name="trash" size={16} color="#EF4444" />
                     </TouchableOpacity>
                   </View>
                 )) || <Text style={styles.detailText}>No hay managers asignados</Text>}

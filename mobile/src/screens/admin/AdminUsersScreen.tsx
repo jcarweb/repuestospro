@@ -17,7 +17,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { userService, User } from '../../services/userService';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 
 const AdminUsersScreen: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -232,7 +232,7 @@ const AdminUsersScreen: React.FC = () => {
           style={[styles.actionButton, styles.editButton]}
           onPress={() => {/* Implementar edición */}}
         >
-          <Ionicons name="pencil" size={16} color="#3B82F6" />
+          <Icon name="pencil" size={16} color="#3B82F6" />
           <Text style={styles.actionButtonText}>Editar</Text>
         </TouchableOpacity>
         
@@ -240,7 +240,7 @@ const AdminUsersScreen: React.FC = () => {
           style={[styles.actionButton, styles.toggleButton]}
           onPress={() => toggleUserStatus(item._id, item.isActive)}
         >
-          <Ionicons name={item.isActive ? "pause" : "play"} size={16} color="#F59E0B" />
+          <Icon name={item.isActive ? "pause" : "play"} size={16} color="#F59E0B" />
           <Text style={styles.actionButtonText}>
             {item.isActive ? 'Desactivar' : 'Activar'}
           </Text>
@@ -250,7 +250,7 @@ const AdminUsersScreen: React.FC = () => {
           style={[styles.actionButton, styles.deleteButton]}
           onPress={() => deleteUser(item._id, item.name)}
         >
-          <Ionicons name="trash" size={16} color="#EF4444" />
+          <Icon name="trash" size={16} color="#EF4444" />
           <Text style={styles.actionButtonText}>Eliminar</Text>
         </TouchableOpacity>
       </View>
@@ -281,13 +281,13 @@ const AdminUsersScreen: React.FC = () => {
           style={styles.tableActionButton}
           onPress={() => toggleUserStatus(item._id, item.isActive)}
         >
-          <Ionicons name={item.isActive ? "pause" : "play"} size={16} color="#F59E0B" />
+          <Icon name={item.isActive ? "pause" : "play"} size={16} color="#F59E0B" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.tableActionButton}
           onPress={() => deleteUser(item._id, item.name)}
         >
-          <Ionicons name="trash" size={16} color="#EF4444" />
+          <Icon name="trash" size={16} color="#EF4444" />
         </TouchableOpacity>
       </View>
     </View>
@@ -334,7 +334,7 @@ const AdminUsersScreen: React.FC = () => {
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
         <View style={styles.accessDeniedContainer}>
-          <Ionicons name="lock-closed" size={64} color="#EF4444" />
+          <Icon name="lock-closed" size={64} color="#EF4444" />
           <Text style={styles.accessDeniedTitle}>Acceso Denegado</Text>
           <Text style={styles.accessDeniedMessage}>
             No tienes permisos para acceder a la gestión de usuarios.
@@ -364,7 +364,7 @@ const AdminUsersScreen: React.FC = () => {
       {/* Search and Controls */}
       <View style={styles.controlsContainer}>
         <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#6B7280" />
+          <Icon name="search" size={20} color="#6B7280" />
           <TextInput
             style={styles.searchInput}
             placeholder="Buscar usuarios..."
@@ -379,14 +379,14 @@ const AdminUsersScreen: React.FC = () => {
             style={[styles.controlButton, showFilters && styles.controlButtonActive]}
             onPress={() => setShowFilters(!showFilters)}
           >
-            <Ionicons name="filter" size={20} color={showFilters ? "#FFFFFF" : "#6B7280"} />
+            <Icon name="filter" size={20} color={showFilters ? "#FFFFFF" : "#6B7280"} />
           </TouchableOpacity>
           
           <TouchableOpacity
             style={[styles.controlButton, viewMode === 'table' && styles.controlButtonActive]}
             onPress={() => setViewMode(viewMode === 'table' ? 'cards' : 'table')}
           >
-            <Ionicons name={viewMode === 'table' ? 'grid' : 'list'} size={20} color={viewMode === 'table' ? "#FFFFFF" : "#6B7280"} />
+            <Icon name={viewMode === 'table' ? 'grid' : 'list'} size={20} color={viewMode === 'table' ? "#FFFFFF" : "#6B7280"} />
           </TouchableOpacity>
         </View>
       </View>
@@ -466,7 +466,7 @@ const AdminUsersScreen: React.FC = () => {
               }
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
-                  <Ionicons name="people-outline" size={64} color="#9CA3AF" />
+                  <Icon name="people-outline" size={64} color="#9CA3AF" />
                   <Text style={styles.emptyTitle}>No se encontraron usuarios</Text>
                   <Text style={styles.emptyMessage}>
                     Intenta ajustar los filtros de búsqueda
@@ -484,7 +484,7 @@ const AdminUsersScreen: React.FC = () => {
                 onPress={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
               >
-                <Ionicons name="chevron-back" size={20} color={currentPage === 1 ? "#9CA3AF" : "#3B82F6"} />
+                <Icon name="chevron-back" size={20} color={currentPage === 1 ? "#9CA3AF" : "#3B82F6"} />
               </TouchableOpacity>
               
               <Text style={styles.paginationText}>
@@ -496,7 +496,7 @@ const AdminUsersScreen: React.FC = () => {
                 onPress={() => setCurrentPage(Math.min(getTotalPages(), currentPage + 1))}
                 disabled={currentPage === getTotalPages()}
               >
-                <Ionicons name="chevron-forward" size={20} color={currentPage === getTotalPages() ? "#9CA3AF" : "#3B82F6"} />
+                <Icon name="chevron-forward" size={20} color={currentPage === getTotalPages() ? "#9CA3AF" : "#3B82F6"} />
               </TouchableOpacity>
             </View>
           )}

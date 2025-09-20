@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // expo-notifications removido para evitar errores de dependencias
 import { useNavigation } from '@react-navigation/native';
@@ -273,7 +273,7 @@ const SettingsScreen: React.FC = () => {
 
         <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.settingLeft}>
-            <Ionicons name="mail-outline" size={24} color={colors.primary} />
+            <Icon name="mail-outline" size={24} color={colors.primary} />
             <View style={styles.settingText}>
               <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                 Marketing por Email
@@ -300,7 +300,7 @@ const SettingsScreen: React.FC = () => {
         
         <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.settingLeft}>
-            <Ionicons name="finger-print-outline" size={24} color={colors.primary} />
+            <Icon name="finger-print-outline" size={24} color={colors.primary} />
             <View style={styles.settingText}>
               <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                 Autenticación Biométrica
@@ -323,7 +323,7 @@ const SettingsScreen: React.FC = () => {
           onPress={handleSecuritySettings}
         >
           <View style={styles.settingLeft}>
-            <Ionicons name="shield-outline" size={24} color={colors.primary} />
+            <Icon name="shield-outline" size={24} color={colors.primary} />
             <View style={styles.settingText}>
               <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                 Configuración de Seguridad
@@ -333,7 +333,7 @@ const SettingsScreen: React.FC = () => {
               </Text>
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+          <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
         </TouchableOpacity>
       </View>
 
@@ -345,7 +345,7 @@ const SettingsScreen: React.FC = () => {
         
         <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.settingLeft}>
-            <Ionicons name="moon-outline" size={24} color={colors.primary} />
+            <Icon name="moon-outline" size={24} color={colors.primary} />
             <View style={styles.settingText}>
               <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                 Modo Oscuro
@@ -375,7 +375,7 @@ const SettingsScreen: React.FC = () => {
           onPress={handlePrivacySettings}
         >
           <View style={styles.settingLeft}>
-            <Ionicons name="lock-closed-outline" size={24} color={colors.primary} />
+            <Icon name="lock-closed-outline" size={24} color={colors.primary} />
             <View style={styles.settingText}>
               <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                 Configuración de Privacidad
@@ -385,7 +385,7 @@ const SettingsScreen: React.FC = () => {
               </Text>
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+          <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -393,7 +393,7 @@ const SettingsScreen: React.FC = () => {
           onPress={handleDataExport}
         >
           <View style={styles.settingLeft}>
-            <Ionicons name="download-outline" size={24} color={colors.primary} />
+            <Icon name="download-outline" size={24} color={colors.primary} />
             <View style={styles.settingText}>
               <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>
                 Exportar Mis Datos
@@ -403,7 +403,7 @@ const SettingsScreen: React.FC = () => {
               </Text>
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+          <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
         </TouchableOpacity>
       </View>
 
@@ -418,7 +418,7 @@ const SettingsScreen: React.FC = () => {
           onPress={handleDeleteAccount}
         >
           <View style={styles.settingLeft}>
-            <Ionicons name="trash-outline" size={24} color={colors.error} />
+            <Icon name="trash-outline" size={24} color={colors.error} />
             <View style={styles.settingText}>
               <Text style={[styles.settingTitle, { color: colors.error }]}>
                 Eliminar Cuenta
@@ -428,7 +428,7 @@ const SettingsScreen: React.FC = () => {
               </Text>
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.error} />
+          <Icon name="chevron-forward" size={20} color={colors.error} />
         </TouchableOpacity>
       </View>
       </ScrollView>

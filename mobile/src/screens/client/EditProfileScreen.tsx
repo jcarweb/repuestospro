@@ -14,7 +14,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useFocusEffect } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import * as ImagePicker from 'expo-image-picker';
 import LocationPicker from '../../components/LocationPicker';
 import apiService from '../../services/api';
@@ -320,7 +320,7 @@ const EditProfileScreen: React.FC = () => {
             <Image source={{ uri: profileImage }} style={styles.profileImage} />
           ) : (
             <View style={styles.photoPlaceholder}>
-              <Ionicons name="person" size={60} color={colors.textTertiary} />
+              <Icon name="person" size={60} color={colors.textTertiary} />
               <Text style={[styles.photoText, { color: colors.textSecondary }]}>
                 Toca para cambiar foto
               </Text>
@@ -421,7 +421,7 @@ const EditProfileScreen: React.FC = () => {
             </>
           ) : (
             <>
-              <Ionicons name="checkmark" size={20} color="#000000" />
+              <Icon name="checkmark" size={20} color="#000000" />
               <Text style={[styles.saveButtonText, { color: '#000000' }]}>
                 Guardar Cambios
               </Text>

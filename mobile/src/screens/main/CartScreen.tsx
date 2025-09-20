@@ -8,7 +8,7 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 
 interface CartItem {
   id: string;
@@ -92,7 +92,7 @@ const CartScreen: React.FC = () => {
   const renderCartItem = ({ item }: { item: CartItem }) => (
     <View style={styles.cartItem}>
       <View style={styles.itemImage}>
-        <Ionicons name="car-sport" size={40} color="#FFC300" />
+        <Icon name="car-sport" size={40} color="#FFC300" />
       </View>
       
       <View style={styles.itemInfo}>
@@ -106,7 +106,7 @@ const CartScreen: React.FC = () => {
           style={styles.quantityButton}
           onPress={() => updateQuantity(item.id, item.quantity - 1)}
         >
-          <Ionicons name="remove" size={20} color="#6B7280" />
+          <Icon name="remove" size={20} color="#6B7280" />
         </TouchableOpacity>
         
         <Text style={styles.quantityText}>{item.quantity}</Text>
@@ -116,7 +116,7 @@ const CartScreen: React.FC = () => {
           onPress={() => updateQuantity(item.id, item.quantity + 1)}
           disabled={item.quantity >= item.stock}
         >
-          <Ionicons name="add" size={20} color={item.quantity >= item.stock ? "#D1D5DB" : "#6B7280"} />
+          <Icon name="add" size={20} color={item.quantity >= item.stock ? "#D1D5DB" : "#6B7280"} />
         </TouchableOpacity>
       </View>
 
@@ -124,7 +124,7 @@ const CartScreen: React.FC = () => {
         style={styles.removeButton}
         onPress={() => removeItem(item.id)}
       >
-        <Ionicons name="trash-outline" size={20} color="#DC2626" />
+        <Icon name="trash-outline" size={20} color="#DC2626" />
       </TouchableOpacity>
     </View>
   );
@@ -132,7 +132,7 @@ const CartScreen: React.FC = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Ionicons name="cart-outline" size={48} color="#FFC300" />
+        <Icon name="cart-outline" size={48} color="#FFC300" />
         <Text style={styles.loadingText}>Cargando carrito...</Text>
       </View>
     );
@@ -141,7 +141,7 @@ const CartScreen: React.FC = () => {
   if (cartItems.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Ionicons name="cart-outline" size={64} color="#D1D5DB" />
+        <Icon name="cart-outline" size={64} color="#D1D5DB" />
         <Text style={styles.emptyTitle}>Tu carrito está vacío</Text>
         <Text style={styles.emptySubtitle}>
           Agrega productos para comenzar a comprar

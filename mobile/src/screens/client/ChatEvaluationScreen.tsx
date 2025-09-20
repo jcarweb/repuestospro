@@ -9,7 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -114,7 +114,7 @@ const ChatEvaluationScreen: React.FC = () => {
             onPress={() => onPress(star)}
             style={styles.starButton}
           >
-            <Ionicons
+            <Icon
               name={star <= currentRating ? "star" : "star-outline"}
               size={24}
               color={star <= currentRating ? colors.primary : colors.textTertiary}
@@ -213,7 +213,7 @@ const ChatEvaluationScreen: React.FC = () => {
               ]}
               onPress={() => setWouldRecommend(true)}
             >
-              <Ionicons
+              <Icon
                 name="thumbs-up"
                 size={20}
                 color={wouldRecommend === true ? 'white' : colors.textSecondary}
@@ -236,7 +236,7 @@ const ChatEvaluationScreen: React.FC = () => {
               ]}
               onPress={() => setWouldRecommend(false)}
             >
-              <Ionicons
+              <Icon
                 name="thumbs-down"
                 size={20}
                 color={wouldRecommend === false ? 'white' : colors.textSecondary}
@@ -282,7 +282,7 @@ const ChatEvaluationScreen: React.FC = () => {
 
         {/* Información sobre Estrategia Antifuga */}
         <View style={[styles.infoSection, { backgroundColor: colors.warning + '20', borderColor: colors.warning }]}>
-          <Ionicons name="shield-checkmark" size={24} color={colors.warning} />
+          <Icon name="shield-checkmark" size={24} color={colors.warning} />
           <View style={styles.infoContent}>
             <Text style={[styles.infoTitle, { color: colors.warning }]}>
               Estrategia Antifuga

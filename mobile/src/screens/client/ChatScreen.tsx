@@ -11,7 +11,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -284,7 +284,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
             <Text style={[styles.messageTime, { color: colors.textTertiary }]}>
               {item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </Text>
-            <Ionicons
+            <Icon
               name={item.isRead ? "checkmark-done" : "checkmark"}
               size={16}
               color={item.isRead ? colors.primary : colors.textTertiary}
@@ -360,13 +360,13 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
                showToast('Evaluación del chat', 'info');
              }}
            >
-             <Ionicons name="star-outline" size={20} color={colors.textTertiary} />
+             <Icon name="star-outline" size={20} color={colors.textTertiary} />
            </TouchableOpacity>
            <TouchableOpacity
              style={styles.headerButton}
              onPress={() => Alert.alert('Opciones', 'Menú de opciones del chat')}
            >
-             <Ionicons name="ellipsis-vertical" size={24} color={colors.textTertiary} />
+             <Icon name="ellipsis-vertical" size={24} color={colors.textTertiary} />
            </TouchableOpacity>
          </View>
        </View>
@@ -386,7 +386,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
       {/* Input */}
       <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
         <TouchableOpacity style={styles.attachButton}>
-          <Ionicons name="add-circle-outline" size={24} color={colors.textTertiary} />
+          <Icon name="add-circle-outline" size={24} color={colors.textTertiary} />
         </TouchableOpacity>
         
         <View style={[styles.inputWrapper, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}>
@@ -409,7 +409,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
           onPress={sendMessage}
           disabled={!message.trim()}
         >
-          <Ionicons name="send" size={20} color="white" />
+          <Icon name="send" size={20} color="white" />
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

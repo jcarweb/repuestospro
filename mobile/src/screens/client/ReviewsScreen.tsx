@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 
 interface Review {
   _id: string;
@@ -106,7 +106,7 @@ const ReviewsScreen: React.FC = () => {
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
-      <Ionicons
+      <Icon
         key={index}
         name={index < rating ? 'star' : 'star-outline'}
         size={16}
@@ -165,7 +165,7 @@ const ReviewsScreen: React.FC = () => {
       
       <View style={styles.reviewFooter}>
         <TouchableOpacity style={styles.helpfulButton}>
-          <Ionicons name="thumbs-up-outline" size={16} color={colors.textTertiary} />
+          <Icon name="thumbs-up-outline" size={16} color={colors.textTertiary} />
           <Text style={[styles.helpfulText, { color: colors.textTertiary }]}>
             Útil ({item.helpful})
           </Text>
@@ -229,7 +229,7 @@ const ReviewsScreen: React.FC = () => {
         {/* Lista de reseñas */}
         {filteredReviews.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="star-outline" size={64} color={colors.textTertiary} />
+            <Icon name="star-outline" size={64} color={colors.textTertiary} />
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               {selectedFilter === 'all' ? 'No tienes reseñas aún' : 'No hay reseñas con esta calificación'}
             </Text>

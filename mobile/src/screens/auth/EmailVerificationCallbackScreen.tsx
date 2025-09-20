@@ -9,7 +9,7 @@ import {
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import mobileVerificationService from '../../services/mobileVerification';
 
 interface EmailVerificationCallbackScreenProps {
@@ -87,7 +87,7 @@ const EmailVerificationCallbackScreen: React.FC<EmailVerificationCallbackScreenP
       return (
         <View style={styles.content}>
           <View style={[styles.iconContainer, { backgroundColor: colors.success + '20' }]}>
-            <Ionicons name="checkmark-circle" size={60} color={colors.success} />
+            <Icon name="checkmark-circle" size={60} color={colors.success} />
           </View>
           <Text style={[styles.title, { color: colors.textPrimary }]}>
             ¡Email Verificado!
@@ -103,7 +103,7 @@ const EmailVerificationCallbackScreen: React.FC<EmailVerificationCallbackScreenP
       return (
         <View style={styles.content}>
           <View style={[styles.iconContainer, { backgroundColor: colors.error + '20' }]}>
-            <Ionicons name="close-circle" size={60} color={colors.error} />
+            <Icon name="close-circle" size={60} color={colors.error} />
           </View>
           <Text style={[styles.title, { color: colors.textPrimary }]}>
             Error de Verificación

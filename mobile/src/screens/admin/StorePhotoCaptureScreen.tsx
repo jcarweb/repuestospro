@@ -17,7 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 
 interface LocationData {
   latitude: number;
@@ -225,24 +225,24 @@ const StorePhotoCaptureScreen: React.FC = () => {
               style={styles.removeImageButton}
               onPress={() => setImage(null)}
             >
-              <Ionicons name="close-circle" size={24} color="#FF3B30" />
+              <Icon name="close-circle" size={24} color="#FF3B30" />
             </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.imagePlaceholder}>
-            <Ionicons name="camera" size={48} color="#8E8E93" />
+            <Icon name="camera" size={48} color="#8E8E93" />
             <Text style={styles.placeholderText}>Selecciona una foto</Text>
           </View>
         )}
 
         <View style={styles.imageButtons}>
           <TouchableOpacity style={styles.imageButton} onPress={takePhoto}>
-            <Ionicons name="camera" size={20} color="#007AFF" />
+            <Icon name="camera" size={20} color="#007AFF" />
             <Text style={styles.imageButtonText}>Tomar Foto</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.imageButton} onPress={selectFromGallery}>
-            <Ionicons name="images" size={20} color="#007AFF" />
+            <Icon name="images" size={20} color="#007AFF" />
             <Text style={styles.imageButtonText}>Galería</Text>
           </TouchableOpacity>
         </View>
@@ -254,7 +254,7 @@ const StorePhotoCaptureScreen: React.FC = () => {
         
         {location ? (
           <View style={styles.locationContainer}>
-            <Ionicons name="location" size={20} color="#34C759" />
+            <Icon name="location" size={20} color="#34C759" />
             <Text style={styles.locationText}>
               Lat: {location.latitude.toFixed(6)}
             </Text>
@@ -269,7 +269,7 @@ const StorePhotoCaptureScreen: React.FC = () => {
           </View>
         ) : (
           <View style={styles.locationPlaceholder}>
-            <Ionicons name="location-outline" size={32} color="#8E8E93" />
+            <Icon name="location-outline" size={32} color="#8E8E93" />
             <Text style={styles.placeholderText}>Ubicación no obtenida</Text>
           </View>
         )}
@@ -282,7 +282,7 @@ const StorePhotoCaptureScreen: React.FC = () => {
           {isLoadingLocation ? (
             <ActivityIndicator size="small" color="#007AFF" />
           ) : (
-            <Ionicons name="locate" size={20} color="#007AFF" />
+            <Icon name="locate" size={20} color="#007AFF" />
           )}
           <Text style={styles.locationButtonText}>
             {isLoadingLocation ? 'Obteniendo...' : 'Obtener Ubicación'}
@@ -327,7 +327,7 @@ const StorePhotoCaptureScreen: React.FC = () => {
         {isUploading ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
-          <Ionicons name="cloud-upload" size={20} color="#fff" />
+          <Icon name="cloud-upload" size={20} color="#fff" />
         )}
         <Text style={styles.uploadButtonText}>
           {isUploading ? 'Subiendo...' : 'Subir Foto'}

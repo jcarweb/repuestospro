@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import googleAuthService from '../../services/googleAuth';
 import biometricAuthService from '../../services/biometricAuth';
 import authVerificationService from '../../services/authVerification';
@@ -364,7 +364,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <View style={styles.form}>
             {error && (
               <View style={[styles.errorContainer, { backgroundColor: colors.error + '20', borderColor: colors.error }]}>
-                <Ionicons name="alert-circle" size={20} color={colors.error} />
+                <Icon name="alert-circle" size={20} color={colors.error} />
                 <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
               </View>
             )}
@@ -387,7 +387,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
-                <Ionicons
+                <Icon
                   name="person-outline"
                   size={20}
                   color={colors.textTertiary}
@@ -417,13 +417,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   onPress={() => setShowPassword(!showPassword)}
                   style={styles.passwordToggle}
                 >
-                  <Ionicons
+                  <Icon
                     name={showPassword ? 'eye-off' : 'eye'}
                     size={20}
                     color={colors.textTertiary}
                   />
                 </TouchableOpacity>
-                <Ionicons
+                <Icon
                   name="lock-closed-outline"
                   size={20}
                   color={colors.textTertiary}
@@ -462,7 +462,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   onPress={handleGoogleLogin}
                   disabled={isLoading}
                 >
-                  <Ionicons name="logo-google" size={20} color="#FFFFFF" />
+                  <Icon name="logo-google" size={20} color="#FFFFFF" />
                   <Text style={styles.socialButtonText}>Continuar con Google</Text>
                 </TouchableOpacity>
 
@@ -476,7 +476,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                     onPress={handleBiometricLogin}
                     disabled={isBiometricLoading}
                   >
-                    <Ionicons name="finger-print" size={20} color={colors.success} />
+                    <Icon name="finger-print" size={20} color={colors.success} />
                     <Text style={[styles.alternativeButtonText, { color: colors.textPrimary }]}>
                       {isBiometricLoading ? 'Verificando...' : 'Huella'}
                     </Text>
@@ -489,7 +489,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                     }]}
                     onPress={handlePinLogin}
                   >
-                    <Ionicons name="keypad" size={20} color="#8B5CF6" />
+                    <Icon name="keypad" size={20} color="#8B5CF6" />
                     <Text style={[styles.alternativeButtonText, { color: colors.textPrimary }]}>PIN</Text>
                   </TouchableOpacity>
                 </View>

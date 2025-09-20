@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 
 interface DeliveryStats {
   totalDeliveries: number;
@@ -64,7 +64,7 @@ const DeliveryDashboardScreen: React.FC = () => {
   const renderStatCard = (icon: string, title: string, value: string, subtitle?: string, color?: string) => (
     <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={[styles.statIcon, { backgroundColor: color || colors.primary }]}>
-        <Ionicons name={icon as any} size={24} color="white" />
+        <Icon name={icon as any} size={24} color="white" />
       </View>
       <View style={styles.statContent}>
         <Text style={[styles.statValue, { color: colors.textPrimary }]}>
@@ -88,7 +88,7 @@ const DeliveryDashboardScreen: React.FC = () => {
       onPress={onPress}
     >
       <View style={[styles.menuIcon, { backgroundColor: colors.primary }]}>
-        <Ionicons name={icon as any} size={24} color="#000000" />
+        <Icon name={icon as any} size={24} color="#000000" />
       </View>
       <View style={styles.menuContent}>
         <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>
@@ -98,7 +98,7 @@ const DeliveryDashboardScreen: React.FC = () => {
           {subtitle}
         </Text>
       </View>
-      <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+      <Icon name="chevron-forward" size={20} color={colors.textTertiary} />
     </TouchableOpacity>
   );
 
@@ -116,7 +116,7 @@ const DeliveryDashboardScreen: React.FC = () => {
   if (!stats) {
     return (
       <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
-        <Ionicons name="alert-circle-outline" size={64} color={colors.error} />
+        <Icon name="alert-circle-outline" size={64} color={colors.error} />
         <Text style={[styles.errorText, { color: colors.textSecondary }]}>
           No se pudieron cargar las estadísticas de delivery
         </Text>
@@ -140,7 +140,7 @@ const DeliveryDashboardScreen: React.FC = () => {
               ]}
               onPress={toggleOnlineStatus}
             >
-              <Ionicons 
+              <Icon 
                 name={isOnline ? 'radio-button-on' : 'radio-button-off'} 
                 size={20} 
                 color="white" 
@@ -215,7 +215,7 @@ const DeliveryDashboardScreen: React.FC = () => {
           
           <View style={[styles.earningsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.earningsHeader}>
-              <Ionicons name="cash-outline" size={32} color={colors.primary} />
+              <Icon name="cash-outline" size={32} color={colors.primary} />
               <View style={styles.earningsInfo}>
                 <Text style={[styles.earningsAmount, { color: colors.textPrimary }]}>
                   ${stats.weeklyEarnings.toFixed(2)}
@@ -328,7 +328,7 @@ const DeliveryDashboardScreen: React.FC = () => {
                 // navigation.navigate('PendingDeliveries');
               }}
             >
-              <Ionicons name="time-outline" size={32} color={colors.warning} />
+              <Icon name="time-outline" size={32} color={colors.warning} />
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
                 Entregas Pendientes
               </Text>
@@ -341,7 +341,7 @@ const DeliveryDashboardScreen: React.FC = () => {
                 // navigation.navigate('Map');
               }}
             >
-              <Ionicons name="map-outline" size={32} color={colors.primary} />
+              <Icon name="map-outline" size={32} color={colors.primary} />
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
                 Ver Mapa
               </Text>
@@ -354,7 +354,7 @@ const DeliveryDashboardScreen: React.FC = () => {
                 // navigation.navigate('Earnings');
               }}
             >
-              <Ionicons name="cash-outline" size={32} color={colors.success} />
+              <Icon name="cash-outline" size={32} color={colors.success} />
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
                 Ver Ganancias
               </Text>
@@ -367,7 +367,7 @@ const DeliveryDashboardScreen: React.FC = () => {
                 // navigation.navigate('Profile');
               }}
             >
-              <Ionicons name="person-outline" size={32} color={colors.primary} />
+              <Icon name="person-outline" size={32} color={colors.primary} />
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
                 Mi Perfil
               </Text>

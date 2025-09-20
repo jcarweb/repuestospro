@@ -21,7 +21,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { productService, Product, Store } from '../../services/productService';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 
 type AdminStackParamList = {
   AdminProducts: undefined;
@@ -385,7 +385,7 @@ const AdminProductsScreen: React.FC = () => {
             style={[styles.tableActionButton, { backgroundColor: item.isActive ? '#10B981' : '#EF4444' }]}
             onPress={() => toggleProductStatus(item._id, item.isActive)}
           >
-            <Ionicons
+            <Icon
               name={item.isActive ? 'checkmark' : 'close'}
               size={14}
               color="white"
@@ -396,7 +396,7 @@ const AdminProductsScreen: React.FC = () => {
               style={[styles.tableActionButton, { backgroundColor: '#EF4444' }]}
               onPress={() => deleteProduct(item._id, item.name || 'Producto')}
             >
-              <Ionicons name="trash" size={14} color="white" />
+              <Icon name="trash" size={14} color="white" />
             </TouchableOpacity>
           )}
         </View>
@@ -425,7 +425,7 @@ const AdminProductsScreen: React.FC = () => {
                 ]}
                 onPress={() => toggleProductStatus(item._id, item.isActive)}
               >
-                <Ionicons
+                <Icon
                   name={item.isActive ? 'checkmark' : 'close'}
                   size={16}
                   color="white"
@@ -439,7 +439,7 @@ const AdminProductsScreen: React.FC = () => {
                 ]}
                 onPress={() => toggleProductFeatured(item._id, item.isFeatured)}
               >
-                <Ionicons
+                <Icon
                   name="star"
                   size={16}
                   color="white"
@@ -450,7 +450,7 @@ const AdminProductsScreen: React.FC = () => {
                 style={styles.editButton}
                 onPress={() => navigation.navigate('AdminCreateProduct', { productId: item._id })}
               >
-                <Ionicons name="pencil" size={16} color="#3B82F6" />
+                <Icon name="pencil" size={16} color="#3B82F6" />
               </TouchableOpacity>
             </>
           )}
@@ -461,7 +461,7 @@ const AdminProductsScreen: React.FC = () => {
               style={styles.deleteButton}
               onPress={() => deleteProduct(item._id, item.name || 'Producto')}
             >
-              <Ionicons name="trash" size={16} color="#EF4444" />
+              <Icon name="trash" size={16} color="#EF4444" />
             </TouchableOpacity>
           )}
         </View>
@@ -504,7 +504,7 @@ const AdminProductsScreen: React.FC = () => {
         </Text>
         {item.isFeatured && (
           <View style={styles.featuredBadge}>
-            <Ionicons name="star" size={12} color="#F59E0B" />
+            <Icon name="star" size={12} color="#F59E0B" />
             <Text style={styles.featuredText}>Destacado</Text>
           </View>
         )}
@@ -572,7 +572,7 @@ const AdminProductsScreen: React.FC = () => {
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
         <View style={styles.accessDeniedContainer}>
-          <Ionicons name="lock-closed" size={64} color="#EF4444" />
+          <Icon name="lock-closed" size={64} color="#EF4444" />
           <Text style={styles.accessDeniedTitle}>Acceso Denegado</Text>
           <Text style={styles.accessDeniedMessage}>
             No tienes permisos para acceder a la gestión de productos.
@@ -610,7 +610,7 @@ const AdminProductsScreen: React.FC = () => {
               style={styles.addButton}
               onPress={() => navigation.navigate('AdminCreateProduct')}
             >
-              <Ionicons name="add" size={24} color="white" />
+              <Icon name="add" size={24} color="white" />
             </TouchableOpacity>
           )}
         </View>
@@ -618,7 +618,7 @@ const AdminProductsScreen: React.FC = () => {
 
       {/* Search Bar and Controls */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#6B7280" style={styles.searchIcon} />
+        <Icon name="search" size={20} color="#6B7280" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar productos..."
@@ -645,13 +645,13 @@ const AdminProductsScreen: React.FC = () => {
               setShowFilters(!showFilters);
             }}
           >
-            <Ionicons name="filter" size={20} color={showFilters ? "#FFFFFF" : "#6B7280"} />
+            <Icon name="filter" size={20} color={showFilters ? "#FFFFFF" : "#6B7280"} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.controlButton, viewMode === 'table' && styles.controlButtonActive]}
             onPress={() => setViewMode(viewMode === 'cards' ? 'table' : 'cards')}
           >
-            <Ionicons name={viewMode === 'table' ? 'grid' : 'list'} size={20} color={viewMode === 'table' ? "#FFFFFF" : "#6B7280"} />
+            <Icon name={viewMode === 'table' ? 'grid' : 'list'} size={20} color={viewMode === 'table' ? "#FFFFFF" : "#6B7280"} />
           </TouchableOpacity>
         </View>
       </View>
@@ -804,7 +804,7 @@ const AdminProductsScreen: React.FC = () => {
               }
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
-                  <Ionicons name="cube-outline" size={64} color="#9CA3AF" />
+                  <Icon name="cube-outline" size={64} color="#9CA3AF" />
                   <Text style={styles.emptyTitle}>No se encontraron productos</Text>
                   <Text style={styles.emptyMessage}>
                     Intenta ajustar los filtros de búsqueda
@@ -822,7 +822,7 @@ const AdminProductsScreen: React.FC = () => {
                 onPress={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
               >
-                <Ionicons name="chevron-back" size={20} color={currentPage === 1 ? "#9CA3AF" : "#3B82F6"} />
+                <Icon name="chevron-back" size={20} color={currentPage === 1 ? "#9CA3AF" : "#3B82F6"} />
               </TouchableOpacity>
               
               <Text style={styles.paginationText}>
@@ -834,7 +834,7 @@ const AdminProductsScreen: React.FC = () => {
                 onPress={() => setCurrentPage(Math.min(getTotalPages(), currentPage + 1))}
                 disabled={currentPage === getTotalPages()}
               >
-                <Ionicons name="chevron-forward" size={20} color={currentPage === getTotalPages() ? "#9CA3AF" : "#3B82F6"} />
+                <Icon name="chevron-forward" size={20} color={currentPage === getTotalPages() ? "#9CA3AF" : "#3B82F6"} />
               </TouchableOpacity>
             </View>
           )}

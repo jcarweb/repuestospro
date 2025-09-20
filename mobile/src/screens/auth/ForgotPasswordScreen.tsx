@@ -11,7 +11,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -85,7 +85,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
               style={styles.backButton}
               onPress={handleBackToLogin}
             >
-              <Ionicons name="arrow-back" size={24} color={colors.textTertiary} />
+              <Icon name="arrow-back" size={24} color={colors.textTertiary} />
             </TouchableOpacity>
           </View>
 
@@ -110,7 +110,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
           <View style={styles.form}>
             {error && (
               <View style={[styles.errorContainer, { backgroundColor: colors.error + '20' }]}>
-                <Ionicons name="alert-circle" size={20} color={colors.error} />
+                <Icon name="alert-circle" size={20} color={colors.error} />
                 <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
               </View>
             )}
@@ -130,7 +130,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
                   autoCorrect={false}
                   editable={!isLoading}
                 />
-                <Ionicons
+                <Icon
                   name="mail-outline"
                   size={20}
                   color={colors.textTertiary}
@@ -147,7 +147,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
             >
               {isLoading ? (
                 <View style={styles.loadingContainer}>
-                  <Ionicons name="hourglass-outline" size={20} color={colors.textPrimary} />
+                  <Icon name="hourglass-outline" size={20} color={colors.textPrimary} />
                   <Text style={[styles.sendButtonText, { color: colors.textPrimary }]}>Enviando...</Text>
                 </View>
               ) : (

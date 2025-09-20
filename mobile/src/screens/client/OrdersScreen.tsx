@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 
 interface OrderItem {
   _id: string;
@@ -216,7 +216,7 @@ const OrdersScreen: React.FC = () => {
             </Text>
           </View>
           <View style={[styles.statusBadge, { backgroundColor: statusInfo.color }]}>
-            <Ionicons name={statusInfo.icon as any} size={16} color="white" />
+            <Icon name={statusInfo.icon as any} size={16} color="white" />
             <Text style={styles.statusText}>
               {statusInfo.text}
             </Text>
@@ -261,7 +261,7 @@ const OrdersScreen: React.FC = () => {
                 // navigation.navigate('OrderDetail', { orderId: item._id });
               }}
             >
-              <Ionicons name="eye-outline" size={16} color={colors.textPrimary} />
+              <Icon name="eye-outline" size={16} color={colors.textPrimary} />
               <Text style={[styles.actionText, { color: colors.textPrimary }]}>
                 Ver
               </Text>
@@ -275,7 +275,7 @@ const OrdersScreen: React.FC = () => {
                   // navigation.navigate('Review', { orderId: item._id });
                 }}
               >
-                <Ionicons name="star-outline" size={16} color="#000000" />
+                <Icon name="star-outline" size={16} color="#000000" />
                 <Text style={[styles.actionText, { color: '#000000' }]}>
                   Reseñar
                 </Text>
@@ -302,7 +302,7 @@ const OrdersScreen: React.FC = () => {
         ]}
         onPress={() => setSelectedStatus(isSelected ? null : status)}
       >
-        <Ionicons 
+        <Icon 
           name={statusInfo.icon as any} 
           size={16} 
           color={isSelected ? 'white' : colors.textPrimary} 
@@ -355,7 +355,7 @@ const OrdersScreen: React.FC = () => {
         {/* Lista de pedidos */}
         {filteredOrders.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="receipt-outline" size={64} color={colors.textTertiary} />
+            <Icon name="receipt-outline" size={64} color={colors.textTertiary} />
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               {selectedStatus ? 'No hay pedidos con este estado' : 'No tienes pedidos aún'}
             </Text>

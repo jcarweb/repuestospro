@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import authVerificationService from '../../services/authVerification';
 
 interface GPSVerificationScreenProps {
@@ -91,7 +91,7 @@ const GPSVerificationScreen: React.FC<GPSVerificationScreenProps> = ({ navigatio
       <View style={styles.card}>
         {/* Icono */}
         <View style={styles.iconContainer}>
-          <Ionicons 
+          <Icon 
             name={locationData ? "location" : "location-outline"} 
             size={80} 
             color={locationData ? "#10B981" : "#FFC300"} 

@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/Icon';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import encryptionService from '../services/encryptionService';
@@ -117,7 +117,7 @@ const EncryptionStatusModal: React.FC<EncryptionStatusModalProps> = ({
     <View key={key} style={[styles.dataItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.dataHeader}>
         <View style={styles.dataIconContainer}>
-          <Ionicons 
+          <Icon 
             name={isEncrypted ? "shield-checkmark" : "shield"} 
             size={24} 
             color={isEncrypted ? colors.success : colors.textTertiary} 
@@ -133,7 +133,7 @@ const EncryptionStatusModal: React.FC<EncryptionStatusModalProps> = ({
         </View>
         {isEncrypted && (
           <View style={[styles.encryptedBadge, { backgroundColor: colors.success }]}>
-            <Ionicons name="lock-closed" size={16} color="white" />
+            <Icon name="lock-closed" size={16} color="white" />
           </View>
         )}
       </View>
@@ -150,13 +150,13 @@ const EncryptionStatusModal: React.FC<EncryptionStatusModalProps> = ({
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.headerBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color={colors.textPrimary} />
+            <Icon name="close" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
             Estado de Encriptación
           </Text>
           <TouchableOpacity onPress={clearAllEncryptedData} style={styles.clearButton}>
-            <Ionicons name="trash" size={20} color={colors.error} />
+            <Icon name="trash" size={20} color={colors.error} />
           </TouchableOpacity>
         </View>
 
@@ -173,7 +173,7 @@ const EncryptionStatusModal: React.FC<EncryptionStatusModalProps> = ({
               {/* Resumen general */}
               <View style={[styles.summaryContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <View style={styles.summaryHeader}>
-                  <Ionicons name="shield-checkmark" size={32} color={colors.primary} />
+                  <Icon name="shield-checkmark" size={32} color={colors.primary} />
                   <Text style={[styles.summaryTitle, { color: colors.textPrimary }]}>
                     Resumen de Seguridad
                   </Text>
@@ -200,7 +200,7 @@ const EncryptionStatusModal: React.FC<EncryptionStatusModalProps> = ({
                 </View>
 
                 <View style={[styles.lastEncryptionContainer, { backgroundColor: colors.background }]}>
-                  <Ionicons name="time" size={20} color={colors.textSecondary} />
+                  <Icon name="time" size={20} color={colors.textSecondary} />
                   <Text style={[styles.lastEncryptionText, { color: colors.textSecondary }]}>
                     Última encriptación: {formatLastEncryption(stats.lastEncryption)}
                   </Text>
@@ -220,7 +220,7 @@ const EncryptionStatusModal: React.FC<EncryptionStatusModalProps> = ({
 
               {/* Información de seguridad */}
               <View style={[styles.infoContainer, { backgroundColor: colors.info + '20', borderColor: colors.info }]}>
-                <Ionicons name="information-circle" size={24} color={colors.info} />
+                <Icon name="information-circle" size={24} color={colors.info} />
                 <View style={styles.infoContent}>
                   <Text style={[styles.infoTitle, { color: colors.info }]}>
                     Información de Seguridad
@@ -239,21 +239,21 @@ const EncryptionStatusModal: React.FC<EncryptionStatusModalProps> = ({
                 </Text>
                 
                 <View style={styles.recommendationItem}>
-                  <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+                  <Icon name="checkmark-circle" size={20} color={colors.success} />
                   <Text style={[styles.recommendationText, { color: colors.textSecondary }]}>
                     Mantén tu contraseña segura y no la compartas
                   </Text>
                 </View>
                 
                 <View style={styles.recommendationItem}>
-                  <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+                  <Icon name="checkmark-circle" size={20} color={colors.success} />
                   <Text style={[styles.recommendationText, { color: colors.textSecondary }]}>
                     Activa 2FA para mayor protección
                   </Text>
                 </View>
                 
                 <View style={styles.recommendationItem}>
-                  <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+                  <Icon name="checkmark-circle" size={20} color={colors.success} />
                   <Text style={[styles.recommendationText, { color: colors.textSecondary }]}>
                     Revisa regularmente el historial de seguridad
                   </Text>
@@ -262,7 +262,7 @@ const EncryptionStatusModal: React.FC<EncryptionStatusModalProps> = ({
             </>
           ) : (
             <View style={styles.errorContainer}>
-              <Ionicons name="alert-circle" size={64} color={colors.error} />
+              <Icon name="alert-circle" size={64} color={colors.error} />
               <Text style={[styles.errorTitle, { color: colors.textPrimary }]}>
                 Error al cargar datos
               </Text>
