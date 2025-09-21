@@ -1,0 +1,18 @@
+#!/bin/sh
+# Hook de pre-commit para verificación de seguridad
+
+echo "🔍 Ejecutando verificación de seguridad..."
+
+# Ejecutar script de verificación de seguridad
+node scripts/pre-commit-security.js
+
+# Si el script falla, bloquear el commit
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ COMMIT BLOQUEADO por razones de seguridad"
+    echo "💡 Revisa los errores anteriores y corrige los problemas"
+    exit 1
+fi
+
+echo "✅ Verificación de seguridad completada"
+exit 0

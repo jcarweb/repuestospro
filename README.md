@@ -2,6 +2,15 @@
 
 Un ecommerce completo para repuestos de vehículos (autos, motos y camiones) construido con **React** y **programación reactiva** en el backend.
 
+## 🔒 Seguridad
+
+**IMPORTANTE**: Este proyecto implementa estrictas medidas de seguridad. Por favor, lee [SECURITY_GUIDELINES.md](./SECURITY_GUIDELINES.md) antes de comenzar.
+
+- ✅ Variables de entorno protegidas
+- ✅ Credenciales nunca expuestas en código
+- ✅ Documentación sin información sensible
+- ✅ Scripts de limpieza automática
+
 ## 🚀 Características Principales
 
 ### Frontend (React + TypeScript)

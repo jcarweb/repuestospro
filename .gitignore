@@ -7,10 +7,36 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
 dist
 dist-ssr
 *.local
+
+# Environment variables and credentials
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.test
+*.env
+config/secrets.json
+credentials.json
+secrets/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+database/
+
+# Build outputs
+build/
+out/
+.next/
+.nuxt/
+.cache/
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +48,101 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Test files and coverage
+coverage/
+.nyc_output/
+test-results/
+*.test.js
+*.spec.js
+__tests__/
+tests/
+
+# Documentation with sensitive information
+*SECRET*.md
+*CREDENTIALS*.md
+*PASSWORD*.md
+*API_KEY*.md
+*TOKEN*.md
+*PRIVATE*.md
+*CONFIDENTIAL*.md
+
+# Mobile app specific
+mobile/android/app/google-services.json
+mobile/ios/GoogleService-Info.plist
+mobile/android/app/src/main/res/values/strings.xml
+mobile/ios/PiezasYA/Info.plist
+
+# Expo
+.expo/
+.expo-shared/
+
+# React Native
+android/app/build/
+ios/build/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# IDE
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Lock files (keep package-lock.json but ignore others)
+yarn.lock
+pnpm-lock.yaml
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.parcel-cache
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Temporary folders
+tmp/
+temp/
