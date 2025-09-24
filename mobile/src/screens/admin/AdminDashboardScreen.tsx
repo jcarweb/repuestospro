@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   StatusBar,
   Platform,
+  Alert,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -67,7 +68,7 @@ type AdminDashboardNavigationProp = StackNavigationProp<AdminStackParamList, 'Ad
 
 const AdminDashboardScreen: React.FC = () => {
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { showToast } = useToast();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<AdminDashboardNavigationProp>();
@@ -185,12 +186,22 @@ const AdminDashboardScreen: React.FC = () => {
       >
         {/* Header */}
         <View style={[styles.header, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>
-            Panel de Administración
-          </Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Bienvenido al centro de control de PiezasYA
-          </Text>
+          <View style={styles.headerContent}>
+            <View style={styles.headerText}>
+              <Text style={[styles.title, { color: colors.textPrimary }]}>
+                Panel de Administración
+              </Text>
+              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                Bienvenido al centro de control de PiezasYA
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.profileButton, { backgroundColor: colors.primary }]}
+              onPress={() => navigation.navigate('AdminProfile')}
+            >
+              <Ionicons name="person" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Estadísticas */}
@@ -458,6 +469,31 @@ const AdminDashboardScreen: React.FC = () => {
                 Configuración
               </Text>
             </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.quickActionCard, { backgroundColor: colors.error + '10', borderColor: colors.error }]}
+              onPress={() => {
+                Alert.alert(
+                  'Cerrar sesión',
+                  '¿Estás seguro de que quieres cerrar sesión?',
+                  [
+                    { text: 'Cancelar', style: 'cancel' },
+                    {
+                      text: 'Cerrar sesión',
+                      style: 'destructive',
+                      onPress: () => {
+                        logout();
+                      },
+                    },
+                  ]
+                );
+              }}
+            >
+              <Ionicons name="log-out-outline" size={32} color={colors.error} />
+              <Text style={[styles.quickActionText, { color: colors.error }]}>
+                Cerrar Sesión
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -479,6 +515,14 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 16,
   },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerText: {
+    flex: 1,
+  },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
@@ -486,6 +530,14 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
+  },
+  profileButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 16,
   },
   statsSection: {
     marginBottom: 24,

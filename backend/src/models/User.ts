@@ -488,9 +488,9 @@ userSchema.methods.verifyTwoFactorCode = function(code: string): boolean {
     return false;
   }
 
-  // Aquí implementarías la verificación con la librería de 2FA
-  // Por ahora, una implementación básica
-  return code.length === 6 && /^\d+$/.test(code);
+  // Usar la librería de autenticación real
+  const { verifyTwoFactorCode } = require('../utils/twoFactorUtils');
+  return verifyTwoFactorCode(this.twoFactorSecret, code);
 };
 
 userSchema.methods.generateBackupCodes = function(): string[] {

@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
 import { Ionicons } from '@expo/vector-icons';
+import apiService from '../../services/api';
 
 
 interface Product {
@@ -177,12 +178,23 @@ const ClientHomeScreen: React.FC = () => {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      // Usar productos mock en lugar de hacer request
-      setProducts(mockProducts);
-      setFilteredProducts(mockProducts);
+      
+      // Usar el servicio de API real para obtener productos
+      const response = await apiService.getProducts({ limit: 20 });
+      
+      if (response.success && response.data) {
+        setProducts(response.data);
+        setFilteredProducts(response.data);
+        console.log('✅ Productos cargados desde la base de datos:', response.data.length);
+      } else {
+        console.warn('⚠️ No se pudieron cargar productos, usando fallback');
+        // Fallback a productos mock solo si falla la conexión
+        setProducts(mockProducts);
+        setFilteredProducts(mockProducts);
+      }
     } catch (error) {
       console.error('Error cargando productos:', error);
-      // Fallback a productos mock
+      // Fallback a productos mock solo en caso de error
       setProducts(mockProducts);
       setFilteredProducts(mockProducts);
     } finally {
@@ -198,36 +210,23 @@ const ClientHomeScreen: React.FC = () => {
 
     try {
       setSearching(true);
-      const response = await fetch('http://192.168.0.110:5000/api/search/products', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query,
-          config: {
-            semanticSearchEnabled: searchConfig.semanticSearchEnabled,
-            semanticThreshold: searchConfig.semanticThreshold,
-            typoCorrectionEnabled: searchConfig.typoCorrectionEnabled,
-            maxEditDistance: searchConfig.maxEditDistance,
-            minWordLength: searchConfig.minWordLength,
-            searchableFields: searchConfig.searchableFields,
-            fieldWeights: searchConfig.fieldWeights,
-            maxResults: searchConfig.maxResults,
-            minRelevanceScore: searchConfig.minRelevanceScore,
-          },
-        }),
+      
+      // Usar el servicio de API real para buscar productos
+      const response = await apiService.getProducts({ 
+        search: query,
+        limit: searchConfig.maxResults || 20
       });
 
-      const result = await response.json();
-      if (result.success) {
-        setFilteredProducts(result.data);
+      if (response.success && response.data) {
+        setFilteredProducts(response.data);
+        console.log('✅ Búsqueda exitosa:', response.data.length, 'productos encontrados');
       } else {
-        // Si falla la búsqueda avanzada, usar búsqueda simple
+        // Si falla la búsqueda, usar búsqueda simple local
         performSimpleSearch(query);
       }
     } catch (error) {
-      console.error('Error en búsqueda avanzada:', error);
+      console.error('Error en búsqueda:', error);
+      // Fallback a búsqueda simple local
       performSimpleSearch(query);
     } finally {
       setSearching(false);

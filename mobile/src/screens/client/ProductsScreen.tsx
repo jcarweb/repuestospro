@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import apiService from '../../services/api';
 
 interface Product {
   _id: string;
@@ -58,21 +59,20 @@ const ProductsScreen: React.FC = () => {
     try {
       setLoading(true);
       
-      // Cargar productos y categorías en paralelo
+      // Cargar productos y categorías usando el servicio de API
       const [productsResponse, categoriesResponse] = await Promise.all([
-        fetch('http://192.168.0.110:5000/api/products'),
-        fetch('http://192.168.0.110:5000/api/categories')
+        apiService.getProducts(),
+        apiService.getCategories()
       ]);
 
-      const productsResult = await productsResponse.json();
-      const categoriesResult = await categoriesResponse.json();
-
-      if (productsResult.success) {
-        setProducts(productsResult.data);
+      if (productsResponse.success && productsResponse.data) {
+        setProducts(productsResponse.data);
+        console.log('✅ Productos cargados:', productsResponse.data.length);
       }
 
-      if (categoriesResult.success) {
-        setCategories(categoriesResult.data);
+      if (categoriesResponse.success && categoriesResponse.data) {
+        setCategories(categoriesResponse.data);
+        console.log('✅ Categorías cargadas:', categoriesResponse.data.length);
       }
     } catch (error) {
       console.error('Error cargando datos:', error);

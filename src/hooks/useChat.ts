@@ -116,7 +116,7 @@ export const useChat = (options: UseChatOptions): UseChat => {
 
   // Inicializar conexión Socket.IO
   useEffect(() => {
-    const serverUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    const serverUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
     
     socketRef.current = io(serverUrl, {
       transports: ['websocket', 'polling'],

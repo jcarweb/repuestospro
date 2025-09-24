@@ -41,6 +41,8 @@ import AdminStoresScreen from '../screens/admin/AdminStoresScreen';
 import AdminOrdersScreen from '../screens/admin/AdminOrdersScreen';
 import AdminReportsScreen from '../screens/admin/AdminReportsScreen';
 import AdminSettingsScreen from '../screens/admin/AdminSettingsScreen';
+import AdminProfileScreen from '../screens/admin/AdminProfileScreen';
+import AdminEditProfileScreen from '../screens/admin/AdminEditProfileScreen';
 import OrderDetailsScreen from '../screens/admin/OrderDetailsScreen';
 import AdminCreateUserScreen from '../screens/admin/AdminCreateUserScreen';
 import AdminCreateProductScreen from '../screens/admin/AdminCreateProductScreen';
@@ -49,12 +51,19 @@ import StorePhotosListScreen from '../screens/admin/StorePhotosListScreen';
 
 // Store Manager Screens
 import StoreManagerDashboardScreen from '../screens/store-manager/StoreManagerDashboardScreen';
+import StoreManagerProfileScreen from '../screens/store-manager/StoreManagerProfileScreen';
+import StoreManagerEditProfileScreen from '../screens/store-manager/StoreManagerEditProfileScreen';
+
+// Seller Screens
+import SellerDashboardScreen from '../screens/seller/SellerDashboardScreen';
 
 // Delivery Screens
 import DeliveryDashboardScreen from '../screens/delivery/DeliveryDashboardScreen';
+import DeliveryProfileScreen from '../screens/delivery/DeliveryProfileScreen';
+import DeliveryEditProfileScreen from '../screens/delivery/DeliveryEditProfileScreen';
 
 // Components
-import SplashScreen from '../components/SplashScreen';
+import { ActivityIndicator, View, Text } from 'react-native';
 import Toast from '../components/Toast';
 
 const Stack = createStackNavigator();
@@ -159,6 +168,31 @@ const AppNavigator = () => {
   const [showPinVerification, setShowPinVerification] = useState(false);
   const [pinEnabled, setPinEnabled] = useState(false);
 
+  console.log('🔍 AppNavigator - Renderizando con usuario:', user ? `${user.email} (${user.role})` : 'null');
+  console.log('🔍 AppNavigator - isLoading:', isLoading);
+
+  // Log para debug de roles
+  useEffect(() => {
+    if (user) {
+      console.log('🔍 AppNavigator - Usuario detectado:', {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        name: user.name
+      });
+      console.log('🔍 AppNavigator - Condiciones de navegación:', {
+        isClient: user.role === 'client',
+        isAdmin: user.role === 'admin',
+        isStoreManager: user.role === 'store_manager',
+        isDelivery: user.role === 'delivery'
+      });
+      console.log('🔍 AppNavigator - Tipo de rol:', typeof user.role);
+      console.log('🔍 AppNavigator - Rol exacto:', JSON.stringify(user.role));
+    } else {
+      console.log('🔍 AppNavigator - No hay usuario');
+    }
+  }, [user]);
+
   useEffect(() => {
     const checkPinStatus = async () => {
       try {
@@ -173,11 +207,11 @@ const AppNavigator = () => {
           showPinVerification: showPinVerification
         });
         
-        // Si el usuario está logueado y tiene PIN habilitado, mostrar verificación
-        if (user && isPinEnabled) {
-          console.log('🔐 Mostrando verificación de PIN');
-          setShowPinVerification(true);
-        }
+        // Temporalmente deshabilitado para evitar errores de navegación
+        // if (user && isPinEnabled) {
+        //   console.log('🔐 Mostrando verificación de PIN');
+        //   setShowPinVerification(true);
+        // }
       } catch (error) {
         console.error('Error checking PIN status:', error);
       }
@@ -197,16 +231,45 @@ const AppNavigator = () => {
     setShowPinVerification(false);
   };
 
-  // Mostrar verificación de PIN si está habilitada
-  if (showPinVerification && user) {
+  // Mostrar verificación de PIN si está habilitada - Temporalmente deshabilitado
+  // if (showPinVerification && user) {
+  //   return (
+  //     <PINVerificationScreen
+  //       navigation={{ goBack: handlePinCancel }}
+  //       route={{ params: { onSuccess: handlePinSuccess } }}
+  //     />
+  //   );
+  // }
+
+  console.log('🔍 AppNavigator - Renderizando navegación con usuario:', user ? `${user.email} (${user.role})` : 'null');
+  console.log('🔍 AppNavigator - isLoading en render:', isLoading);
+  
+  if (isLoading) {
+    console.log('🔍 AppNavigator - Mostrando loading...');
     return (
-      <PINVerificationScreen
-        navigation={{ goBack: handlePinCancel }}
-        route={{ params: { onSuccess: handlePinSuccess } }}
-      />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={{ marginTop: 16, color: colors.textSecondary }}>Cargando...</Text>
+      </View>
     );
   }
-
+  
+  console.log('🔍 AppNavigator - Continuando con navegación...');
+  
+  // Verificar si hay usuario
+  if (!user) {
+    console.log('🔍 AppNavigator - No hay usuario, mostrando Auth Stack');
+  } else {
+    console.log('🔍 AppNavigator - Hay usuario, mostrando Role-based navigation');
+  }
+  
+  // Verificar si hay usuario
+  if (!user) {
+    console.log('🔍 AppNavigator - No hay usuario, mostrando Auth Stack');
+  } else {
+    console.log('🔍 AppNavigator - Hay usuario, mostrando Role-based navigation');
+  }
+  
   return (
     <NavigationContainer linking={linking}>
       <Stack.Navigator
@@ -226,6 +289,7 @@ const AppNavigator = () => {
         {!user ? (
           // Auth Stack
           <>
+            {console.log('🔍 AppNavigator - Mostrando Auth Stack (no hay usuario)')}
             <Stack.Screen 
               name="Login" 
               component={LoginScreen} 
@@ -265,8 +329,12 @@ const AppNavigator = () => {
         ) : (
           // Role-based navigation
           <>
+            {console.log('🔍 AppNavigator - Mostrando Role-based navigation (hay usuario)')}
+            {console.log('🔍 AppNavigator - Evaluando navegación para rol:', user.role)}
+            {console.log('🔍 AppNavigator - ¿Es cliente?', user.role === 'client')}
             {user.role === 'client' && (
               <>
+                {console.log('🔍 AppNavigator - Renderizando ClientTabs')}
                 <Stack.Screen 
                   name="ClientTabs" 
                   component={ClientTabNavigator} 
@@ -338,8 +406,11 @@ const AppNavigator = () => {
               </>
             )}
             
+            {console.log('🔍 AppNavigator - Verificando si es admin:', user.role === 'admin')}
+            {console.log('🔍 AppNavigator - ¿Es admin?', user.role === 'admin')}
             {user.role === 'admin' && (
               <>
+                {console.log('🔍 AppNavigator - Renderizando AdminDashboard')}
                 <Stack.Screen 
                   name="AdminDashboard" 
                   component={AdminDashboardScreen} 
@@ -444,23 +515,97 @@ const AppNavigator = () => {
                     headerBackTitle: 'Dashboard'
                   }} 
                 />
+                <Stack.Screen 
+                  name="AdminProfile" 
+                  component={AdminProfileScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Perfil de Administrador',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="AdminEditProfile" 
+                  component={AdminEditProfileScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Editar Perfil',
+                    headerBackTitle: 'Perfil'
+                  }} 
+                />
               </>
             )}
             
+            {console.log('🔍 AppNavigator - ¿Es store_manager?', user.role === 'store_manager')}
             {user.role === 'store_manager' && (
-              <Stack.Screen 
-                name="StoreManagerDashboard" 
-                component={StoreManagerDashboardScreen} 
-                options={{ headerShown: false }} 
-              />
+              <>
+                {console.log('🔍 AppNavigator - Renderizando StoreManagerDashboard')}
+                <Stack.Screen 
+                  name="StoreManagerDashboard" 
+                  component={StoreManagerDashboardScreen} 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="StoreManagerProfile" 
+                  component={StoreManagerProfileScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Perfil de Gestor',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="StoreManagerEditProfile" 
+                  component={StoreManagerEditProfileScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Editar Perfil',
+                    headerBackTitle: 'Perfil'
+                  }} 
+                />
+              </>
             )}
             
+            {console.log('🔍 AppNavigator - ¿Es seller?', user.role === 'seller')}
+            {user.role === 'seller' && (
+              <>
+                {console.log('🔍 AppNavigator - Renderizando SellerDashboard')}
+                <Stack.Screen 
+                  name="SellerDashboard" 
+                  component={SellerDashboardScreen} 
+                  options={{ headerShown: false }} 
+                />
+              </>
+            )}
+            
+            {console.log('🔍 AppNavigator - ¿Es delivery?', user.role === 'delivery')}
             {user.role === 'delivery' && (
-              <Stack.Screen 
-                name="DeliveryDashboard" 
-                component={DeliveryDashboardScreen} 
-                options={{ headerShown: false }} 
-              />
+              <>
+                {console.log('🔍 AppNavigator - Renderizando DeliveryDashboard')}
+                <Stack.Screen 
+                  name="DeliveryDashboard" 
+                  component={DeliveryDashboardScreen} 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="DeliveryProfile" 
+                  component={DeliveryProfileScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Perfil de Repartidor',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="DeliveryEditProfile" 
+                  component={DeliveryEditProfileScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Editar Perfil',
+                    headerBackTitle: 'Perfil'
+                  }} 
+                />
+              </>
             )}
           </>
         )}

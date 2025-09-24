@@ -59,7 +59,7 @@ nano .env
 #### Backend (Node.js/Express)
 ```bash
 # Variables requeridas
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>
 JWT_SECRET=your-super-secret-jwt-key
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 CLOUDINARY_API_KEY=your-api-key

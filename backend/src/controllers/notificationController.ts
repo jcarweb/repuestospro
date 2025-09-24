@@ -3,12 +3,16 @@ import User from '../models/User';
 import webpush from 'web-push';
 import config from '../config/env';
 
-// Configurar web-push con las claves VAPID
-webpush.setVapidDetails(
-  'mailto:noreply@piezasya.com',
-  config.VAPID_PUBLIC_KEY,
-  config.VAPID_PRIVATE_KEY
-);
+// Configurar web-push con las claves VAPID solo si están disponibles
+if (config.VAPID_PUBLIC_KEY && config.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    'mailto:noreply@piezasya.com',
+    config.VAPID_PUBLIC_KEY,
+    config.VAPID_PRIVATE_KEY
+  );
+} else {
+  console.log('⚠️  VAPID keys no configuradas. Las notificaciones push no estarán disponibles.');
+}
 
 class NotificationController {
   // Suscribirse a notificaciones push
@@ -96,6 +100,12 @@ class NotificationController {
     }>;
   }) {
     try {
+      // Verificar si VAPID está configurado
+      if (!config.VAPID_PUBLIC_KEY || !config.VAPID_PRIVATE_KEY) {
+        console.log('⚠️  VAPID no configurado. No se puede enviar notificación push.');
+        return false;
+      }
+
       const user = await User.findById(userId);
       if (!user || !user.pushToken || !user.pushEnabled) {
         return false;

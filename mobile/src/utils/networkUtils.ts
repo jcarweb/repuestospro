@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const NETWORK_CONFIGS = {
   // Redes conocidas (para desarrollo rápido)
   knownNetworks: {
-    'localhost': 'http://localhost:5000/api', // Localhost como prioridad MÁXIMA
+    'localhost': 'http://192.168.0.106:5000/api', // IP de red local como prioridad MÁXIMA
     '127.0.0.1': 'http://127.0.0.1:5000/api', // IP local
     '192.168.150.104': 'http://192.168.150.104:5000/api', // IP del backend
     '192.168.0.110': 'http://192.168.0.110:5000/api', // IP anterior del backend

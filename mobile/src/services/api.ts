@@ -167,6 +167,36 @@ class ApiService {
     });
   }
 
+  async loginWithPin(credentials: { email: string; pin: string }): Promise<AuthResponse> {
+    const response = await this.request<AuthResponse>('/auth/login/pin', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+
+    if (response.success && response.data?.token) {
+      await this.saveToken(response.data.token);
+    }
+
+    return response;
+  }
+
+  async verifyTwoFactor(credentials: { email: string; code: string; tempToken?: string }): Promise<AuthResponse> {
+    const response = await this.request<AuthResponse>('/auth/login/2fa/complete', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        email: credentials.email, 
+        code: credentials.code,
+        tempToken: credentials.tempToken || 'temp-token' // Temporal hasta que implementemos el flujo completo
+      }),
+    });
+
+    if (response.success && response.data?.token) {
+      await this.saveToken(response.data.token);
+    }
+
+    return response;
+  }
+
   async logout(): Promise<void> {
     try {
       await this.request('/auth/logout', { method: 'POST' });

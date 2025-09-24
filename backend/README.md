@@ -42,7 +42,7 @@ Backend para el ecommerce de repuestos de vehículos construido con **programaci
    ```env
    PORT=5000
    NODE_ENV=development
-   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/repuestos-pro
+   MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>
    JWT_SECRET=your-super-secret-jwt-key
    ```
 

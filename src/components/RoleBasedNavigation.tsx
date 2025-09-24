@@ -386,6 +386,70 @@ const RoleBasedNavigation: React.FC<RoleBasedNavigationProps> = ({
             badge: null
           }
         ]
+      },
+      seller: {
+        title: t('sidebar.roles.seller'),
+        icon: Users,
+        color: 'text-orange-600 dark:text-orange-400',
+        bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+        menuItems: [
+          {
+            title: t('sidebar.seller.dashboard'),
+            path: '/seller/dashboard',
+            icon: LayoutDashboard,
+            description: t('sidebar.seller.dashboard.description'),
+            badge: null
+          },
+          {
+            title: t('sidebar.seller.priceConsultation'),
+            path: '/seller/prices',
+            icon: DollarSign,
+            description: t('sidebar.seller.priceConsultation.description'),
+            badge: null
+          },
+          {
+            title: t('sidebar.seller.customerChat'),
+            path: '/seller/chat',
+            icon: MessageSquare,
+            description: t('sidebar.seller.customerChat.description'),
+            badge: null
+          },
+          {
+            title: t('sidebar.seller.quotes'),
+            path: '/seller/quotes',
+            icon: FileText,
+            description: t('sidebar.seller.quotes.description'),
+            badge: null
+          },
+          {
+            title: t('sidebar.seller.products'),
+            path: '/seller/products',
+            icon: Package,
+            description: t('sidebar.seller.products.description'),
+            badge: null
+          },
+          {
+            title: t('sidebar.seller.customers'),
+            path: '/seller/customers',
+            icon: Users,
+            description: t('sidebar.seller.customers.description'),
+            badge: null
+          },
+          {
+            title: t('sidebar.seller.performance'),
+            path: '/seller/performance',
+            icon: BarChart3,
+            description: t('sidebar.seller.performance.description'),
+            badge: null
+          },
+          {
+            title: t('sidebar.seller.profile'),
+            path: '/seller/profile',
+            icon: User,
+            description: t('sidebar.seller.profile.description'),
+            badge: null
+          }
+        ]
       }
     };
 
@@ -393,6 +457,7 @@ const RoleBasedNavigation: React.FC<RoleBasedNavigationProps> = ({
     if (hasRole('admin')) return baseConfig.admin;
     if (hasRole('store_manager')) return baseConfig.store_manager;
     if (hasRole('delivery')) return baseConfig.delivery;
+    if (hasRole('seller')) return baseConfig.seller;
     if (hasRole('client')) return baseConfig.client;
     
     return baseConfig.client; // Default

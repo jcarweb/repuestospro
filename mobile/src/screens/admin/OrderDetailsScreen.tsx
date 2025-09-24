@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { getBaseURL } from '../../config/api';
 
 interface OrderItem {
   product: {
@@ -98,7 +99,8 @@ const OrderDetailsScreen: React.FC = () => {
   const loadOrderDetails = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/admin/orders/${route.params.orderId}`, {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/admin/orders/${route.params.orderId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -124,7 +126,8 @@ const OrderDetailsScreen: React.FC = () => {
 
   const updateOrderStatus = async (newStatus: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/orders/${route.params.orderId}/status`, {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/admin/orders/${route.params.orderId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

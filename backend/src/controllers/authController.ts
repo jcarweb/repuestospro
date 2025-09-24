@@ -1402,8 +1402,15 @@ export class AuthController {
   static async completeLoginWithTwoFactor(req: Request, res: Response): Promise<void> {
     try {
       const { email, code, tempToken } = req.body;
+      
+      console.log('🔐 2FA Verification Request:', { 
+        email, 
+        code: code ? `${code.substring(0, 2)}****` : 'null', 
+        hasTempToken: !!tempToken 
+      });
 
       if (!email || !code || !tempToken) {
+        console.log('❌ Missing required fields:', { email: !!email, code: !!code, tempToken: !!tempToken });
         res.status(400).json({
           success: false,
           message: 'Email, código y token temporal requeridos'
@@ -1415,6 +1422,7 @@ export class AuthController {
       const user = await User.findOne({ email }).select('+twoFactorSecret +backupCodes');
       
       if (!user) {
+        console.log('❌ Usuario no encontrado:', email);
         res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
@@ -1422,7 +1430,15 @@ export class AuthController {
         return;
       }
 
+      console.log('✅ Usuario encontrado:', { 
+        id: user._id, 
+        email: user.email, 
+        twoFactorEnabled: user.twoFactorEnabled,
+        hasSecret: !!user.twoFactorSecret 
+      });
+
       if (!user.twoFactorEnabled) {
+        console.log('❌ 2FA no habilitado para usuario:', email);
         res.status(400).json({
           success: false,
           message: '2FA no está habilitado para este usuario'
@@ -1431,19 +1447,25 @@ export class AuthController {
       }
 
       // Verificar código 2FA
+      console.log('🔍 Verificando código 2FA...');
       let isValid = user.verifyTwoFactorCode(code);
+      console.log('🔍 Resultado verificación TOTP:', isValid);
 
       // Si no es válido, verificar códigos de respaldo
       if (!isValid && user.backupCodes) {
+        console.log('🔍 Verificando códigos de respaldo...');
         isValid = user.backupCodes.includes(code);
+        console.log('🔍 Resultado verificación backup:', isValid);
         if (isValid) {
           // Remover código de respaldo usado
           user.backupCodes = user.backupCodes.filter(c => c !== code);
           await user.save();
+          console.log('✅ Código de respaldo usado y removido');
         }
       }
 
       if (!isValid) {
+        console.log('❌ Código inválido:', code);
         res.status(400).json({
           success: false,
           message: 'Código inválido'
@@ -1456,6 +1478,7 @@ export class AuthController {
 
       // Generar token final
       const token = AuthController.generateToken(user._id.toString());
+      console.log('✅ Token generado para usuario:', user.email);
 
       // Registrar actividad
       await Activity.create({
@@ -1465,6 +1488,17 @@ export class AuthController {
         metadata: { ip: req.ip, userAgent: req.get('User-Agent') }
       });
 
+      console.log('🎉 2FA verification successful for user:', user.email);
+      console.log('🔍 Usuario que se envía al frontend:', {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified,
+        fingerprintEnabled: user.fingerprintEnabled,
+        twoFactorEnabled: true
+      });
+      
       res.json({
         success: true,
         message: 'Inicio de sesión exitoso con 2FA',

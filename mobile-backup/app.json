@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "PiezasYA",
+    "slug": "piezasya-mobile",
+    "version": "1.0.0",
+    "sdkVersion": "54.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/piezasya.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/piezasya.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1A1A1A"
+    },
+    "assetBundlePatterns": [
+      "assets/*",
+      "src/assets/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.piezasya.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/piezasya.png",
+        "backgroundColor": "#1A1A1A"
+      },
+      "package": "com.piezasya.mobile"
+    },
+    "web": {
+      "favicon": "./assets/piezasya.png"
+    },
+    "scheme": "piezasya",
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    },
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "updates": {
+      "enabled": false,
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
+  }
+}

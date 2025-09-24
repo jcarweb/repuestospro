@@ -22,7 +22,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const EditProfileScreen: React.FC = () => {
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const { user, loadUserProfile } = useAuth();
   const { showToast } = useToast();
   
   const [name, setName] = useState(user?.name || '');
@@ -169,7 +169,9 @@ const EditProfileScreen: React.FC = () => {
       };
 
       // Guardar en el backend real
+      console.log('📤 Enviando datos del perfil:', profileData);
       const response = await apiService.updateUserProfile(profileData);
+      console.log('📥 Respuesta del backend:', response);
       
       if (response.success && response.data) {
         // Actualizar el usuario en el contexto
@@ -178,20 +180,36 @@ const EditProfileScreen: React.FC = () => {
         
         // Guardar datos del perfil específicos del usuario localmente también
         const userProfileKey = `profileData_${user.id}`;
-        await AsyncStorage.setItem(userProfileKey, JSON.stringify(profileData));
+        const profileDataToSave = {
+          ...profileData,
+          profileImage: profileImage, // Asegurar que la imagen se guarde
+          avatar: profileImage // También guardar como avatar para compatibilidad
+        };
+        await AsyncStorage.setItem(userProfileKey, JSON.stringify(profileDataToSave));
         
         console.log('Perfil actualizado en backend:', updatedUser);
+        
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+        }
+
+        showToast('Perfil actualizado correctamente', 'success');
+        console.log('Perfil actualizado:', updatedUser);
+        
+        // Recargar el perfil del usuario desde el backend
+        try {
+          console.log('🔄 Recargando perfil del usuario...');
+          await loadUserProfile();
+          console.log('✅ Perfil recargado exitosamente');
+        } catch (reloadError) {
+          console.error('❌ Error recargando perfil:', reloadError);
+        }
+        
+        resetSaveState();
       } else {
-        throw new Error(response.message || 'Error al actualizar perfil en el servidor');
+        console.error('❌ Error en la respuesta del backend:', response);
+        throw new Error(response.message || response.error || 'Error al actualizar perfil en el servidor');
       }
-
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-
-      showToast('Perfil actualizado correctamente', 'success');
-      console.log('Perfil actualizado:', updatedUser);
-      resetSaveState();
     } catch (error) {
       console.error('Error al guardar perfil:', error);
       

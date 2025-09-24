@@ -15,6 +15,9 @@ import { useToast } from '../../contexts/ToastContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { SimpleBackendStatus } from '../../components/SimpleBackendStatus';
+import { BackendSwitcher } from '../../components/BackendSwitcher';
+import { apiConfig } from '../../config/api';
 
 const ProfileScreen: React.FC = () => {
   const { colors } = useTheme();
@@ -41,6 +44,17 @@ const ProfileScreen: React.FC = () => {
     }, [])
   );
 
+  const getBaseUrl = async () => {
+    try {
+      const baseUrl = await apiConfig.getBaseURL();
+      // Remover /api del final para obtener la URL base del servidor
+      return baseUrl.replace('/api', '');
+    } catch (error) {
+      console.error('Error obteniendo URL base:', error);
+      return 'https://piezasya-back.onrender.com'; // Fallback
+    }
+  };
+
   const loadProfileData = async () => {
     try {
       if (!user?.id) {
@@ -63,10 +77,35 @@ const ProfileScreen: React.FC = () => {
       if (savedProfileData) {
         const data = JSON.parse(savedProfileData);
         setProfileData(data);
-        setProfileImage(data.profileImage || null);
+        // Usar la imagen del usuario actualizado si está disponible, sino usar la guardada localmente
+        const avatarUrl = user.avatar || data.profileImage || null;
+        console.log('🖼️ Avatar URL encontrada:', avatarUrl);
+        if (avatarUrl && !avatarUrl.startsWith('http')) {
+          // Si es una ruta relativa, construir la URL completa
+          const baseUrl = await getBaseUrl();
+          const fullImageUrl = `${baseUrl}${avatarUrl}`;
+          console.log('🖼️ URL completa de imagen construida:', fullImageUrl);
+          setProfileImage(fullImageUrl);
+        } else {
+          console.log('🖼️ Usando URL de imagen directa:', avatarUrl);
+          setProfileImage(avatarUrl);
+        }
         console.log(`Datos del perfil cargados para usuario ${user.id}:`, data);
       } else {
-        console.log(`No hay datos de perfil guardados para usuario ${user.id}`);
+        // Si no hay datos guardados localmente, usar los datos del usuario actualizado
+        const avatarUrl = user.avatar || null;
+        console.log('🖼️ Avatar URL del usuario:', avatarUrl);
+        if (avatarUrl && !avatarUrl.startsWith('http')) {
+          // Si es una ruta relativa, construir la URL completa
+          const baseUrl = await getBaseUrl();
+          const fullImageUrl = `${baseUrl}${avatarUrl}`;
+          console.log('🖼️ URL completa de imagen construida:', fullImageUrl);
+          setProfileImage(fullImageUrl);
+        } else {
+          console.log('🖼️ Usando URL de imagen directa:', avatarUrl);
+          setProfileImage(avatarUrl);
+        }
+        console.log(`No hay datos de perfil guardados para usuario ${user.id}, usando datos del usuario actualizado`);
       }
     } catch (error) {
       console.error('Error cargando datos del perfil:', error);
@@ -168,6 +207,14 @@ const ProfileScreen: React.FC = () => {
             Editar
           </Text>
         </TouchableOpacity>
+      </View>
+
+      {/* Backend Switcher */}
+      <View style={styles.backendSwitcherContainer}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+          Servidor Backend
+        </Text>
+        <BackendSwitcher />
       </View>
 
 
@@ -388,6 +435,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   section: {
+    marginBottom: 24,
+  },
+  backendSwitcherContainer: {
     marginBottom: 24,
   },
   sectionTitle: {

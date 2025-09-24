@@ -22,7 +22,7 @@ function createEnvExample() {
 VITE_API_URL=http://localhost:5000
 
 # Base de datos MongoDB
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>
 
 # JWT Secret (genera una clave segura)
 JWT_SECRET=your-super-secret-jwt-key-here

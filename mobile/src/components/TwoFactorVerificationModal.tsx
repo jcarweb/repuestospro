@@ -18,6 +18,7 @@ interface TwoFactorVerificationModalProps {
   onClose: () => void;
   onSuccess: (code: string) => void;
   onUseBackupCode: () => void;
+  userEmail?: string;
 }
 
 const TwoFactorVerificationModal: React.FC<TwoFactorVerificationModalProps> = ({
@@ -25,6 +26,7 @@ const TwoFactorVerificationModal: React.FC<TwoFactorVerificationModalProps> = ({
   onClose,
   onSuccess,
   onUseBackupCode,
+  userEmail,
 }) => {
   const { colors } = useTheme();
   const { showToast } = useToast();
@@ -34,6 +36,7 @@ const TwoFactorVerificationModal: React.FC<TwoFactorVerificationModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
   const [useBackup, setUseBackup] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -51,45 +54,70 @@ const TwoFactorVerificationModal: React.FC<TwoFactorVerificationModalProps> = ({
       setBackupCode('');
       setUseBackup(false);
       setTimeLeft(30);
+      setError(null);
     }
   }, [visible]);
 
   const handleVerifyCode = async () => {
     console.log('Verificando código 2FA:', { useBackup, verificationCode, backupCode });
+    console.log('userEmail recibido:', userEmail);
+    
+    // Limpiar error anterior
+    setError(null);
     
     if (useBackup) {
       if (backupCode.length < 6) {
-        showToast('El código de respaldo debe tener al menos 6 caracteres', 'error');
+        setError('El código de respaldo debe tener al menos 6 caracteres');
         return;
       }
     } else {
       if (verificationCode.length !== 6) {
-        showToast('El código debe tener 6 dígitos', 'error');
+        setError('El código debe tener 6 dígitos');
         return;
       }
     }
 
     setLoading(true);
     try {
-      // Simular verificación del código
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Aceptar cualquier código de 6 dígitos (simulando Google Authenticator)
       const codeToVerify = useBackup ? backupCode : verificationCode;
-      const isValid = useBackup ? backupCode.length >= 6 : /^\d{6}$/.test(verificationCode);
       
-      console.log('Código válido:', isValid, 'Código:', codeToVerify);
+      // Usar el servicio de API real para verificar 2FA
+      const { default: apiService } = await import('../services/api');
       
-      if (isValid) {
+      // Usar el email del usuario pasado como prop
+      if (!userEmail) {
+        setError('Error: No se encontró información del usuario');
+        return;
+      }
+      
+      console.log('Usuario encontrado para 2FA:', userEmail);
+      
+      // Obtener el tempToken
+      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+      const tempToken = await AsyncStorage.getItem('tempToken');
+      console.log('TempToken encontrado:', tempToken ? 'Sí' : 'No');
+      
+      const response = await apiService.verifyTwoFactor({
+        email: userEmail,
+        code: codeToVerify,
+        tempToken: tempToken || 'temp-token'
+      });
+      
+      console.log('Respuesta completa del backend 2FA:', JSON.stringify(response, null, 2));
+      
+      if (response.success) {
         showToast('Código verificado correctamente', 'success');
         onSuccess(codeToVerify);
         onClose();
       } else {
-        showToast('Código inválido', 'error');
+        const errorMessage = response.message || 'Código inválido';
+        setError(errorMessage);
+        console.error('Error en verificación 2FA:', errorMessage);
       }
-    } catch (error) {
-      console.error('Error verifying code:', error);
-      showToast('Error al verificar código', 'error');
+    } catch (error: any) {
+      console.error('Error verifying 2FA code:', error);
+      const errorMessage = error.message || 'Error al verificar código';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -118,6 +146,15 @@ const TwoFactorVerificationModal: React.FC<TwoFactorVerificationModalProps> = ({
           Tiempo restante: {timeLeft}s
         </Text>
       </View>
+
+      {error && (
+        <View style={[styles.errorContainer, { backgroundColor: colors.error + '20', borderColor: colors.error }]}>
+          <Ionicons name="alert-circle" size={24} color={colors.error} />
+          <Text style={[styles.errorText, { color: colors.error }]}>
+            {error}
+          </Text>
+        </View>
+      )}
 
       <View style={styles.codeInputContainer}>
         <TextInput
@@ -167,6 +204,16 @@ const TwoFactorVerificationModal: React.FC<TwoFactorVerificationModalProps> = ({
         <Ionicons name="key" size={16} color={colors.textSecondary} />
         <Text style={[styles.backupButtonText, { color: colors.textSecondary }]}>
           Usar código de respaldo
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.cancelButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        onPress={onClose}
+      >
+        <Ionicons name="close" size={16} color={colors.textSecondary} />
+        <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>
+          Cancelar
         </Text>
       </TouchableOpacity>
     </View>
@@ -313,6 +360,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 20,
+  },
+  errorText: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 14,
+    lineHeight: 20,
+  },
   codeInputContainer: {
     marginBottom: 20,
   },
@@ -358,6 +419,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   backupButtonText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  cancelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 10,
+  },
+  cancelButtonText: {
     marginLeft: 8,
     fontSize: 14,
     fontWeight: '600',

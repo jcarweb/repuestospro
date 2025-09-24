@@ -2,349 +2,319 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
+  StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
+  Alert,
+  RefreshControl,
 } from 'react-native';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import { apiService } from '../../services/api';
 
 interface StoreStats {
   totalProducts: number;
   lowStockProducts: number;
-  totalOrders: number;
   pendingOrders: number;
+  todaySales: number;
   totalRevenue: number;
-  todayRevenue: number;
   averageRating: number;
-  totalReviews: number;
 }
 
 const StoreManagerDashboardScreen: React.FC = () => {
   const { colors } = useTheme();
-  const [stats, setStats] = useState<StoreStats | null>(null);
+  const { user, logout } = useAuth();
+  const { showToast } = useToast();
+  const navigation = useNavigation();
+  const [stats, setStats] = useState<StoreStats>({
+    totalProducts: 0,
+    lowStockProducts: 0,
+    pendingOrders: 0,
+    todaySales: 0,
+    totalRevenue: 0,
+    averageRating: 0,
+  });
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadStoreStats();
-  }, []);
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadStoreStats = async () => {
     try {
       setLoading(true);
-      // Aquí cargarías las estadísticas de la tienda desde el backend
-      // Por ahora usamos datos de ejemplo
-      const mockStats: StoreStats = {
-        totalProducts: 150,
-        lowStockProducts: 8,
-        totalOrders: 45,
-        pendingOrders: 12,
-        totalRevenue: 12500.75,
-        todayRevenue: 850.50,
-        averageRating: 4.2,
-        totalReviews: 28,
-      };
-      setStats(mockStats);
+      // TODO: Implementar endpoint real para estadísticas de tienda
+      // const response = await apiService.getStoreStats();
+      // setStats(response.data);
+      
+      // Datos mock por ahora
+      setStats({
+        totalProducts: 1250,
+        lowStockProducts: 23,
+        pendingOrders: 8,
+        todaySales: 15,
+        totalRevenue: 12500,
+        averageRating: 4.7,
+      });
     } catch (error) {
-      console.error('Error cargando estadísticas de tienda:', error);
+      console.error('Error loading store stats:', error);
+      showToast('Error al cargar estadísticas de la tienda', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  const renderStatCard = (icon: string, title: string, value: string, subtitle?: string, color?: string) => (
-    <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <View style={[styles.statIcon, { backgroundColor: color || colors.primary }]}>
-        <Ionicons name={icon as any} size={24} color="white" />
-      </View>
-      <View style={styles.statContent}>
-        <Text style={[styles.statValue, { color: colors.textPrimary }]}>
-          {value}
-        </Text>
-        <Text style={[styles.statTitle, { color: colors.textSecondary }]}>
-          {title}
-        </Text>
-        {subtitle && (
-          <Text style={[styles.statSubtitle, { color: colors.textTertiary }]}>
-            {subtitle}
-          </Text>
-        )}
-      </View>
-    </View>
-  );
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadStoreStats();
+    setRefreshing(false);
+  };
 
-  const renderMenuCard = (icon: string, title: string, subtitle: string, onPress: () => void) => (
+  useEffect(() => {
+    loadStoreStats();
+  }, []);
+
+  const StatCard = ({ 
+    title, 
+    value, 
+    icon, 
+    color, 
+    onPress 
+  }: {
+    title: string;
+    value: string | number;
+    icon: keyof typeof Ionicons.glyphMap;
+    color: string;
+    onPress?: () => void;
+  }) => (
     <TouchableOpacity
-      style={[styles.menuCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
       onPress={onPress}
+      activeOpacity={0.7}
     >
-      <View style={[styles.menuIcon, { backgroundColor: colors.primary }]}>
-        <Ionicons name={icon as any} size={24} color="#000000" />
+      <View style={styles.statCardContent}>
+        <View style={[styles.statIcon, { backgroundColor: color + '20' }]}>
+          <Ionicons name={icon} size={24} color={color} />
+        </View>
+        <View style={styles.statText}>
+          <Text style={[styles.statValue, { color: colors.textPrimary }]}>{value}</Text>
+          <Text style={[styles.statTitle, { color: colors.textSecondary }]}>{title}</Text>
+        </View>
       </View>
-      <View style={styles.menuContent}>
-        <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>
-          {title}
-        </Text>
-        <Text style={[styles.menuSubtitle, { color: colors.textSecondary }]}>
-          {subtitle}
-        </Text>
-      </View>
-      <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
     </TouchableOpacity>
   );
 
+  const QuickAction = ({ 
+    title, 
+    icon, 
+    onPress 
+  }: {
+    title: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    onPress: () => void;
+  }) => (
+    <TouchableOpacity
+      style={[styles.quickAction, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <Ionicons name={icon} size={24} color={colors.primary} />
+      <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>{title}</Text>
+    </TouchableOpacity>
+  );
+
+  const handleQuickAction = (action: string) => {
+    showToast(`Acción: ${action}`, 'info');
+    // TODO: Implementar navegación a pantallas específicas
+  };
+
   if (loading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-          Cargando dashboard de tienda...
-        </Text>
-      </View>
-    );
-  }
-
-  if (!stats) {
-    return (
-      <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
-        <Ionicons name="alert-circle-outline" size={64} color={colors.error} />
-        <Text style={[styles.errorText, { color: colors.textSecondary }]}>
-          No se pudieron cargar las estadísticas de la tienda
-        </Text>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.loadingContainer}>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+            Cargando dashboard...
+          </Text>
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={[styles.header, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>
-            Gestión de Tienda
-          </Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Panel de control de tu tienda
-          </Text>
-        </View>
-
-        {/* Estadísticas principales */}
-        <View style={styles.statsSection}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-            Estadísticas de la Tienda
-          </Text>
-          
-          <View style={styles.statsGrid}>
-            {renderStatCard(
-              'cube-outline',
-              'Productos',
-              stats.totalProducts.toString(),
-              'En catálogo',
-              colors.success
-            )}
-            {renderStatCard(
-              'warning-outline',
-              'Stock Bajo',
-              stats.lowStockProducts.toString(),
-              'Necesitan reposición',
-              colors.warning
-            )}
-            {renderStatCard(
-              'receipt-outline',
-              'Pedidos',
-              stats.totalOrders.toString(),
-              `${stats.pendingOrders} pendientes`,
-              colors.info
-            )}
-            {renderStatCard(
-              'cash-outline',
-              'Ingresos',
-              `$${stats.totalRevenue.toLocaleString()}`,
-              `Hoy: $${stats.todayRevenue.toFixed(2)}`,
-              colors.primary
-            )}
-            {renderStatCard(
-              'star-outline',
-              'Calificación',
-              stats.averageRating.toFixed(1),
-              `${stats.totalReviews} reseñas`,
-              colors.primary
-            )}
-            {renderStatCard(
-              'trending-up-outline',
-              'Rendimiento',
-              '85%',
-              'Este mes',
-              colors.success
-            )}
-          </View>
-        </View>
-
-        {/* Alertas y notificaciones */}
-        <View style={styles.alertsSection}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-            Alertas y Notificaciones
-          </Text>
-          
-          {stats.lowStockProducts > 0 && (
-            <View style={[styles.alertCard, { backgroundColor: colors.warning + '20', borderColor: colors.warning }]}>
-              <Ionicons name="warning-outline" size={24} color={colors.warning} />
-              <View style={styles.alertContent}>
-                <Text style={[styles.alertTitle, { color: colors.textPrimary }]}>
-                  Productos con stock bajo
-                </Text>
-                <Text style={[styles.alertMessage, { color: colors.textSecondary }]}>
-                  {stats.lowStockProducts} productos necesitan reposición
-                </Text>
-              </View>
+    <ScrollView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <View style={styles.headerContent}>
+          <View style={styles.headerText}>
+            <Text style={[styles.welcomeText, { color: colors.textSecondary }]}>
+              Bienvenido de vuelta,
+            </Text>
+            <Text style={[styles.userName, { color: colors.textPrimary }]}>
+              {user?.name || 'Gestor de Tienda'}
+            </Text>
+            <View style={[styles.roleBadge, { backgroundColor: colors.primary + '20' }]}>
+              <Ionicons name="storefront" size={16} color={colors.primary} />
+              <Text style={[styles.roleText, { color: colors.primary }]}>
+                Gestor de Tienda
+              </Text>
             </View>
-          )}
-          
-          {stats.pendingOrders > 0 && (
-            <View style={[styles.alertCard, { backgroundColor: colors.info + '20', borderColor: colors.info }]}>
-              <Ionicons name="time-outline" size={24} color={colors.info} />
-              <View style={styles.alertContent}>
-                <Text style={[styles.alertTitle, { color: colors.textPrimary }]}>
-                  Pedidos pendientes
-                </Text>
-                <Text style={[styles.alertMessage, { color: colors.textSecondary }]}>
-                  {stats.pendingOrders} pedidos esperan procesamiento
-                </Text>
-              </View>
-            </View>
-          )}
-        </View>
-
-        {/* Menú de funciones */}
-        <View style={styles.menuSection}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-            Funciones de Gestión
-          </Text>
-          
-          {renderMenuCard(
-            'cube-outline',
-            'Gestión de Productos',
-            'Administrar inventario y productos',
-            () => {
-              // Navegar a gestión de productos
-              // navigation.navigate('ProductManagement');
-            }
-          )}
-          
-          {renderMenuCard(
-            'receipt-outline',
-            'Gestión de Pedidos',
-            'Procesar y gestionar pedidos',
-            () => {
-              // Navegar a gestión de pedidos
-              // navigation.navigate('OrderManagement');
-            }
-          )}
-          
-          {renderMenuCard(
-            'analytics-outline',
-            'Reportes de Ventas',
-            'Ver estadísticas y reportes',
-            () => {
-              // Navegar a reportes
-              // navigation.navigate('SalesReports');
-            }
-          )}
-          
-          {renderMenuCard(
-            'chatbubble-outline',
-            'Mensajes',
-            'Comunicación con clientes',
-            () => {
-              // Navegar a mensajes
-              // navigation.navigate('Messages');
-            }
-          )}
-          
-          {renderMenuCard(
-            'star-outline',
-            'Reseñas',
-            'Gestionar reseñas de clientes',
-            () => {
-              // Navegar a reseñas
-              // navigation.navigate('Reviews');
-            }
-          )}
-          
-          {renderMenuCard(
-            'settings-outline',
-            'Configuración',
-            'Configurar tienda',
-            () => {
-              // Navegar a configuración
-              // navigation.navigate('StoreSettings');
-            }
-          )}
-        </View>
-
-        {/* Acciones rápidas */}
-        <View style={styles.quickActionsSection}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-            Acciones Rápidas
-          </Text>
-          
-          <View style={styles.quickActionsGrid}>
-            <TouchableOpacity
-              style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-              onPress={() => {
-                // Agregar nuevo producto
-                // navigation.navigate('AddProduct');
-              }}
-            >
-              <Ionicons name="add-circle-outline" size={32} color={colors.primary} />
-              <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
-                Nuevo Producto
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-              onPress={() => {
-                // Ver pedidos pendientes
-                // navigation.navigate('PendingOrders');
-              }}
-            >
-              <Ionicons name="time-outline" size={32} color={colors.warning} />
-              <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
-                Pedidos Pendientes
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-              onPress={() => {
-                // Ver stock bajo
-                // navigation.navigate('LowStock');
-              }}
-            >
-              <Ionicons name="warning-outline" size={32} color={colors.warning} />
-              <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
-                Stock Bajo
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-              onPress={() => {
-                // Ver reportes
-                // navigation.navigate('Reports');
-              }}
-            >
-              <Ionicons name="analytics-outline" size={32} color={colors.primary} />
-              <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
-                Ver Reportes
-              </Text>
-            </TouchableOpacity>
           </View>
+          <TouchableOpacity
+            style={[styles.profileButton, { backgroundColor: colors.primary }]}
+            onPress={() => navigation.navigate('StoreManagerProfile')}
+          >
+            <Ionicons name="person" size={20} color="white" />
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-    </View>
+      </View>
+
+      {/* Stats Grid */}
+      <View style={styles.statsGrid}>
+        <StatCard
+          title="Total Productos"
+          value={stats.totalProducts}
+          icon="cube"
+          color={colors.primary}
+          onPress={() => handleQuickAction('Ver Productos')}
+        />
+        <StatCard
+          title="Stock Bajo"
+          value={stats.lowStockProducts}
+          icon="warning"
+          color="#FF6B6B"
+          onPress={() => handleQuickAction('Ver Stock Bajo')}
+        />
+        <StatCard
+          title="Pedidos Pendientes"
+          value={stats.pendingOrders}
+          icon="time"
+          color="#4ECDC4"
+          onPress={() => handleQuickAction('Ver Pedidos')}
+        />
+        <StatCard
+          title="Ventas Hoy"
+          value={stats.todaySales}
+          icon="trending-up"
+          color="#45B7D1"
+          onPress={() => handleQuickAction('Ver Ventas')}
+        />
+        <StatCard
+          title="Ingresos Totales"
+          value={`$${stats.totalRevenue.toLocaleString()}`}
+          icon="cash"
+          color="#96CEB4"
+          onPress={() => handleQuickAction('Ver Ingresos')}
+        />
+        <StatCard
+          title="Calificación"
+          value={`${stats.averageRating}/5`}
+          icon="star"
+          color="#FFEAA7"
+          onPress={() => handleQuickAction('Ver Reseñas')}
+        />
+      </View>
+
+      {/* Quick Actions */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+          Acciones Rápidas
+        </Text>
+        <View style={styles.quickActionsGrid}>
+          <QuickAction
+            title="Gestión de Inventario"
+            icon="cube"
+            onPress={() => handleQuickAction('Inventario')}
+          />
+          <QuickAction
+            title="Gestión de Productos"
+            icon="package"
+            onPress={() => handleQuickAction('Productos')}
+          />
+          <QuickAction
+            title="Gestión de Vendedores"
+            icon="people"
+            onPress={() => handleQuickAction('Vendedores')}
+          />
+          <QuickAction
+            title="Promociones"
+            icon="pricetag"
+            onPress={() => handleQuickAction('Promociones')}
+          />
+          <QuickAction
+            title="Gestión de Ventas"
+            icon="trending-up"
+            onPress={() => handleQuickAction('Ventas')}
+          />
+          <QuickAction
+            title="Gestión de Pedidos"
+            icon="list"
+            onPress={() => handleQuickAction('Pedidos')}
+          />
+          <QuickAction
+            title="Gestión de Delivery"
+            icon="car"
+            onPress={() => handleQuickAction('Delivery')}
+          />
+          <QuickAction
+            title="Analytics"
+            icon="bar-chart"
+            onPress={() => handleQuickAction('Analytics')}
+          />
+          <QuickAction
+            title="Mensajería"
+            icon="chatbubbles"
+            onPress={() => handleQuickAction('Mensajería')}
+          />
+          <QuickAction
+            title="Reseñas"
+            icon="star"
+            onPress={() => handleQuickAction('Reseñas')}
+          />
+          <QuickAction
+            title="Configuración"
+            icon="settings"
+            onPress={() => handleQuickAction('Configuración')}
+          />
+          <QuickAction
+            title="Cerrar Sesión"
+            icon="log-out"
+            onPress={() => {
+              Alert.alert(
+                'Cerrar sesión',
+                '¿Estás seguro de que quieres cerrar sesión?',
+                [
+                  { text: 'Cancelar', style: 'cancel' },
+                  {
+                    text: 'Cerrar sesión',
+                    style: 'destructive',
+                    onPress: () => {
+                      logout();
+                    },
+                  },
+                ]
+              );
+            }}
+          />
+        </View>
+      </View>
+
+      {/* Recent Activity */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+          Actividad Reciente
+        </Text>
+        <View style={[styles.activityCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Text style={[styles.activityText, { color: colors.textSecondary }]}>
+            No hay actividad reciente
+          </Text>
+        </View>
+      </View>
+    </ScrollView>
   );
 };
 
@@ -352,41 +322,67 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  loadingContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
   },
   header: {
     padding: 20,
-    marginBottom: 16,
+    borderBottomWidth: 1,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerText: {
+    flex: 1,
+  },
+  welcomeText: {
+    fontSize: 14,
     marginBottom: 4,
   },
-  subtitle: {
-    fontSize: 16,
-  },
-  statsSection: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
+  userName: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 16,
-    paddingHorizontal: 16,
+  },
+  profileButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 16,
+  },
+  roleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  roleText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 16,
+    padding: 16,
     gap: 12,
   },
   statCard: {
-    width: '48%',
+    width: '47%',
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
+  },
+  statCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -398,115 +394,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 12,
   },
-  statContent: {
+  statText: {
     flex: 1,
   },
   statValue: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   statTitle: {
     fontSize: 12,
-    marginBottom: 2,
   },
-  statSubtitle: {
-    fontSize: 10,
-  },
-  alertsSection: {
-    marginBottom: 24,
-  },
-  alertCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  section: {
     padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 8,
-    borderRadius: 12,
-    borderWidth: 1,
   },
-  alertContent: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  alertTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  alertMessage: {
-    fontSize: 14,
-  },
-  menuSection: {
-    marginBottom: 24,
-  },
-  menuCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  menuIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  menuContent: {
-    flex: 1,
-  },
-  menuTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  menuSubtitle: {
-    fontSize: 14,
-  },
-  quickActionsSection: {
-    marginBottom: 24,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
   quickActionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 16,
     gap: 12,
   },
-  quickActionCard: {
-    width: '48%',
-    padding: 20,
+  quickAction: {
+    width: '30%',
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 12,
     borderWidth: 1,
-    alignItems: 'center',
+    padding: 12,
   },
   quickActionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: 8,
+    fontSize: 12,
     textAlign: 'center',
+    marginTop: 8,
+    fontWeight: '500',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  activityCard: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
   },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    marginTop: 16,
-    fontSize: 16,
+  activityText: {
+    fontSize: 14,
     textAlign: 'center',
   },
 });

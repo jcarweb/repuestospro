@@ -2,380 +2,426 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
+  StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  Switch,
 } from 'react-native';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import { apiService } from '../../services/api';
 
 interface DeliveryStats {
-  totalDeliveries: number;
-  completedDeliveries: number;
-  pendingDeliveries: number;
-  todayEarnings: number;
-  weeklyEarnings: number;
+  assignedOrders: number;
+  completedToday: number;
   averageRating: number;
-  totalReviews: number;
-  activeHours: number;
-  totalDistance: number;
+  totalEarnings: number;
+  currentStatus: 'available' | 'unavailable' | 'busy' | 'on_route' | 'returning_to_store';
+  autoStatusMode: boolean;
+  workHours: string;
+  deliveryZone: {
+    center: [number, number];
+    radius: number;
+  };
 }
 
 const DeliveryDashboardScreen: React.FC = () => {
   const { colors } = useTheme();
-  const [stats, setStats] = useState<DeliveryStats | null>(null);
+  const { user, logout } = useAuth();
+  const { showToast } = useToast();
+  const navigation = useNavigation();
+  const [stats, setStats] = useState<DeliveryStats>({
+    assignedOrders: 0,
+    completedToday: 0,
+    averageRating: 0,
+    totalEarnings: 0,
+    currentStatus: 'unavailable',
+    autoStatusMode: true,
+    workHours: '8:00 - 17:00',
+    deliveryZone: {
+      center: [-66.98422315655894, 10.462530926442378],
+      radius: 10,
+    },
+  });
   const [loading, setLoading] = useState(true);
-  const [isOnline, setIsOnline] = useState(false);
-
-  useEffect(() => {
-    loadDeliveryStats();
-  }, []);
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadDeliveryStats = async () => {
     try {
       setLoading(true);
-      // Aquí cargarías las estadísticas de delivery desde el backend
-      // Por ahora usamos datos de ejemplo
-      const mockStats: DeliveryStats = {
-        totalDeliveries: 45,
-        completedDeliveries: 42,
-        pendingDeliveries: 3,
-        todayEarnings: 125.50,
-        weeklyEarnings: 850.75,
-        averageRating: 4.8,
-        totalReviews: 38,
-        activeHours: 6.5,
-        totalDistance: 45.2,
-      };
-      setStats(mockStats);
+      // TODO: Implementar endpoint real para estadísticas de delivery
+      // const response = await apiService.getDeliveryStats();
+      // setStats(response.data);
+      
+      // Datos mock por ahora
+      setStats({
+        assignedOrders: 5,
+        completedToday: 12,
+        averageRating: 4.9,
+        totalEarnings: 850,
+        currentStatus: 'available',
+        autoStatusMode: true,
+        workHours: '8:00 - 17:00',
+        deliveryZone: {
+          center: [-66.98422315655894, 10.462530926442378],
+          radius: 10,
+        },
+      });
     } catch (error) {
-      console.error('Error cargando estadísticas de delivery:', error);
+      console.error('Error loading delivery stats:', error);
+      showToast('Error al cargar estadísticas de delivery', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleOnlineStatus = () => {
-    setIsOnline(!isOnline);
-    // Aquí actualizarías el estado en el backend
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadDeliveryStats();
+    setRefreshing(false);
   };
 
-  const renderStatCard = (icon: string, title: string, value: string, subtitle?: string, color?: string) => (
-    <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <View style={[styles.statIcon, { backgroundColor: color || colors.primary }]}>
-        <Ionicons name={icon as any} size={24} color="white" />
-      </View>
-      <View style={styles.statContent}>
-        <Text style={[styles.statValue, { color: colors.textPrimary }]}>
-          {value}
-        </Text>
-        <Text style={[styles.statTitle, { color: colors.textSecondary }]}>
-          {title}
-        </Text>
-        {subtitle && (
-          <Text style={[styles.statSubtitle, { color: colors.textTertiary }]}>
-            {subtitle}
-          </Text>
-        )}
-      </View>
-    </View>
-  );
+  const toggleStatus = async () => {
+    try {
+      const newStatus = stats.currentStatus === 'available' ? 'unavailable' : 'available';
+      // TODO: Implementar endpoint real para cambiar estado
+      // await apiService.updateDeliveryStatus(newStatus);
+      
+      setStats(prev => ({ ...prev, currentStatus: newStatus }));
+      showToast(`Estado cambiado a: ${newStatus === 'available' ? 'Disponible' : 'No Disponible'}`, 'success');
+    } catch (error) {
+      console.error('Error updating status:', error);
+      showToast('Error al cambiar estado', 'error');
+    }
+  };
 
-  const renderMenuCard = (icon: string, title: string, subtitle: string, onPress: () => void) => (
+  const toggleAutoStatus = async () => {
+    try {
+      // TODO: Implementar endpoint real para cambiar modo automático
+      // await apiService.updateAutoStatusMode(!stats.autoStatusMode);
+      
+      setStats(prev => ({ ...prev, autoStatusMode: !prev.autoStatusMode }));
+      showToast(`Modo automático: ${!stats.autoStatusMode ? 'Activado' : 'Desactivado'}`, 'success');
+    } catch (error) {
+      console.error('Error updating auto status:', error);
+      showToast('Error al cambiar modo automático', 'error');
+    }
+  };
+
+  useEffect(() => {
+    loadDeliveryStats();
+  }, []);
+
+  const StatCard = ({ 
+    title, 
+    value, 
+    icon, 
+    color, 
+    onPress 
+  }: {
+    title: string;
+    value: string | number;
+    icon: keyof typeof Ionicons.glyphMap;
+    color: string;
+    onPress?: () => void;
+  }) => (
     <TouchableOpacity
-      style={[styles.menuCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
       onPress={onPress}
+      activeOpacity={0.7}
     >
-      <View style={[styles.menuIcon, { backgroundColor: colors.primary }]}>
-        <Ionicons name={icon as any} size={24} color="#000000" />
+      <View style={styles.statCardContent}>
+        <View style={[styles.statIcon, { backgroundColor: color + '20' }]}>
+          <Ionicons name={icon} size={24} color={color} />
+        </View>
+        <View style={styles.statText}>
+          <Text style={[styles.statValue, { color: colors.textPrimary }]}>{value}</Text>
+          <Text style={[styles.statTitle, { color: colors.textSecondary }]}>{title}</Text>
+        </View>
       </View>
-      <View style={styles.menuContent}>
-        <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>
-          {title}
-        </Text>
-        <Text style={[styles.menuSubtitle, { color: colors.textSecondary }]}>
-          {subtitle}
-        </Text>
-      </View>
-      <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
     </TouchableOpacity>
   );
 
+  const QuickAction = ({ 
+    title, 
+    icon, 
+    onPress,
+    badge 
+  }: {
+    title: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    onPress: () => void;
+    badge?: number;
+  }) => (
+    <TouchableOpacity
+      style={[styles.quickAction, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <View style={styles.quickActionHeader}>
+        <Ionicons name={icon} size={24} color={colors.primary} />
+        {badge && badge > 0 && (
+          <View style={[styles.badge, { backgroundColor: colors.error }]}>
+            <Text style={[styles.badgeText, { color: 'white' }]}>{badge}</Text>
+          </View>
+        )}
+      </View>
+      <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>{title}</Text>
+    </TouchableOpacity>
+  );
+
+  const handleQuickAction = (action: string) => {
+    showToast(`Acción: ${action}`, 'info');
+    // TODO: Implementar navegación a pantallas específicas
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'available': return '#34C759';
+      case 'unavailable': return '#FF3B30';
+      case 'busy': return '#FF9500';
+      case 'on_route': return '#007AFF';
+      case 'returning_to_store': return '#5856D6';
+      default: return colors.textSecondary;
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'available': return 'Disponible';
+      case 'unavailable': return 'No Disponible';
+      case 'busy': return 'Ocupado';
+      case 'on_route': return 'En Ruta';
+      case 'returning_to_store': return 'Regresando';
+      default: return 'Desconocido';
+    }
+  };
+
   if (loading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-          Cargando dashboard de delivery...
-        </Text>
-      </View>
-    );
-  }
-
-  if (!stats) {
-    return (
-      <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
-        <Ionicons name="alert-circle-outline" size={64} color={colors.error} />
-        <Text style={[styles.errorText, { color: colors.textSecondary }]}>
-          No se pudieron cargar las estadísticas de delivery
-        </Text>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.loadingContainer}>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+            Cargando dashboard...
+          </Text>
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Header con estado online/offline */}
-        <View style={[styles.header, { backgroundColor: colors.surface }]}>
-          <View style={styles.headerTop}>
-            <Text style={[styles.title, { color: colors.textPrimary }]}>
-              Panel de Delivery
+    <ScrollView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <View style={styles.headerContent}>
+          <View style={styles.headerText}>
+            <Text style={[styles.welcomeText, { color: colors.textSecondary }]}>
+              Bienvenido de vuelta,
             </Text>
-            <TouchableOpacity
-              style={[
-                styles.onlineToggle,
-                { backgroundColor: isOnline ? colors.success : colors.error }
-              ]}
-              onPress={toggleOnlineStatus}
-            >
-              <Ionicons 
-                name={isOnline ? 'radio-button-on' : 'radio-button-off'} 
-                size={20} 
-                color="white" 
-              />
-              <Text style={styles.onlineText}>
-                {isOnline ? 'En línea' : 'Desconectado'}
+            <Text style={[styles.userName, { color: colors.textPrimary }]}>
+              {user?.name || 'Repartidor'}
+            </Text>
+            <View style={[styles.roleBadge, { backgroundColor: '#34C759' + '20' }]}>
+              <Ionicons name="car" size={16} color="#34C759" />
+              <Text style={[styles.roleText, { color: '#34C759' }]}>
+                Delivery
               </Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            {isOnline ? 'Listo para recibir entregas' : 'Activa tu disponibilidad para recibir entregas'}
-          </Text>
-        </View>
-
-        {/* Estadísticas principales */}
-        <View style={styles.statsSection}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-            Estadísticas de Hoy
-          </Text>
-          
-          <View style={styles.statsGrid}>
-            {renderStatCard(
-              'car-outline',
-              'Entregas',
-              `${stats.completedDeliveries}/${stats.totalDeliveries}`,
-              'Completadas',
-              colors.success
-            )}
-            {renderStatCard(
-              'time-outline',
-              'Pendientes',
-              stats.pendingDeliveries.toString(),
-              'Por entregar',
-              colors.warning
-            )}
-            {renderStatCard(
-              'cash-outline',
-              'Ganancias',
-              `$${stats.todayEarnings.toFixed(2)}`,
-              'Hoy',
-              colors.primary
-            )}
-            {renderStatCard(
-              'star-outline',
-              'Calificación',
-              stats.averageRating.toFixed(1),
-              `${stats.totalReviews} reseñas`,
-              colors.primary
-            )}
-            {renderStatCard(
-              'time-outline',
-              'Horas Activo',
-              `${stats.activeHours}h`,
-              'Hoy',
-              colors.info
-            )}
-            {renderStatCard(
-              'location-outline',
-              'Distancia',
-              `${stats.totalDistance}km`,
-              'Recorrida',
-              colors.info
-            )}
-          </View>
-        </View>
-
-        {/* Ganancias semanales */}
-        <View style={styles.earningsSection}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-            Ganancias Semanales
-          </Text>
-          
-          <View style={[styles.earningsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <View style={styles.earningsHeader}>
-              <Ionicons name="cash-outline" size={32} color={colors.primary} />
-              <View style={styles.earningsInfo}>
-                <Text style={[styles.earningsAmount, { color: colors.textPrimary }]}>
-                  ${stats.weeklyEarnings.toFixed(2)}
-                </Text>
-                <Text style={[styles.earningsLabel, { color: colors.textSecondary }]}>
-                  Esta semana
-                </Text>
-              </View>
-            </View>
-            
-            <View style={styles.earningsBreakdown}>
-              <View style={styles.earningsRow}>
-                <Text style={[styles.earningsRowLabel, { color: colors.textSecondary }]}>
-                  Entregas completadas:
-                </Text>
-                <Text style={[styles.earningsRowValue, { color: colors.textPrimary }]}>
-                  {stats.completedDeliveries}
-                </Text>
-              </View>
-              <View style={styles.earningsRow}>
-                <Text style={[styles.earningsRowLabel, { color: colors.textSecondary }]}>
-                  Promedio por entrega:
-                </Text>
-                <Text style={[styles.earningsRowValue, { color: colors.textPrimary }]}>
-                  ${(stats.weeklyEarnings / stats.completedDeliveries).toFixed(2)}
-                </Text>
-              </View>
             </View>
           </View>
+          <TouchableOpacity
+            style={[styles.profileButton, { backgroundColor: '#34C759' }]}
+            onPress={() => navigation.navigate('DeliveryProfile')}
+          >
+            <Ionicons name="person" size={20} color="white" />
+          </TouchableOpacity>
         </View>
+      </View>
 
-        {/* Menú de funciones */}
-        <View style={styles.menuSection}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-            Funciones de Delivery
+      {/* Status Control */}
+      <View style={[styles.statusSection, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.statusHeader}>
+          <Text style={[styles.statusTitle, { color: colors.textPrimary }]}>
+            Estado de Disponibilidad
           </Text>
-          
-          {renderMenuCard(
-            'list-outline',
-            'Mis Entregas',
-            'Ver entregas asignadas y completadas',
-            () => {
-              // Navegar a mis entregas
-              // navigation.navigate('MyDeliveries');
-            }
-          )}
-          
-          {renderMenuCard(
-            'map-outline',
-            'Mapa de Rutas',
-            'Ver rutas optimizadas',
-            () => {
-              // Navegar a mapa de rutas
-              // navigation.navigate('RouteMap');
-            }
-          )}
-          
-          {renderMenuCard(
-            'document-text-outline',
-            'Reporte de Entregas',
-            'Generar reportes de actividad',
-            () => {
-              // Navegar a reportes
-              // navigation.navigate('DeliveryReports');
-            }
-          )}
-          
-          {renderMenuCard(
-            'star-outline',
-            'Calificaciones',
-            'Ver calificaciones de clientes',
-            () => {
-              // Navegar a calificaciones
-              // navigation.navigate('Ratings');
-            }
-          )}
-          
-          {renderMenuCard(
-            'time-outline',
-            'Horario de Trabajo',
-            'Configurar disponibilidad',
-            () => {
-              // Navegar a horario
-              // navigation.navigate('WorkSchedule');
-            }
-          )}
-          
-          {renderMenuCard(
-            'settings-outline',
-            'Configuración',
-            'Configurar perfil y preferencias',
-            () => {
-              // Navegar a configuración
-              // navigation.navigate('DeliverySettings');
-            }
-          )}
-        </View>
-
-        {/* Acciones rápidas */}
-        <View style={styles.quickActionsSection}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
-            Acciones Rápidas
-          </Text>
-          
-          <View style={styles.quickActionsGrid}>
-            <TouchableOpacity
-              style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-              onPress={() => {
-                // Ver entregas pendientes
-                // navigation.navigate('PendingDeliveries');
-              }}
-            >
-              <Ionicons name="time-outline" size={32} color={colors.warning} />
-              <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
-                Entregas Pendientes
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-              onPress={() => {
-                // Ver mapa
-                // navigation.navigate('Map');
-              }}
-            >
-              <Ionicons name="map-outline" size={32} color={colors.primary} />
-              <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
-                Ver Mapa
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-              onPress={() => {
-                // Ver ganancias
-                // navigation.navigate('Earnings');
-              }}
-            >
-              <Ionicons name="cash-outline" size={32} color={colors.success} />
-              <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
-                Ver Ganancias
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-              onPress={() => {
-                // Ver perfil
-                // navigation.navigate('Profile');
-              }}
-            >
-              <Ionicons name="person-outline" size={32} color={colors.primary} />
-              <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
-                Mi Perfil
-              </Text>
-            </TouchableOpacity>
+          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(stats.currentStatus) + '20' }]}>
+            <Ionicons 
+              name={stats.currentStatus === 'available' ? 'checkmark-circle' : 'close-circle'} 
+              size={16} 
+              color={getStatusColor(stats.currentStatus)} 
+            />
+            <Text style={[styles.statusText, { color: getStatusColor(stats.currentStatus) }]}>
+              {getStatusText(stats.currentStatus)}
+            </Text>
           </View>
         </View>
-      </ScrollView>
-    </View>
+        
+        <View style={styles.statusControls}>
+          <TouchableOpacity
+            style={[
+              styles.statusButton,
+              { 
+                backgroundColor: stats.currentStatus === 'available' ? '#34C759' : colors.border,
+                borderColor: getStatusColor(stats.currentStatus)
+              }
+            ]}
+            onPress={toggleStatus}
+          >
+            <Ionicons 
+              name={stats.currentStatus === 'available' ? 'checkmark' : 'close'} 
+              size={20} 
+              color={stats.currentStatus === 'available' ? 'white' : colors.textSecondary} 
+            />
+            <Text style={[
+              styles.statusButtonText,
+              { color: stats.currentStatus === 'available' ? 'white' : colors.textSecondary }
+            ]}>
+              {stats.currentStatus === 'available' ? 'Disponible' : 'No Disponible'}
+            </Text>
+          </TouchableOpacity>
+          
+          <View style={styles.autoStatusControl}>
+            <Text style={[styles.autoStatusLabel, { color: colors.textSecondary }]}>
+              Modo Automático
+            </Text>
+            <Switch
+              value={stats.autoStatusMode}
+              onValueChange={toggleAutoStatus}
+              trackColor={{ false: colors.border, true: colors.primary + '50' }}
+              thumbColor={stats.autoStatusMode ? colors.primary : colors.textTertiary}
+            />
+          </View>
+        </View>
+      </View>
+
+      {/* Stats Grid */}
+      <View style={styles.statsGrid}>
+        <StatCard
+          title="Órdenes Asignadas"
+          value={stats.assignedOrders}
+          icon="list"
+          color="#007AFF"
+          onPress={() => handleQuickAction('Ver Órdenes Asignadas')}
+        />
+        <StatCard
+          title="Completadas Hoy"
+          value={stats.completedToday}
+          icon="checkmark-circle"
+          color="#34C759"
+          onPress={() => handleQuickAction('Ver Completadas')}
+        />
+        <StatCard
+          title="Calificación"
+          value={`${stats.averageRating}/5`}
+          icon="star"
+          color="#FFD60A"
+          onPress={() => handleQuickAction('Ver Calificaciones')}
+        />
+        <StatCard
+          title="Ganancias Totales"
+          value={`$${stats.totalEarnings}`}
+          icon="cash"
+          color="#34C759"
+          onPress={() => handleQuickAction('Ver Ganancias')}
+        />
+      </View>
+
+      {/* Quick Actions */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+          Acciones Rápidas
+        </Text>
+        <View style={styles.quickActionsGrid}>
+          <QuickAction
+            title="Órdenes Asignadas"
+            icon="list"
+            onPress={() => handleQuickAction('Órdenes Asignadas')}
+            badge={stats.assignedOrders}
+          />
+          <QuickAction
+            title="Mapa de Rutas"
+            icon="map"
+            onPress={() => handleQuickAction('Mapa de Rutas')}
+          />
+          <QuickAction
+            title="Reportes"
+            icon="document-text"
+            onPress={() => handleQuickAction('Reportes')}
+          />
+          <QuickAction
+            title="Calificaciones"
+            icon="star"
+            onPress={() => handleQuickAction('Calificaciones')}
+          />
+          <QuickAction
+            title="Horario de Trabajo"
+            icon="calendar"
+            onPress={() => handleQuickAction('Horario de Trabajo')}
+          />
+          <QuickAction
+            title="Perfil"
+            icon="person"
+            onPress={() => navigation.navigate('DeliveryProfile')}
+          />
+          <QuickAction
+            title="Cerrar Sesión"
+            icon="log-out"
+            onPress={() => {
+              Alert.alert(
+                'Cerrar sesión',
+                '¿Estás seguro de que quieres cerrar sesión?',
+                [
+                  { text: 'Cancelar', style: 'cancel' },
+                  {
+                    text: 'Cerrar sesión',
+                    style: 'destructive',
+                    onPress: () => {
+                      logout();
+                    },
+                  },
+                ]
+              );
+            }}
+          />
+        </View>
+      </View>
+
+      {/* Work Info */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+          Información de Trabajo
+        </Text>
+        <View style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={styles.infoRow}>
+            <Ionicons name="time" size={20} color={colors.primary} />
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
+              Horario de Trabajo:
+            </Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
+              {stats.workHours}
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Ionicons name="location" size={20} color={colors.primary} />
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
+              Zona de Entrega:
+            </Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
+              {stats.deliveryZone.radius} km
+            </Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
 };
 
@@ -383,59 +429,119 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  loadingContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
   },
   header: {
     padding: 20,
-    marginBottom: 16,
+    borderBottomWidth: 1,
   },
-  headerTop: {
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
   },
-  title: {
-    fontSize: 28,
+  headerText: {
+    flex: 1,
+  },
+  welcomeText: {
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  userName: {
+    fontSize: 20,
     fontWeight: 'bold',
   },
-  onlineToggle: {
+  profileButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 16,
+  },
+  roleBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderRadius: 20,
   },
-  onlineText: {
-    color: 'white',
-    fontSize: 14,
+  roleText: {
+    fontSize: 12,
     fontWeight: '600',
     marginLeft: 4,
   },
-  subtitle: {
-    fontSize: 16,
+  statusSection: {
+    margin: 16,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
   },
-  statsSection: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  statusHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 16,
-    paddingHorizontal: 16,
+  },
+  statusTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  statusControls: {
+    gap: 12,
+  },
+  statusButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  statusButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  autoStatusControl: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  autoStatusLabel: {
+    fontSize: 14,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 16,
+    padding: 16,
     gap: 12,
   },
   statCard: {
-    width: '48%',
+    width: '47%',
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
+  },
+  statCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -447,135 +553,82 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 12,
   },
-  statContent: {
+  statText: {
     flex: 1,
   },
   statValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 2,
-  },
-  statTitle: {
-    fontSize: 12,
-    marginBottom: 2,
-  },
-  statSubtitle: {
-    fontSize: 10,
-  },
-  earningsSection: {
-    marginBottom: 24,
-  },
-  earningsCard: {
-    marginHorizontal: 16,
-    padding: 20,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  earningsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  earningsInfo: {
-    marginLeft: 16,
-  },
-  earningsAmount: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 4,
   },
-  earningsLabel: {
-    fontSize: 14,
+  statTitle: {
+    fontSize: 12,
   },
-  earningsBreakdown: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
-    paddingTop: 16,
-  },
-  earningsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  earningsRowLabel: {
-    fontSize: 14,
-  },
-  earningsRowValue: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  menuSection: {
-    marginBottom: 24,
-  },
-  menuCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  section: {
     padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 8,
-    borderRadius: 12,
-    borderWidth: 1,
   },
-  menuIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  menuContent: {
-    flex: 1,
-  },
-  menuTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  menuSubtitle: {
-    fontSize: 14,
-  },
-  quickActionsSection: {
-    marginBottom: 24,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
   quickActionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 16,
     gap: 12,
   },
-  quickActionCard: {
-    width: '48%',
-    padding: 20,
+  quickAction: {
+    width: '30%',
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 12,
     borderWidth: 1,
+    padding: 12,
+  },
+  quickActionHeader: {
+    position: 'relative',
     alignItems: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   quickActionText: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 8,
+    fontWeight: '500',
+  },
+  infoCard: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  infoLabel: {
+    fontSize: 14,
+    marginLeft: 8,
+    flex: 1,
+  },
+  infoValue: {
     fontSize: 14,
     fontWeight: '600',
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    marginTop: 16,
-    fontSize: 16,
-    textAlign: 'center',
   },
 });
 

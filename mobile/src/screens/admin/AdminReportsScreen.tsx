@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getBaseURL } from '../../config/api';
 import {
   View,
   Text,
@@ -110,7 +111,8 @@ const AdminReportsScreen: React.FC = () => {
   const loadReportData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/admin/reports?period=${selectedPeriod}`, {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/admin/reports?period=${selectedPeriod}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
