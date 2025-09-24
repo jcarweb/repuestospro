@@ -14,7 +14,7 @@ const ServerStatus: React.FC<ServerStatusProps> = ({ className = '' }) => {
     
     setIsChecking(true);
     try {
-      const response = await fetch('http://localhost:3001/health', {
+      const response = await fetch('http://localhost:5000/health', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

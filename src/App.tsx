@@ -97,11 +97,23 @@ import DeliverySchedule from './pages/DeliverySchedule';
 import DeliveryAvailabilityStatus from './pages/DeliveryAvailabilityStatus';
 import DeliveryProfile from './pages/DeliveryProfile';
 
+// Páginas de vendedor
+import SellerDashboard from './pages/SellerDashboard';
+import SellerPrices from './pages/SellerPrices';
+import SellerChat from './pages/SellerChat';
+import SellerQuotes from './pages/SellerQuotes';
+import SellerProducts from './pages/SellerProducts';
+import SellerCustomers from './pages/SellerCustomers';
+import SellerPerformance from './pages/SellerPerformance';
+import SellerProfile from './pages/SellerProfile';
+
 // Componentes de rutas protegidas
 import AdminRoute from './components/AdminRoute';
 import StoreManagerRoute from './components/StoreManagerRoute';
 import DeliveryRoute from './components/DeliveryRoute';
 import DeliveryLayout from './components/DeliveryLayout';
+import SellerRoute from './components/SellerRoute';
+import SellerLayout from './components/SellerLayout';
 import ClientRoute from './components/ClientRoute';
 import ClientLayout from './components/ClientLayout';
 import AdminLayout from './components/AdminLayout';
@@ -697,6 +709,96 @@ function AppContent() {
                      <Configuration />
                    </DeliveryLayout>
                  </DeliveryRoute>
+               } />
+             </Routes>
+           } />
+
+                    {/* Rutas de vendedor - SIN Header ni Sidebar principal */}
+           <Route path="/seller/*" element={
+             <Routes>
+               <Route path="/" element={
+                 <SellerRoute>
+                   <Navigate to="/seller/dashboard" replace />
+                 </SellerRoute>
+               } />
+               <Route path="/dashboard" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerDashboard />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/prices" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerPrices />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/chat" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerChat />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/quotes" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerQuotes />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/products" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerProducts />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/customers" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerCustomers />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/performance" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerPerformance />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/profile" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerProfile />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               
+               {/* Rutas de perfil para vendedor */}
+               <Route path="/user-profile" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <Profile />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/security" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <Security />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/configuration" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <Configuration />
+                   </SellerLayout>
+                 </SellerRoute>
                } />
              </Routes>
            } />

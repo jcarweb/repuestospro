@@ -32,6 +32,12 @@ const TwoFactorVerification: React.FC<TwoFactorVerificationProps> = ({
       return;
     }
 
+    // Validar que el código tenga 6 dígitos
+    if (code.trim().length !== 6) {
+      setError('El código debe tener 6 dígitos');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -137,11 +143,22 @@ const TwoFactorVerification: React.FC<TwoFactorVerificationProps> = ({
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500">
-            El código cambia cada 30 segundos
+            Ingresa el código de 6 dígitos de tu autenticador
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            Código de prueba: 612927
+            El código cambia cada 30 segundos
           </p>
+          <p className="text-xs text-blue-600 mt-1 font-medium">
+            🔐 Sistema de seguridad profesional activado
+          </p>
+          <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-xs text-yellow-800 font-medium">
+              💡 Si tienes problemas con el código TOTP, puedes usar un código de respaldo
+            </p>
+            <p className="text-xs text-yellow-700 mt-1">
+              Los códigos de respaldo son de 6 caracteres alfanuméricos
+            </p>
+          </div>
         </div>
       </div>
     </div>

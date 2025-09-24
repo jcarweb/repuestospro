@@ -146,3 +146,4 @@ pids
 # Temporary folders
 tmp/
 temp/
+"mobile/android/app/src/main/assets/index.android.bundle" 
