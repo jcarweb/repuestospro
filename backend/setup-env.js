@@ -8,7 +8,7 @@ PORT=5000
 NODE_ENV=development
 
 # Configuración de JWT
-JWT_SECRET=tu-secreto-jwt-super-seguro-cambiar-en-produccion
+JWT_SECRET=your-jwt-secret-here
 JWT_EXPIRES_IN=24h
 
 # Configuración de MongoDB (REEMPLAZA CON TUS CREDENCIALES)

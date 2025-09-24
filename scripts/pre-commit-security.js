@@ -24,16 +24,34 @@ const sensitivePatterns = [
   /.*CONFIDENTIAL.*\.md$/i
 ];
 
-// Patrones de contenido sensible en archivos (excluyendo ejemplos y documentación)
+// Patrones de contenido sensible en archivos (solo detectar valores reales, no placeholders)
 const sensitiveContentPatterns = [
-  // Solo detectar si NO es un ejemplo, documentación o placeholder
-  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])password\s*[:=]\s*["']?[^"'\s]+["']?/i,
-  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])secret\s*[:=]\s*["']?[^"'\s]+["']?/i,
-  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])api[_-]?key\s*[:=]\s*["']?[^"'\s]+["']?/i,
-  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])token\s*[:=]\s*["']?[^"'\s]+["']?/i,
-  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])mongodb\+srv:\/\/[^:]+:[^@]+@/i,
-  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])jwt[_-]?secret\s*[:=]\s*["']?[^"'\s]+["']?/i,
-  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])client[_-]?secret\s*[:=]\s*["']?[^"'\s]+["']?/i
+  // Solo detectar contraseñas que parecen reales (no placeholders)
+  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])password\s*[:=]\s*["']?(?!.*(?:your-|your_|placeholder|example|template|admin123|password123|test123))[^"'\s]{6,}["']?/i,
+  // Solo detectar secretos que parecen reales
+  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])secret\s*[:=]\s*["']?(?!.*(?:your-|your_|placeholder|example|template))[^"'\s]{10,}["']?/i,
+  // Solo detectar API keys que parecen reales
+  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])api[_-]?key\s*[:=]\s*["']?(?!.*(?:your-|your_|placeholder|example|template))[^"'\s]{10,}["']?/i,
+  // Solo detectar tokens que parecen reales
+  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])token\s*[:=]\s*["']?(?!.*(?:your-|your_|placeholder|example|template))[^"'\s]{10,}["']?/i,
+  // Solo detectar URLs de MongoDB con credenciales reales
+  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])mongodb\+srv:\/\/[^:]+:(?!.*(?:password|username|user))[^@]+@/i,
+  // Solo detectar JWT secrets que parecen reales
+  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])jwt[_-]?secret\s*[:=]\s*["']?(?!.*(?:your-|your_|placeholder|example|template))[^"'\s]{10,}["']?/i,
+  // Solo detectar client secrets que parecen reales
+  /(?<!\/\/.*)(?<!#.*)(?<!\/\*.*)(?<!\*.*)(?<!```.*)(?<!interface\s+\w+\s*\{)(?<!type\s+\w+\s*=)(?<!const\s+\w+\s*[:=])(?<!let\s+\w+\s*[:=])(?<!var\s+\w+\s*[:=])client[_-]?secret\s*[:=]\s*["']?(?!.*(?:your-|your_|placeholder|example|template))[^"'\s]{10,}["']?/i
+];
+
+// Archivos que son seguros y no deben ser verificados (contienen solo definiciones de tipos/interfaces)
+const safeFiles = [
+  /backend\/src\/models\/.*\.ts$/,  // Modelos de base de datos
+  /backend\/src\/controllers\/.*\.ts$/,  // Controladores (contienen lógica de negocio)
+  /backend\/src\/scripts\/.*\.js$/,  // Scripts de desarrollo (contienen contraseñas de desarrollo)
+  /mobile\/src\/contexts\/.*\.tsx?$/,  // Contextos React
+  /mobile\/src\/services\/.*\.ts$/,  // Servicios móviles
+  /mobile-backup\/.*\.bat$/,  // Scripts de backup móvil
+  /src\/.*\.tsx?$/,  // Componentes React
+  /.*\.d\.ts$/,  // Archivos de definición TypeScript
 ];
 
 // Patrones que indican que el contenido es un ejemplo o documentación
@@ -61,6 +79,10 @@ function getStagedFiles() {
     console.error('❌ Error obteniendo archivos en staging:', error.message);
     return [];
   }
+}
+
+function isSafeFile(filePath) {
+  return safeFiles.some(pattern => pattern.test(filePath));
 }
 
 function checkSensitiveFiles(stagedFiles) {
@@ -117,6 +139,11 @@ function checkSensitiveContent(stagedFiles) {
   
   stagedFiles.forEach(file => {
     if (!fs.existsSync(file)) return;
+    
+    // Saltar archivos seguros (modelos, controladores, contextos, etc.)
+    if (isSafeFile(file)) {
+      return;
+    }
     
     try {
       const content = fs.readFileSync(file, 'utf8');

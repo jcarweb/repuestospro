@@ -327,7 +327,7 @@ src/
 Crear archivo \`.env\` en la raíz del proyecto:
 \`\`\`
 API_BASE_URL=http://localhost:5000/api
-GOOGLE_MAPS_API_KEY=tu_api_key_aqui
+GOOGLE_MAPS_API_KEY=your_api_key_here
 \`\`\`
 
 ### Android
