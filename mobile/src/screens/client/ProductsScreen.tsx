@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import apiService from '../../services/api';
 
 interface Product {
@@ -38,6 +39,7 @@ interface Category {
 
 const ProductsScreen: React.FC = () => {
   const { colors } = useTheme();
+  const navigation = useNavigation();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -141,7 +143,10 @@ const ProductsScreen: React.FC = () => {
       style={[styles.productCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
       onPress={() => {
         // Navegar al detalle del producto
-        // navigation.navigate('ProductDetail', { productId: item._id });
+        (navigation as any).navigate('ProductDetail', { 
+          productId: item._id,
+          product: item 
+        });
       }}
     >
       <Image

@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 interface Product {
   _id: string;
@@ -50,6 +51,8 @@ const { width } = Dimensions.get('window');
 const ProductDetailScreen: React.FC = () => {
   const { colors } = useTheme();
   const { showToast } = useToast();
+  const navigation = useNavigation();
+  const route = useRoute();
   const [product, setProduct] = useState<Product | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -129,9 +132,21 @@ const ProductDetailScreen: React.FC = () => {
     loadProductData();
   }, []);
 
+  // Obtener parámetros de la ruta
+  const productId = (route.params as any)?.productId;
+  const productFromRoute = (route.params as any)?.product;
+
   const loadProductData = async () => {
     try {
       setIsLoading(true);
+      
+      // Si hay un producto pasado por parámetros, usarlo
+      if (productFromRoute) {
+        setProduct(productFromRoute);
+        setReviews(mockReviews);
+        return;
+      }
+      
       // Simular carga de datos
       await new Promise(resolve => setTimeout(resolve, 1000));
       setProduct(mockProduct);
@@ -152,6 +167,11 @@ const ProductDetailScreen: React.FC = () => {
 
     // Aquí se agregaría la lógica para añadir al carrito
     showToast(`${quantity} ${product!.name} agregado al carrito`, 'success');
+    
+    // Opcional: navegar al carrito después de agregar
+    setTimeout(() => {
+      (navigation as any).navigate('ClientTabs', { screen: 'Cart' });
+    }, 1500);
   };
 
   const handleBuyNow = () => {
@@ -162,19 +182,22 @@ const ProductDetailScreen: React.FC = () => {
 
     // Aquí se navegaría al checkout
     showToast('Procediendo al pago...', 'success');
+    
+    // Simular navegación al checkout
+    setTimeout(() => {
+      Alert.alert('Checkout', 'Funcionalidad de checkout próximamente');
+    }, 1000);
   };
 
   const handleChatWithCompany = () => {
     if (!product) return;
     
     // Navegar al chat con la empresa específica
-    // navigation.navigate('Chat', { 
-    //   companyId: product.brand,
-    //   productId: product._id,
-    //   productName: product.name 
-    // });
-    
-    showToast(`Iniciando chat con ${product.brand} sobre ${product.name}...`, 'info');
+    (navigation as any).navigate('Chat', { 
+      companyId: product.brand,
+      productId: product._id,
+      productName: product.name 
+    });
   };
 
   const toggleFavorite = () => {

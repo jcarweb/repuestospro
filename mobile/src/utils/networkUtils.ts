@@ -32,9 +32,9 @@ const NETWORK_CONFIGS = {
      // Puerto por defecto
    defaultPort: 5000,
   
-  // Timeouts
-  scanTimeout: 5000,
-  connectionTimeout: 3000,
+  // Timeouts optimizados para mejor conectividad
+  scanTimeout: 8000, // Aumentado para dar más tiempo al escaneo
+  connectionTimeout: 5000, // Aumentado para mejor estabilidad
 };
 
 // Interfaz para la configuración de red

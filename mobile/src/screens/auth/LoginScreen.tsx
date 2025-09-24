@@ -523,23 +523,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   <Text style={[styles.helpLinkText, { color: colors.primary }]}>¿Olvidaste tu contraseña?</Text>
                 </TouchableOpacity>
                 
-                {/* Botón temporal para limpiar storage */}
-                <TouchableOpacity
-                  style={[styles.helpLink, { marginTop: 10 }]}
-                  onPress={async () => {
-                    try {
-                      await AsyncStorage.removeItem('user');
-                      await AsyncStorage.removeItem('authToken');
-                      await AsyncStorage.removeItem('tempToken');
-                      await AsyncStorage.removeItem('savedCredentials');
-                      Alert.alert('Storage Limpiado', 'AsyncStorage limpiado. Reinicia la app.');
-                    } catch (error) {
-                      Alert.alert('Error', 'Error limpiando storage');
-                    }
-                  }}
-                >
-                  <Text style={[styles.helpLinkText, { color: colors.error }]}>🧹 Limpiar Storage (Debug)</Text>
-                </TouchableOpacity>
               </View>
 
             </View>

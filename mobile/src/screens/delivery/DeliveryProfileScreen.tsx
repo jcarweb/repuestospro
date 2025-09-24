@@ -124,7 +124,7 @@ const DeliveryProfileScreen: React.FC = () => {
   };
 
   const handleEarningsPress = () => {
-    showToast('Funcionalidad de ganancias próximamente', 'info');
+    navigation.navigate('DeliveryEarnings' as never);
   };
 
   const handleSettingsPress = () => {

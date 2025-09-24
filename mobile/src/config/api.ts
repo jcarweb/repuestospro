@@ -4,8 +4,10 @@ import { BACKEND_ENVIRONMENTS, BackendEnvironment, getEnvironmentById } from './
 
 // Configuración base de la API
 const BASE_API_CONFIG = {
-  TIMEOUT: 10000, // 10 segundos
+  TIMEOUT: 15000, // 15 segundos para mejor estabilidad
   RETRY_ATTEMPTS: 3,
+  RETRY_DELAY: 1000, // 1 segundo base para backoff
+  MAX_RETRY_DELAY: 5000, // Máximo 5 segundos entre reintentos
 };
 
 // Clase para manejar la configuración dinámica de la API
@@ -140,27 +142,74 @@ export class DynamicAPIConfig {
     return BACKEND_ENVIRONMENTS;
   }
 
-  // Verificar conectividad del entorno actual
+  // Verificar conectividad del entorno actual con reintentos
   async testCurrentEnvironment(): Promise<boolean> {
     if (!this.currentConfig) return false;
     
+    return await this.requestWithRetry(
+      `${this.currentConfig.baseUrl}/health`,
+      { method: 'GET' },
+      'health check'
+    ).then(() => {
+      this.currentConfig!.isWorking = true;
+      this.currentConfig!.lastTested = Date.now();
+      console.log(`🔍 Test de conectividad ${this.currentConfig!.networkName}: ✅ OK`);
+      return true;
+    }).catch((error) => {
+      console.log(`🔍 Test de conectividad ${this.currentConfig!.networkName}: ❌ FALLO`, error);
+      this.currentConfig!.isWorking = false;
+      this.currentConfig!.lastTested = Date.now();
+      return false;
+    });
+  }
+
+  // Método para hacer peticiones con reintentos y backoff exponencial
+  private async requestWithRetry(
+    url: string, 
+    options: RequestInit = {}, 
+    operation: string = 'request',
+    attempt: number = 1
+  ): Promise<Response> {
+    const isProduction = this.currentEnvironment?.isProduction || false;
+    const timeout = isProduction ? 20000 : BASE_API_CONFIG.TIMEOUT; // 20s para producción, 15s para desarrollo
+    
     try {
-      const response = await fetch(`${this.currentConfig.baseUrl}/health`, {
-        method: 'GET',
-        timeout: 5000,
+      console.log(`🌐 ${operation} (intento ${attempt}/${BASE_API_CONFIG.RETRY_ATTEMPTS}): ${url}`);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+      
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...options.headers,
+        },
       });
       
-      const isWorking = response.ok;
-      this.currentConfig.isWorking = isWorking;
-      this.currentConfig.lastTested = Date.now();
+      clearTimeout(timeoutId);
       
-      console.log(`🔍 Test de conectividad ${this.currentConfig.networkName}:`, isWorking ? '✅ OK' : '❌ FALLO');
-      return isWorking;
+      if (!response.ok && response.status >= 500) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+      
+      return response;
     } catch (error) {
-      console.log(`🔍 Test de conectividad ${this.currentConfig.networkName}: ❌ FALLO`, error);
-      this.currentConfig.isWorking = false;
-      this.currentConfig.lastTested = Date.now();
-      return false;
+      if (attempt < BASE_API_CONFIG.RETRY_ATTEMPTS) {
+        const delay = Math.min(
+          BASE_API_CONFIG.RETRY_DELAY * Math.pow(2, attempt - 1),
+          BASE_API_CONFIG.MAX_RETRY_DELAY
+        );
+        
+        console.log(`⏳ Reintentando ${operation} en ${delay}ms... (intento ${attempt + 1})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        
+        return this.requestWithRetry(url, options, operation, attempt + 1);
+      }
+      
+      throw error;
     }
   }
 
@@ -188,6 +237,8 @@ export const API_CONFIG = {
   },
   TIMEOUT: BASE_API_CONFIG.TIMEOUT,
   RETRY_ATTEMPTS: BASE_API_CONFIG.RETRY_ATTEMPTS,
+  RETRY_DELAY: BASE_API_CONFIG.RETRY_DELAY,
+  MAX_RETRY_DELAY: BASE_API_CONFIG.MAX_RETRY_DELAY,
 };
 
 // Función helper para obtener la URL base

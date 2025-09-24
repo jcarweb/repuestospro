@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useNavigation } from '@react-navigation/native';
 
 interface ChatMessage {
   id: string;
@@ -51,6 +52,7 @@ interface ChatScreenProps {
 const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
   const { colors } = useTheme();
   const { showToast } = useToast();
+  const navigation = useNavigation();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -356,8 +358,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
            <TouchableOpacity
              style={styles.headerButton}
              onPress={() => {
-               // navigation.navigate('ChatEvaluation', { chatId: chatSession?.id });
-               showToast('Evaluación del chat', 'info');
+               (navigation as any).navigate('ChatEvaluation', { chatId: chatSession?.id });
              }}
            >
              <Ionicons name="star-outline" size={20} color={colors.textTertiary} />

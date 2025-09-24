@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import apiService from '../../services/api';
 
 
@@ -48,6 +49,7 @@ interface SearchConfig {
 const ClientHomeScreen: React.FC = () => {
   const { colors } = useTheme();
   const { showToast } = useToast();
+  const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -280,8 +282,10 @@ const ClientHomeScreen: React.FC = () => {
       style={[styles.productCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
       onPress={() => {
         // Navegar al detalle del producto
-        // navigation.navigate('ProductDetail', { productId: item._id });
-        showToast(`Navegando a ${item.name}`, 'info');
+        (navigation as any).navigate('ProductDetail', { 
+          productId: item._id,
+          product: item 
+        });
       }}
     >
       <Image

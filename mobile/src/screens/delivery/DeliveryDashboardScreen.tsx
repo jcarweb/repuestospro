@@ -54,11 +54,31 @@ const DeliveryDashboardScreen: React.FC = () => {
   const loadDeliveryStats = async () => {
     try {
       setLoading(true);
-      // TODO: Implementar endpoint real para estadísticas de delivery
-      // const response = await apiService.getDeliveryStats();
-      // setStats(response.data);
+      const response = await apiService.getDeliveryStats();
       
-      // Datos mock por ahora
+      if (response.success) {
+        const data = response.data;
+        setStats({
+          assignedOrders: data.totalDeliveries || 0,
+          completedToday: data.completedDeliveries || 0,
+          averageRating: data.averageRating || 0,
+          totalEarnings: data.totalEarnings || 0,
+          currentStatus: user?.deliveryStatus || 'unavailable',
+          autoStatusMode: user?.autoStatusMode || false,
+          workHours: user?.workSchedule ? `${user.workSchedule.startTime} - ${user.workSchedule.endTime}` : '8:00 - 17:00',
+          deliveryZone: user?.deliveryZone || {
+            center: [-66.98422315655894, 10.462530926442378],
+            radius: 10,
+          },
+        });
+      } else {
+        throw new Error(response.message || 'Error al cargar estadísticas');
+      }
+    } catch (error) {
+      console.error('Error loading delivery stats:', error);
+      showToast('Error al cargar estadísticas de delivery', 'error');
+      
+      // Fallback a datos mock en caso de error
       setStats({
         assignedOrders: 5,
         completedToday: 12,
@@ -72,9 +92,6 @@ const DeliveryDashboardScreen: React.FC = () => {
           radius: 10,
         },
       });
-    } catch (error) {
-      console.error('Error loading delivery stats:', error);
-      showToast('Error al cargar estadísticas de delivery', 'error');
     } finally {
       setLoading(false);
     }
@@ -89,11 +106,14 @@ const DeliveryDashboardScreen: React.FC = () => {
   const toggleStatus = async () => {
     try {
       const newStatus = stats.currentStatus === 'available' ? 'unavailable' : 'available';
-      // TODO: Implementar endpoint real para cambiar estado
-      // await apiService.updateDeliveryStatus(newStatus);
+      const response = await apiService.updateDeliveryStatus({ deliveryStatus: newStatus });
       
-      setStats(prev => ({ ...prev, currentStatus: newStatus }));
-      showToast(`Estado cambiado a: ${newStatus === 'available' ? 'Disponible' : 'No Disponible'}`, 'success');
+      if (response.success) {
+        setStats(prev => ({ ...prev, currentStatus: newStatus }));
+        showToast(`Estado cambiado a: ${newStatus === 'available' ? 'Disponible' : 'No Disponible'}`, 'success');
+      } else {
+        throw new Error(response.message || 'Error al actualizar estado');
+      }
     } catch (error) {
       console.error('Error updating status:', error);
       showToast('Error al cambiar estado', 'error');
@@ -102,11 +122,16 @@ const DeliveryDashboardScreen: React.FC = () => {
 
   const toggleAutoStatus = async () => {
     try {
-      // TODO: Implementar endpoint real para cambiar modo automático
-      // await apiService.updateAutoStatusMode(!stats.autoStatusMode);
+      const response = await apiService.updateDeliverySettings({ 
+        performance: { autoStatusMode: !stats.autoStatusMode } 
+      });
       
-      setStats(prev => ({ ...prev, autoStatusMode: !prev.autoStatusMode }));
-      showToast(`Modo automático: ${!stats.autoStatusMode ? 'Activado' : 'Desactivado'}`, 'success');
+      if (response.success) {
+        setStats(prev => ({ ...prev, autoStatusMode: !prev.autoStatusMode }));
+        showToast(`Modo automático: ${!stats.autoStatusMode ? 'Activado' : 'Desactivado'}`, 'success');
+      } else {
+        throw new Error(response.message || 'Error al actualizar modo automático');
+      }
     } catch (error) {
       console.error('Error updating auto status:', error);
       showToast('Error al cambiar modo automático', 'error');
@@ -176,8 +201,31 @@ const DeliveryDashboardScreen: React.FC = () => {
   );
 
   const handleQuickAction = (action: string) => {
-    showToast(`Acción: ${action}`, 'info');
-    // TODO: Implementar navegación a pantallas específicas
+    switch (action) {
+      case 'Ver Órdenes Asignadas':
+        navigation.navigate('DeliveryOrders' as never);
+        break;
+      case 'Ver Completadas':
+        navigation.navigate('DeliveryOrders' as never);
+        break;
+      case 'Ver Calificaciones':
+        navigation.navigate('DeliveryRatings' as never);
+        break;
+      case 'Ver Ganancias':
+        navigation.navigate('DeliveryEarnings' as never);
+        break;
+      case 'Mapa de Rutas':
+        navigation.navigate('DeliveryMap' as never);
+        break;
+      case 'Reportes':
+        navigation.navigate('DeliveryReport' as never);
+        break;
+      case 'Horario de Trabajo':
+        navigation.navigate('DeliverySchedule' as never);
+        break;
+      default:
+        showToast(`Acción: ${action}`, 'info');
+    }
   };
 
   const getStatusColor = (status: string) => {

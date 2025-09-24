@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthResponse, LoginRequest, RegisterRequest, ApiResponse, User } from '../types';
 import API_CONFIG, { getBaseURL } from '../config/api';
+import { offlineService } from './offlineService';
 
 class ApiService {
   private token: string | null = null;
@@ -61,12 +62,25 @@ class ApiService {
       },
     };
 
+    return await this.requestWithRetry(url, config, endpoint);
+  }
+
+  // Método mejorado con reintentos y backoff exponencial
+  private async requestWithRetry<T>(
+    url: string,
+    config: RequestInit,
+    operation: string,
+    attempt: number = 1
+  ): Promise<T> {
     try {
-      console.log('🌐 Making request to:', url);
+      console.log(`🌐 ${operation} (intento ${attempt}/${API_CONFIG.RETRY_ATTEMPTS}): ${url}`);
       
-      // Agregar timeout a la petición
+      // Timeout dinámico basado en el entorno
+      const isProduction = url.includes('onrender.com');
+      const timeout = isProduction ? 20000 : API_CONFIG.TIMEOUT; // 20s para Render, 15s para local
+      
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
       
       const response = await fetch(url, {
         ...config,
@@ -78,25 +92,63 @@ class ApiService {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error en la petición');
+        // Si es un error del servidor (5xx), reintentar
+        if (response.status >= 500 && attempt < API_CONFIG.RETRY_ATTEMPTS) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        throw new Error(data.message || `Error ${response.status}: ${response.statusText}`);
       }
 
       return data;
     } catch (error) {
-      console.error('API Error:', error);
+      console.error(`API Error (intento ${attempt}):`, error);
+      
+      // Lógica de reintentos
+      if (attempt < API_CONFIG.RETRY_ATTEMPTS) {
+        const shouldRetry = this.shouldRetry(error);
+        
+        if (shouldRetry) {
+          const delay = Math.min(
+            API_CONFIG.RETRY_DELAY * Math.pow(2, attempt - 1),
+            API_CONFIG.MAX_RETRY_DELAY
+          );
+          
+          console.log(`⏳ Reintentando ${operation} en ${delay}ms... (intento ${attempt + 1})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          
+          return this.requestWithRetry(url, config, operation, attempt + 1);
+        }
+      }
       
       // Si es un error de timeout o conexión, devolver un error más específico
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
-          throw new Error('Timeout: El servidor no respondió en el tiempo esperado');
+          throw new Error('Timeout: El servidor no respondió en el tiempo esperado. Intenta nuevamente.');
         }
         if (error.message.includes('Network request failed')) {
-          throw new Error('Error de conexión: No se pudo conectar al servidor');
+          throw new Error('Error de conexión: No se pudo conectar al servidor. Verifica tu conexión a internet.');
+        }
+        if (error.message.includes('Server error')) {
+          throw new Error('El servidor está experimentando problemas. Intenta nuevamente en unos momentos.');
         }
       }
       
       throw error;
     }
+  }
+
+  // Determinar si un error debe ser reintentado
+  private shouldRetry(error: any): boolean {
+    if (error instanceof Error) {
+      // Reintentar en casos de timeout, errores de red, o errores del servidor
+      return (
+        error.name === 'AbortError' ||
+        error.message.includes('Network request failed') ||
+        error.message.includes('Server error') ||
+        error.message.includes('fetch')
+      );
+    }
+    return false;
   }
 
   // Auth endpoints
@@ -241,16 +293,37 @@ class ApiService {
     }
 
     const endpoint = `/products${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return this.request<ApiResponse<any[]>>(endpoint);
+    const cacheKey = `products_${queryParams.toString()}`;
+    
+    // Usar cache para productos (5 minutos de TTL)
+    return offlineService.getData(
+      cacheKey,
+      () => this.request<ApiResponse<any[]>>(endpoint),
+      5 * 60 * 1000
+    );
   }
 
   async getProduct(id: string): Promise<ApiResponse<any>> {
-    return this.request<ApiResponse<any>>(`/products/${id}`);
+    const cacheKey = `product_${id}`;
+    
+    // Usar cache para producto individual (10 minutos de TTL)
+    return offlineService.getData(
+      cacheKey,
+      () => this.request<ApiResponse<any>>(`/products/${id}`),
+      10 * 60 * 1000
+    );
   }
 
   // Categories endpoints
   async getCategories(): Promise<ApiResponse<any[]>> {
-    return this.request<ApiResponse<any[]>>('/categories');
+    const cacheKey = 'categories';
+    
+    // Usar cache para categorías (30 minutos de TTL - cambian poco)
+    return offlineService.getData(
+      cacheKey,
+      () => this.request<ApiResponse<any[]>>('/categories'),
+      30 * 60 * 1000
+    );
   }
 
   async getSubcategories(categoryId: string): Promise<ApiResponse<any[]>> {
@@ -326,6 +399,307 @@ class ApiService {
       return this.token !== null && this.token !== '';
     } catch (error) {
       return false;
+    }
+  }
+
+  // ==================== DELIVERY ENDPOINTS ====================
+
+  /**
+   * Obtener estadísticas del delivery
+   */
+  async getDeliveryStats(): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/delivery/stats/personal`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting delivery stats:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener órdenes del delivery
+   */
+  async getDeliveryOrders(params?: { status?: string; limit?: number; page?: number }): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const queryParams = new URLSearchParams();
+      
+      if (params?.status) queryParams.append('status', params.status);
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      if (params?.page) queryParams.append('page', params.page.toString());
+
+      const response = await fetch(`${baseURL}/api/delivery/orders?${queryParams}`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting delivery orders:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualizar estado de una orden
+   */
+  async updateOrderStatus(orderId: string, status: string, notes?: string, location?: any): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/delivery/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ status, notes, location }),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener ubicaciones de entrega
+   */
+  async getDeliveryLocations(status?: string): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const queryParams = new URLSearchParams();
+      
+      if (status) queryParams.append('status', status);
+
+      const response = await fetch(`${baseURL}/api/delivery/locations?${queryParams}`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting delivery locations:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener reportes del delivery
+   */
+  async getDeliveryReports(params?: { period?: string; dateFrom?: string; dateTo?: string }): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const queryParams = new URLSearchParams();
+      
+      if (params?.period) queryParams.append('period', params.period);
+      if (params?.dateFrom) queryParams.append('dateFrom', params.dateFrom);
+      if (params?.dateTo) queryParams.append('dateTo', params.dateTo);
+
+      const response = await fetch(`${baseURL}/api/delivery/reports?${queryParams}`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting delivery reports:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener calificaciones del delivery
+   */
+  async getDeliveryRatings(params?: { rating?: number; limit?: number; page?: number }): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const queryParams = new URLSearchParams();
+      
+      if (params?.rating) queryParams.append('rating', params.rating.toString());
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      if (params?.page) queryParams.append('page', params.page.toString());
+
+      const response = await fetch(`${baseURL}/api/delivery/ratings?${queryParams}`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting delivery ratings:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener horario de trabajo del delivery
+   */
+  async getDeliverySchedule(): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/delivery/schedule`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting delivery schedule:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualizar horario de trabajo del delivery
+   */
+  async updateDeliverySchedule(scheduleData: any): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/delivery/schedule`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify(scheduleData),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error updating delivery schedule:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener configuración del delivery
+   */
+  async getDeliverySettings(): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/delivery/settings`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting delivery settings:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualizar configuración del delivery
+   */
+  async updateDeliverySettings(settingsData: any): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/delivery/settings`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify(settingsData),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error updating delivery settings:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener datos de ubicación del delivery
+   */
+  async getDeliveryLocation(): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/delivery/location`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting delivery location:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualizar ubicación del delivery
+   */
+  async updateDeliveryLocation(locationData: any): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/delivery/location`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify(locationData),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error updating delivery location:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener ganancias del delivery
+   */
+  async getDeliveryEarnings(params?: { period?: string; dateFrom?: string; dateTo?: string }): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const queryParams = new URLSearchParams();
+      
+      if (params?.period) queryParams.append('period', params.period);
+      if (params?.dateFrom) queryParams.append('dateFrom', params.dateFrom);
+      if (params?.dateTo) queryParams.append('dateTo', params.dateTo);
+
+      const response = await fetch(`${baseURL}/api/delivery/earnings?${queryParams}`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting delivery earnings:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualizar estado de disponibilidad del delivery
+   */
+  async updateDeliveryStatus(statusData: any): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/delivery/status`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify(statusData),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error updating delivery status:', error);
+      throw error;
     }
   }
 }

@@ -61,6 +61,14 @@ import SellerDashboardScreen from '../screens/seller/SellerDashboardScreen';
 import DeliveryDashboardScreen from '../screens/delivery/DeliveryDashboardScreen';
 import DeliveryProfileScreen from '../screens/delivery/DeliveryProfileScreen';
 import DeliveryEditProfileScreen from '../screens/delivery/DeliveryEditProfileScreen';
+import DeliveryOrdersScreen from '../screens/delivery/DeliveryOrdersScreen';
+import DeliveryMapScreen from '../screens/delivery/DeliveryMapScreen';
+import DeliveryReportScreen from '../screens/delivery/DeliveryReportScreen';
+import DeliveryRatingsScreen from '../screens/delivery/DeliveryRatingsScreen';
+import DeliveryScheduleScreen from '../screens/delivery/DeliveryScheduleScreen';
+import DeliverySettingsScreen from '../screens/delivery/DeliverySettingsScreen';
+import DeliveryLocationScreen from '../screens/delivery/DeliveryLocationScreen';
+import DeliveryEarningsScreen from '../screens/delivery/DeliveryEarningsScreen';
 
 // Components
 import { ActivityIndicator, View, Text } from 'react-native';
@@ -603,6 +611,78 @@ const AppNavigator = () => {
                     headerShown: true,
                     title: 'Editar Perfil',
                     headerBackTitle: 'Perfil'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="DeliveryOrders" 
+                  component={DeliveryOrdersScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Mis Entregas',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="DeliveryMap" 
+                  component={DeliveryMapScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Mapa de Rutas',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="DeliveryReport" 
+                  component={DeliveryReportScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Reportes de Delivery',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="DeliveryRatings" 
+                  component={DeliveryRatingsScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Mis Calificaciones',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="DeliverySchedule" 
+                  component={DeliveryScheduleScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Horario de Trabajo',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="DeliverySettings" 
+                  component={DeliverySettingsScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Configuración de Repartidor',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="DeliveryLocation" 
+                  component={DeliveryLocationScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Ubicación en Tiempo Real',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="DeliveryEarnings" 
+                  component={DeliveryEarningsScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Ganancias y Comisiones',
+                    headerBackTitle: 'Dashboard'
                   }} 
                 />
               </>
