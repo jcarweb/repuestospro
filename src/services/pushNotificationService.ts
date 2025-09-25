@@ -89,7 +89,7 @@ class PushNotificationService {
       this.log('📝 Intentando registrar Service Worker en /sw.js');
       
       // Intentar registrar el Service Worker
-      this.swRegistration = await navigator.serviceWorker.register('/sw.js', {
+      this.swRegistration = await navigator.serviceWorker.register('/sw-simple.js', {
         scope: '/',
         updateViaCache: 'none' // Evitar cache del Service Worker
       });
