@@ -1,31 +1,24 @@
 import nodemailer from 'nodemailer';
-import config from '../config/env';
-
+import dotenv from 'dotenv';
+// Cargar variables de entorno
+dotenv.config();
 class EmailService {
   private transporter: nodemailer.Transporter;
-
   constructor() {
-   /* console.log('🔧 Configuración de Email cargada:');
-    console.log('   Host:', config.EMAIL_HOST);
-    console.log('   Port:', config.EMAIL_PORT);
-    console.log('   User:', config.EMAIL_USER);
-    console.log('   Secure:', config.EMAIL_SECURE);
-    console.log('   Has Password:', !!config.EMAIL_PASS);*/
-    
+   /*
+    // Información de contraseña no loggeada por seguridad;*/
     this.transporter = nodemailer.createTransport({
-      host: config.EMAIL_HOST,
-      port: config.EMAIL_PORT,
-      secure: config.EMAIL_SECURE,
+      host: process.env['EMAIL_HOST'],
+      port: parseInt(process.env['EMAIL_PORT'] || '587'),
+      secure: process.env['EMAIL_SECURE'] === 'true',
       auth: {
-        user: config.EMAIL_USER,
-        pass: config.EMAIL_PASS
+        user: process.env['EMAIL_USER'],
+        pass: process.env['EMAIL_PASSWORD']
       }
     });
   }
-
   async sendWelcomeEmail(user: any, role: string): Promise<void> {
     const roleInfo = this.getRoleInfo(role);
-    
     const html = `
       <!DOCTYPE html>
       <html>
@@ -51,23 +44,18 @@ class EmailService {
           <div class="content">
             <h2>Hola ${user.name},</h2>
             <p>¡Gracias por registrarte en PiezasYA! Tu cuenta ha sido creada exitosamente como <strong>${this.getRoleName(role)}</strong>.</p>
-            
             <h3>${roleInfo.title}</h3>
             <ul>
               ${roleInfo.features.map(feature => `<li>${feature}</li>`).join('')}
             </ul>
-            
             <p>Para comenzar a usar todas las funcionalidades disponibles, te recomendamos:</p>
             <ol>
               <li>Completar tu perfil de usuario</li>
               <li>Configurar tus preferencias de seguridad</li>
               <li>Explorar las funcionalidades específicas de tu rol</li>
             </ol>
-            
-            <a href="${config.FRONTEND_URL}" class="cta">${roleInfo.ctaText}</a>
-            
+            <a href="${process.env['FRONTEND_URL']}" class="cta">${roleInfo.ctaText}</a>
             <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
-            
             <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
           <div class="footer">
@@ -78,18 +66,15 @@ class EmailService {
       </body>
       </html>
     `;
-
     await this.transporter.sendMail({
-      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${process.env['EMAIL_USER']}>`,
       to: user.email,
       subject: '¡Bienvenido a PiezasYA!',
       html
     });
   }
-
   async sendRegistrationCodeEmail(email: string, code: string, role: string, expiresAt: Date): Promise<void> {
     const roleInfo = this.getRoleInfo(role);
-    
     const html = `
       <!DOCTYPE html>
       <html>
@@ -116,19 +101,15 @@ class EmailService {
           <div class="content">
             <h2>Hola,</h2>
             <p>Has sido invitado a unirte a PiezasYA como <strong>${this.getRoleName(role)}</strong>.</p>
-            
             <h3>Tu código de registro:</h3>
             <div class="code">${code}</div>
-            
             <div class="warning">
               <strong>Importante:</strong> Este código expira el ${expiresAt.toLocaleDateString()} a las ${expiresAt.toLocaleTimeString()}.
             </div>
-            
             <h3>${roleInfo.title}</h3>
             <ul>
               ${roleInfo.features.map(feature => `<li>${feature}</li>`).join('')}
             </ul>
-            
             <p>Para completar tu registro:</p>
             <ol>
               <li>Haz clic en el botón de abajo</li>
@@ -136,11 +117,8 @@ class EmailService {
               <li>Completa tu información personal</li>
               <li>Configura tu contraseña</li>
             </ol>
-            
-            <a href="${config.FRONTEND_URL}/register-with-code" class="cta">Completar Registro</a>
-            
+            <a href="${process.env['FRONTEND_URL']}/register-with-code" class="cta">Completar Registro</a>
             <p>Si no solicitaste este código, puedes ignorar este email.</p>
-            
             <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
           <div class="footer">
@@ -151,18 +129,15 @@ class EmailService {
       </body>
       </html>
     `;
-
     await this.transporter.sendMail({
-      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${process.env['EMAIL_USER']}>`,
       to: email,
       subject: `Código de Registro - ${this.getRoleName(role)}`,
       html
     });
   }
-
   async sendPasswordResetEmail(email: string, resetToken: string): Promise<void> {
-    const resetUrl = `${config.FRONTEND_URL}/reset-password?token=${resetToken}`;
-    
+    const resetUrl = `${process.env['FRONTEND_URL']}/reset-password?token=${resetToken}`;
     const html = `
       <!DOCTYPE html>
       <html>
@@ -188,18 +163,13 @@ class EmailService {
           <div class="content">
             <h2>Hola,</h2>
             <p>Has solicitado restablecer tu contraseña en PiezasYA.</p>
-            
             <p>Haz clic en el botón de abajo para crear una nueva contraseña:</p>
-            
             <a href="${resetUrl}" class="cta">Restablecer Contraseña</a>
-            
             <div class="warning">
               <strong>Importante:</strong> Este enlace es válido por 1 hora. Si no solicitaste este cambio, puedes ignorar este email.
             </div>
-            
             <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
             <p style="word-break: break-all; color: #FFC300;">${resetUrl}</p>
-            
             <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
           <div class="footer">
@@ -210,18 +180,15 @@ class EmailService {
       </body>
       </html>
     `;
-
     await this.transporter.sendMail({
-      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${process.env['EMAIL_USER']}>`,
       to: email,
       subject: 'Restablecer Contraseña - PiezasYA',
       html
     });
   }
-
   async sendEmailVerificationEmail(email: string, verificationToken: string): Promise<void> {
-    const verificationUrl = `${config.FRONTEND_URL}/verify-email?token=${verificationToken}`;
-    
+    const verificationUrl = `${process.env['FRONTEND_URL']}/verify-email?token=${verificationToken}`;
     const html = `
       <!DOCTYPE html>
       <html>
@@ -246,14 +213,10 @@ class EmailService {
           <div class="content">
             <h2>Hola,</h2>
             <p>Gracias por registrarte en PiezasYA. Para completar tu registro, necesitamos verificar tu dirección de email.</p>
-            
             <p>Haz clic en el botón de abajo para verificar tu email:</p>
-            
             <a href="${verificationUrl}" class="cta">Verificar Email</a>
-            
             <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
             <p style="word-break: break-all; color: #FFC300;">${verificationUrl}</p>
-            
             <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
           <div class="footer">
@@ -264,18 +227,15 @@ class EmailService {
       </body>
       </html>
     `;
-
     await this.transporter.sendMail({
-      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${process.env['EMAIL_USER']}>`,
       to: email,
       subject: 'Verificar tu Email - PiezasYA',
       html
     });
   }
-
   async sendAdminPasswordResetEmail(email: string, userName: string, tempPassword: string, resetToken: string): Promise<void> {
-    const resetUrl = `${config.FRONTEND_URL}/reset-password?token=${resetToken}`;
-    
+    const resetUrl = `${process.env['FRONTEND_URL']}/reset-password?token=${resetToken}`;
     const html = `
       <!DOCTYPE html>
       <html>
@@ -302,28 +262,22 @@ class EmailService {
           <div class="content">
             <h2>Hola ${userName},</h2>
             <p>Un administrador ha reseteado tu contraseña en PiezasYA.</p>
-            
             <div class="temp-password">
               <strong>Tu contraseña temporal es:</strong><br>
               <span style="font-size: 24px; letter-spacing: 2px;">${tempPassword}</span>
             </div>
-            
             <p>Por seguridad, te recomendamos cambiar esta contraseña temporal por una nueva:</p>
-            
             <a href="${resetUrl}" class="cta">Cambiar Contraseña</a>
-            
             <div class="warning">
-              <strong>Importante:</strong> 
+              <strong>Importante:</strong>
               <ul>
                 <li>Esta contraseña temporal es válida por 1 hora</li>
                 <li>Usa el enlace de arriba para establecer una nueva contraseña</li>
                 <li>Si no solicitaste este cambio, contacta inmediatamente al administrador</li>
               </ul>
             </div>
-            
             <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
             <p style="word-break: break-all; color: #FFC300;">${resetUrl}</p>
-            
             <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
           <div class="footer">
@@ -334,15 +288,13 @@ class EmailService {
       </body>
       </html>
     `;
-
     await this.transporter.sendMail({
-      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${process.env['EMAIL_USER']}>`,
       to: email,
       subject: 'Contraseña Temporal - PiezasYA',
       html
     });
   }
-
   private getRoleName(role: string): string {
     switch (role) {
       case 'admin':
@@ -357,7 +309,6 @@ class EmailService {
         return 'Usuario';
     }
   }
-
   private getRoleInfo(role: string): { title: string; features: string[]; ctaText: string } {
     switch (role) {
       case 'admin':
@@ -427,11 +378,10 @@ class EmailService {
         };
     }
   }
-
   // Métodos para solicitudes de publicidad
   async sendAdvertisementRequestConfirmation(
-    email: string, 
-    campaignName: string, 
+    email: string,
+    campaignName: string,
     estimates: { estimatedReach: number; estimatedClicks: number; estimatedCost: number }
   ): Promise<void> {
     const html = `
@@ -459,9 +409,7 @@ class EmailService {
           <div class="content">
             <h2>Hola,</h2>
             <p>Hemos recibido tu solicitud de publicidad para la campaña <strong>"${campaignName}"</strong>.</p>
-            
             <p>Tu solicitud está siendo procesada y será revisada por nuestro equipo de administración. Te notificaremos cuando tengamos una respuesta.</p>
-            
             <div class="estimate-box">
               <h3>📊 Estimaciones de tu Campaña</h3>
               <div class="estimate-item">
@@ -477,16 +425,13 @@ class EmailService {
                 <span>$${estimates.estimatedCost.toFixed(2)} USD</span>
               </div>
             </div>
-            
             <p><strong>Próximos pasos:</strong></p>
             <ol>
               <li>Nuestro equipo revisará tu solicitud (1-2 días hábiles)</li>
               <li>Te enviaremos una notificación de aprobación o rechazo</li>
               <li>Si es aprobada, tu campaña será activada automáticamente</li>
             </ol>
-            
             <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
-            
             <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
           <div class="footer">
@@ -497,18 +442,16 @@ class EmailService {
       </body>
       </html>
     `;
-
     await this.transporter.sendMail({
-      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${process.env['EMAIL_USER']}>`,
       to: email,
       subject: `Solicitud de Publicidad Recibida - ${campaignName}`,
       html
     });
   }
-
   async sendAdvertisementRequestNotification(
-    adminEmail: string, 
-    campaignName: string, 
+    adminEmail: string,
+    campaignName: string,
     storeManagerId: string
   ): Promise<void> {
     const html = `
@@ -535,22 +478,17 @@ class EmailService {
           </div>
           <div class="content">
             <h2>Hola Administrador,</h2>
-            
             <div class="alert">
               <strong>Se ha recibido una nueva solicitud de publicidad que requiere tu revisión.</strong>
             </div>
-            
             <p><strong>Detalles de la solicitud:</strong></p>
             <ul>
               <li><strong>Campaña:</strong> ${campaignName}</li>
               <li><strong>Gestor de Tienda ID:</strong> ${storeManagerId}</li>
               <li><strong>Estado:</strong> Pendiente de revisión</li>
             </ul>
-            
             <p>Por favor, revisa la solicitud en el panel de administración y toma una decisión de aprobación o rechazo.</p>
-            
-            <a href="${config.FRONTEND_URL}/admin/advertisement-requests" class="cta">Revisar Solicitud</a>
-            
+            <a href="${process.env['FRONTEND_URL']}/admin/advertisement-requests" class="cta">Revisar Solicitud</a>
             <p>Saludos,<br>Sistema de PiezasYA</p>
           </div>
           <div class="footer">
@@ -561,19 +499,17 @@ class EmailService {
       </body>
       </html>
     `;
-
     await this.transporter.sendMail({
-      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${process.env['EMAIL_USER']}>`,
       to: adminEmail,
       subject: 'Nueva Solicitud de Publicidad - Requiere Revisión',
       html
     });
   }
-
   async sendAdvertisementApproval(
-    email: string, 
-    campaignName: string, 
-    advertisementId: string, 
+    email: string,
+    campaignName: string,
+    advertisementId: string,
     adminNotes?: string
   ): Promise<void> {
     const html = `
@@ -601,32 +537,25 @@ class EmailService {
           </div>
           <div class="content">
             <h2>¡Excelentes noticias!</h2>
-            
             <div class="success-box">
               <h3>Tu solicitud de publicidad ha sido <strong>APROBADA</strong></h3>
               <p>La campaña <strong>"${campaignName}"</strong> ha sido revisada y aprobada por nuestro equipo de administración.</p>
             </div>
-            
             <p><strong>Detalles de la publicidad:</strong></p>
             <ul>
               <li><strong>ID de Publicidad:</strong> ${advertisementId}</li>
               <li><strong>Estado:</strong> Aprobada y lista para activación</li>
               <li><strong>Próximo paso:</strong> Será activada automáticamente según la programación</li>
             </ul>
-            
             ${adminNotes ? `
             <div class="notes-box">
               <h4>📝 Notas del Administrador:</h4>
               <p>${adminNotes}</p>
             </div>
             ` : ''}
-            
             <p>Recibirás reportes periódicos sobre el rendimiento de tu campaña según las preferencias que configuraste.</p>
-            
-            <a href="${config.FRONTEND_URL}/store-manager/advertisement-requests" class="cta">Ver Detalles de la Campaña</a>
-            
+            <a href="${process.env['FRONTEND_URL']}/store-manager/advertisement-requests" class="cta">Ver Detalles de la Campaña</a>
             <p>¡Gracias por confiar en PiezasYA para tu publicidad!</p>
-            
             <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
           <div class="footer">
@@ -637,18 +566,16 @@ class EmailService {
       </body>
       </html>
     `;
-
     await this.transporter.sendMail({
-      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${process.env['EMAIL_USER']}>`,
       to: email,
       subject: `¡Publicidad Aprobada! - ${campaignName}`,
       html
     });
   }
-
   async sendAdvertisementRejection(
-    email: string, 
-    campaignName: string, 
+    email: string,
+    campaignName: string,
     rejectionReason: string
   ): Promise<void> {
     const html = `
@@ -676,28 +603,22 @@ class EmailService {
           </div>
           <div class="content">
             <h2>Hola,</h2>
-            
             <div class="rejection-box">
               <h3>Tu solicitud de publicidad ha sido <strong>RECHAZADA</strong></h3>
               <p>Lamentamos informarte que la campaña <strong>"${campaignName}"</strong> no ha sido aprobada por nuestro equipo de administración.</p>
             </div>
-            
             <div class="reason-box">
               <h4>📝 Motivo del Rechazo:</h4>
               <p>${rejectionReason}</p>
             </div>
-            
             <p><strong>¿Qué puedes hacer?</strong></p>
             <ul>
               <li>Revisar y corregir los puntos mencionados en el motivo del rechazo</li>
               <li>Crear una nueva solicitud con las correcciones necesarias</li>
               <li>Contactar a nuestro equipo si tienes dudas sobre los requisitos</li>
             </ul>
-            
-            <a href="${config.FRONTEND_URL}/store-manager/advertisement-requests" class="cta">Crear Nueva Solicitud</a>
-            
+            <a href="${process.env['FRONTEND_URL']}/store-manager/advertisement-requests" class="cta">Crear Nueva Solicitud</a>
             <p>Estamos aquí para ayudarte a crear una campaña exitosa. No dudes en contactarnos si necesitas orientación.</p>
-            
             <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
           <div class="footer">
@@ -708,15 +629,13 @@ class EmailService {
       </body>
       </html>
     `;
-
     await this.transporter.sendMail({
-      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${process.env['EMAIL_USER']}>`,
       to: email,
       subject: `Solicitud de Publicidad Rechazada - ${campaignName}`,
       html
     });
   }
-
   async sendAdvertisementReport(
     email: string,
     campaignName: string,
@@ -759,7 +678,6 @@ class EmailService {
           <div class="content">
             <h2>Hola,</h2>
             <p>Aquí tienes el reporte de rendimiento de tu campaña <strong>"${campaignName}"</strong> para el período ${reportData.period}.</p>
-            
             <div class="metrics-grid">
               <div class="metric-box">
                 <div class="metric-value">${reportData.impressions.toLocaleString()}</div>
@@ -786,7 +704,6 @@ class EmailService {
                 <div class="metric-label">CPM</div>
               </div>
             </div>
-            
             <p><strong>Resumen:</strong></p>
             <ul>
               <li>Tu campaña ha alcanzado ${reportData.impressions.toLocaleString()} personas</li>
@@ -794,7 +711,6 @@ class EmailService {
               <li>El costo por click promedio es de $${reportData.cpc.toFixed(2)}</li>
               <li>El gasto total del período es de $${reportData.spend.toFixed(2)}</li>
             </ul>
-            
             <p>Saludos,<br>El equipo de PiezasYA</p>
           </div>
           <div class="footer">
@@ -805,14 +721,12 @@ class EmailService {
       </body>
       </html>
     `;
-
     await this.transporter.sendMail({
-      from: `"PiezasYA" <${config.EMAIL_USER}>`,
+      from: `"PiezasYA" <${process.env['EMAIL_USER']}>`,
       to: email,
       subject: `Reporte de Campaña - ${campaignName} (${reportData.period})`,
       html
     });
   }
 }
-
-export default new EmailService(); 
+export default new EmailService();

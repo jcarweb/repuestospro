@@ -149,7 +149,7 @@ const AdminOrdersScreen: React.FC = () => {
 
   const loadStats = async () => {
     try {
-      const response = await fetch('${await getBaseURL()}/admin/orders/stats', {
+      const response = await fetch(`${await getBaseURL()}/admin/orders/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

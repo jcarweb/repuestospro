@@ -2,8 +2,12 @@ import { Request, Response } from 'express';
 import AdvertisingPlan, { IAdvertisingPlan } from '../models/AdvertisingPlan';
 import { adminMiddleware } from '../middleware/authMiddleware';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 // Obtener todos los planes de publicidad
-export const getAdvertisingPlans = async (req: Request, res: Response) => {
+export const getAdvertisingPlans = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const {
       search,
@@ -54,7 +58,7 @@ export const getAdvertisingPlans = async (req: Request, res: Response) => {
 
     const total = await AdvertisingPlan.countDocuments(filters);
 
-    res.json({
+      return res.json({
       success: true,
       data: plans,
       pagination: {
@@ -66,7 +70,7 @@ export const getAdvertisingPlans = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error obteniendo planes de publicidad:', error);
-    res.status(500).json({
+      return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });
@@ -74,7 +78,7 @@ export const getAdvertisingPlans = async (req: Request, res: Response) => {
 };
 
 // Obtener un plan específico
-export const getAdvertisingPlanById = async (req: Request, res: Response) => {
+export const getAdvertisingPlanById = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -88,13 +92,13 @@ export const getAdvertisingPlanById = async (req: Request, res: Response) => {
       });
     }
 
-    res.json({
+      return res.json({
       success: true,
       data: plan
     });
   } catch (error) {
     console.error('Error obteniendo plan de publicidad:', error);
-    res.status(500).json({
+      return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });
@@ -102,7 +106,7 @@ export const getAdvertisingPlanById = async (req: Request, res: Response) => {
 };
 
 // Crear nuevo plan de publicidad
-export const createAdvertisingPlan = async (req: Request, res: Response) => {
+export const createAdvertisingPlan = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const planData = {
       ...req.body,
@@ -114,7 +118,7 @@ export const createAdvertisingPlan = async (req: Request, res: Response) => {
 
     await plan.populate('createdBy', 'name email');
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       data: plan,
       message: 'Plan de publicidad creado exitosamente'
@@ -125,11 +129,11 @@ export const createAdvertisingPlan = async (req: Request, res: Response) => {
     if (error instanceof Error) {
       return res.status(400).json({
         success: false,
-        message: error.message
+        message: (error as Error).message
       });
     }
     
-    res.status(500).json({
+      return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });
@@ -137,7 +141,7 @@ export const createAdvertisingPlan = async (req: Request, res: Response) => {
 };
 
 // Actualizar plan de publicidad
-export const updateAdvertisingPlan = async (req: Request, res: Response) => {
+export const updateAdvertisingPlan = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -155,7 +159,7 @@ export const updateAdvertisingPlan = async (req: Request, res: Response) => {
       });
     }
 
-    res.json({
+      return res.json({
       success: true,
       data: plan,
       message: 'Plan de publicidad actualizado exitosamente'
@@ -166,11 +170,11 @@ export const updateAdvertisingPlan = async (req: Request, res: Response) => {
     if (error instanceof Error) {
       return res.status(400).json({
         success: false,
-        message: error.message
+        message: (error as Error).message
       });
     }
     
-    res.status(500).json({
+      return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });
@@ -178,7 +182,7 @@ export const updateAdvertisingPlan = async (req: Request, res: Response) => {
 };
 
 // Eliminar plan de publicidad
-export const deleteAdvertisingPlan = async (req: Request, res: Response) => {
+export const deleteAdvertisingPlan = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -191,13 +195,13 @@ export const deleteAdvertisingPlan = async (req: Request, res: Response) => {
       });
     }
 
-    res.json({
+      return res.json({
       success: true,
       message: 'Plan de publicidad eliminado exitosamente'
     });
   } catch (error) {
     console.error('Error eliminando plan de publicidad:', error);
-    res.status(500).json({
+      return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });
@@ -205,7 +209,7 @@ export const deleteAdvertisingPlan = async (req: Request, res: Response) => {
 };
 
 // Toggle estado del plan
-export const toggleAdvertisingPlanStatus = async (req: Request, res: Response) => {
+export const toggleAdvertisingPlanStatus = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -221,14 +225,14 @@ export const toggleAdvertisingPlanStatus = async (req: Request, res: Response) =
     plan.isActive = !plan.isActive;
     await plan.save();
 
-    res.json({
+      return res.json({
       success: true,
       data: plan,
       message: `Plan ${plan.isActive ? 'activado' : 'desactivado'} exitosamente`
     });
   } catch (error) {
     console.error('Error cambiando estado del plan:', error);
-    res.status(500).json({
+      return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });
@@ -236,7 +240,7 @@ export const toggleAdvertisingPlanStatus = async (req: Request, res: Response) =
 };
 
 // Obtener estadísticas de planes
-export const getAdvertisingPlanStats = async (req: Request, res: Response) => {
+export const getAdvertisingPlanStats = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const totalPlans = await AdvertisingPlan.countDocuments();
     const activePlans = await AdvertisingPlan.countDocuments({ isActive: true });
@@ -265,7 +269,7 @@ export const getAdvertisingPlanStats = async (req: Request, res: Response) => {
     // Tasa de conversión (simulada)
     const conversionRate = Math.random() * 10; // En producción vendría de datos reales
 
-    res.json({
+      return res.json({
       success: true,
       data: {
         totalPlans,
@@ -279,7 +283,7 @@ export const getAdvertisingPlanStats = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error obteniendo estadísticas de planes:', error);
-    res.status(500).json({
+      return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });
@@ -287,27 +291,27 @@ export const getAdvertisingPlanStats = async (req: Request, res: Response) => {
 };
 
 // Obtener planes activos (para tiendas)
-export const getActiveAdvertisingPlans = async (req: Request, res: Response) => {
+export const getActiveAdvertisingPlans = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { type, category } = req.query;
 
     let plans;
     
     if (type && category) {
-      plans = await AdvertisingPlan.getPlansByTypeAndCategory(type as string, category as string);
+      plans = await (AdvertisingPlan as any).getPlansByTypeAndCategory(type as string, category as string);
     } else if (type) {
       plans = await AdvertisingPlan.find({ type, isActive: true }).sort({ sortOrder: 1, priority: -1 });
     } else {
-      plans = await AdvertisingPlan.getActivePlans();
+      plans = await (AdvertisingPlan as any).getActivePlans();
     }
 
-    res.json({
+      return res.json({
       success: true,
       data: plans
     });
   } catch (error) {
     console.error('Error obteniendo planes activos:', error);
-    res.status(500).json({
+      return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });
@@ -315,17 +319,17 @@ export const getActiveAdvertisingPlans = async (req: Request, res: Response) => 
 };
 
 // Obtener planes recomendados
-export const getRecommendedPlans = async (req: Request, res: Response) => {
+export const getRecommendedPlans = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const plans = await AdvertisingPlan.getRecommendedPlans();
+    const plans = await (AdvertisingPlan as any).getRecommendedPlans();
 
-    res.json({
+      return res.json({
       success: true,
       data: plans
     });
   } catch (error) {
     console.error('Error obteniendo planes recomendados:', error);
-    res.status(500).json({
+      return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });
@@ -333,17 +337,17 @@ export const getRecommendedPlans = async (req: Request, res: Response) => {
 };
 
 // Obtener planes populares
-export const getPopularPlans = async (req: Request, res: Response) => {
+export const getPopularPlans = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const plans = await AdvertisingPlan.getPopularPlans();
+    const plans = await (AdvertisingPlan as any).getPopularPlans();
 
-    res.json({
+      return res.json({
       success: true,
       data: plans
     });
   } catch (error) {
     console.error('Error obteniendo planes populares:', error);
-    res.status(500).json({
+      return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });
@@ -351,7 +355,7 @@ export const getPopularPlans = async (req: Request, res: Response) => {
 };
 
 // Verificar si un plan es adecuado para una tienda
-export const checkPlanSuitability = async (req: Request, res: Response) => {
+export const checkPlanSuitability = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { planId, storeId } = req.params;
 
@@ -370,15 +374,34 @@ export const checkPlanSuitability = async (req: Request, res: Response) => {
       category: 'automotive'
     };
 
-    const suitability = plan.isSuitableForStore(store);
+    // Check if plan is suitable for store based on store type and plan requirements
+    const planData = plan as any;
+    const storeData = store as any;
+    
+    const suitability = {
+      isSuitable: (planData.storeTypes || []).includes(storeData.storeType || 'general') && 
+                  (planData.minRevenue || 0) <= (storeData.monthlyRevenue || 0) &&
+                  (planData.maxRevenue || 999999) >= (storeData.monthlyRevenue || 0),
+      reasons: [] as string[]
+    };
+    
+    if (!(planData.storeTypes || []).includes(storeData.storeType || 'general')) {
+      suitability.reasons.push(`Plan requires store type: ${(planData.storeTypes || []).join(', ')}`);
+    }
+    if ((planData.minRevenue || 0) > (storeData.monthlyRevenue || 0)) {
+      suitability.reasons.push(`Plan requires minimum revenue: $${planData.minRevenue || 0}`);
+    }
+    if ((planData.maxRevenue || 999999) < (storeData.monthlyRevenue || 0)) {
+      suitability.reasons.push(`Plan maximum revenue exceeded: $${planData.maxRevenue || 999999}`);
+    }
 
-    res.json({
+      return res.json({
       success: true,
       data: suitability
     });
   } catch (error) {
     console.error('Error verificando adecuación del plan:', error);
-    res.status(500).json({
+      return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });
@@ -386,7 +409,7 @@ export const checkPlanSuitability = async (req: Request, res: Response) => {
 };
 
 // Duplicar plan
-export const duplicateAdvertisingPlan = async (req: Request, res: Response) => {
+export const duplicateAdvertisingPlan = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -400,8 +423,8 @@ export const duplicateAdvertisingPlan = async (req: Request, res: Response) => {
 
     const planData = originalPlan.toObject();
     delete planData._id;
-    delete planData.createdAt;
-    delete planData.updatedAt;
+    delete (planData as any).createdAt;
+    delete (planData as any).updatedAt;
     
     planData.name = `${planData.name} (Copia)`;
     planData.isActive = false;
@@ -412,14 +435,14 @@ export const duplicateAdvertisingPlan = async (req: Request, res: Response) => {
 
     await newPlan.populate('createdBy', 'name email');
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       data: newPlan,
       message: 'Plan duplicado exitosamente'
     });
   } catch (error) {
     console.error('Error duplicando plan:', error);
-    res.status(500).json({
+      return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });

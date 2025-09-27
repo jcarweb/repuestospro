@@ -11,7 +11,7 @@ export const BACKEND_ENVIRONMENTS: BackendEnvironment[] = [
   {
     id: 'local',
     name: 'Local Development',
-    baseUrl: 'http://192.168.0.106:5000/api',
+    baseUrl: 'http://192.168.31.122:5000/api',
     description: 'Backend local en tu computadora',
     isLocal: true,
     isProduction: false

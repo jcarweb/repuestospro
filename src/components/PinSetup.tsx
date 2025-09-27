@@ -44,7 +44,7 @@ const PinSetup: React.FC<PinSetupProps> = ({ onPinSet, onCancel }) => {
 
     try {
       // Aquí se enviaría al servidor para guardar el PIN
-      const response = await fetch('http://localhost:5000/api/auth/setup-pin', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""/api/auth/setup-pin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

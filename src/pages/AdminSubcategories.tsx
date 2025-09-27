@@ -104,7 +104,7 @@ const AdminSubcategories: React.FC = () => {
         params.append('isActive', selectedStatus === 'active' ? 'true' : 'false');
       }
 
-      const response = await fetch(`http://localhost:5000/api/subcategories?${params}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""""""""/api/subcategories?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -125,7 +125,7 @@ const AdminSubcategories: React.FC = () => {
   // Cargar categorías
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/categories', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/categories', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -144,7 +144,7 @@ const AdminSubcategories: React.FC = () => {
   // Cargar estadísticas
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/admin/subcategories/stats', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/admin/subcategories/stats', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -181,7 +181,7 @@ const AdminSubcategories: React.FC = () => {
         order: Number(formData.order) || 0
       };
 
-      const response = await fetch('http://localhost:5000/api/subcategories', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/subcategories', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -224,7 +224,7 @@ const AdminSubcategories: React.FC = () => {
         order: Number(formData.order) || 0
       };
 
-      const response = await fetch(`http://localhost:5000/api/subcategories/${selectedSubcategory._id}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/subcategories/${selectedSubcategory._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -255,7 +255,7 @@ const AdminSubcategories: React.FC = () => {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/subcategories/${subcategoryId}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/subcategories/${subcategoryId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -280,7 +280,7 @@ const AdminSubcategories: React.FC = () => {
   // Cambiar estado de subcategoría
   const handleToggleStatus = async (subcategoryId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/subcategories/${subcategoryId}/toggle-status`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/subcategories/${subcategoryId}/toggle-status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`

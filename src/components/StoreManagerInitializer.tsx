@@ -209,7 +209,7 @@ const StoreManagerInitializer: React.FC = () => {
   const handleCreateStore = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/stores', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""/api/stores', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

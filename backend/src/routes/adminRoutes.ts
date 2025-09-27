@@ -1,5 +1,6 @@
 import express from 'express';
-import AdminController from '../controllers/adminController';
+import { Request, Response } from 'express';
+import AdminController from '../controllers/AdminController';
 import { authMiddleware as authenticateToken, adminMiddleware as requireAdmin } from '../middleware/authMiddleware';
 import Store from '../models/Store';
 import Product from '../models/Product';
@@ -91,7 +92,7 @@ router.post('/users/:id/reset-password', AdminController.resetUserPassword);
 router.get('/email-config', AdminController.checkEmailConfig);
 
 // Endpoint para limpiar datos de prueba
-router.delete('/clean-test-data', authenticateToken, requireAdmin, async (req, res) => {
+router.delete('/clean-test-data', authenticateToken, requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
     const testStoreNames = [
       'AutoParts Express',
@@ -106,7 +107,7 @@ router.delete('/clean-test-data', authenticateToken, requireAdmin, async (req, r
     const testStoreIds = testStores.map(store => store._id);
 
     if (testStoreIds.length === 0) {
-      return res.json({
+      res.json({
         success: true,
         message: 'No se encontraron tiendas de prueba para eliminar',
         deletedStores: 0,
@@ -140,6 +141,17 @@ router.delete('/clean-test-data', authenticateToken, requireAdmin, async (req, r
   }
 });
 
+// ===== GESTIÓN DE ÓRDENES =====
+
+// Obtener todas las órdenes
+router.get('/orders', AdminController.getOrders);
+
+// Obtener estadísticas de órdenes
+router.get('/orders/stats', AdminController.getOrderStats);
+
+// Actualizar estado de orden
+router.put('/orders/:orderId/status', AdminController.updateOrderStatus);
+
 // ===== ESTADÍSTICAS Y REPORTES =====
 
 // Obtener estadísticas generales del dashboard
@@ -147,6 +159,85 @@ router.get('/dashboard-stats', AdminController.getDashboardStats);
 
 // Obtener estadísticas de tiendas
 router.get('/store-stats', AdminController.getStoreStats);
+
+// Obtener reportes detallados
+router.get('/reports', AdminController.getReports);
+
+// ===== CONFIGURACIÓN DEL SISTEMA =====
+
+// Obtener configuraciones del sistema
+router.get('/settings', AdminController.getSystemSettings);
+
+// Actualizar configuración del sistema
+router.put('/settings', AdminController.updateSystemSettings);
+
+// ===== SISTEMA DE ENRIQUECIMIENTO =====
+
+// Subir foto de tienda con GPS
+router.post('/upload-store-photo', AdminController.uploadStorePhoto);
+
+// Obtener fotos de tiendas
+router.get('/store-photos', AdminController.getStorePhotos);
+
+// ===== GESTIÓN DE TIENDAS =====
+
+// Obtener todas las tiendas
+router.get('/stores', AdminController.getStores);
+
+// Obtener estadísticas de tiendas
+router.get('/stores/stats', AdminController.getStoreStats);
+
+// Crear nueva tienda
+router.post('/stores', AdminController.createStore);
+
+// Actualizar tienda
+router.put('/stores/:storeId', AdminController.updateStore);
+
+// Eliminar tienda
+router.delete('/stores/:storeId', AdminController.deleteStore);
+
+// Cambiar estado de tienda
+router.put('/stores/:storeId/toggle-status', AdminController.toggleStoreStatus);
+
+// Obtener propietarios disponibles
+router.get('/stores/available-owners', AdminController.getAvailableOwners);
+
+// Obtener managers disponibles
+router.get('/stores/available-managers', AdminController.getAvailableManagers);
+
+// Agregar manager a tienda
+router.post('/stores/:storeId/managers', AdminController.addManager);
+
+// Remover manager de tienda
+router.delete('/stores/:storeId/managers/:managerId', AdminController.removeManager);
+
+// ===== GESTIÓN DE DELIVERY =====
+
+// Obtener repartidores
+router.get('/delivery/drivers', AdminController.getDeliveryDrivers);
+
+// Obtener pedidos de delivery
+router.get('/delivery/orders', AdminController.getDeliveryOrders);
+
+// Obtener estadísticas de delivery
+router.get('/delivery/stats', AdminController.getDeliveryStats);
+
+// Cambiar estado de repartidor
+router.put('/delivery/drivers/:driverId/toggle-status', AdminController.toggleDriverStatus);
+
+// Asignar repartidor a pedido
+router.put('/delivery/orders/:orderId/assign', AdminController.assignDriver);
+
+// Actualizar estado de pedido de delivery
+router.put('/delivery/orders/:orderId/status', AdminController.updateDeliveryOrderStatus);
+
+// ===== CONFIGURACIÓN DE BÚSQUEDA =====
+
+// Obtener configuración de búsqueda
+router.get('/search-config', AdminController.getSearchConfig);
+
+// Actualizar configuración de búsqueda
+router.put('/search-config', AdminController.updateSearchConfig);
 
 // Las estadísticas están disponibles en las rutas específicas:
 // - /users/stats para estadísticas de usuarios

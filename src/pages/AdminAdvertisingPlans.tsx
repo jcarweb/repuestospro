@@ -155,7 +155,7 @@ const AdminAdvertisingPlans: React.FC = () => {
       if (selectedCategory !== 'all') params.append('category', selectedCategory);
       if (selectedStatus !== 'all') params.append('status', selectedStatus);
 
-      const response = await fetch(`http://localhost:5000/api/advertising-plans?${params}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""""""/api/advertising-plans?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -176,7 +176,7 @@ const AdminAdvertisingPlans: React.FC = () => {
   // Cargar estadísticas
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/advertising-plans/stats', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/advertising-plans/stats', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -202,7 +202,7 @@ const AdminAdvertisingPlans: React.FC = () => {
   // Crear plan
   const handleCreatePlan = async (planData: any) => {
     try {
-      const response = await fetch('http://localhost:5000/api/advertising-plans', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/advertising-plans', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -232,7 +232,7 @@ const AdminAdvertisingPlans: React.FC = () => {
     if (!selectedPlan) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/advertising-plans/${selectedPlan._id}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/advertising-plans/${selectedPlan._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -265,7 +265,7 @@ const AdminAdvertisingPlans: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/advertising-plans/${planId}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/advertising-plans/${planId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -290,7 +290,7 @@ const AdminAdvertisingPlans: React.FC = () => {
   // Toggle estado del plan
   const handleToggleStatus = async (planId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/advertising-plans/${planId}/toggle`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/advertising-plans/${planId}/toggle`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`

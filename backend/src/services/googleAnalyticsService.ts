@@ -70,7 +70,7 @@ export class GoogleAnalyticsService {
       }
 
       config.isEnabled = enabled;
-      config.lastConfiguredBy = adminId;
+      config.lastConfiguredBy = adminId as any;
       config.lastConfiguredAt = new Date();
       await config.save();
 

@@ -77,6 +77,92 @@ tests/
 *TOKEN*.md
 *PRIVATE*.md
 *CONFIDENTIAL*.md
+SECURITY_*.md
+*SECURITY*.md
+*IMPROVEMENTS*.md
+*CORRECTION*.md
+*SUMMARY*.md
+*EJECUTIVO*.md
+*PROFESIONAL*.md
+*IMPLEMENTACION*.md
+*GUIDELINES*.md
+*CONTEXTO*.md
+*ROLES*.md
+*SISTEMA*.md
+*TAREAS*.md
+*PLAN*.md
+*INTEGRACION*.md
+*INTERNACIONALIZACION*.md
+*BACKEND*.md
+*TUNNEL*.md
+*GUIA*.md
+*INSTRUCCIONES*.md
+*DIAGNOSTICO*.md
+*TROUBLESHOOTING*.md
+
+# Debug and testing scripts (should not be in production)
+backend/src/scripts/debug*.js
+backend/src/scripts/test*.js
+backend/src/scripts/fix*.js
+backend/src/scripts/force*.js
+backend/src/scripts/simple*.js
+backend/src/scripts/check*.js
+backend/src/scripts/reset*.js
+backend/src/scripts/diagnose*.js
+backend/test-*.js
+backend/verify-*.js
+backend/check-*.js
+backend/debug-*.js
+backend/create-*.js
+backend/search-*.js
+backend/start-with-specific-ip.js
+backend/setup-env.js
+fix-env-vars.js
+
+# Data files with real information
+backend/real-*.csv
+backend/productos-ejemplo.csv
+backend/profile-data.json
+backend/*-data.json
+backend/*-example.csv
+backend/*-sample.csv
+
+# Temporary and backup files
+backend/*.backup
+backend/*.bak
+backend/*.old
+backend/*.tmp
+backend/*.temp
+backend/{
+backend/}
+
+# Scripts that should not be in production
+scripts/setup-*.js
+scripts/security-*.js
+scripts/pre-commit-*.js
+scripts/migrate-*.js
+scripts/*-cleanup.js
+scripts/*-security.js
+
+# Mobile debug and test files
+mobile/test-*.bat
+mobile/start-*.bat
+mobile/force-*.bat
+mobile/clear-*.bat
+mobile/disable-*.js
+mobile/diagnose-*.js
+mobile/check-*.js
+mobile/backend-*.js
+mobile/change-*.js
+mobile-backup/
+
+# Development and testing files
+*.test.js
+*.spec.js
+*test*.js
+*debug*.js
+*Debug*.js
+*DEBUG*.js
 
 # Mobile app specific
 mobile/android/app/google-services.json

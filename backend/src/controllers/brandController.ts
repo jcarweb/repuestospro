@@ -2,9 +2,13 @@ import { Request, Response } from 'express';
 import Brand, { IBrand } from '../models/Brand';
 import Activity from '../models/Activity';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 export class BrandController {
   // Obtener todas las marcas
-  static async getAllBrands(req: Request, res: Response): Promise<void> {
+  static async getAllBrands(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { vehicleType, isActive } = req.query;
       
@@ -30,7 +34,7 @@ export class BrandController {
   }
 
   // Obtener una marca por ID
-  static async getBrandById(req: Request, res: Response): Promise<void> {
+  static async getBrandById(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       
@@ -58,7 +62,7 @@ export class BrandController {
   }
 
   // Crear una nueva marca
-  static async createBrand(req: Request, res: Response): Promise<void> {
+  static async createBrand(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { name, description, vehicleType, order, logo, country, website } = req.body;
 
@@ -122,7 +126,7 @@ export class BrandController {
   }
 
   // Actualizar una marca
-  static async updateBrand(req: Request, res: Response): Promise<void> {
+  static async updateBrand(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { name, description, vehicleType, isActive, order, logo, country, website } = req.body;
@@ -141,7 +145,7 @@ export class BrandController {
       if (name && name.trim() !== brand.name) {
         const existingBrand = await Brand.findOne({ 
           name: name.trim(), 
-          vehicleType: vehicleType || brand.vehicleType,
+          vehicleType: vehicleType || (brand as any).vehicleType,
           _id: { $ne: id }
         });
 
@@ -157,9 +161,9 @@ export class BrandController {
       // Actualizar campos
       if (name !== undefined) brand.name = name.trim();
       if (description !== undefined) brand.description = description.trim();
-      if (vehicleType !== undefined) brand.vehicleType = vehicleType;
+      if (vehicleType !== undefined) (brand as any).vehicleType = vehicleType;
       if (isActive !== undefined) brand.isActive = isActive;
-      if (order !== undefined) brand.order = order;
+      if (order !== undefined) (brand as any).order = order;
       if (logo !== undefined) brand.logo = logo.trim();
       if (country !== undefined) brand.country = country.trim();
       if (website !== undefined) brand.website = website.trim();
@@ -171,7 +175,7 @@ export class BrandController {
         userId: (req as any).user._id,
         type: 'brand_updated',
         description: `Marca "${brand.name}" actualizada`,
-        metadata: { brandId: brand._id, vehicleType: brand.vehicleType }
+        metadata: { brandId: brand._id, vehicleType: (brand as any).vehicleType }
       });
 
       res.json({
@@ -189,7 +193,7 @@ export class BrandController {
   }
 
   // Eliminar una marca
-  static async deleteBrand(req: Request, res: Response): Promise<void> {
+  static async deleteBrand(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -210,7 +214,7 @@ export class BrandController {
         userId: (req as any).user._id,
         type: 'brand_deleted',
         description: `Marca "${brand.name}" eliminada`,
-        metadata: { brandId: brand._id, vehicleType: brand.vehicleType }
+        metadata: { brandId: brand._id, vehicleType: (brand as any).vehicleType }
       });
 
       res.json({
@@ -227,7 +231,7 @@ export class BrandController {
   }
 
   // Cambiar estado de una marca
-  static async toggleBrandStatus(req: Request, res: Response): Promise<void> {
+  static async toggleBrandStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -249,7 +253,7 @@ export class BrandController {
         userId: (req as any).user._id,
         type: 'brand_status_changed',
         description: `Marca "${brand.name}" ${brand.isActive ? 'activada' : 'desactivada'}`,
-        metadata: { brandId: brand._id, vehicleType: brand.vehicleType }
+        metadata: { brandId: brand._id, vehicleType: (brand as any).vehicleType }
       });
 
       res.json({

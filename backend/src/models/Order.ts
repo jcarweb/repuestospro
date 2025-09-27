@@ -456,25 +456,25 @@ OrderSchema.index({ 'customerInfo.email': 1 });
 OrderSchema.index({ 'deliveryInfo.assignedDelivery': 1 });
 
 // Métodos de instancia
-OrderSchema.methods.calculateTotal = function(): number {
-  return this.subtotal + this.taxAmount + this.commissionAmount + this.warrantyTotal + this.shippingCost - this.discountAmount;
+OrderSchema.methods['calculateTotal'] = function(): number {
+  return this['subtotal'] + this['taxAmount'] + this['commissionAmount'] + this['warrantyTotal'] + this['shippingCost'] - this['discountAmount'];
 };
 
-OrderSchema.methods.canBeCancelled = function(): boolean {
-  return ['pending', 'confirmed', 'processing', 'on_hold'].includes(this.orderStatus);
+OrderSchema.methods['canBeCancelled'] = function(): boolean {
+  return ['pending', 'confirmed', 'processing', 'on_hold'].includes(this['orderStatus']);
 };
 
-OrderSchema.methods.canBeRefunded = function(): boolean {
-  return ['completed', 'delivered', 'partially_delivered'].includes(this.orderStatus) && 
-         ['paid', 'partially_refunded'].includes(this.paymentStatus);
+OrderSchema.methods['canBeRefunded'] = function(): boolean {
+  return ['completed', 'delivered', 'partially_delivered'].includes(this['orderStatus']) && 
+         ['paid', 'partially_refunded'].includes(this['paymentStatus']);
 };
 
-OrderSchema.methods.canBeShipped = function(): boolean {
-  return ['confirmed', 'processing', 'ready_for_delivery'].includes(this.orderStatus) && 
-         this.paymentStatus === 'paid';
+OrderSchema.methods['canBeShipped'] = function(): boolean {
+  return ['confirmed', 'processing', 'ready_for_delivery'].includes(this['orderStatus']) && 
+         this['paymentStatus'] === 'paid';
 };
 
-OrderSchema.methods.getStatusColor = function(): string {
+OrderSchema.methods['getStatusColor'] = function(): string {
   const statusColors: Record<OrderStatus, string> = {
     pending: 'bg-yellow-100 text-yellow-800',
     confirmed: 'bg-blue-100 text-blue-800',
@@ -494,10 +494,10 @@ OrderSchema.methods.getStatusColor = function(): string {
     partially_shipped: 'bg-blue-100 text-blue-800',
     partially_delivered: 'bg-blue-100 text-blue-800'
   };
-  return statusColors[this.orderStatus] || 'bg-gray-100 text-gray-800';
+  return statusColors[this['orderStatus'] as OrderStatus] || 'bg-gray-100 text-gray-800';
 };
 
-OrderSchema.methods.getStatusText = function(): string {
+OrderSchema.methods['getStatusText'] = function(): string {
   const statusTexts: Record<OrderStatus, string> = {
     pending: 'Pendiente',
     confirmed: 'Confirmada',
@@ -517,7 +517,7 @@ OrderSchema.methods.getStatusText = function(): string {
     partially_shipped: 'Enviada Parcialmente',
     partially_delivered: 'Entregada Parcialmente'
   };
-  return statusTexts[this.orderStatus] || 'Desconocido';
+  return statusTexts[this['orderStatus'] as OrderStatus] || 'Desconocido';
 };
 
 // Middleware pre-save para actualizar updatedAt

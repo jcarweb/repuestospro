@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../types';
 import apiService from '../services/api'; // Usar servicio real de API
-import { forceCorrectNetworkConfig } from '../utils/networkUtils'; // Forzar configuración correcta
+// import { forceCorrectNetworkConfig } from '../utils/networkUtils'; // Forzar configuración correcta
 import authVerificationService from '../services/authVerification';
 // import { useToast } from './ToastContext';
 
@@ -82,7 +82,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('🔧 API REAL: Inicializando autenticación con configuración correcta');
         
         // Forzar configuración de red correcta
-        await forceCorrectNetworkConfig();
+        // await forceCorrectNetworkConfig();
         
         // Verificar si hay un usuario guardado
         const storedUser = await AsyncStorage.getItem('user');
@@ -416,8 +416,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (response.success && response.data) {
         console.log('Perfil del usuario cargado desde backend:', response.data);
-        setUser(response.data);
-        await AsyncStorage.setItem('user', JSON.stringify(response.data));
+        
+        // Combinar datos del backend con datos locales guardados
+        const userProfileKey = `profileData_${user.id}`;
+        const savedProfileData = await AsyncStorage.getItem(userProfileKey);
+        
+        let updatedUser = { ...response.data };
+        
+        if (savedProfileData) {
+          const localData = JSON.parse(savedProfileData);
+          console.log('Datos locales encontrados:', localData);
+          
+          // Combinar datos locales con datos del backend
+          updatedUser = {
+            ...updatedUser,
+            name: localData.name || updatedUser.name,
+            email: localData.email || updatedUser.email,
+            phone: localData.phone || updatedUser.phone,
+            address: localData.address || updatedUser.address,
+            avatar: localData.profileImage || updatedUser.avatar,
+            location: localData.location || updatedUser.location
+          };
+          
+          console.log('Usuario actualizado con datos locales:', updatedUser);
+        }
+        
+        setUser(updatedUser);
+        await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
         showToast('Perfil actualizado desde el servidor', 'success');
       } else {
         console.log('No se pudo cargar el perfil desde el backend:', response.message);

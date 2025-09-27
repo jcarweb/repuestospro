@@ -3,11 +3,20 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
 
 // Configuración de Cloudinary
+import { secureConfig } from './secureConfig';
+
+const cloudinaryConfig = secureConfig.get('cloudinary');
+
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'your_cloud_name',
-  api_key: process.env.CLOUDINARY_API_KEY || 'your_api_key',
-  api_secret: process.env.CLOUDINARY_API_SECRET || 'your_api_secret'
+  cloud_name: cloudinaryConfig.cloudName,
+  api_key: cloudinaryConfig.apiKey,
+  api_secret: cloudinaryConfig.apiSecret
 });
+
+// Verificar configuración de Cloudinary
+if (!cloudinaryConfig.isConfigured) {
+  console.warn('⚠️  Cloudinary no está configurado correctamente. Las imágenes no se subirán a Cloudinary.');
+}
 
 // Configuración de almacenamiento para productos
 export const productStorage = new CloudinaryStorage({

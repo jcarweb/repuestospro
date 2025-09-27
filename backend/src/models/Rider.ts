@@ -385,57 +385,57 @@ RiderSchema.index({ type: 1, status: 1 });
 RiderSchema.index({ 'rating.average': -1 });
 
 // Método para calcular distancia desde una ubicación
-RiderSchema.methods.calculateDistanceFrom = function(lat: number, lng: number): number {
-  if (!this.availability.currentLocation) {
+RiderSchema.methods['calculateDistanceFrom'] = function(lat: number, lng: number): number {
+  if (!this['availability'].currentLocation) {
     return Infinity;
   }
   
   const R = 6371; // Radio de la Tierra en km
-  const dLat = (lat - this.availability.currentLocation.lat) * Math.PI / 180;
-  const dLng = (lng - this.availability.currentLocation.lng) * Math.PI / 180;
+  const dLat = (lat - this['availability'].currentLocation.lat) * Math.PI / 180;
+  const dLng = (lng - this['availability'].currentLocation.lng) * Math.PI / 180;
   const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(this.availability.currentLocation.lat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+            Math.cos(this['availability'].currentLocation.lat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
             Math.sin(dLng/2) * Math.sin(dLng/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c;
 };
 
 // Método para verificar si está en zona de servicio
-RiderSchema.methods.isInServiceArea = function(lat: number, lng: number): boolean {
-  return this.serviceAreas.some(area => {
+RiderSchema.methods['isInServiceArea'] = function(lat: number, lng: number): boolean {
+  return (this['serviceAreas'] as any[]).some(area => {
     if (!area.isActive) return false;
-    const distance = this.calculateDistanceFrom(area.coordinates.lat, area.coordinates.lng);
+    const distance = this['calculateDistanceFrom'](area.coordinates.lat, area.coordinates.lng);
     return distance <= area.radius;
   });
 };
 
 // Método para actualizar estado
-RiderSchema.methods.updateStatus = function(newStatus: string, reason?: string, updatedBy?: string) {
-  this.status = newStatus;
-  this.statusHistory.push({
+RiderSchema.methods['updateStatus'] = function(newStatus: string, reason?: string, updatedBy?: string) {
+  this['status'] = newStatus;
+  this['statusHistory'].push({
     status: newStatus,
     timestamp: new Date(),
     reason,
     updatedBy
   });
-  return this.save();
+  return this['save']();
 };
 
 // Método para actualizar ubicación
-RiderSchema.methods.updateLocation = function(lat: number, lng: number) {
-  this.availability.currentLocation = {
+RiderSchema.methods['updateLocation'] = function(lat: number, lng: number) {
+  this['availability'].currentLocation = {
     lat,
     lng,
     timestamp: new Date()
   };
-  return this.save();
+  return this['save']();
 };
 
 // Método para calcular comisión
-RiderSchema.methods.calculateCommission = function(orderAmount: number): number {
-  const commissionRate = this.type === 'external' && this.externalProvider 
-    ? this.externalProvider.commissionRate 
-    : this.payment.commissionRate;
+RiderSchema.methods['calculateCommission'] = function(orderAmount: number): number {
+  const commissionRate = this['type'] === 'external' && this['externalProvider']
+    ? this['externalProvider'].commissionRate
+    : this['payment'].commissionRate;
   return (orderAmount * commissionRate) / 100;
 };
 

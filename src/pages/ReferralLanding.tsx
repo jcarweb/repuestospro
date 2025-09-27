@@ -22,7 +22,7 @@ const ReferralLanding: React.FC = () => {
 
   const trackReferralClick = async (code: string) => {
     try {
-      await fetch(`http://localhost:5000/api/loyalty/track-click/${code}`, {
+      await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""/api/loyalty/track-click/${code}`, {
         method: 'GET'
       });
     } catch (error) {
@@ -32,7 +32,7 @@ const ReferralLanding: React.FC = () => {
 
   const verifyReferralCode = async (code: string) => {
     try {
-      const response = await fetch('http://localhost:5000/api/loyalty/verify-referral', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/loyalty/verify-referral', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

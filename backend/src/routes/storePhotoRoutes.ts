@@ -18,4 +18,6 @@ router.post('/admin/enrichment/run', cryptoAdminMiddleware, StorePhotoController
 router.get('/admin/enrichment/stats', cryptoAdminMiddleware, StorePhotoController.getEnrichmentStats);
 router.post('/admin/worker/control', cryptoAdminMiddleware, StorePhotoController.controlWorker);
 
+// Endpoint de debug removido por seguridad
+
 export default router;

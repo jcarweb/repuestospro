@@ -90,7 +90,7 @@ export class ExchangeRateService {
           
           return {
             success: false,
-            message: `Error al obtener tasa BCV después de ${this.retryAttempts} intentos: ${error.message}`
+            message: `Error al obtener tasa BCV después de ${this.retryAttempts} intentos: ${(error as Error).message}`
           };
         }
 
@@ -139,14 +139,9 @@ export class ExchangeRateService {
    */
   private async notifyAdminOfFailure(url: string, error: any): Promise<void> {
     try {
-      const message = `⚠️ Error al obtener tasa BCV\n\nURL: ${url}\nError: ${error.message}\nFecha: ${new Date().toLocaleString()}\n\nPor favor, configure la tasa manualmente en el panel de administración.`;
+      const message = `⚠️ Error al obtener tasa BCV\n\nURL: ${url}\nError: ${(error as Error).message}\nFecha: ${new Date().toLocaleString()}\n\nPor favor, configure la tasa manualmente en el panel de administración.`;
       
-      await sendNotificationToAdmin({
-        title: 'Error en Tasa de Cambio BCV',
-        message,
-        type: 'error',
-        priority: 'high'
-      });
+      await sendNotificationToAdmin('Error en Tasa de Cambio BCV', message, 'error', 'high');
 
       console.log('Notificación enviada al administrador');
     } catch (notificationError) {

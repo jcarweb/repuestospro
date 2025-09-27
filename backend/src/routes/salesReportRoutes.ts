@@ -28,14 +28,7 @@ export function createSalesReportRoutes(): Router {
   router.get('/admin/payment-analytics', roleMiddleware(['admin']), salesReportController.getPaymentAnalytics);
   router.get('/admin/export', roleMiddleware(['admin']), salesReportController.exportReport);
 
-  // Ruta para generar datos de prueba (solo admin)
-  router.post('/generate-test-data', roleMiddleware(['admin']), salesReportController.generateTestData);
-
-  // Ruta para generar datos de prueba para gestores de tienda (solo admin)
-  router.post('/generate-store-manager-test-data', roleMiddleware(['admin']), salesReportController.generateStoreManagerTestData);
-
-  // Ruta temporal para generar token de prueba (SOLO PARA DESARROLLO)
-  router.get('/generate-test-token', salesReportController.generateTestToken);
+  // Endpoints de debug removidos por seguridad
 
   return router;
 }

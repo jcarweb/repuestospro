@@ -138,7 +138,7 @@ const StoreManagerInventory: React.FC = () => {
 
   const fetchUserStores = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/stores/user-stores', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""""""""/api/stores/user-stores', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -177,7 +177,7 @@ const StoreManagerInventory: React.FC = () => {
       if (filterAlert !== 'all') params.append('alert', filterAlert);
       if (searchTerm) params.append('search', searchTerm);
 
-      const response = await fetch(`http://localhost:5000/api/inventory/store-manager/inventory?${params}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory/store-manager/inventory?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -197,7 +197,7 @@ const StoreManagerInventory: React.FC = () => {
     if (!selectedStore) return;
     
     try {
-      const response = await fetch(`http://localhost:5000/api/inventory/store-manager/stats/${selectedStore}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory/store-manager/stats/${selectedStore}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -215,7 +215,7 @@ const StoreManagerInventory: React.FC = () => {
     if (!selectedStore) return;
     
     try {
-      const response = await fetch(`http://localhost:5000/api/inventory/store-manager/movements/${selectedStore}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory/store-manager/movements/${selectedStore}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -233,7 +233,7 @@ const StoreManagerInventory: React.FC = () => {
     if (!selectedProduct || !selectedStore) return;
     
     try {
-      const response = await fetch(`http://localhost:5000/api/inventory/stock/${selectedStore}/${selectedProduct.product._id}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory/stock/${selectedStore}/${selectedProduct.product._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -275,7 +275,7 @@ const StoreManagerInventory: React.FC = () => {
       if (filterAlert !== 'all') params.append('alert', filterAlert);
       if (searchTerm) params.append('search', searchTerm);
 
-      const response = await fetch(`http://localhost:5000/api/inventory/store-manager/export?${params}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory/store-manager/export?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -306,7 +306,7 @@ const StoreManagerInventory: React.FC = () => {
       formData.append('csvFile', file);
       formData.append('storeId', selectedStore);
 
-      const response = await fetch('http://localhost:5000/api/inventory/store-manager/import', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory/store-manager/import', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

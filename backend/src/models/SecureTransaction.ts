@@ -1,10 +1,10 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ISecureTransaction extends Document {
-  transactionId: mongoose.Types.ObjectId;
-  userId: mongoose.Types.ObjectId;
-  storeId: mongoose.Types.ObjectId;
-  productId: mongoose.Types.ObjectId;
+  transactionId: mongoose.Schema.Types.ObjectId;
+  userId: mongoose.Schema.Types.ObjectId;
+  storeId: mongoose.Schema.Types.ObjectId;
+  productId: mongoose.Schema.Types.ObjectId;
   
   // Estado de protección
   protectionStatus: 'protected' | 'at_risk' | 'claimed' | 'expired' | 'resolved';
@@ -18,7 +18,7 @@ export interface ISecureTransaction extends Document {
   paymentStatus: 'pending' | 'completed' | 'failed' | 'refunded';
   
   // Garantías asociadas
-  warranties: mongoose.Types.ObjectId[]; // Referencias a Warranty
+  warranties: mongoose.Schema.Types.ObjectId[]; // Referencias a Warranty
   activeWarrantyCount: number;
   
   // Fechas importantes
@@ -44,7 +44,7 @@ export interface ISecureTransaction extends Document {
   // Metadatos
   notes?: string;
   tags?: string[];
-  createdBy: mongoose.Types.ObjectId;
+  createdBy: mongoose.Schema.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -119,45 +119,45 @@ const SecureTransactionSchema = new Schema<ISecureTransaction>({
 SecureTransactionSchema.index({ transactionId: 1 }, { unique: true });
 SecureTransactionSchema.index({ userId: 1, protectionStatus: 1 });
 SecureTransactionSchema.index({ storeId: 1, protectionStatus: 1 });
-SecureTransactionSchema.index({ protectionEndDate: 1, protectionStatus: 'protected' });
+SecureTransactionSchema.index({ protectionEndDate: 1, protectionStatus: 1 });
 SecureTransactionSchema.index({ purchaseDate: 1 });
 SecureTransactionSchema.index({ riskScore: -1 });
 
 // Método para verificar si la protección está activa
-SecureTransactionSchema.methods.isProtected = function(): boolean {
-  return this.protectionStatus === 'protected' && new Date() <= this.protectionEndDate;
+SecureTransactionSchema.methods['isProtected'] = function(): boolean {
+  return this['protectionStatus'] === 'protected' && new Date() <= this['protectionEndDate'];
 };
 
 // Método para calcular días restantes de protección
-SecureTransactionSchema.methods.getProtectionDaysRemaining = function(): number {
-  if (this.protectionStatus !== 'protected') return 0;
+SecureTransactionSchema.methods['getProtectionDaysRemaining'] = function(): number {
+  if (this['protectionStatus'] !== 'protected') return 0;
   const now = new Date();
-  const diffTime = this.protectionEndDate.getTime() - now.getTime();
+  const diffTime = this['protectionEndDate'].getTime() - now.getTime();
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
 // Método para agregar evento al historial
-SecureTransactionSchema.methods.addEvent = function(type: string, description: string, amount?: number, metadata?: any) {
-  this.events.push({
+SecureTransactionSchema.methods['addEvent'] = function(type: string, description: string, amount?: number, metadata?: any) {
+  this['events'].push({
     type,
     description,
     amount,
     timestamp: new Date(),
     metadata
   });
-  this.lastActivityDate = new Date();
-  return this.save();
+  this['lastActivityDate'] = new Date();
+  return this['save']();
 };
 
 // Método para calcular valor total protegido
-SecureTransactionSchema.methods.getProtectedValue = function(): number {
-  if (!this.isProtected()) return 0;
-  return this.transactionAmount;
+SecureTransactionSchema.methods['getProtectedValue'] = function(): number {
+  if (!this['isProtected']()) return 0;
+  return this['transactionAmount'];
 };
 
 // Método para verificar si puede hacer reclamo
-SecureTransactionSchema.methods.canFileClaim = function(): boolean {
-  return this.isProtected() && this.activeWarrantyCount > 0;
+SecureTransactionSchema.methods['canFileClaim'] = function(): boolean {
+  return this['isProtected']() && this['activeWarrantyCount'] > 0;
 };
 
 // Pre-save middleware para actualizar activeWarrantyCount

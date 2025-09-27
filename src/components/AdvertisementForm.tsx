@@ -134,7 +134,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
     try {
       console.log('🔍 AdvertisementForm - Cargando tiendas...');
       
-      const response = await fetch('http://localhost:5000/api/stores', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""/api/stores', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -159,7 +159,7 @@ const AdvertisementForm: React.FC<AdvertisementFormProps> = ({
   // Cargar datos de analytics
   const fetchAnalyticsData = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/advertisements/admin/analytics', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/advertisements/admin/analytics', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

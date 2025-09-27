@@ -2,22 +2,30 @@ import { Request, Response } from 'express';
 import Activity from '../models/Activity';
 import { IActivity } from '../models/Activity';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 class ActivityController {
   // Obtener actividades del usuario autenticado
-  async getUserActivities(req: Request, res: Response) {
+  async getUserActivities(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
-      const limit = parseInt(req.query.limit as string) || 50;
-      const skip = parseInt(req.query.skip as string) || 0;
+      const limit = parseInt(req.query['limit'] as string) || 50;
+      const skip = parseInt(req.query['skip'] as string) || 0;
 
       if (!userId) {
-        return res.status(401).json({ 
+        res.status(401).json({ 
           success: false, 
           message: 'Usuario no autenticado' 
         });
+        return;
       }
 
-      const activities = await Activity.getUserActivities(userId, limit, skip);
+      const activities = await Activity.find({ userId })
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .skip(skip);
 
       res.json({
         success: true,
@@ -33,19 +41,26 @@ class ActivityController {
   }
 
   // Obtener estadísticas de actividades del usuario
-  async getActivityStats(req: Request, res: Response) {
+  async getActivityStats(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
-      const days = parseInt(req.query.days as string) || 30;
+      const days = parseInt(req.query['days'] as string) || 30;
 
       if (!userId) {
-        return res.status(401).json({ 
+        res.status(401).json({ 
           success: false, 
           message: 'Usuario no autenticado' 
         });
+        return;
       }
 
-      const stats = await Activity.getActivityStats(userId, days);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+      
+      const stats = await Activity.aggregate([
+        { $match: { userId, createdAt: { $gte: startDate } } },
+        { $group: { _id: '$type', count: { $sum: 1 } } }
+      ]);
 
       res.json({
         success: true,
@@ -61,33 +76,35 @@ class ActivityController {
   }
 
   // Crear una nueva actividad (usado internamente)
-  async createActivity(req: Request, res: Response) {
+  async createActivity(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
       const { type, description, metadata, success, errorMessage } = req.body;
 
       if (!userId) {
-        return res.status(401).json({ 
+        res.status(401).json({ 
           success: false, 
           message: 'Usuario no autenticado' 
         });
+        return;
       }
 
       if (!type || !description) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Tipo y descripción son requeridos'
         });
+        return;
       }
 
-      const activity = await Activity.createActivity(
+      const activity = await Activity.create({
         userId,
         type,
         description,
         metadata,
         success,
-        errorMessage
-      );
+        errorMessage,
+      });
 
       res.status(201).json({
         success: true,
@@ -103,10 +120,10 @@ class ActivityController {
   }
 
   // Obtener todas las actividades (solo admin)
-  async getAllActivities(req: Request, res: Response) {
+  async getAllActivities(req: AuthenticatedRequest, res: Response) {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 50;
+      const page = parseInt(req.query['page'] as string) || 1;
+      const limit = parseInt(req.query['limit'] as string) || 50;
       const skip = (page - 1) * limit;
 
       const activities = await Activity.find()
@@ -137,11 +154,11 @@ class ActivityController {
   }
 
   // Obtener actividades por tipo (solo admin)
-  async getActivitiesByType(req: Request, res: Response) {
+  async getActivitiesByType(req: AuthenticatedRequest, res: Response) {
     try {
       const { type } = req.params;
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 50;
+      const page = parseInt(req.query['page'] as string) || 1;
+      const limit = parseInt(req.query['limit'] as string) || 50;
       const skip = (page - 1) * limit;
 
       const activities = await Activity.find({ type })
@@ -172,9 +189,9 @@ class ActivityController {
   }
 
   // Obtener estadísticas globales (solo admin)
-  async getGlobalStats(req: Request, res: Response) {
+  async getGlobalStats(req: AuthenticatedRequest, res: Response) {
     try {
-      const days = parseInt(req.query.days as string) || 30;
+      const days = parseInt(req.query['days'] as string) || 30;
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
 

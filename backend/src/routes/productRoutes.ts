@@ -4,8 +4,7 @@ import { authMiddleware, adminMiddleware, storeManagerMiddleware } from '../midd
 
 const router = Router();
 
-// Rutas públicas
-router.get('/test', productController.testEndpoint);
+// Endpoint de debug removido por seguridad
 
 // Rutas para todos los usuarios autenticados
 router.get('/', productController.getProducts);

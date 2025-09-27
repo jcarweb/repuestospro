@@ -3,12 +3,16 @@ import Rider, { IRider } from '../models/Rider';
 import User from '../models/User';
 import * as argon2 from 'argon2';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 export class RiderController {
   
   /**
    * Crear un nuevo rider
    */
-  static async createRider(req: Request, res: Response) {
+  static async createRider(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const {
         type,
@@ -28,13 +32,13 @@ export class RiderController {
       // Verificar si el email ya existe
       const existingRider = await Rider.findOne({ email });
       if (existingRider) {
-        return res.status(400).json({ message: 'El email ya está registrado' });
+        res.status(400).json({ message: 'El email ya está registrado' });
       }
 
       // Verificar si el número de identificación ya existe
       const existingId = await Rider.findOne({ idNumber });
       if (existingId) {
-        return res.status(400).json({ message: 'El número de identificación ya está registrado' });
+        res.status(400).json({ message: 'El número de identificación ya está registrado' });
       }
 
       // Crear el rider
@@ -69,7 +73,7 @@ export class RiderController {
         rider.userId = user._id;
       }
 
-      await rider.save();
+      await rider!.save();
 
       res.status(201).json({
         success: true,
@@ -86,7 +90,7 @@ export class RiderController {
   /**
    * Obtener todos los riders con filtros
    */
-  static async getRiders(req: Request, res: Response) {
+  static async getRiders(req: AuthenticatedRequest, res: Response) {
     try {
       const {
         type,
@@ -142,7 +146,7 @@ export class RiderController {
   /**
    * Obtener un rider específico
    */
-  static async getRider(req: Request, res: Response) {
+  static async getRider(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -150,7 +154,7 @@ export class RiderController {
         .populate('userId');
 
       if (!rider) {
-        return res.status(404).json({ message: 'Rider no encontrado' });
+        res.status(404).json({ message: 'Rider no encontrado' });
       }
 
       res.json({
@@ -167,35 +171,35 @@ export class RiderController {
   /**
    * Actualizar rider
    */
-  static async updateRider(req: Request, res: Response) {
+  static async updateRider(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const updateData = req.body;
 
       const rider = await Rider.findById(id);
       if (!rider) {
-        return res.status(404).json({ message: 'Rider no encontrado' });
+        res.status(404).json({ message: 'Rider no encontrado' });
       }
 
       // Verificar email único si se está actualizando
-      if (updateData.email && updateData.email !== rider.email) {
+      if (updateData.email && updateData.email !== rider?.email) {
         const existingRider = await Rider.findOne({ email: updateData.email });
         if (existingRider) {
-          return res.status(400).json({ message: 'El email ya está registrado' });
+          res.status(400).json({ message: 'El email ya está registrado' });
         }
       }
 
       // Verificar ID único si se está actualizando
-      if (updateData.idNumber && updateData.idNumber !== rider.idNumber) {
+      if (updateData.idNumber && updateData.idNumber !== rider?.idNumber) {
         const existingId = await Rider.findOne({ idNumber: updateData.idNumber });
         if (existingId) {
-          return res.status(400).json({ message: 'El número de identificación ya está registrado' });
+          res.status(400).json({ message: 'El número de identificación ya está registrado' });
         }
       }
 
       // Actualizar rider
-      Object.assign(rider, updateData);
-      await rider.save();
+      Object.assign(rider!, updateData);
+      await rider!.save();
 
       res.json({
         success: true,
@@ -212,17 +216,17 @@ export class RiderController {
   /**
    * Actualizar estado del rider
    */
-  static async updateRiderStatus(req: Request, res: Response) {
+  static async updateRiderStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { status, reason } = req.body;
 
       const rider = await Rider.findById(id);
       if (!rider) {
-        return res.status(404).json({ message: 'Rider no encontrado' });
+        res.status(404).json({ message: 'Rider no encontrado' });
       }
 
-      await rider.updateStatus(status, reason, req.user?.email);
+      await (rider as any).updateStatus(status, reason, req.user?.email);
 
       res.json({
         success: true,
@@ -239,28 +243,28 @@ export class RiderController {
   /**
    * Actualizar disponibilidad del rider
    */
-  static async updateRiderAvailability(req: Request, res: Response) {
+  static async updateRiderAvailability(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { isOnline, isAvailable, currentLocation } = req.body;
 
       const rider = await Rider.findById(id);
       if (!rider) {
-        return res.status(404).json({ message: 'Rider no encontrado' });
+        res.status(404).json({ message: 'Rider no encontrado' });
       }
 
-      rider.availability.isOnline = isOnline;
-      rider.availability.isAvailable = isAvailable;
+      rider!.availability.isOnline = isOnline;
+      rider!.availability.isAvailable = isAvailable;
       
       if (currentLocation) {
-        rider.availability.currentLocation = {
+        rider!.availability.currentLocation = {
           lat: currentLocation.lat,
           lng: currentLocation.lng,
           timestamp: new Date()
         };
       }
 
-      await rider.save();
+      await rider!.save();
 
       res.json({
         success: true,
@@ -277,14 +281,14 @@ export class RiderController {
   /**
    * Obtener estadísticas del rider
    */
-  static async getRiderStats(req: Request, res: Response) {
+  static async getRiderStats(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { dateFrom, dateTo } = req.query;
 
       const rider = await Rider.findById(id);
       if (!rider) {
-        return res.status(404).json({ message: 'Rider no encontrado' });
+        res.status(404).json({ message: 'Rider no encontrado' });
       }
 
       // Aquí se pueden agregar cálculos adicionales de estadísticas
@@ -294,8 +298,8 @@ export class RiderController {
         success: true,
         data: {
           rider,
-          stats: rider.stats,
-          rating: rider.rating
+          stats: rider!.stats,
+          rating: rider!.rating
         }
       });
 
@@ -308,7 +312,7 @@ export class RiderController {
   /**
    * Obtener estadísticas generales de riders
    */
-  static async getRidersStats(req: Request, res: Response) {
+  static async getRidersStats(req: AuthenticatedRequest, res: Response) {
     try {
       const [
         totalRiders,
@@ -354,13 +358,13 @@ export class RiderController {
   /**
    * Eliminar rider
    */
-  static async deleteRider(req: Request, res: Response) {
+  static async deleteRider(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
       const rider = await Rider.findById(id);
       if (!rider) {
-        return res.status(404).json({ message: 'Rider no encontrado' });
+        res.status(404).json({ message: 'Rider no encontrado' });
       }
 
       // Verificar que no tenga deliveries activos
@@ -369,8 +373,8 @@ export class RiderController {
       await Rider.findByIdAndDelete(id);
 
       // Si es rider interno, eliminar usuario asociado
-      if (rider.userId) {
-        await User.findByIdAndDelete(rider.userId);
+      if (rider!.userId) {
+        await User.findByIdAndDelete(rider!.userId);
       }
 
       res.json({
@@ -387,22 +391,22 @@ export class RiderController {
   /**
    * Verificar documentos del rider
    */
-  static async verifyRiderDocuments(req: Request, res: Response) {
+  static async verifyRiderDocuments(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { documentType, verified } = req.body;
 
       const rider = await Rider.findById(id);
       if (!rider) {
-        return res.status(404).json({ message: 'Rider no encontrado' });
+        res.status(404).json({ message: 'Rider no encontrado' });
       }
 
       // Actualizar verificación del documento
-      if (rider.documents[documentType]) {
-        rider.documents[documentType].verified = verified;
+      if ((rider!.documents as any)[documentType]) {
+        (rider!.documents as any)[documentType].verified = verified;
       }
 
-      await rider.save();
+      await rider!.save();
 
       res.json({
         success: true,
@@ -419,18 +423,18 @@ export class RiderController {
   /**
    * Configurar zonas de servicio del rider
    */
-  static async updateServiceAreas(req: Request, res: Response) {
+  static async updateServiceAreas(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { serviceAreas } = req.body;
 
       const rider = await Rider.findById(id);
       if (!rider) {
-        return res.status(404).json({ message: 'Rider no encontrado' });
+        res.status(404).json({ message: 'Rider no encontrado' });
       }
 
-      rider.serviceAreas = serviceAreas;
-      await rider.save();
+      rider!.serviceAreas = serviceAreas;
+      await rider!.save();
 
       res.json({
         success: true,

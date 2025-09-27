@@ -57,7 +57,7 @@ export interface IAdvertisingPlan extends Document {
   sortOrder: number;
   createdAt: Date;
   updatedAt: Date;
-  createdBy: mongoose.Types.ObjectId;
+  createdBy: mongoose.Schema.Types.ObjectId;
 }
 
 const AdvertisingPlanSchema = new Schema<IAdvertisingPlan>({
@@ -299,12 +299,12 @@ AdvertisingPlanSchema.pre('save', function(next) {
 });
 
 // Método para obtener planes activos ordenados por prioridad
-AdvertisingPlanSchema.statics.getActivePlans = function() {
+AdvertisingPlanSchema.statics['getActivePlans'] = function() {
   return this.find({ isActive: true }).sort({ sortOrder: 1, priority: -1 });
 };
 
 // Método para obtener planes por tipo y categoría
-AdvertisingPlanSchema.statics.getPlansByTypeAndCategory = function(type: string, category: string) {
+AdvertisingPlanSchema.statics['getPlansByTypeAndCategory'] = function(type: string, category: string) {
   return this.find({ 
     type, 
     category, 
@@ -313,7 +313,7 @@ AdvertisingPlanSchema.statics.getPlansByTypeAndCategory = function(type: string,
 };
 
 // Método para obtener planes recomendados
-AdvertisingPlanSchema.statics.getRecommendedPlans = function() {
+AdvertisingPlanSchema.statics['getRecommendedPlans'] = function() {
   return this.find({ 
     isActive: true, 
     isRecommended: true 
@@ -321,7 +321,7 @@ AdvertisingPlanSchema.statics.getRecommendedPlans = function() {
 };
 
 // Método para obtener planes populares
-AdvertisingPlanSchema.statics.getPopularPlans = function() {
+AdvertisingPlanSchema.statics['getPopularPlans'] = function() {
   return this.find({ 
     isActive: true, 
     isPopular: true 
@@ -329,20 +329,20 @@ AdvertisingPlanSchema.statics.getPopularPlans = function() {
 };
 
 // Método de instancia para verificar si un plan es adecuado para una tienda
-AdvertisingPlanSchema.methods.isSuitableForStore = function(store: any) {
+AdvertisingPlanSchema.methods['isSuitableForStore'] = function(store: any) {
   // Verificar rating mínimo
-  if (store.rating < this.restrictions.minStoreRating) {
+  if (store.rating < this['restrictions'].minStoreRating) {
     return { suitable: false, reason: 'Rating de tienda insuficiente' };
   }
   
   // Verificar antigüedad mínima
   const storeAge = Math.floor((Date.now() - new Date(store.createdAt).getTime()) / (1000 * 60 * 60 * 24));
-  if (storeAge < this.restrictions.minStoreAge) {
+  if (storeAge < this['restrictions'].minStoreAge) {
     return { suitable: false, reason: 'Tienda muy nueva' };
   }
   
   // Verificar categorías bloqueadas
-  if (store.category && this.restrictions.blacklistedCategories.includes(store.category)) {
+  if (store.category && this['restrictions'].blacklistedCategories.includes(store.category)) {
     return { suitable: false, reason: 'Categoría no permitida' };
   }
   

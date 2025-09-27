@@ -63,7 +63,7 @@ export interface IUser extends Document {
   // Campos específicos para Delivery
   deliveryStatus?: 'available' | 'unavailable' | 'busy' | 'on_route' | 'returning_to_store';
   autoStatusMode: boolean; // true = automático, false = manual
-  currentOrder?: mongoose.Types.ObjectId;
+  currentOrder?: mongoose.Schema.Types.ObjectId;
   deliveryZone?: {
     center: [number, number];
     radius: number; // en kilómetros
@@ -80,7 +80,7 @@ export interface IUser extends Document {
   };
   
   // Campos específicos para Store Manager
-  stores?: mongoose.Types.ObjectId[]; // Referencias a las tiendas que gestiona
+  stores?: mongoose.Schema.Types.ObjectId[]; // Referencias a las tiendas que gestiona
   commissionRate?: number; // porcentaje de comisión por venta
   taxRate?: number; // porcentaje de impuestos
   
@@ -92,7 +92,7 @@ export interface IUser extends Document {
     orderManagement: boolean;
     inventoryView: boolean;
   };
-  assignedStore?: mongoose.Types.ObjectId; // Tienda asignada al vendedor
+  assignedStore?: mongoose.Schema.Types.ObjectId; // Tienda asignada al vendedor
   
   // Campos específicos para Admin
   adminPermissions?: {
@@ -425,7 +425,7 @@ userSchema.index({ stores: 1 });
 userSchema.index({ assignedStore: 1 });
 
 // Métodos de instancia
-userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+userSchema.methods['comparePassword'] = async function(this: IUser, candidatePassword: string): Promise<boolean> {
   try {
     // Verificar si la contraseña almacenada tiene el formato correcto de Argon2
     if (!this.password || !this.password.startsWith('$argon2')) {
@@ -439,7 +439,7 @@ userSchema.methods.comparePassword = async function(candidatePassword: string): 
   }
 };
 
-userSchema.methods.comparePin = async function(candidatePin: string): Promise<boolean> {
+userSchema.methods['comparePin'] = async function(this: IUser, candidatePin: string): Promise<boolean> {
   if (!this.pin) return false;
   try {
     // Verificar si el PIN almacenado tiene el formato correcto de Argon2
@@ -454,11 +454,11 @@ userSchema.methods.comparePin = async function(candidatePin: string): Promise<bo
   }
 };
 
-userSchema.methods.isAccountLocked = function(): boolean {
+userSchema.methods['isAccountLocked'] = function(this: IUser): boolean {
   return !!(this.lockUntil && this.lockUntil > new Date());
 };
 
-userSchema.methods.incrementLoginAttempts = async function(): Promise<void> {
+userSchema.methods['incrementLoginAttempts'] = async function(this: IUser): Promise<void> {
   // Si hay un lockUntil y ya expiró, resetear
   if (this.lockUntil && this.lockUntil < new Date()) {
     return this.updateOne({
@@ -477,13 +477,13 @@ userSchema.methods.incrementLoginAttempts = async function(): Promise<void> {
   return this.updateOne(updates);
 };
 
-userSchema.methods.resetLoginAttempts = async function(): Promise<void> {
+userSchema.methods['resetLoginAttempts'] = async function(this: IUser): Promise<void> {
   return this.updateOne({
     $unset: { loginAttempts: 1, lockUntil: 1 }
   });
 };
 
-userSchema.methods.verifyTwoFactorCode = function(code: string): boolean {
+userSchema.methods['verifyTwoFactorCode'] = function(this: IUser, code: string): boolean {
   if (!this.twoFactorSecret || !this.twoFactorEnabled) {
     return false;
   }
@@ -493,7 +493,7 @@ userSchema.methods.verifyTwoFactorCode = function(code: string): boolean {
   return verifyTwoFactorCode(this.twoFactorSecret, code);
 };
 
-userSchema.methods.generateBackupCodes = function(): string[] {
+userSchema.methods['generateBackupCodes'] = function(this: IUser): string[] {
   const codes: string[] = [];
   for (let i = 0; i < 10; i++) {
     codes.push(Math.random().toString(36).substring(2, 8).toUpperCase());

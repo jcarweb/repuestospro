@@ -120,7 +120,7 @@ const AdminProducts: React.FC = () => {
   // Cargar tiendas
   const fetchStores = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/stores', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""""""""/api/stores', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -155,7 +155,7 @@ const AdminProducts: React.FC = () => {
         params.append('storeId', selectedStore);
       }
 
-      const response = await fetch(`http://localhost:5000/api/products/admin/all?${params}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/products/admin/all?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -178,7 +178,7 @@ const AdminProducts: React.FC = () => {
   // Cargar estadísticas
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/products/admin/stats', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/products/admin/stats', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -205,7 +205,7 @@ const AdminProducts: React.FC = () => {
   // Crear producto
   const handleCreateProduct = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/products/admin/create', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/products/admin/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -239,7 +239,7 @@ const AdminProducts: React.FC = () => {
     if (!selectedProduct) return;
     
     try {
-      const response = await fetch(`http://localhost:5000/api/products/admin/${selectedProduct._id}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/products/admin/${selectedProduct._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -270,7 +270,7 @@ const AdminProducts: React.FC = () => {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/products/admin/${productId}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/products/admin/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -310,7 +310,7 @@ const AdminProducts: React.FC = () => {
       formDataToSend.append('csvFile', csvFile);
       formDataToSend.append('storeId', formData.storeId);
 
-      const response = await fetch('http://localhost:5000/api/products/admin/import-csv', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/products/admin/import-csv', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

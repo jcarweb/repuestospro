@@ -1,17 +1,15 @@
 import mongoose from 'mongoose';
 import Product from '../models/Product';
 import Store from '../models/Store';
-
 // Configuración de la base de datos
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/repuestospro', {
+mongoose.connect(process.env['MONGODB_URI'] || 'mongodb://localhost:27017/repuestospro', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 } as any);
-
 // Marcas por tipo de vehículo
 const vehicleBrands = {
   automovil: [
-    'Toyota', 'Honda', 'Ford', 'Chevrolet', 'Nissan', 'BMW', 'Mercedes', 'Audi', 
+    'Toyota', 'Honda', 'Ford', 'Chevrolet', 'Nissan', 'BMW', 'Mercedes', 'Audi',
     'Volkswagen', 'Hyundai', 'Kia', 'Mazda', 'Subaru', 'Mitsubishi', 'Lexus',
     'Peugeot', 'Renault', 'Fiat', 'Seat', 'Skoda', 'Volvo', 'Jaguar', 'Land Rover'
   ],
@@ -26,7 +24,7 @@ const vehicleBrands = {
     'Isuzu', 'Hino', 'UD Trucks', 'Tata', 'Ashok Leyland'
   ],
   maquinaria_agricola: [
-    'John Deere', 'Massey Ferguson', 'New Holland', 'Case IH', 'Kubota', 'Fendt', 
+    'John Deere', 'Massey Ferguson', 'New Holland', 'Case IH', 'Kubota', 'Fendt',
     'Valtra', 'Deutz-Fahr', 'Claas', 'Landini', 'McCormick', 'Same', 'Lamborghini',
     'Antonio Carraro', 'Goldoni', 'Arbos', 'Solis', 'Mahindra', 'Tafe'
   ],
@@ -38,17 +36,14 @@ const vehicleBrands = {
     'Industrias Venoco', 'Maquinarias del Sur', 'Equipos Industriales CA'
   ]
 };
-
 // Función para obtener marcas por tipo de vehículo
 function getBrandsByVehicleType(vehicleType: string): string[] {
   return vehicleBrands[vehicleType as keyof typeof vehicleBrands] || vehicleBrands.automovil;
 }
-
 const categories = [
-  'Motor', 'Frenos', 'Suspensión', 'Eléctrico', 'Transmisión', 'Refrigeración', 
+  'Motor', 'Frenos', 'Suspensión', 'Eléctrico', 'Transmisión', 'Refrigeración',
   'Combustible', 'Escape', 'Dirección', 'Iluminación', 'Accesorios'
 ];
-
 const subcategories = {
   'Motor': ['Aceite de Motor', 'Filtros de Aceite', 'Bujías', 'Correas', 'Bombas de Aceite', 'Juntas'],
   'Frenos': ['Pastillas de Freno', 'Discos de Freno', 'Líquido de Frenos', 'Cilindros', 'Cables'],
@@ -62,7 +57,6 @@ const subcategories = {
   'Iluminación': ['Bombillas', 'Faros', 'Pilotos', 'Cables de Iluminación'],
   'Accesorios': ['Alfombras', 'Cubiertas', 'Organizadores', 'Cargadores']
 };
-
 const productNames = {
   'Motor': [
     'Aceite Sintético 5W-30', 'Aceite Mineral 10W-40', 'Filtro de Aceite Premium',
@@ -110,7 +104,6 @@ const productNames = {
     'Cargador USB', 'Porta Vasos', 'Cubre Volante'
   ]
 };
-
 const descriptions = {
   'Motor': [
     'Aceite de motor de alta calidad para máxima protección y rendimiento',
@@ -169,7 +162,6 @@ const descriptions = {
     'Organizador de maletero práctico'
   ]
 };
-
 // Función para determinar el tipo de despacho basado en el tipo de vehículo
 function getDeliveryType(vehicleType: string): string {
   switch (vehicleType) {
@@ -184,45 +176,38 @@ function getDeliveryType(vehicleType: string): string {
       return 'delivery_motorizado';
   }
 }
-
 // Función para generar un producto aleatorio
 function generateRandomProduct() {
   const category = categories[Math.floor(Math.random() * categories.length)];
-  const subcategoryList = (subcategories as any)[category];
+  const subcategoryList = (subcategories as any)[category as string] || [];
   const subcategory = subcategoryList[Math.floor(Math.random() * subcategoryList.length)];
-  
   // Determinar tipo de vehículo (por ahora solo automóviles, se puede expandir)
   const vehicleType = 'automovil';
   const deliveryType = getDeliveryType(vehicleType);
-  
   // Obtener marcas específicas para el tipo de vehículo
   const availableBrands = getBrandsByVehicleType(vehicleType);
   const brand = availableBrands[Math.floor(Math.random() * availableBrands.length)];
-  
-  const productNamesList = (productNames as any)[category];
+  const productNamesList = (productNames as any)[category as string] || [];
   const productName = productNamesList[Math.floor(Math.random() * productNamesList.length)];
-  
-  const descriptionsList = (descriptions as any)[category];
+  const descriptionsList = (descriptions as any)[category as string] || [];
   const description = descriptionsList[Math.floor(Math.random() * descriptionsList.length)];
-  
   const price = Math.floor(Math.random() * 500) + 10; // Precio entre $10 y $510
   const stock = Math.floor(Math.random() * 50) + 1; // Stock entre 1 y 50
-  
   return {
     name: `${productName} ${brand}`,
     description: `${description} compatible con vehículos ${brand}`,
     price: price,
     images: [`https://via.placeholder.com/300x200/0066cc/ffffff?text=${encodeURIComponent(productName)}`],
-    category: category.toLowerCase(),
+    category: category?.toLowerCase() || 'general',
     vehicleType: vehicleType,
     deliveryType: deliveryType,
-    brand: brand.toLowerCase(),
+    brand: brand?.toLowerCase() || 'generic',
     subcategory: subcategory.toLowerCase(),
     sku: `SKU-${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
     stock: stock,
     isActive: true,
     isFeatured: Math.random() > 0.8, // 20% de productos destacados
-    tags: [category.toLowerCase(), brand.toLowerCase(), subcategory.toLowerCase()],
+    tags: [category?.toLowerCase() || 'general', brand?.toLowerCase() || 'generic', subcategory?.toLowerCase() || 'general'],
     specifications: {
       marca: brand,
       categoria: category,
@@ -234,34 +219,27 @@ function generateRandomProduct() {
     store: null as any // Se asignará después
   };
 }
-
 // Función principal para generar productos
 export async function generateTestProducts() {
   try {
     console.log('🚀 Iniciando generación de productos de prueba...');
-    
     // Obtener tiendas existentes
     const stores = await Store.find({ isActive: true });
     if (stores.length === 0) {
       throw new Error('No hay tiendas activas en la base de datos. Ejecuta primero el seed de tiendas.');
     }
-    
     console.log(`🏪 Usando ${stores.length} tiendas para asignar productos`);
-    
     // Generar 150 productos de prueba
     const products = [];
     for (let i = 0; i < 150; i++) {
       const product = generateRandomProduct();
       // Asignar una tienda aleatoria
       const randomStore = stores[Math.floor(Math.random() * stores.length)];
-      product.store = randomStore._id;
+      product.store = randomStore?._id;
       products.push(product);
     }
-    
     // Insertar productos en la base de datos
     const result = await Product.insertMany(products);
-    console.log(`✅ Generados ${result.length} productos de prueba exitosamente`);
-    
     // Mostrar estadísticas
     const stats = await Product.aggregate([
       {
@@ -273,12 +251,10 @@ export async function generateTestProducts() {
         }
       }
     ]);
-    
     console.log('\n📊 Estadísticas por categoría:');
     stats.forEach(stat => {
       console.log(`${stat._id}: ${stat.count} productos, precio promedio: $${Math.round(stat.avgPrice)}, stock total: ${stat.totalStock}`);
     });
-    
     // Estadísticas por marca
     const brandStats = await Product.aggregate([
       {
@@ -289,24 +265,20 @@ export async function generateTestProducts() {
       },
       { $sort: { count: -1 } }
     ]);
-    
     console.log('\n🏷️  Productos por marca:');
     brandStats.forEach(stat => {
       console.log(`${stat._id}: ${stat.count} productos`);
     });
-    
     console.log('\n🎉 Generación de productos de prueba completada!');
     console.log('💡 Ahora puedes probar el sistema de búsqueda avanzada');
-    
   } catch (error) {
     console.error('❌ Error generando productos de prueba:', error);
     throw error;
   }
 }
-
 // Ejecutar el script si se llama directamente
 if (require.main === module) {
   generateTestProducts().then(() => {
     mongoose.connection.close();
   });
-} 
+}

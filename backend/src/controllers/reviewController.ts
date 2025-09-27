@@ -4,7 +4,11 @@ import User from '../models/User';
 import Product from '../models/Product';
 import Order from '../models/Order';
 import Store from '../models/Store';
-import { ContentFilter } from '../middleware/contentFilter';
+import { ContentFilterService } from '../middleware/contentFilter';
+
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
 
 export class ReviewController {
   // Obtener todas las reseñas de una tienda
@@ -215,12 +219,12 @@ export class ReviewController {
       }
 
       // Validar contenido de la respuesta
-      const contentValidation = await ContentFilter.validateReviewContent(reply);
+      const contentValidation = await ContentFilterService.validateReviewContent(reply);
       if (!contentValidation.isValid) {
         res.status(400).json({
           success: false,
           message: 'La respuesta contiene contenido inapropiado',
-          details: contentValidation.reasons
+          details: (contentValidation as any).reasons || []
         });
         return;
       }
@@ -238,7 +242,7 @@ export class ReviewController {
 
       // Verificar que el producto pertenece a la tienda del store manager
       const product = await Product.findById(review.productId);
-      if (!product || product.storeId.toString() !== storeManagerId.toString()) {
+      if (!product || product.store.toString() !== storeManagerId.toString()) {
         res.status(403).json({
           success: false,
           message: 'No tienes permisos para responder a esta reseña'

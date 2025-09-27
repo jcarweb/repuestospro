@@ -158,7 +158,7 @@ const StoreBranchesManager: React.FC = () => {
       setActionLoading(true);
       
       console.log('Enviando request con token:', token ? 'Token presente' : 'Sin token');
-      const response = await fetch('http://localhost:5000/api/stores', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""""""/api/stores', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -214,7 +214,7 @@ const StoreBranchesManager: React.FC = () => {
     try {
       setActionLoading(true);
       
-      const response = await fetch(`http://localhost:5000/api/stores/${editingStore._id}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/stores/${editingStore._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -245,7 +245,7 @@ const StoreBranchesManager: React.FC = () => {
     try {
       setActionLoading(true);
       
-      const response = await fetch(`http://localhost:5000/api/stores/${selectedStore._id}/business-hours`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/stores/${selectedStore._id}/business-hours`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -274,7 +274,7 @@ const StoreBranchesManager: React.FC = () => {
     try {
       setActionLoading(true);
       
-      const response = await fetch(`http://localhost:5000/api/stores/${storeId}/set-main`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/stores/${storeId}/set-main`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -301,7 +301,7 @@ const StoreBranchesManager: React.FC = () => {
     try {
       setActionLoading(true);
       
-      const response = await fetch(`http://localhost:5000/api/stores/${storeId}/toggle-status`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/stores/${storeId}/toggle-status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -330,7 +330,7 @@ const StoreBranchesManager: React.FC = () => {
     try {
       setActionLoading(true);
       
-      const response = await fetch(`http://localhost:5000/api/stores/${storeId}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/stores/${storeId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

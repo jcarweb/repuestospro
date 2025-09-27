@@ -1,10 +1,14 @@
 import { Request, Response } from 'express';
 import SearchService from '../services/SearchService';
-import { authenticateToken, requireAdmin } from '../middleware';
+import { authMiddleware as authenticateToken, adminMiddleware as requireAdmin } from '../middleware/authMiddleware';
+
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
 
 class SearchController {
   // Búsqueda de productos
-  async searchProducts(req: Request, res: Response) {
+  async searchProducts(req: Request, res: Response): Promise<void> {
     try {
       const {
         query,
@@ -16,7 +20,7 @@ class SearchController {
       } = req.body;
 
       if (!query || query.trim().length === 0) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'La consulta de búsqueda es requerida'
         });
@@ -57,18 +61,18 @@ class SearchController {
   }
 
   // Autocompletado
-  async autocomplete(req: Request, res: Response) {
+  async autocomplete(req: Request, res: Response): Promise<void> {
     try {
       const { query } = req.query;
 
       if (!query || typeof query !== 'string') {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'La consulta es requerida'
         });
       }
 
-      const suggestions = await SearchService.autocomplete(query);
+      const suggestions = await SearchService.autocomplete(query as string);
 
       res.json({
         success: true,
@@ -105,7 +109,7 @@ class SearchController {
   }
 
   // Actualizar configuración de búsqueda (solo admin)
-  async updateSearchConfig(req: Request, res: Response) {
+  async updateSearchConfig(req: AuthenticatedRequest, res: Response) {
     try {
       const {
         semanticSearchEnabled,
@@ -127,7 +131,7 @@ class SearchController {
         intentRecognitionEnabled
       } = req.body;
 
-      const user = req.user as any;
+      const user = req.user;
 
       const updatedConfig = await SearchService.updateConfig({
         semanticSearchEnabled,

@@ -44,7 +44,8 @@ const TwoFactorVerification: React.FC<TwoFactorVerificationProps> = ({
     try {
       console.log('🔐 Enviando verificación 2FA...', { email, code: code.trim(), tempToken: tempToken.substring(0, 20) + '...' });
       
-      const response = await fetch('http://localhost:5000/api/auth/login/2fa/complete', {
+      const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+      const response = await fetch(`${baseUrl}/api/auth/login/2fa/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

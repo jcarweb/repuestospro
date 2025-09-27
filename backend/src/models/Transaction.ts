@@ -2,12 +2,12 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ITransaction extends Document {
   transactionNumber: string;
-  userId: mongoose.Types.ObjectId;
-  storeId: mongoose.Types.ObjectId;
+  userId: mongoose.Schema.Types.ObjectId;
+  storeId: mongoose.Schema.Types.ObjectId;
   
   // Información de productos
   items: Array<{
-    productId: mongoose.Types.ObjectId;
+    productId: mongoose.Schema.Types.ObjectId;
     productName: string;
     quantity: number;
     unitPrice: number;
@@ -54,7 +54,7 @@ export interface ITransaction extends Document {
   // Metadatos
   notes?: string;
   tags?: string[];
-  createdBy: mongoose.Types.ObjectId;
+  createdBy: mongoose.Schema.Types.ObjectId;
 }
 
 const TransactionSchema = new Schema<ITransaction>({
@@ -232,20 +232,20 @@ TransactionSchema.index({ status: 1, paymentStatus: 1 });
 TransactionSchema.index({ warrantyEnabled: 1 });
 
 // Métodos de instancia
-TransactionSchema.methods.calculateTotal = function(): number {
-  return this.subtotal + this.taxAmount + this.commissionAmount + this.warrantyTotal;
+TransactionSchema.methods['calculateTotal'] = function(): number {
+  return this['subtotal'] + this['taxAmount'] + this['commissionAmount'] + this['warrantyTotal'];
 };
 
-TransactionSchema.methods.isWarrantyEligible = function(): boolean {
-  return this.warrantyEnabled && this.warrantyLevel !== 'none' && this.warrantyCoverage > 0;
+TransactionSchema.methods['isWarrantyEligible'] = function(): boolean {
+  return this['warrantyEnabled'] && this['warrantyLevel'] !== 'none' && this['warrantyCoverage'] > 0;
 };
 
-TransactionSchema.methods.canBeCancelled = function(): boolean {
-  return ['pending', 'processing'].includes(this.status);
+TransactionSchema.methods['canBeCancelled'] = function(): boolean {
+  return ['pending', 'processing'].includes(this['status']);
 };
 
-TransactionSchema.methods.canBeRefunded = function(): boolean {
-  return this.status === 'completed' && this.paymentStatus === 'completed';
+TransactionSchema.methods['canBeRefunded'] = function(): boolean {
+  return this['status'] === 'completed' && this['paymentStatus'] === 'completed';
 };
 
 // Middleware pre-save para actualizar updatedAt

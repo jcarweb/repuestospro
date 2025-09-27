@@ -106,7 +106,7 @@ const AdminInventory: React.FC = () => {
   const fetchStores = async () => {
     try {
       console.log('🔍 Fetching stores...', { token: token ? 'present' : 'missing' });
-      const response = await fetch('http://localhost:5000/api/stores', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""""""/api/stores', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -144,7 +144,7 @@ const AdminInventory: React.FC = () => {
       if (filterAlert !== 'all') params.append('alert', filterAlert);
       if (searchTerm) params.append('search', searchTerm);
 
-      const response = await fetch(`http://localhost:5000/api/inventory/admin/all?${params}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory/admin/all?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -162,7 +162,7 @@ const AdminInventory: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/inventory/admin/stats', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory/admin/stats', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -184,7 +184,7 @@ const AdminInventory: React.FC = () => {
       if (filterAlert !== 'all') params.append('alert', filterAlert);
       if (searchTerm) params.append('search', searchTerm);
 
-      const response = await fetch(`http://localhost:5000/api/inventory/admin/export?${params}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory/admin/export?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -212,7 +212,7 @@ const AdminInventory: React.FC = () => {
       const formData = new FormData();
       formData.append('csvFile', file);
 
-      const response = await fetch('http://localhost:5000/api/inventory/admin/import', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory/admin/import', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

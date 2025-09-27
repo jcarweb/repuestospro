@@ -88,7 +88,7 @@ export class WarrantyService {
 
       return savedWarranty;
     } catch (error) {
-      throw new Error(`Error al crear garantía: ${error.message}`);
+      throw new Error(`Error al crear garantía: ${(error as Error).message}`);
     }
   }
 
@@ -308,8 +308,8 @@ export class WarrantyService {
       extended: 10000
     };
 
-    const percentage = percentages[level] || 100;
-    const maxAmount = maxAmounts[level] || 1000;
+    const percentage = percentages[level as keyof typeof percentages] || 100;
+    const maxAmount = maxAmounts[level as keyof typeof maxAmounts] || 1000;
     const coverageAmount = Math.min(amount * (percentage / 100), maxAmount);
 
     return {
@@ -331,7 +331,7 @@ export class WarrantyService {
       extended: 0.12 // 12%
     };
 
-    const rate = rates[level] || 0.05;
+    const rate = rates[level as keyof typeof rates] || 0.05;
     return Math.round(amount * rate * 100) / 100; // Redondear a 2 decimales
   }
 
@@ -357,7 +357,7 @@ export class WarrantyService {
       }
     };
 
-    return durations[type]?.[level] || 30;
+    return durations[type as keyof typeof durations]?.[level as keyof typeof durations[keyof typeof durations]] || 30;
   }
 
   /**
@@ -397,7 +397,7 @@ export class WarrantyService {
       extended: 10000
     };
 
-    return maxAmounts[level] || 1000;
+    return maxAmounts[level as keyof typeof maxAmounts] || 1000;
   }
 
   /**
@@ -410,7 +410,7 @@ export class WarrantyService {
       claim_protection: `Protección de reclamos ${level} - Soporte completo para disputas`
     };
 
-    return descriptions[type] || 'Garantía de compra';
+    return descriptions[type as keyof typeof descriptions] || 'Garantía de compra';
   }
 
   /**

@@ -2,6 +2,10 @@ import { Request, Response } from 'express';
 import { SalesReportService, SalesReportFilters } from '../services/SalesReportService';
 import mongoose from 'mongoose';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 export class SalesReportController {
   /**
    * Helper method to handle store manager filters
@@ -13,7 +17,7 @@ export class SalesReportController {
         // Si se especifica una tienda específica en los filtros, usarla
         if (!filters.storeId) {
           // Usar la primera tienda por defecto, o todas las tiendas
-          filters.storeId = new mongoose.Types.ObjectId(user.stores[0]);
+          filters.storeId = user.stores[0];
         }
       }
     }
@@ -23,7 +27,7 @@ export class SalesReportController {
   /**
    * Generar reporte completo de ventas
    */
-  public generateSalesReport = async (req: Request, res: Response) => {
+  public generateSalesReport = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const filters = this.parseFilters(req.query);
       this.handleStoreManagerFilters(filters, req.user);
@@ -47,7 +51,7 @@ export class SalesReportController {
   /**
    * Obtener métricas rápidas para el dashboard
    */
-  public getQuickMetrics = async (req: Request, res: Response) => {
+  public getQuickMetrics = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const filters: SalesReportFilters = {};
       
@@ -81,7 +85,7 @@ export class SalesReportController {
   /**
    * Obtener tendencias de ventas
    */
-  public getSalesTrends = async (req: Request, res: Response) => {
+  public getSalesTrends = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const filters = this.parseFilters(req.query);
       
@@ -109,7 +113,7 @@ export class SalesReportController {
   /**
    * Obtener productos más vendidos
    */
-  public getTopProducts = async (req: Request, res: Response) => {
+  public getTopProducts = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const filters = this.parseFilters(req.query);
       
@@ -137,7 +141,7 @@ export class SalesReportController {
   /**
    * Obtener análisis de clientes
    */
-  public getCustomerAnalytics = async (req: Request, res: Response) => {
+  public getCustomerAnalytics = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const filters = this.parseFilters(req.query);
       
@@ -165,7 +169,7 @@ export class SalesReportController {
   /**
    * Obtener análisis de métodos de pago
    */
-  public getPaymentAnalytics = async (req: Request, res: Response) => {
+  public getPaymentAnalytics = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const filters = this.parseFilters(req.query);
       
@@ -193,10 +197,10 @@ export class SalesReportController {
   /**
    * Exportar reporte
    */
-  public exportReport = async (req: Request, res: Response) => {
+  public exportReport = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const filters = this.parseFilters(req.query);
-      const format = (req.query.format as 'csv' | 'json') || 'csv';
+      const format = (req.query['format'] as 'csv' | 'json') || 'csv';
       
       this.handleStoreManagerFilters(filters, req.user);
 
@@ -245,12 +249,12 @@ export class SalesReportController {
   /**
    * Generar datos de prueba para gestores de tienda
    */
-  public generateStoreManagerTestData = async (req: Request, res: Response) => {
+  public generateStoreManagerTestData = async (req: Request, res: Response): Promise<void> => {
     try {
       const { userEmail } = req.body;
       
       if (!userEmail) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Se requiere el email del gestor de tienda'
         });
@@ -275,7 +279,7 @@ export class SalesReportController {
   /**
    * Generar token temporal para pruebas (SOLO PARA DESARROLLO)
    */
-  public generateTestToken = async (req: Request, res: Response) => {
+  public generateTestToken = async (req: Request, res: Response): Promise<void> => {
     try {
       const jwt = require('jsonwebtoken');
       const config = require('../config/env').config;
@@ -285,7 +289,7 @@ export class SalesReportController {
       const user = await User.findOne({ email: 'jucarl74@gmail.com' });
       
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario jucarl74@gmail.com no encontrado'
         });
@@ -339,19 +343,19 @@ export class SalesReportController {
     }
 
     if (query.storeId) {
-      filters.storeId = new mongoose.Types.ObjectId(query.storeId as string);
+      filters.storeId = query.storeId as any;
     }
 
     if (query.userId) {
-      filters.userId = new mongoose.Types.ObjectId(query.userId as string);
+      filters.userId = query.userId as any;
     }
 
     if (query.categoryId) {
-      filters.categoryId = new mongoose.Types.ObjectId(query.categoryId as string);
+      filters.categoryId = query.categoryId as any;
     }
 
     if (query.productId) {
-      filters.productId = new mongoose.Types.ObjectId(query.productId as string);
+      filters.productId = query.productId as any;
     }
 
     if (query.paymentMethod) {
@@ -365,7 +369,7 @@ export class SalesReportController {
     }
 
     if (query.customerId) {
-      filters.customerId = new mongoose.Types.ObjectId(query.customerId as string);
+      filters.customerId = query.customerId as any;
     }
 
     if (query.search) {

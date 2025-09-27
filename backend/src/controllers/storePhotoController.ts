@@ -4,33 +4,44 @@ import { enrichmentWorker } from '../services/enrichmentWorker';
 import { CryptoAuth } from '../utils/cryptoAuth';
 import { storePhotoUpload, deleteImage } from '../config/cloudinary';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 export class StorePhotoController {
   /**
    * Sube una foto de local con GPS
    */
   static uploadStorePhoto = [
     storePhotoUpload.single('image'),
-    async (req: any, res: Response) => {
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       try {
         const user = req.user;
         const { name, phone, lat, lng } = req.body;
 
         if (!req.file) {
-          return res.status(400).json({
+          res.status(400).json({
             success: false,
             message: 'Imagen requerida'
           });
         }
 
         if (!name || !lat || !lng) {
-          return res.status(400).json({
+          res.status(400).json({
             success: false,
             message: 'Nombre, latitud y longitud son requeridos'
           });
         }
 
         // La imagen ya está en Cloudinary, usar la URL directamente
-        const imageUrl = req.file.path;
+        const imageUrl = req.file?.path;
+        if (!imageUrl) {
+          res.status(400).json({
+            success: false,
+            message: 'No se pudo procesar la imagen'
+          });
+          return;
+        }
 
         // Crear el documento en la base de datos
         const storePhoto = new StorePhoto({
@@ -39,7 +50,7 @@ export class StorePhotoController {
           imageUrl,
           lat: parseFloat(lat),
           lng: parseFloat(lng),
-          uploadedBy: user._id,
+          uploadedBy: user?._id || user?.id,
           status: 'pending'
         });
 
@@ -71,9 +82,9 @@ export class StorePhotoController {
   /**
    * Obtiene todas las fotos de locales
    */
-  static getStorePhotos = async (req: any, res: Response) => {
+  static getStorePhotos = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const { page = 1, limit = 10, status } = req.query;
+      const { page = 1, limit = 50, status } = req.query;
       const user = req.user;
 
       const filter: any = {};
@@ -82,27 +93,25 @@ export class StorePhotoController {
       }
 
       // Solo admin puede ver todas las fotos, otros usuarios solo las suyas
-      if (user.role !== 'admin') {
+      if (user && user.role !== 'admin') {
         filter.uploadedBy = user._id;
       }
 
       const photos = await StorePhoto.find(filter)
         .populate('uploadedBy', 'name email')
         .sort({ createdAt: -1 })
-        .limit(limit * 1)
-        .skip((page - 1) * limit);
+        .limit(Number(limit) * 1)
+        .skip((Number(page) - 1) * Number(limit));
 
       const total = await StorePhoto.countDocuments(filter);
 
       res.json({
         success: true,
-        data: {
-          photos,
-          pagination: {
-            current: parseInt(page),
-            pages: Math.ceil(total / limit),
-            total
-          }
+        data: photos, // Enviar directamente las fotos, no un objeto con paginación
+        pagination: {
+          current: parseInt(String(page)),
+          pages: Math.ceil(total / Number(limit)),
+          total
         }
       });
     } catch (error) {
@@ -117,7 +126,7 @@ export class StorePhotoController {
   /**
    * Obtiene una foto específica
    */
-  static getStorePhoto = async (req: any, res: Response) => {
+  static getStorePhoto = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const user = req.user;
@@ -125,15 +134,15 @@ export class StorePhotoController {
       const photo = await StorePhoto.findById(id).populate('uploadedBy', 'name email');
 
       if (!photo) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Foto no encontrada'
         });
       }
 
       // Verificar permisos
-      if (user.role !== 'admin' && photo.uploadedBy._id.toString() !== user._id.toString()) {
-        return res.status(403).json({
+      if (user.role !== 'admin' && photo?.uploadedBy._id.toString() !== user._id.toString()) {
+        res.status(403).json({
           success: false,
           message: 'Acceso denegado'
         });
@@ -155,7 +164,7 @@ export class StorePhotoController {
   /**
    * Ejecuta el proceso de enriquecimiento manualmente
    */
-  static runEnrichment = async (req: any, res: Response) => {
+  static runEnrichment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { photoId } = req.body;
 
@@ -176,7 +185,7 @@ export class StorePhotoController {
         }
       } else {
         // Procesar todas las fotos pendientes
-        await enrichmentWorker.processPendingPhotos();
+        await (enrichmentWorker as any).processPendingPhotos();
         
         res.json({
           success: true,
@@ -195,7 +204,7 @@ export class StorePhotoController {
   /**
    * Obtiene estadísticas del enriquecimiento
    */
-  static getEnrichmentStats = async (req: any, res: Response) => {
+  static getEnrichmentStats = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const stats = await enrichmentWorker.getStats();
       
@@ -215,7 +224,7 @@ export class StorePhotoController {
   /**
    * Inicia/detiene el worker de enriquecimiento
    */
-  static controlWorker = async (req: any, res: Response) => {
+  static controlWorker = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { action } = req.body;
 
@@ -249,7 +258,7 @@ export class StorePhotoController {
   /**
    * Elimina una foto
    */
-  static deleteStorePhoto = async (req: any, res: Response) => {
+  static deleteStorePhoto = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const user = req.user;
@@ -257,28 +266,35 @@ export class StorePhotoController {
       const photo = await StorePhoto.findById(id);
 
       if (!photo) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Foto no encontrada'
         });
       }
 
       // Verificar permisos
-      if (user.role !== 'admin' && photo.uploadedBy.toString() !== user._id.toString()) {
-        return res.status(403).json({
+      if (user.role !== 'admin' && photo?.uploadedBy.toString() !== user._id.toString()) {
+        res.status(403).json({
           success: false,
           message: 'Acceso denegado'
         });
       }
 
       // Extraer public_id de la URL de Cloudinary
-      const imageUrl = photo.imageUrl;
+      const imageUrl = photo?.imageUrl;
+      if (!imageUrl) {
+        res.status(400).json({
+          success: false,
+          message: 'No se encontró URL de imagen'
+        });
+        return;
+      }
       const publicIdMatch = imageUrl.match(/\/v\d+\/(.+)\.(jpg|jpeg|png|gif|webp)$/);
       
       if (publicIdMatch) {
         const publicId = publicIdMatch[1];
         try {
-          await deleteImage(publicId);
+          await deleteImage(publicId || '');
           console.log(`Imagen eliminada de Cloudinary: ${publicId}`);
         } catch (cloudinaryError) {
           console.error('Error eliminando imagen de Cloudinary:', cloudinaryError);
@@ -294,6 +310,49 @@ export class StorePhotoController {
       });
     } catch (error) {
       console.error('Error eliminando foto:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  };
+
+  /**
+   * Endpoint de prueba para verificar el sistema
+   */
+  static testSystem = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const stats = await StorePhoto.aggregate([
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 }
+          }
+        }
+      ]);
+
+      const total = await StorePhoto.countDocuments();
+      const recentPhotos = await StorePhoto.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate('uploadedBy', 'name email');
+
+      res.json({
+        success: true,
+        message: 'Sistema de enriquecimiento funcionando correctamente',
+        data: {
+          total,
+          stats: stats.reduce((acc, stat) => {
+            acc[stat._id] = stat.count;
+            return acc;
+          }, {}),
+          recentPhotos,
+          cloudinaryConfigured: !!(process.env['CLOUDINARY_CLOUD_NAME'] && 
+                                  process.env['CLOUDINARY_CLOUD_NAME'] !== 'your_cloud_name')
+        }
+      });
+    } catch (error) {
+      console.error('Error en test del sistema:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

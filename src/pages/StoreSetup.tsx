@@ -99,7 +99,7 @@ const StoreSetup: React.FC = () => {
           setTimeout(() => reject(new Error('Timeout')), 10000);
         });
 
-        const fetchPromise = fetch('http://localhost:5000/api/user/stores', {
+        const fetchPromise = fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""/api/user/stores', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -195,7 +195,7 @@ const StoreSetup: React.FC = () => {
         }
       };
 
-      const response = await fetch('http://localhost:5000/api/stores', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/stores', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

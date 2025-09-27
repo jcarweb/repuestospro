@@ -425,35 +425,35 @@ advertisementSchema.index({ createdBy: 1 });
 advertisementSchema.index({ 'schedule.startDate': 1, 'schedule.endDate': 1, status: 1 });
 
 // Método para verificar si el anuncio está activo y en horario
-advertisementSchema.methods.isCurrentlyActive = function(): boolean {
+advertisementSchema.methods['isCurrentlyActive'] = function(): boolean {
   const now = new Date();
   const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
   const currentDay = now.getDay();
   
   // Verificar si está activo en configuración
-  if (!this.displaySettings.isActive || this.status !== 'active') {
+  if (!this['displaySettings'].isActive || this['status'] !== 'active') {
     return false;
   }
   
   // Verificar fechas
-  if (now < this.schedule.startDate || now > this.schedule.endDate) {
+  if (now < this['schedule'].startDate || now > this['schedule'].endDate) {
     return false;
   }
   
   // Verificar días de la semana
-  if (this.schedule.daysOfWeek.length > 0 && !this.schedule.daysOfWeek.includes(currentDay)) {
+  if (this['schedule'].daysOfWeek.length > 0 && !this['schedule'].daysOfWeek.includes(currentDay)) {
     return false;
   }
   
   // Verificar horario general
-  if (currentTime < this.schedule.startTime || currentTime > this.schedule.endTime) {
+  if (currentTime < this['schedule'].startTime || currentTime > this['schedule'].endTime) {
     return false;
   }
   
   // Verificar slots de tiempo específicos
-  if (this.schedule.timeSlots.length > 0) {
-    const isInTimeSlot = this.schedule.timeSlots.some(slot => 
-      currentTime >= slot.start && currentTime <= slot.end
+  if (this['schedule'].timeSlots.length > 0) {
+    const isInTimeSlot = this['schedule'].timeSlots.some((slot: any) => 
+      (currentTime as string) >= slot.start && (currentTime as string) <= slot.end
     );
     if (!isInTimeSlot) {
       return false;
@@ -464,48 +464,48 @@ advertisementSchema.methods.isCurrentlyActive = function(): boolean {
 };
 
 // Método para registrar una impresión
-advertisementSchema.methods.recordImpression = function(userData: any): void {
-  this.tracking.impressions += 1;
-  this.displaySettings.currentImpressions += 1;
+advertisementSchema.methods['recordImpression'] = function(userData: any): void {
+  this['tracking'].impressions += 1;
+  this['displaySettings'].currentImpressions += 1;
   
   // Actualizar breakdown por dispositivo
   if (userData.platform === 'android') {
-    this.analytics.deviceBreakdown.android += 1;
+    this['analytics'].deviceBreakdown.android += 1;
   } else if (userData.platform === 'ios') {
-    this.analytics.deviceBreakdown.ios += 1;
+    this['analytics'].deviceBreakdown.ios += 1;
   }
   
   // Actualizar breakdown por ubicación
   if (userData.location) {
-    const currentLocationCount = this.analytics.locationBreakdown.get(userData.location) || 0;
-    this.analytics.locationBreakdown.set(userData.location, currentLocationCount + 1);
+    const currentLocationCount = this['analytics'].locationBreakdown.get(userData.location) || 0;
+    this['analytics'].locationBreakdown.set(userData.location, currentLocationCount + 1);
   }
   
   // Actualizar breakdown por hora
   const currentHour = new Date().getHours().toString();
-  const currentHourCount = this.analytics.timeBreakdown.get(currentHour) || 0;
-  this.analytics.timeBreakdown.set(currentHour, currentHourCount + 1);
+  const currentHourCount = this['analytics'].timeBreakdown.get(currentHour) || 0;
+  this['analytics'].timeBreakdown.set(currentHour, currentHourCount + 1);
   
   // Actualizar breakdown por segmento de usuario
   if (userData.userRole) {
-    const currentRoleCount = this.analytics.userSegmentBreakdown.get(userData.userRole) || 0;
-    this.analytics.userSegmentBreakdown.set(userData.userRole, currentRoleCount + 1);
+    const currentRoleCount = this['analytics'].userSegmentBreakdown.get(userData.userRole) || 0;
+    this['analytics'].userSegmentBreakdown.set(userData.userRole, currentRoleCount + 1);
   }
   
   // Calcular CTR
-  if (this.tracking.impressions > 0) {
-    this.tracking.ctr = (this.tracking.clicks / this.tracking.impressions) * 100;
+  if (this['tracking'].impressions > 0) {
+    this['tracking'].ctr = (this['tracking'].clicks / this['tracking'].impressions) * 100;
   }
 };
 
 // Método para registrar un click
-advertisementSchema.methods.recordClick = function(): void {
-  this.tracking.clicks += 1;
-  this.displaySettings.currentClicks += 1;
+advertisementSchema.methods['recordClick'] = function(): void {
+  this['tracking'].clicks += 1;
+  this['displaySettings'].currentClicks += 1;
   
   // Calcular CTR
-  if (this.tracking.impressions > 0) {
-    this.tracking.ctr = (this.tracking.clicks / this.tracking.impressions) * 100;
+  if (this['tracking'].impressions > 0) {
+    this['tracking'].ctr = (this['tracking'].clicks / this['tracking'].impressions) * 100;
   }
 };
 

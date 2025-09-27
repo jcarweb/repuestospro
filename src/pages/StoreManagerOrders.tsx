@@ -133,7 +133,7 @@ const StoreManagerOrders: React.FC = () => {
       if (paymentFilter !== 'all') params.append('paymentStatus', paymentFilter);
       if (dateFilter !== 'all') params.append('dateRange', dateFilter);
 
-      const response = await fetch(`http://localhost:5000/api/orders/store-manager?${params}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""""/api/orders/store-manager?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -154,7 +154,7 @@ const StoreManagerOrders: React.FC = () => {
     if (!activeStore?._id) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/store-manager/stats/${activeStore._id}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/orders/store-manager/stats/${activeStore._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -171,7 +171,7 @@ const StoreManagerOrders: React.FC = () => {
 
   const handleUpdateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -198,7 +198,7 @@ const StoreManagerOrders: React.FC = () => {
 
   const handleAssignDelivery = async (orderId: string, deliveryId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}/assign-delivery`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/orders/${orderId}/assign-delivery`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

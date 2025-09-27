@@ -54,7 +54,7 @@ export const cryptoAuthMiddleware = async (req: CryptoAuthRequest, res: Response
     }
 
     // Verificar que el rol en el token coincida con el de la base de datos
-    if (decoded.role !== user.role) {
+    if (decoded.role !== (user.role as string)) {
       return res.status(401).json({
         success: false,
         message: 'Token inválido - rol no coincide'
@@ -64,7 +64,7 @@ export const cryptoAuthMiddleware = async (req: CryptoAuthRequest, res: Response
     // Agregar el usuario al request
     req.user = user;
     
-    next();
+    return next();
   } catch (error) {
     console.error('Error en middleware de autenticación crypto:', error);
     
@@ -87,14 +87,14 @@ export const cryptoAdminMiddleware = async (req: CryptoAuthRequest, res: Respons
       });
     }
 
-    if (user.role !== 'admin') {
+    if ((user.role as string) !== 'admin') {
       return res.status(403).json({
         success: false,
         message: 'Acceso denegado. Se requieren permisos de administrador'
       });
     }
 
-    next();
+    return next();
   } catch (error) {
     console.error('Error en middleware de administrador crypto:', error);
     return res.status(500).json({
@@ -117,14 +117,14 @@ export const cryptoRoleMiddleware = (allowedRoles: string[]) => {
         });
       }
 
-      if (!allowedRoles.includes(user.role)) {
+      if (!allowedRoles.includes(user.role as string)) {
         return res.status(403).json({
           success: false,
           message: `Acceso denegado. Se requiere uno de los siguientes roles: ${allowedRoles.join(', ')}`
         });
       }
 
-      next();
+      return next();
     } catch (error) {
       console.error('Error en middleware de roles crypto:', error);
       return res.status(500).json({

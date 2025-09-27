@@ -33,7 +33,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
     setMessage(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/loyalty/review', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""/api/loyalty/review', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

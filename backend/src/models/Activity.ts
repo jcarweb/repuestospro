@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IActivity extends Document {
-  userId: mongoose.Types.ObjectId;
+  userId: mongoose.Schema.Types.ObjectId;
     type: 'login' | 'logout' | 'register' | 'password_reset' | 'password_changed' | 'email_verification' | 
                 'cart_add' | 'cart_remove' | 'cart_clear' | 'purchase' | 'profile_update' | 'preferences_update' |
                 'push_notifications_update' | 'avatar_upload' | 'avatar_deleted' |
@@ -79,7 +79,7 @@ activitySchema.index({ success: 1 });
 activitySchema.index({ createdAt: -1 });
 
 // Método estático para crear actividad
-activitySchema.statics.createActivity = async function(
+activitySchema.statics['createActivity'] = async function(
   userId: string,
   type: IActivity['type'],
   description: string,
@@ -98,7 +98,7 @@ activitySchema.statics.createActivity = async function(
 };
 
 // Método estático para obtener actividades de un usuario
-activitySchema.statics.getUserActivities = async function(
+activitySchema.statics['getUserActivities'] = async function(
   userId: string,
   limit: number = 50,
   skip: number = 0
@@ -110,7 +110,7 @@ activitySchema.statics.getUserActivities = async function(
 };
 
 // Método estático para obtener estadísticas de actividades
-activitySchema.statics.getActivityStats = async function(
+activitySchema.statics['getActivityStats'] = async function(
   userId: string,
   days: number = 30
 ): Promise<any> {

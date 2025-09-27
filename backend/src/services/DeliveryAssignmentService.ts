@@ -25,6 +25,20 @@ export interface RiderCandidate {
 export class DeliveryAssignmentService {
   
   /**
+   * Calcula la distancia entre dos puntos usando la fórmula de Haversine
+   */
+  static calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371; // Radio de la Tierra en kilómetros
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+  
+  /**
    * Asigna un delivery a un rider disponible
    */
   static async assignDelivery(
@@ -147,7 +161,7 @@ export class DeliveryAssignmentService {
     // Ordenar por score (mayor a menor)
     candidates.sort((a, b) => b.score - a.score);
     
-    return candidates[0].rider;
+    return candidates[0]?.rider || null;
   }
 
   /**
@@ -166,7 +180,7 @@ export class DeliveryAssignmentService {
     // Ordenar por score (mayor a menor)
     candidates.sort((a, b) => b.score - a.score);
     
-    return candidates[0].rider;
+    return candidates[0]?.rider || null;
   }
 
   /**
@@ -193,7 +207,7 @@ export class DeliveryAssignmentService {
     const topCandidates = [...internalCandidatesInTop, ...externalCandidatesInTop];
     topCandidates.sort((a, b) => b.score - a.score);
     
-    return topCandidates[0].rider;
+    return topCandidates[0]?.rider || null;
   }
 
   /**
@@ -257,7 +271,7 @@ export class DeliveryAssignmentService {
     config: AssignmentConfig
   ): Promise<RiderCandidate | null> {
     // Verificar distancia
-    const distance = rider.calculateDistanceFrom(
+    const distance = (rider as any).calculateDistanceFrom(
       delivery.pickupLocation.coordinates.lat,
       delivery.pickupLocation.coordinates.lng
     );
@@ -267,7 +281,7 @@ export class DeliveryAssignmentService {
     }
 
     // Verificar si está en zona de servicio
-    if (!rider.isInServiceArea(
+    if (!(rider as any).isInServiceArea(
       delivery.pickupLocation.coordinates.lat,
       delivery.pickupLocation.coordinates.lng
     )) {
@@ -291,7 +305,7 @@ export class DeliveryAssignmentService {
     const availability = this.calculateAvailabilityScore(rider);
 
     // Calcular costo (comisión del rider)
-    const cost = rider.calculateCommission(delivery.deliveryFee);
+    const cost = (rider as any).calculateCommission(delivery.deliveryFee);
 
     // Calcular score final
     const score = this.calculateRiderScore({
@@ -401,18 +415,18 @@ export class DeliveryAssignmentService {
     if (rider.vehicle) {
       delivery.riderVehicle = {
         type: rider.vehicle.type,
-        plate: rider.vehicle.plate,
-        model: rider.vehicle.model
+        ...(rider.vehicle.plate && { plate: rider.vehicle.plate }),
+        ...(rider.vehicle.model && { model: rider.vehicle.model })
       };
     }
 
     // Generar código de tracking si no existe
     if (!delivery.trackingCode) {
-      delivery.trackingCode = delivery.generateTrackingCode();
+      delivery.trackingCode = `TRK${Date.now()}${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
     }
 
     // Generar URL de tracking
-    delivery.trackingUrl = `${process.env.FRONTEND_URL}/tracking/${delivery.trackingCode}`;
+    delivery.trackingUrl = `${process.env['FRONTEND_URL']}/tracking/${delivery.trackingCode}`;
 
     // Agregar al historial
     delivery.statusHistory.push({
@@ -443,7 +457,7 @@ export class DeliveryAssignmentService {
         .reduce((sum, d) => sum + d.riderPayment, 0),
       totalDistance: deliveries
         .filter(d => d.status === 'delivered')
-        .reduce((sum, d) => sum + (d.calculateDistance(
+        .reduce((sum, d) => sum + (DeliveryAssignmentService.calculateDistance(
           d.pickupLocation.coordinates.lat,
           d.pickupLocation.coordinates.lng,
           d.deliveryLocation.coordinates.lat,
@@ -478,7 +492,7 @@ export class DeliveryAssignmentService {
           totalTime += (delivery_time.getTime() - pickup.getTime()) / (1000 * 60); // minutos
         }
       }
-      stats.averageDeliveryTime = totalTime / completedDeliveries.length;
+      (stats as any).averageDeliveryTime = totalTime / completedDeliveries.length;
     }
 
     await Rider.findByIdAndUpdate(riderId, { stats });
@@ -501,15 +515,15 @@ export class DeliveryAssignmentService {
     const availableRiders: IRider[] = [];
 
     for (const rider of riders) {
-      const distance = rider.calculateDistanceFrom(lat, lng);
-      if (distance <= maxDistance && rider.isInServiceArea(lat, lng)) {
+      const distance = (rider as any).calculateDistanceFrom(lat, lng);
+      if (distance <= maxDistance && (rider as any).isInServiceArea(lat, lng)) {
         availableRiders.push(rider);
       }
     }
 
     return availableRiders.sort((a, b) => {
-      const distanceA = a.calculateDistanceFrom(lat, lng);
-      const distanceB = b.calculateDistanceFrom(lat, lng);
+      const distanceA = DeliveryAssignmentService.calculateDistance(lat, lng, (a as any).currentLocation?.lat || 0, (a as any).currentLocation?.lng || 0);
+      const distanceB = DeliveryAssignmentService.calculateDistance(lat, lng, (b as any).currentLocation?.lat || 0, (b as any).currentLocation?.lng || 0);
       return distanceA - distanceB;
     });
   }

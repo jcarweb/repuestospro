@@ -2,32 +2,30 @@ import { Request, Response } from 'express';
 import User from '../models/User';
 import webpush from 'web-push';
 import config from '../config/env';
-
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
 // Configurar web-push con las claves VAPID solo si están disponibles
 if (config.VAPID_PUBLIC_KEY && config.VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
     'mailto:noreply@piezasya.com',
-    config.VAPID_PUBLIC_KEY,
-    config.VAPID_PRIVATE_KEY
+    config.VAPID_PUBLIC_KEY || '',
+    config.VAPID_PRIVATE_KEY || ''
   );
 } else {
-  console.log('⚠️  VAPID keys no configuradas. Las notificaciones push no estarán disponibles.');
 }
-
 class NotificationController {
   // Suscribirse a notificaciones push
-  async subscribeToPush(req: Request, res: Response) {
+  async subscribeToPush(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?.id || req.user?._id;
       const { subscription } = req.body;
-
       if (!subscription) {
         return res.status(400).json({
           success: false,
           message: 'Suscripción requerida'
         });
       }
-
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({
@@ -35,30 +33,26 @@ class NotificationController {
           message: 'Usuario no encontrado'
         });
       }
-
       // Guardar la suscripción en el usuario
       user.pushToken = JSON.stringify(subscription);
       user.pushEnabled = true;
       await user.save();
-
-      res.json({
+      return res.json({
         success: true,
         message: 'Suscrito a notificaciones push correctamente'
       });
     } catch (error) {
       console.error('Error subscribing to push:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
     }
   }
-
   // Desuscribirse de notificaciones push
-  async unsubscribeFromPush(req: Request, res: Response) {
+  async unsubscribeFromPush(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = req.user?.id;
-
+      const userId = req.user?.id || req.user?._id;
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({
@@ -66,25 +60,22 @@ class NotificationController {
           message: 'Usuario no encontrado'
         });
       }
-
       // Remover la suscripción del usuario
-      user.pushToken = undefined;
+      user.pushToken = undefined as any;
       user.pushEnabled = false;
       await user.save();
-
-      res.json({
+      return res.json({
         success: true,
         message: 'Desuscrito de notificaciones push correctamente'
       });
     } catch (error) {
       console.error('Error unsubscribing from push:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
     }
   }
-
   // Enviar notificación push a un usuario específico
   async sendPushToUser(userId: string, notification: {
     title: string;
@@ -102,17 +93,13 @@ class NotificationController {
     try {
       // Verificar si VAPID está configurado
       if (!config.VAPID_PUBLIC_KEY || !config.VAPID_PRIVATE_KEY) {
-        console.log('⚠️  VAPID no configurado. No se puede enviar notificación push.');
         return false;
       }
-
       const user = await User.findById(userId);
       if (!user || !user.pushToken || !user.pushEnabled) {
         return false;
       }
-
       const subscription = JSON.parse(user.pushToken);
-      
       const payload = JSON.stringify({
         title: notification.title,
         body: notification.body,
@@ -122,7 +109,6 @@ class NotificationController {
         data: notification.data || {},
         actions: notification.actions || []
       });
-
       await webpush.sendNotification(subscription, payload);
       return true;
     } catch (error) {
@@ -130,7 +116,6 @@ class NotificationController {
       return false;
     }
   }
-
   // Enviar notificación push a múltiples usuarios
   async sendPushToUsers(userIds: string[], notification: {
     title: string;
@@ -148,18 +133,15 @@ class NotificationController {
     const results = await Promise.allSettled(
       userIds.map(userId => this.sendPushToUser(userId, notification))
     );
-
-    const successful = results.filter(result => 
+    const successful = results.filter(result =>
       result.status === 'fulfilled' && result.value === true
     ).length;
-
     return {
       total: userIds.length,
       successful,
       failed: userIds.length - successful
     };
   }
-
   // Enviar notificación push a todos los usuarios con push habilitado
   async sendPushToAll(notification: {
     title: string;
@@ -179,7 +161,6 @@ class NotificationController {
         pushEnabled: true,
         pushToken: { $exists: true, $ne: null }
       });
-
       const userIds = users.map(user => user._id.toString());
       return await this.sendPushToUsers(userIds, notification);
     } catch (error) {
@@ -191,7 +172,6 @@ class NotificationController {
       };
     }
   }
-
   // Enviar notificación push por rol
   async sendPushByRole(role: string, notification: {
     title: string;
@@ -212,7 +192,6 @@ class NotificationController {
         pushEnabled: true,
         pushToken: { $exists: true, $ne: null }
       });
-
       const userIds = users.map(user => user._id.toString());
       return await this.sendPushToUsers(userIds, notification);
     } catch (error) {
@@ -224,7 +203,6 @@ class NotificationController {
       };
     }
   }
-
   // Enviar notificación push por ubicación (usuarios en un radio específico)
   async sendPushByLocation(center: [number, number], radiusKm: number, notification: {
     title: string;
@@ -253,7 +231,6 @@ class NotificationController {
           }
         }
       });
-
       const userIds = users.map(user => user._id.toString());
       return await this.sendPushToUsers(userIds, notification);
     } catch (error) {
@@ -265,16 +242,14 @@ class NotificationController {
       };
     }
   }
-
   // Obtener estadísticas de notificaciones push
-  async getPushStats(req: Request, res: Response) {
+  async getPushStats(req: AuthenticatedRequest, res: Response) {
     try {
       const totalUsers = await User.countDocuments();
       const pushEnabledUsers = await User.countDocuments({
         pushEnabled: true,
         pushToken: { $exists: true, $ne: null }
       });
-
       const pushStatsByRole = await User.aggregate([
         {
           $match: {
@@ -289,8 +264,7 @@ class NotificationController {
           }
         }
       ]);
-
-      res.json({
+      return res.json({
         success: true,
         data: {
           totalUsers,
@@ -301,12 +275,11 @@ class NotificationController {
       });
     } catch (error) {
       console.error('Error getting push stats:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
     }
   }
 }
-
 export default new NotificationController();

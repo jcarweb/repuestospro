@@ -197,7 +197,7 @@ ClaimSchema.index({ warrantyId: 1 });
 ClaimSchema.index({ status: 1, priority: 1 });
 ClaimSchema.index({ assignedAgent: 1, status: 1 });
 ClaimSchema.index({ filedDate: -1 });
-ClaimSchema.index({ deadlineDate: 1, status: 'pending' });
+ClaimSchema.index({ deadlineDate: 1, status: 1 });
 
 // Pre-save middleware para generar claimNumber
 ClaimSchema.pre('save', function(next) {
@@ -211,50 +211,50 @@ ClaimSchema.pre('save', function(next) {
 });
 
 // Método para agregar comunicación
-ClaimSchema.methods.addCommunication = function(from: string, message: string, attachments?: string[], isInternal?: boolean) {
-  this.communications.push({
+ClaimSchema.methods['addCommunication'] = function(from: string, message: string, attachments?: string[], isInternal?: boolean) {
+  this['communications'].push({
     from,
     message,
     timestamp: new Date(),
     attachments: attachments || [],
     isInternal: isInternal || false
   });
-  this.lastUpdated = new Date();
-  return this.save();
+  this['lastUpdated'] = new Date();
+  return this['save']();
 };
 
 // Método para agregar evidencia
-ClaimSchema.methods.addEvidence = function(evidenceData: any) {
-  this.evidence.push({
+ClaimSchema.methods['addEvidence'] = function(evidenceData: any) {
+  this['evidence'].push({
     ...evidenceData,
     uploadedAt: new Date()
   });
-  return this.save();
+  return this['save']();
 };
 
 // Método para actualizar estado
-ClaimSchema.methods.updateStatus = function(newStatus: string, notes?: string) {
-  this.status = newStatus;
-  this.lastUpdated = new Date();
+ClaimSchema.methods['updateStatus'] = function(newStatus: string, notes?: string) {
+  this['status'] = newStatus;
+  this['lastUpdated'] = new Date();
   
   if (notes) {
-    this.addCommunication('system', `Estado actualizado a: ${newStatus}. ${notes}`);
+    this['addCommunication']('system', `Estado actualizado a: ${newStatus}. ${notes}`);
   }
   
-  return this.save();
+  return this['save']();
 };
 
 // Método para calcular tiempo transcurrido
-ClaimSchema.methods.getTimeElapsed = function(): number {
+ClaimSchema.methods['getTimeElapsed'] = function(): number {
   const now = new Date();
-  const diffTime = now.getTime() - this.filedDate.getTime();
+  const diffTime = now.getTime() - this['filedDate'].getTime();
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
 // Método para verificar si está en tiempo límite
-ClaimSchema.methods.isWithinDeadline = function(): boolean {
-  if (!this.deadlineDate) return true;
-  return new Date() <= this.deadlineDate;
+ClaimSchema.methods['isWithinDeadline'] = function(): boolean {
+  if (!this['deadlineDate']) return true;
+  return new Date() <= this['deadlineDate'];
 };
 
 export default mongoose.model<IClaim>('Claim', ClaimSchema);

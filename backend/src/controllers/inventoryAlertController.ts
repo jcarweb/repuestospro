@@ -6,9 +6,13 @@ import Product from '../models/Product';
 import Store from '../models/Store';
 import User from '../models/User';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 class InventoryAlertController {
   // Obtener alertas de una tienda
-  async getStoreAlerts(req: Request, res: Response) {
+  async getStoreAlerts(req: AuthenticatedRequest, res: Response) {
     try {
       const { storeId } = req.params;
       const { page = 1, limit = 10, alertType, isActive } = req.query;
@@ -54,15 +58,15 @@ class InventoryAlertController {
   }
 
   // Crear nueva alerta
-  async createAlert(req: Request, res: Response) {
+  async createAlert(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { storeId, productId, alertType, threshold, notificationSettings } = req.body;
-      const userId = (req as any).user.id;
+      const userId = req.user?.id;
 
       // Verificar que la tienda existe y el usuario tiene acceso
       const store = await Store.findById(storeId);
       if (!store) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Tienda no encontrada'
         });
@@ -71,7 +75,7 @@ class InventoryAlertController {
       // Verificar que el producto existe
       const product = await Product.findById(productId);
       if (!product) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Producto no encontrado'
         });
@@ -85,7 +89,7 @@ class InventoryAlertController {
       });
 
       if (existingAlert) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Ya existe una alerta de este tipo para este producto'
         });
@@ -129,29 +133,29 @@ class InventoryAlertController {
   }
 
   // Actualizar alerta
-  async updateAlert(req: Request, res: Response) {
+  async updateAlert(req: AuthenticatedRequest, res: Response) {
     try {
       const { alertId } = req.params;
       const { threshold, isActive, notificationSettings } = req.body;
-      const userId = (req as any).user.id;
+      const userId = req.user?.id;
 
       const alert = await InventoryAlert.findById(alertId);
       if (!alert) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Alerta no encontrada'
         });
       }
 
-      if (threshold !== undefined) alert.threshold = threshold;
-      if (isActive !== undefined) alert.isActive = isActive;
-      if (notificationSettings) alert.notificationSettings = { ...alert.notificationSettings, ...notificationSettings };
+      if (threshold !== undefined) alert!.threshold = threshold;
+      if (isActive !== undefined) alert!.isActive = isActive;
+      if (notificationSettings) alert!.notificationSettings = { ...alert!.notificationSettings, ...notificationSettings };
       
-      alert.updatedBy = userId;
-      await alert.save();
+      alert!.updatedBy = userId;
+      await alert!.save();
 
       // Poblar la respuesta
-      await alert.populate([
+      await alert!.populate([
         { path: 'product', select: 'name sku category brand' },
         { path: 'createdBy', select: 'name email' },
         { path: 'updatedBy', select: 'name email' }
@@ -172,13 +176,13 @@ class InventoryAlertController {
   }
 
   // Eliminar alerta
-  async deleteAlert(req: Request, res: Response) {
+  async deleteAlert(req: AuthenticatedRequest, res: Response) {
     try {
       const { alertId } = req.params;
 
       const alert = await InventoryAlert.findByIdAndDelete(alertId);
       if (!alert) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Alerta no encontrada'
         });
@@ -198,9 +202,9 @@ class InventoryAlertController {
   }
 
   // Obtener notificaciones de alertas
-  async getNotifications(req: Request, res: Response) {
+  async getNotifications(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = (req as any).user.id;
+      const userId = req.user?.id;
       const { page = 1, limit = 10, isRead, storeId } = req.query;
 
       const query: any = { user: userId };
@@ -244,7 +248,7 @@ class InventoryAlertController {
   }
 
   // Marcar notificación como leída
-  async markAsRead(req: Request, res: Response) {
+  async markAsRead(req: AuthenticatedRequest, res: Response) {
     try {
       const { notificationId } = req.params;
 
@@ -258,7 +262,7 @@ class InventoryAlertController {
       );
 
       if (!notification) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Notificación no encontrada'
         });
@@ -278,7 +282,7 @@ class InventoryAlertController {
   }
 
   // Verificar y generar alertas automáticamente
-  async checkAndGenerateAlerts(req: Request, res: Response) {
+  async checkAndGenerateAlerts(req: AuthenticatedRequest, res: Response) {
     try {
       const { storeId } = req.params;
       
@@ -316,8 +320,8 @@ class InventoryAlertController {
             product: alert.product._id,
             alert: alert._id,
             type: alert.alertType,
-            title: `Alerta de Stock - ${alert.product.name}`,
-            message: `El producto ${alert.product.name} (${alert.product.sku}) tiene ${currentStock} unidades disponibles. Umbral: ${alert.threshold}`,
+            title: `Alerta de Stock - ${(alert.product as any).name}`,
+            message: `El producto ${(alert.product as any).name} (${(alert.product as any).sku}) tiene ${currentStock} unidades disponibles. Umbral: ${alert.threshold}`,
             currentStock,
             threshold: alert.threshold,
             isSent: false
@@ -347,7 +351,7 @@ class InventoryAlertController {
   }
 
   // Obtener estadísticas de alertas
-  async getAlertStats(req: Request, res: Response) {
+  async getAlertStats(req: AuthenticatedRequest, res: Response) {
     try {
       const { storeId } = req.params;
 

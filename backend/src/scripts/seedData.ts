@@ -3,7 +3,6 @@ import Category from '../models/Category';
 import Brand from '../models/Brand';
 import Subcategory from '../models/Subcategory';
 import config from '../config/env';
-
 // Datos iniciales para categorías de autos
 const carCategories = [
   {
@@ -63,7 +62,6 @@ const carCategories = [
     icon: 'climate'
   }
 ];
-
 // Datos iniciales para marcas de autos
 const carBrands = [
   { name: 'Toyota', country: 'Japón', vehicleType: 'car', order: 1 },
@@ -167,30 +165,21 @@ const carBrands = [
   { name: 'Volvo Trucks', country: 'Suecia', vehicleType: 'car', order: 99 },
   { name: 'Mercedes-Benz Trucks', country: 'Alemania', vehicleType: 'car', order: 100 }
 ];
-
 // Función para poblar la base de datos
 async function seedDatabase() {
   try {
     console.log('🌱 Iniciando población de base de datos...');
-
     // Conectar a la base de datos
     await mongoose.connect(config.MONGODB_URI);
-    console.log('✅ Conectado a la base de datos');
-
     // Limpiar colecciones existentes
     await Category.deleteMany({});
     await Brand.deleteMany({});
     await Subcategory.deleteMany({});
     console.log('🧹 Colecciones limpiadas');
-
     // Insertar categorías
     const createdCategories = await Category.insertMany(carCategories);
-    console.log(`✅ ${createdCategories.length} categorías insertadas`);
-
     // Insertar marcas
     const createdBrands = await Brand.insertMany(carBrands);
-    console.log(`✅ ${createdBrands.length} marcas insertadas`);
-
     // Crear algunas subcategorías de ejemplo
     const motorCategory = createdCategories.find(cat => cat.name === 'Motor');
     if (motorCategory) {
@@ -224,13 +213,9 @@ async function seedDatabase() {
           order: 4
         }
       ];
-
       await Subcategory.insertMany(motorSubcategories);
-      console.log(`✅ ${motorSubcategories.length} subcategorías de motor insertadas`);
     }
-
     console.log('🎉 Población de base de datos completada exitosamente');
-    
   } catch (error) {
     console.error('❌ Error poblando la base de datos:', error);
   } finally {
@@ -238,10 +223,8 @@ async function seedDatabase() {
     console.log('🔌 Desconectado de la base de datos');
   }
 }
-
 // Ejecutar el script si se llama directamente
 if (require.main === module) {
   seedDatabase();
 }
-
-export default seedDatabase; 
+export default seedDatabase;

@@ -2,16 +2,20 @@ import { Request, Response } from 'express';
 import User from '../models/User';
 import { CryptoAuth } from '../utils/cryptoAuth';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 export class CryptoAuthController {
   /**
    * Login con autenticación crypto
    */
-  static login = async (req: Request, res: Response) => {
+  static login = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Email y contraseña son requeridos'
         });
@@ -21,39 +25,39 @@ export class CryptoAuthController {
       const user = await User.findOne({ email: email.toLowerCase() });
       
       if (!user) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Credenciales inválidas'
         });
       }
 
       // Verificar si la cuenta está bloqueada
-      if (user.isAccountLocked()) {
-        return res.status(401).json({
+      if (user?.isAccountLocked()) {
+        res.status(401).json({
           success: false,
           message: 'Cuenta bloqueada. Intente más tarde'
         });
       }
 
       // Verificar contraseña
-      const isPasswordValid = await user.comparePassword(password);
+      const isPasswordValid = await user?.comparePassword(password);
       
       if (!isPasswordValid) {
-        await user.incrementLoginAttempts();
-        return res.status(401).json({
+        await user?.incrementLoginAttempts();
+        res.status(401).json({
           success: false,
           message: 'Credenciales inválidas'
         });
       }
 
       // Resetear intentos de login
-      await user.resetLoginAttempts();
+      await user?.resetLoginAttempts();
 
       // Generar token con crypto
       const token = CryptoAuth.generateToken({
-        id: user._id.toString(),
-        email: user.email,
-        role: user.role
+        id: user?._id.toString(),
+        email: user?.email || '',
+        role: user?.role || ''
       });
 
       res.json({
@@ -62,12 +66,12 @@ export class CryptoAuthController {
         data: {
           token,
           user: {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            avatar: user.avatar,
-            isEmailVerified: user.isEmailVerified
+            id: user?._id,
+            name: user?.name,
+            email: user?.email,
+            role: user?.role,
+            avatar: user?.avatar,
+            isEmailVerified: user?.isEmailVerified
           }
         }
       });
@@ -83,12 +87,12 @@ export class CryptoAuthController {
   /**
    * Registro con autenticación crypto
    */
-  static register = async (req: Request, res: Response) => {
+  static register = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { name, email, password, phone, role = 'client' } = req.body;
 
       if (!name || !email || !password) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Nombre, email y contraseña son requeridos'
         });
@@ -98,7 +102,7 @@ export class CryptoAuthController {
       const existingUser = await User.findOne({ email: email.toLowerCase() });
       
       if (existingUser) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'El email ya está registrado'
         });
@@ -117,9 +121,9 @@ export class CryptoAuthController {
 
       // Generar token
       const token = CryptoAuth.generateToken({
-        id: user._id.toString(),
-        email: user.email,
-        role: user.role
+        id: user?._id.toString(),
+        email: user?.email,
+        role: user?.role
       });
 
       res.status(201).json({
@@ -128,12 +132,12 @@ export class CryptoAuthController {
         data: {
           token,
           user: {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            avatar: user.avatar,
-            isEmailVerified: user.isEmailVerified
+            id: user?._id,
+            name: user?.name,
+            email: user?.email,
+            role: user?.role,
+            avatar: user?.avatar,
+            isEmailVerified: user?.isEmailVerified
           }
         }
       });
@@ -149,32 +153,39 @@ export class CryptoAuthController {
   /**
    * Verificar token
    */
-  static verifyToken = async (req: Request, res: Response) => {
+  static verifyToken = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const authHeader = req.headers.authorization;
       
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Token requerido'
         });
       }
 
-      const token = authHeader.substring(7);
+      const token = authHeader?.substring(7);
+      if (!token) {
+        res.status(401).json({
+          success: false,
+          message: 'Token no proporcionado'
+        });
+        return;
+      }
       const decoded = CryptoAuth.verifyToken(token);
       
       if (!decoded) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Token inválido'
         });
       }
 
       // Buscar usuario
-      const user = await User.findById(decoded.id).select('-password -pin -fingerprintData');
+      const user = await User.findById(decoded?.id).select('-password -pin -fingerprintData');
       
       if (!user || !user.isActive) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no encontrado o inactivo'
         });
@@ -184,12 +195,12 @@ export class CryptoAuthController {
         success: true,
         data: {
           user: {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            avatar: user.avatar,
-            isEmailVerified: user.isEmailVerified
+            id: user?._id,
+            name: user?.name,
+            email: user?.email,
+            role: user?.role,
+            avatar: user?.avatar,
+            isEmailVerified: user?.isEmailVerified
           }
         }
       });
@@ -205,7 +216,7 @@ export class CryptoAuthController {
   /**
    * Obtener perfil del usuario autenticado
    */
-  static getProfile = async (req: any, res: Response) => {
+  static getProfile = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const user = req.user;
       
@@ -213,13 +224,13 @@ export class CryptoAuthController {
         success: true,
         data: {
           user: {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            avatar: user.avatar,
+            id: user?._id,
+            name: user?.name,
+            email: user?.email,
+            role: user?.role,
+            avatar: user?.avatar,
             phone: user.phone,
-            isEmailVerified: user.isEmailVerified,
+            isEmailVerified: user?.isEmailVerified,
             points: user.points,
             loyaltyLevel: user.loyaltyLevel,
             theme: user.theme,

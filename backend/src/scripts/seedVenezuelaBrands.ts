@@ -1,10 +1,8 @@
 import mongoose from 'mongoose';
 import Brand from '../models/Brand';
 import VehicleType from '../models/VehicleType';
-
 // Configuración de conexión a MongoDB
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/repuestospro';
-
+const MONGODB_URI = process.env['MONGODB_URI'] || 'mongodb://localhost:27017/repuestospro';
 // Marcas específicas de Venezuela por tipo de vehículo
 const venezuelaBrands = {
   automovil: [
@@ -150,33 +148,27 @@ const venezuelaBrands = {
     { name: 'Equipos Industriales CA', country: 'Venezuela', description: 'Fabricante venezolano de equipos industriales' }
   ]
 };
-
 async function connectToDatabase() {
   try {
     await mongoose.connect(MONGODB_URI);
-    console.log('✅ Conectado a MongoDB');
   } catch (error) {
     console.error('❌ Error conectando a MongoDB:', error);
     process.exit(1);
   }
 }
-
 async function getVehicleTypeId(name: string): Promise<string | null> {
   const vehicleType = await VehicleType.findOne({ name: name.toLowerCase() });
   return vehicleType?._id?.toString() || null;
 }
-
 async function createOrUpdateBrand(brandData: any, vehicleTypeId: string) {
   try {
     // Buscar si la marca ya existe
     let brand = await Brand.findOne({ name: brandData.name });
-    
     if (brand) {
       // Si existe, agregar el tipo de vehículo si no está ya incluido
       if (!brand.vehicleTypes.includes(vehicleTypeId as any)) {
         brand.vehicleTypes.push(vehicleTypeId as any);
         await brand.save();
-        console.log(`✅ Marca ${brandData.name} actualizada con tipo de vehículo`);
       } else {
         console.log(`ℹ️  Marca ${brandData.name} ya tiene este tipo de vehículo`);
       }
@@ -189,73 +181,51 @@ async function createOrUpdateBrand(brandData: any, vehicleTypeId: string) {
         vehicleTypes: [vehicleTypeId as any],
         isActive: true
       });
-      
       await brand.save();
-      console.log(`✅ Marca ${brandData.name} creada exitosamente`);
     }
   } catch (error) {
     console.error(`❌ Error procesando marca ${brandData.name}:`, error);
   }
 }
-
 async function seedVenezuelaBrands() {
   try {
     await connectToDatabase();
-    
     console.log('🚀 Iniciando proceso de carga de marcas venezolanas...\n');
-    
     // Obtener IDs de tipos de vehículos (usando los nombres correctos de la interfaz)
     const vehicleTypeIds: { [key: string]: string | null } = {};
-    
     // Mapeo de tipos de vehículos: clave del script -> nombre en la base de datos
     const vehicleTypeMapping = {
       'automovil': 'automóviles',
-      'motocicleta': 'motos', 
+      'motocicleta': 'motos',
       'camion': 'camiones',
       'maquinaria_agricola': 'maquinaria agrícola',
       'maquinaria_industrial': 'maquinaria industrial'
     };
-    
     for (const [scriptKey, dbName] of Object.entries(vehicleTypeMapping)) {
       const id = await getVehicleTypeId(dbName);
       vehicleTypeIds[scriptKey] = id;
-      
       if (!id) {
-        console.log(`⚠️  Tipo de vehículo '${dbName}' no encontrado en la base de datos`);
       } else {
-        console.log(`✅ Tipo de vehículo '${dbName}' encontrado con ID: ${id}`);
       }
     }
-    
     console.log('\n📦 Procesando marcas por tipo de vehículo...\n');
-    
     // Procesar cada tipo de vehículo
     for (const [vehicleType, brands] of Object.entries(venezuelaBrands)) {
       const vehicleTypeId = vehicleTypeIds[vehicleType];
-      
       if (!vehicleTypeId) {
-        console.log(`⚠️  Saltando ${vehicleType} - tipo de vehículo no encontrado`);
         continue;
       }
-      
       console.log(`\n🏷️  Procesando marcas para ${vehicleType}:`);
       console.log(`   Total de marcas: ${brands.length}`);
-      
       for (const brandData of brands) {
-        console.log(`   🔍 Procesando marca: ${brandData.name} (${brandData.country})`);
         await createOrUpdateBrand(brandData, vehicleTypeId);
       }
-      
-      console.log(`✅ Completado ${vehicleType} - ${brands.length} marcas procesadas`);
     }
-    
     console.log('\n🎉 Proceso de carga de marcas venezolanas completado exitosamente!');
-    
     // Mostrar estadísticas finales
     const totalBrands = await Brand.countDocuments();
     console.log(`\n📊 Estadísticas finales:`);
     console.log(`   Total de marcas en la base de datos: ${totalBrands}`);
-    
     // Mostrar marcas por tipo de vehículo
     for (const vehicleType of ['automovil', 'motocicleta', 'camion', 'maquinaria_agricola', 'maquinaria_industrial']) {
       const vehicleTypeId = vehicleTypeIds[vehicleType];
@@ -264,7 +234,6 @@ async function seedVenezuelaBrands() {
         console.log(`   ${vehicleType}: ${count} marcas`);
       }
     }
-    
   } catch (error) {
     console.error('❌ Error durante el proceso de carga:', error);
   } finally {
@@ -273,10 +242,8 @@ async function seedVenezuelaBrands() {
     process.exit(0);
   }
 }
-
 // Ejecutar el script
 if (require.main === module) {
   seedVenezuelaBrands();
 }
-
 export default seedVenezuelaBrands;

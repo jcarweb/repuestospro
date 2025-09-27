@@ -62,7 +62,7 @@ export class EnrichmentWorker {
           await this.enrichPhoto(photo);
         } catch (error) {
           console.error(`Error enriqueciendo foto ${photo._id}:`, error);
-          await this.markPhotoAsError(photo._id, error.message);
+          await this.markPhotoAsError(photo._id, (error as Error).message);
         }
       }
     } catch (error) {
@@ -107,7 +107,7 @@ export class EnrichmentWorker {
       console.log(`Foto ${photo.name} enriquecida exitosamente`);
     } catch (error) {
       console.error(`Error enriqueciendo foto ${photo._id}:`, error);
-      await this.markPhotoAsError(photo._id, error.message);
+      await this.markPhotoAsError(photo._id, (error as Error).message);
     }
   }
 
@@ -162,7 +162,7 @@ export class EnrichmentWorker {
         results: [],
         searchTerm: storeName,
         lastUpdated: new Date(),
-        error: error.message
+        error: (error as Error).message
       };
     }
   }
@@ -199,7 +199,7 @@ export class EnrichmentWorker {
         results: {},
         searchTerm: storeName,
         lastUpdated: new Date(),
-        error: error.message
+        error: (error as Error).message
       };
     }
   }
@@ -214,8 +214,8 @@ export class EnrichmentWorker {
       // Simulación de búsqueda en Instagram
       // En producción, usarías la Instagram Basic Display API o Graph API
       const mockData = {
-        found: Math.random() > 0.5, // Simulación aleatoria
-        followers: Math.floor(Math.random() * 10000),
+        found: false, // Cambiado a false por defecto para datos reales
+        followers: 0,
         username: storeName.toLowerCase().replace(/\s+/g, ''),
         lastUpdated: new Date()
       };
@@ -226,7 +226,7 @@ export class EnrichmentWorker {
       return {
         found: false,
         lastUpdated: new Date(),
-        error: error.message
+        error: (error as Error).message
       };
     }
   }

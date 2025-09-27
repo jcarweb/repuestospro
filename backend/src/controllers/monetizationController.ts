@@ -6,18 +6,22 @@ import Tax from '../models/Tax';
 import exchangeRateService from '../services/exchangeRateService';
 import { sendNotificationToAdmin } from '../services/notificationService';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 export class MonetizationController {
   // ===== TASAS DE CAMBIO =====
   
   /**
    * Obtiene la tasa de cambio actual
    */
-  async getCurrentExchangeRate(req: Request, res: Response) {
+  async getCurrentExchangeRate(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const result = await exchangeRateService.getCurrentRate();
       
       if (!result.success) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: result.message
         });
@@ -28,9 +32,9 @@ export class MonetizationController {
         exchangeRate: {
           rate: result.rate,
           source: result.source,
-          sourceUrl: result.sourceUrl,
+          sourceUrl: result.source,
           lastUpdated: result.lastUpdated,
-          isActive: result.isActive
+          isActive: true
         }
       });
     } catch (error) {
@@ -45,12 +49,12 @@ export class MonetizationController {
   /**
    * Actualiza la configuración de la URL de fuente
    */
-  async updateExchangeRateConfig(req: Request, res: Response) {
+  async updateExchangeRateConfig(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { sourceUrl } = req.body;
       
       if (!sourceUrl) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'URL de fuente es requerida'
         });
@@ -79,13 +83,13 @@ export class MonetizationController {
   /**
    * Actualiza la tasa de cambio automáticamente desde BCV
    */
-  async updateExchangeRateFromBcv(req: Request, res: Response) {
+  async updateExchangeRateFromBcv(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { sourceUrl } = req.body;
       const result = await exchangeRateService.getBcvRate(sourceUrl);
       
       if (!result.success) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: result.message
         });
@@ -97,9 +101,9 @@ export class MonetizationController {
         exchangeRate: {
           rate: result.rate,
           source: result.source,
-          sourceUrl: result.sourceUrl,
+          sourceUrl: result.source,
           lastUpdated: result.lastUpdated,
-          isActive: result.isActive
+          isActive: true
         }
       });
     } catch (error) {
@@ -114,7 +118,7 @@ export class MonetizationController {
   /**
    * Obtiene el historial de tasas de cambio
    */
-  async getExchangeRateHistory(req: Request, res: Response) {
+  async getExchangeRateHistory(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { page = 1, limit = 20 } = req.query;
       const skip = (Number(page) - 1) * Number(limit);
@@ -150,7 +154,7 @@ export class MonetizationController {
   /**
    * Obtiene todas las comisiones
    */
-  async getCommissions(req: Request, res: Response) {
+  async getCommissions(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { storeType, isActive } = req.query;
       const filter: any = {};
@@ -176,13 +180,13 @@ export class MonetizationController {
   /**
    * Crea una nueva comisión
    */
-  async createCommission(req: Request, res: Response) {
+  async createCommission(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const commissionData = req.body;
       
       // Validar datos requeridos
       if (!commissionData.name || commissionData.value === undefined) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Nombre y valor son requeridos'
         });
@@ -207,7 +211,7 @@ export class MonetizationController {
   /**
    * Actualiza una comisión
    */
-  async updateCommission(req: Request, res: Response) {
+  async updateCommission(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const updateData = req.body;
@@ -219,7 +223,7 @@ export class MonetizationController {
       );
 
       if (!commission) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Comisión no encontrada'
         });
@@ -242,14 +246,14 @@ export class MonetizationController {
   /**
    * Elimina una comisión
    */
-  async deleteCommission(req: Request, res: Response) {
+  async deleteCommission(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
       const commission = await Commission.findByIdAndDelete(id);
 
       if (!commission) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Comisión no encontrada'
         });
@@ -273,7 +277,7 @@ export class MonetizationController {
   /**
    * Obtiene todos los planes de suscripción
    */
-  async getSubscriptions(req: Request, res: Response) {
+  async getSubscriptions(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { type, isActive } = req.query;
       const filter: any = {};
@@ -299,12 +303,12 @@ export class MonetizationController {
   /**
    * Crea un nuevo plan de suscripción
    */
-  async createSubscription(req: Request, res: Response) {
+  async createSubscription(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const subscriptionData = req.body;
       
       if (!subscriptionData.name || subscriptionData.price === undefined) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Nombre y precio son requeridos'
         });
@@ -329,7 +333,7 @@ export class MonetizationController {
   /**
    * Actualiza un plan de suscripción
    */
-  async updateSubscription(req: Request, res: Response) {
+  async updateSubscription(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const updateData = req.body;
@@ -341,7 +345,7 @@ export class MonetizationController {
       );
 
       if (!subscription) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Plan de suscripción no encontrado'
         });
@@ -364,14 +368,14 @@ export class MonetizationController {
   /**
    * Elimina un plan de suscripción
    */
-  async deleteSubscription(req: Request, res: Response) {
+  async deleteSubscription(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
       const subscription = await Subscription.findByIdAndDelete(id);
 
       if (!subscription) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Plan de suscripción no encontrado'
         });
@@ -395,7 +399,7 @@ export class MonetizationController {
   /**
    * Obtiene todos los impuestos
    */
-  async getTaxes(req: Request, res: Response) {
+  async getTaxes(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { type, appliesTo, isActive } = req.query;
       const filter: any = {};
@@ -422,12 +426,12 @@ export class MonetizationController {
   /**
    * Crea un nuevo impuesto
    */
-  async createTax(req: Request, res: Response) {
+  async createTax(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const taxData = req.body;
       
       if (!taxData.name || taxData.rate === undefined) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Nombre y tasa son requeridos'
         });
@@ -452,7 +456,7 @@ export class MonetizationController {
   /**
    * Actualiza un impuesto
    */
-  async updateTax(req: Request, res: Response) {
+  async updateTax(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const updateData = req.body;
@@ -464,7 +468,7 @@ export class MonetizationController {
       );
 
       if (!tax) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Impuesto no encontrado'
         });
@@ -487,14 +491,14 @@ export class MonetizationController {
   /**
    * Elimina un impuesto
    */
-  async deleteTax(req: Request, res: Response) {
+  async deleteTax(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
       const tax = await Tax.findByIdAndDelete(id);
 
       if (!tax) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Impuesto no encontrado'
         });
@@ -518,12 +522,12 @@ export class MonetizationController {
   /**
    * Calculadora general de comisiones e impuestos
    */
-  async calculateCommission(req: Request, res: Response) {
+  async calculateCommission(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { saleAmount, storeType, exchangeRate } = req.body;
 
       if (!saleAmount || saleAmount <= 0) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'El monto de venta debe ser positivo'
         });
@@ -544,13 +548,13 @@ export class MonetizationController {
       let commissionType = 'N/A';
 
       if (commission) {
-        commissionRate = commission.value;
+        commissionRate = commission.baseRate;
         commissionType = commission.type;
         
         if (commission.type === 'percentage') {
-          commissionAmount = (saleAmount * commission.value) / 100;
+          commissionAmount = (saleAmount * commission.baseRate) / 100;
         } else {
-          commissionAmount = commission.value;
+          commissionAmount = commission.baseRate;
         }
       }
 
@@ -558,7 +562,7 @@ export class MonetizationController {
       const taxBreakdown = taxes.map(tax => {
         let taxAmount = 0;
         
-        if (tax.type === 'percentage') {
+        if (tax.isPercentage) {
           taxAmount = (saleAmount * tax.rate) / 100;
         } else {
           taxAmount = tax.rate;

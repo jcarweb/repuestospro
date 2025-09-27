@@ -4,30 +4,22 @@ import ExchangeRate from '../models/ExchangeRate';
 import Commission from '../models/Commission';
 import Subscription from '../models/Subscription';
 import Tax from '../models/Tax';
-
 dotenv.config();
-
 // Conectar a MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/repuestospro', {
+mongoose.connect(process.env['MONGODB_URI'] || 'mongodb://localhost:27017/repuestospro', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 } as mongoose.ConnectOptions);
-
 const db = mongoose.connection;
-
 db.on('error', console.error.bind(console, 'Error de conexión a MongoDB:'));
 db.once('open', async () => {
-  console.log('✅ Conectado a MongoDB');
-  
   try {
     // Limpiar datos existentes
     await ExchangeRate.deleteMany({});
     await Commission.deleteMany({});
     await Subscription.deleteMany({});
     await Tax.deleteMany({});
-    
     console.log('🧹 Datos existentes eliminados');
-
     // Crear tasa de cambio inicial
     const exchangeRate = await ExchangeRate.create({
       currency: 'USD',
@@ -38,8 +30,6 @@ db.once('open', async () => {
       isActive: true,
       manualOverride: false
     });
-    console.log('✅ Tasa de cambio creada:', exchangeRate.rate);
-
     // Crear comisiones
     const commissions = await Commission.create([
       {
@@ -94,8 +84,6 @@ db.once('open', async () => {
         effectiveDate: new Date()
       }
     ]);
-    console.log('✅ Comisiones creadas:', commissions.length);
-
     // Crear planes de suscripción
     const subscriptions = await Subscription.create([
       {
@@ -163,8 +151,6 @@ db.once('open', async () => {
         isActive: true
       }
     ]);
-    console.log('✅ Planes de suscripción creados:', subscriptions.length);
-
     // Crear impuestos
     const taxes = await Tax.create([
       {
@@ -202,15 +188,12 @@ db.once('open', async () => {
         effectiveDate: new Date()
       }
     ]);
-    console.log('✅ Impuestos creados:', taxes.length);
-
     console.log('🎉 Datos de monetización sembrados exitosamente');
     console.log('📊 Resumen:');
     console.log(`   - Tasa de cambio: ${exchangeRate.rate} ${exchangeRate.currency}`);
     console.log(`   - Comisiones: ${commissions.length}`);
     console.log(`   - Planes de suscripción: ${subscriptions.length}`);
     console.log(`   - Impuestos: ${taxes.length}`);
-
   } catch (error) {
     console.error('❌ Error sembrando datos:', error);
   } finally {

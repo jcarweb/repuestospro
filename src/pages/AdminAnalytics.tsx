@@ -89,7 +89,7 @@ const AdminAnalytics: React.FC = () => {
 
   const fetchConfiguration = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/analytics/configuration', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""""/api/analytics/configuration', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -135,7 +135,7 @@ const AdminAnalytics: React.FC = () => {
     setMessage(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/analytics/configuration', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/analytics/configuration', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -167,7 +167,7 @@ const AdminAnalytics: React.FC = () => {
 
   const handleToggleAnalytics = async (enabled: boolean) => {
     try {
-      const response = await fetch('http://localhost:5000/api/analytics/toggle', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/analytics/toggle', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

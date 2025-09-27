@@ -29,7 +29,7 @@ const ReferralModal: React.FC<ReferralModalProps> = ({
     setMessage(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/loyalty/verify-referral', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""/api/loyalty/verify-referral', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

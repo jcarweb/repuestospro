@@ -97,26 +97,26 @@ const WarrantySchema = new Schema<IWarranty>({
 WarrantySchema.index({ userId: 1, status: 1 });
 WarrantySchema.index({ transactionId: 1 });
 WarrantySchema.index({ storeId: 1, status: 1 });
-WarrantySchema.index({ expirationDate: 1, status: 'active' });
+WarrantySchema.index({ expirationDate: 1, status: 1 });
 WarrantySchema.index({ type: 1, status: 1 });
 
 // Método para verificar si la garantía está activa
-WarrantySchema.methods.isActive = function(): boolean {
-  return this.status === 'active' && new Date() <= this.expirationDate;
+WarrantySchema.methods['isActive'] = function(): boolean {
+  return this['status'] === 'active' && new Date() <= this['expirationDate'];
 };
 
 // Método para calcular días restantes
-WarrantySchema.methods.getDaysRemaining = function(): number {
-  if (this.status !== 'active') return 0;
+WarrantySchema.methods['getDaysRemaining'] = function(): number {
+  if (this['status'] !== 'active') return 0;
   const now = new Date();
-  const diffTime = this.expirationDate.getTime() - now.getTime();
+  const diffTime = this['expirationDate'].getTime() - now.getTime();
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
 // Método para calcular cobertura disponible
-WarrantySchema.methods.getAvailableCoverage = function(): number {
-  if (!this.isActive()) return 0;
-  return Math.min(this.coverageAmount, this.maxCoverageAmount);
+WarrantySchema.methods['getAvailableCoverage'] = function(): number {
+  if (!this['isActive']()) return 0;
+  return Math.min(this['coverageAmount'], this['maxCoverageAmount']);
 };
 
 export default mongoose.model<IWarranty>('Warranty', WarrantySchema);

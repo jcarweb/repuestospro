@@ -55,7 +55,7 @@ const RegisterWithCode: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/registration-codes/verify/${codeToVerify}`);
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""""/api/registration-codes/verify/${codeToVerify}`);
       const result = await response.json();
 
       if (result.success) {
@@ -85,7 +85,7 @@ const RegisterWithCode: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/registration-codes/start-registration', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/registration-codes/start-registration', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -119,7 +119,7 @@ const RegisterWithCode: React.FC = () => {
 
     try {
       // Registrar usuario
-      const registerResponse = await fetch('http://localhost:5000/api/auth/register', {
+      const registerResponse = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -137,7 +137,7 @@ const RegisterWithCode: React.FC = () => {
 
       if (registerResult.success) {
         // Completar registro con código
-        const completeResponse = await fetch('http://localhost:5000/api/registration-codes/complete-registration', {
+        const completeResponse = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/registration-codes/complete-registration', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

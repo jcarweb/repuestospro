@@ -2,7 +2,6 @@ import mongoose from 'mongoose';
 import Subcategory from '../models/Subcategory';
 import Category from '../models/Category';
 import { config } from '../config/env';
-
 // Subcategorías específicas para repuestos automotrices
 const subcategoriesData = [
   // Motor
@@ -135,7 +134,6 @@ const subcategoriesData = [
     ]
   }
 ];
-
 // Subcategorías específicas para motocicletas
 const motorcycleSubcategories = [
   {
@@ -157,7 +155,6 @@ const motorcycleSubcategories = [
     ]
   }
 ];
-
 // Subcategorías específicas para camiones
 const truckSubcategories = [
   {
@@ -177,26 +174,21 @@ const truckSubcategories = [
     ]
   }
 ];
-
 async function seedSubcategories() {
   try {
     // Conectar a MongoDB
     await mongoose.connect(config.MONGODB_URI);
     console.log('Conectado a MongoDB');
-
     // Limpiar subcategorías existentes
     await Subcategory.deleteMany({});
     console.log('Subcategorías existentes eliminadas');
-
     // Obtener todas las categorías
     const categories = await Category.find({});
     const categoryMap = new Map();
     categories.forEach(cat => {
       categoryMap.set(cat.name, cat._id);
     });
-
     let totalCreated = 0;
-
     // Crear subcategorías para automóviles
     for (const categoryData of subcategoriesData) {
       const categoryId = categoryMap.get(categoryData.categoryName);
@@ -212,7 +204,6 @@ async function seedSubcategories() {
         }
       }
     }
-
     // Crear subcategorías para motocicletas
     for (const categoryData of motorcycleSubcategories) {
       const categoryId = categoryMap.get(categoryData.categoryName);
@@ -228,7 +219,6 @@ async function seedSubcategories() {
         }
       }
     }
-
     // Crear subcategorías para camiones
     for (const categoryData of truckSubcategories) {
       const categoryId = categoryMap.get(categoryData.categoryName);
@@ -244,9 +234,6 @@ async function seedSubcategories() {
         }
       }
     }
-
-    console.log('✅ Subcategorías sembradas exitosamente');
-    
     // Mostrar estadísticas
     const totalSubcategories = await Subcategory.countDocuments();
     const byVehicleType = await Subcategory.aggregate([
@@ -257,14 +244,12 @@ async function seedSubcategories() {
         }
       }
     ]);
-    
     console.log(`📊 Estadísticas:`);
     console.log(`   - Total de subcategorías: ${totalSubcategories}`);
     console.log(`   - Por tipo de vehículo:`);
     byVehicleType.forEach(stat => {
       console.log(`     * ${stat._id}: ${stat.count}`);
     });
-
   } catch (error) {
     console.error('Error sembrando subcategorías:', error);
   } finally {
@@ -272,10 +257,8 @@ async function seedSubcategories() {
     console.log('Desconectado de MongoDB');
   }
 }
-
 // Ejecutar si se llama directamente
 if (require.main === module) {
   seedSubcategories();
 }
-
 export default seedSubcategories;

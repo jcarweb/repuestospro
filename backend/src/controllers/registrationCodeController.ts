@@ -241,7 +241,7 @@ export class RegistrationCodeController {
       const { role } = req.params;
       const { page = 1, limit = 10 } = req.query;
 
-      if (!['admin', 'store_manager', 'delivery'].includes(role)) {
+      if (!role || !['admin', 'store_manager', 'delivery'].includes(role)) {
         res.status(400).json({
           success: false,
           message: 'Rol inválido'
@@ -251,7 +251,7 @@ export class RegistrationCodeController {
 
       const codes = await RegistrationCodeService.getRegistrationCodesByRole(
         userId.toString(),
-        role,
+        role as string,
         {
           page: Number(page),
           limit: Number(limit)

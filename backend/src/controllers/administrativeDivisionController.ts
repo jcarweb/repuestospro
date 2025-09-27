@@ -3,21 +3,25 @@ import State from '../models/State';
 import Municipality from '../models/Municipality';
 import Parish from '../models/Parish';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 class AdministrativeDivisionController {
   // Obtener todos los estados
-  async getStates(req: Request, res: Response) {
+  async getStates(req: AuthenticatedRequest, res: Response) {
     try {
       const states = await State.find({ isActive: true })
         .select('name code capital region')
         .sort({ name: 1 });
 
-      res.json({
+      return res.json({
         success: true,
         data: states
       });
     } catch (error) {
       console.error('Error obteniendo estados:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
@@ -25,7 +29,7 @@ class AdministrativeDivisionController {
   }
 
   // Obtener municipios por estado
-  async getMunicipalitiesByState(req: Request, res: Response) {
+  async getMunicipalitiesByState(req: AuthenticatedRequest, res: Response) {
     try {
       const { stateId } = req.params;
 
@@ -43,13 +47,13 @@ class AdministrativeDivisionController {
         .select('name code capital')
         .sort({ name: 1 });
 
-      res.json({
+      return res.json({
         success: true,
         data: municipalities
       });
     } catch (error) {
       console.error('Error obteniendo municipios:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
@@ -57,7 +61,7 @@ class AdministrativeDivisionController {
   }
 
   // Obtener parroquias por municipio
-  async getParishesByMunicipality(req: Request, res: Response) {
+  async getParishesByMunicipality(req: AuthenticatedRequest, res: Response) {
     try {
       const { municipalityId } = req.params;
 
@@ -75,13 +79,13 @@ class AdministrativeDivisionController {
         .select('name code')
         .sort({ name: 1 });
 
-      res.json({
+      return res.json({
         success: true,
         data: parishes
       });
     } catch (error) {
       console.error('Error obteniendo parroquias:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
@@ -89,28 +93,30 @@ class AdministrativeDivisionController {
   }
 
   // Obtener ubicación completa (Estado, Municipio, Parroquia)
-  async getLocationHierarchy(req: Request, res: Response) {
+  async getLocationHierarchy(req: AuthenticatedRequest, res: Response) {
     try {
       const { stateId, municipalityId, parishId } = req.params;
 
-      const location = {
+      const location: any = {
         state: null,
         municipality: null,
         parish: null
       };
 
       if (stateId) {
-        location.state = await State.findById(stateId).select('name code capital region');
+        const state = await State.findById(stateId).select('name code capital region');
+        location.state = state || null;
       }
 
       if (municipalityId) {
-        location.municipality = await Municipality.findById(municipalityId)
+        const municipality = await Municipality.findById(municipalityId)
           .populate('state', 'name code')
           .select('name code capital state');
+        location.municipality = municipality || null;
       }
 
       if (parishId) {
-        location.parish = await Parish.findById(parishId)
+        const parish = await Parish.findById(parishId)
           .populate({
             path: 'municipality',
             select: 'name code capital',
@@ -120,15 +126,16 @@ class AdministrativeDivisionController {
             }
           })
           .select('name code municipality');
+        location.parish = parish || null;
       }
 
-      res.json({
+      return res.json({
         success: true,
         data: location
       });
     } catch (error) {
       console.error('Error obteniendo jerarquía de ubicación:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
@@ -136,7 +143,7 @@ class AdministrativeDivisionController {
   }
 
   // Buscar ubicaciones por texto
-  async searchLocations(req: Request, res: Response) {
+  async searchLocations(req: AuthenticatedRequest, res: Response) {
     try {
       const { query, type } = req.query;
 
@@ -225,13 +232,13 @@ class AdministrativeDivisionController {
           ];
       }
 
-      res.json({
+      return res.json({
         success: true,
         data: results
       });
     } catch (error) {
       console.error('Error buscando ubicaciones:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });

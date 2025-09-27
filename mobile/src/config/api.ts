@@ -64,7 +64,7 @@ export class DynamicAPIConfig {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    return this.currentConfig?.baseUrl || 'http://192.168.0.106:5000/api';
+    return this.currentConfig?.baseUrl || 'http://192.168.31.122:5000/api';
   }
 
   // Obtener la configuración completa
@@ -79,7 +79,7 @@ export class DynamicAPIConfig {
   async rescan(): Promise<NetworkConfig> {
     // Usar la IP real de la red local
     this.currentConfig = {
-      baseUrl: 'http://192.168.0.106:5000/api',
+      baseUrl: 'http://192.168.31.122:5000/api',
       isLocal: true,
       networkName: 'Backend Principal (Forzado)',
       lastTested: Date.now(),

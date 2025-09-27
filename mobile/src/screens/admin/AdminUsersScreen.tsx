@@ -170,6 +170,7 @@ const AdminUsersScreen: React.FC = () => {
     switch (role) {
       case 'admin': return '#DC2626';
       case 'store_manager': return '#2563EB';
+      case 'seller': return '#7C3AED';
       case 'client': return '#059669';
       case 'delivery': return '#D97706';
       default: return '#6B7280';
@@ -180,6 +181,7 @@ const AdminUsersScreen: React.FC = () => {
     switch (role) {
       case 'admin': return 'Administrador';
       case 'store_manager': return 'Gestor de Tienda';
+      case 'seller': return 'Vendedor';
       case 'client': return 'Cliente';
       case 'delivery': return 'Repartidor';
       default: return role;
@@ -404,6 +406,7 @@ const AdminUsersScreen: React.FC = () => {
               {renderFilterButton('Todos', 'all', selectedRole, () => setSelectedRole('all'))}
               {renderFilterButton('Admin', 'admin', selectedRole, () => setSelectedRole('admin'))}
               {renderFilterButton('Gestor', 'store_manager', selectedRole, () => setSelectedRole('store_manager'))}
+              {renderFilterButton('Vendedor', 'seller', selectedRole, () => setSelectedRole('seller'))}
               {renderFilterButton('Cliente', 'client', selectedRole, () => setSelectedRole('client'))}
               {renderFilterButton('Repartidor', 'delivery', selectedRole, () => setSelectedRole('delivery'))}
             </View>

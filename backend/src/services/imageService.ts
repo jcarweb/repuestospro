@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { deleteImage, getOptimizedUrl } from '../config/cloudinary';
+import * as fs from 'fs';
 
 export interface ImageUploadResult {
   publicId: string;
@@ -86,24 +87,19 @@ class ImageService {
    */
   async fileToBase64(file: Express.Multer.File): Promise<Base64ImageData> {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      
-      reader.onload = () => {
-        const result = reader.result as string;
+      try {
+        const base64 = file.buffer.toString('base64');
         const format = file.mimetype.split('/')[1] || 'jpg';
+        const dataUrl = `data:${file.mimetype};base64,${base64}`;
         
         resolve({
-          data: result,
+          data: dataUrl,
           format: format,
           filename: file.originalname
         });
-      };
-      
-      reader.onerror = () => {
+      } catch (error) {
         reject(new Error('Error convirtiendo archivo a base64'));
-      };
-      
-      reader.readAsDataURL(file);
+      }
     });
   }
 
@@ -185,24 +181,20 @@ class ImageService {
    * Obtener información de imagen sin subirla
    */
   async getImageInfo(base64Data: string): Promise<{ width: number; height: number; size: number; format: string }> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
+    try {
+      // Para Node.js, usamos una aproximación básica
+      const format = base64Data.split(';')[0]?.split('/')[1] || 'unknown';
+      const size = Math.ceil((base64Data.length * 3) / 4); // Aproximación del tamaño en bytes
       
-      img.onload = () => {
-        resolve({
-          width: img.width,
-          height: img.height,
-          size: Math.ceil((base64Data.length * 3) / 4), // Aproximación del tamaño en bytes
-          format: base64Data.split(';')[0].split('/')[1]
-        });
+      return {
+        width: 0, // No podemos obtener dimensiones reales en Node.js sin librerías adicionales
+        height: 0,
+        size,
+        format
       };
-      
-      img.onerror = () => {
-        reject(new Error('Error obteniendo información de la imagen'));
-      };
-      
-      img.src = base64Data;
-    });
+    } catch (error) {
+      throw new Error('Error al procesar información de imagen');
+    }
   }
 
   /**
@@ -214,48 +206,14 @@ class ImageService {
     maxHeight: number = 600, 
     quality: number = 0.8
   ): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        if (!ctx) {
-          reject(new Error('No se pudo obtener el contexto del canvas'));
-          return;
-        }
-
-        // Calcular nuevas dimensiones manteniendo proporción
-        let { width, height } = img;
-        
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
-        }
-        
-        if (height > maxHeight) {
-          width = (width * maxHeight) / height;
-          height = maxHeight;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        // Dibujar imagen redimensionada
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Convertir a base64 con calidad especificada
-        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
-        resolve(compressedBase64);
-      };
-      
-      img.onerror = () => {
-        reject(new Error('Error cargando la imagen'));
-      };
-      
-      img.src = base64Data;
-    });
+    try {
+      // Para Node.js, retornamos la imagen original ya que no tenemos canvas
+      // En un entorno de producción, se podría usar sharp o jimp para redimensionar
+      console.warn('compressBase64Image: Funcionalidad limitada en Node.js. Retornando imagen original.');
+      return base64Data;
+    } catch (error) {
+      throw new Error('Error al procesar imagen');
+    }
   }
 }
 
