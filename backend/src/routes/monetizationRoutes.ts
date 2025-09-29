@@ -69,6 +69,20 @@ router.put('/taxes/:id', monetizationController.updateTax);
 // Eliminar impuesto
 router.delete('/taxes/:id', monetizationController.deleteTax);
 
+// ===== CONFIGURACIÓN DE TASA POR TIENDA =====
+
+// Rutas protegidas para gestores de tienda
+router.use('/store/:storeId/exchange-rate', authenticateToken);
+
+// Obtener preferencia de tasa de una tienda
+router.get('/store/:storeId/exchange-rate/preference', monetizationController.getStoreExchangeRatePreference);
+
+// Actualizar preferencia de tasa de una tienda
+router.put('/store/:storeId/exchange-rate/preference', monetizationController.updateStoreExchangeRatePreference);
+
+// Obtener tasa de cambio según preferencia de la tienda
+router.get('/store/:storeId/exchange-rate/current', monetizationController.getStoreExchangeRate);
+
 // ===== CÁLCULOS =====
 
 // Calculadora general (público)

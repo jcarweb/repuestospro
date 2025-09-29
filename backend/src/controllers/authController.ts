@@ -1205,11 +1205,11 @@ export class AuthController {
   static async completeLoginWithTwoFactor(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { email, code, tempToken } = req.body;
-      if (!email || !code || !tempToken) {
+      if (!email || !code) {
         // Campos requeridos faltantes - información sensible no loggeada
         res.status(400).json({
           success: false,
-          message: 'Email, código y token temporal requeridos'
+          message: 'Email y código son requeridos'
         });
         return;
       }
@@ -1231,6 +1231,7 @@ export class AuthController {
       }
       // Verificar código 2FA
       let isValid = user.verifyTwoFactorCode(code);
+      
       // Si no es válido, verificar códigos de respaldo
       if (!isValid && user.backupCodes) {
         isValid = user.backupCodes.includes(code);
@@ -1240,8 +1241,8 @@ export class AuthController {
           await user.save();
         }
       }
+      
       if (!isValid) {
-        // Información de código no loggeada por seguridad;
         res.status(400).json({
           success: false,
           message: 'Código inválido'

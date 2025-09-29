@@ -51,6 +51,7 @@ export interface IStore extends Document {
     deliveryRadius: number;
     minimumOrder: number;
     autoAcceptOrders: boolean;
+    preferredExchangeRate: 'USD' | 'EUR'; // Preferencia de tasa de cambio para el gestor
   };
   createdAt: Date;
   updatedAt: Date;
@@ -254,6 +255,11 @@ const StoreSchema = new Schema<IStore>({
     autoAcceptOrders: {
       type: Boolean,
       default: false
+    },
+    preferredExchangeRate: {
+      type: String,
+      enum: ['USD', 'EUR'],
+      default: 'USD'
     }
   }
 }, {

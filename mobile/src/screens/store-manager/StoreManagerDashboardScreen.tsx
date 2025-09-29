@@ -278,7 +278,7 @@ const StoreManagerDashboardScreen: React.FC = () => {
           <QuickAction
             title="Configuración"
             icon="settings"
-            onPress={() => handleQuickAction('Configuración')}
+            onPress={() => navigation.navigate('StoreConfiguration')}
           />
           <QuickAction
             title="Cerrar Sesión"

@@ -30,7 +30,7 @@ router.delete('/stores/:id/managers', storeController.removeManager);
 // Rutas para desactivar tienda (solo owner)
 router.put('/stores/:id/deactivate', storeController.deactivateStore);
 
-// Rutas para toggle status, establecer principal y eliminar (solo owner)
+// Rutas para toggle status (admin, owner o store_manager)
 router.patch('/stores/:id/toggle-status', storeController.toggleStoreStatus);
 router.put('/stores/:id/set-main', storeController.setMainStore);
 router.delete('/stores/:id', storeController.deleteStore);

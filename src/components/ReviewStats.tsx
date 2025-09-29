@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { StarIcon, ChartBarIcon, TrendingUpIcon, TrendingDownIcon } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { StarIcon, ChartBarIcon, TrendingUpIcon, TrendingDownIcon } from '@heroicons/react/outline';
+import { StarIcon as StarIconSolid } from '@heroicons/react/solid';
 
 interface ReviewStatsProps {
   stats: {

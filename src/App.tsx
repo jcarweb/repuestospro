@@ -78,6 +78,7 @@ import StoreManagerAnalytics from './pages/StoreManagerAnalytics';
 import StoreManagerMessages from './pages/StoreManagerMessages';
 import StoreManagerReviews from './pages/StoreManagerReviews';
 import StoreManagerSettings from './pages/StoreManagerSettings';
+import StoreManagerStoreConfiguration from './pages/StoreManagerStoreConfiguration';
 import StoreManagerInventory from './pages/StoreManagerInventory';
 import StoreManagerInventoryAlerts from './pages/StoreManagerInventoryAlerts';
 import StoreManagerNotifications from './pages/StoreManagerNotifications';
@@ -86,6 +87,8 @@ import StoreSetup from './pages/StoreSetup';
 import InventoryManagementPage from './pages/InventoryManagementPage';
 import InventoryReportsPage from './pages/InventoryReportsPage';
 import InventoryTransfersPage from './pages/InventoryTransfersPage';
+import Quotations from './pages/Quotations';
+import QuotationConfig from './pages/QuotationConfig';
 
 // Páginas de delivery
 import DeliveryDashboard from './pages/DeliveryDashboard';
@@ -571,6 +574,13 @@ function AppContent() {
                  </StoreManagerLayout>
                </StoreManagerRoute>
              } />
+             <Route path="/store-configuration" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerStoreConfiguration />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
              <Route path="/profile" element={
                <StoreManagerRoute>
                  <StoreManagerLayout>
@@ -610,6 +620,20 @@ function AppContent() {
                <StoreManagerRoute>
                  <StoreManagerLayout>
                    <InventoryTransfersPage />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/quotations" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <Quotations />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/quotation-config" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <QuotationConfig />
                  </StoreManagerLayout>
                </StoreManagerRoute>
              } />
@@ -745,7 +769,7 @@ function AppContent() {
                <Route path="/quotes" element={
                  <SellerRoute>
                    <SellerLayout>
-                     <SellerQuotes />
+                     <Quotations />
                    </SellerLayout>
                  </SellerRoute>
                } />

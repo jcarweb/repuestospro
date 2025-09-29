@@ -3,6 +3,7 @@ import ExchangeRate from '../models/ExchangeRate';
 import Commission from '../models/Commission';
 import Subscription from '../models/Subscription';
 import Tax from '../models/Tax';
+import Store from '../models/Store';
 import exchangeRateService from '../services/exchangeRateService';
 import { sendNotificationToAdmin } from '../services/notificationService';
 
@@ -85,21 +86,23 @@ export class MonetizationController {
    */
   async updateExchangeRateFromBcv(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const { sourceUrl } = req.body;
-      const result = await exchangeRateService.getBcvRate(sourceUrl);
+      const { sourceUrl, currency = 'USD' } = req.body;
+      const result = await exchangeRateService.getBcvRate(sourceUrl, currency);
       
       if (!result.success) {
         res.status(400).json({
           success: false,
           message: result.message
         });
+        return;
       }
 
       res.json({
         success: true,
-        message: 'Tasa de cambio actualizada exitosamente',
+        message: `Tasa de cambio ${currency} actualizada exitosamente`,
         exchangeRate: {
           rate: result.rate,
+          currency,
           source: result.source,
           sourceUrl: result.source,
           lastUpdated: result.lastUpdated,
@@ -120,15 +123,15 @@ export class MonetizationController {
    */
   async getExchangeRateHistory(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const { page = 1, limit = 20 } = req.query;
+      const { page = 1, limit = 20, currency = 'USD' } = req.query;
       const skip = (Number(page) - 1) * Number(limit);
 
-      const rates = await ExchangeRate.find({ currency: 'USD' })
+      const rates = await ExchangeRate.find({ currency })
         .sort({ lastUpdated: -1 })
         .skip(skip)
         .limit(Number(limit));
 
-      const total = await ExchangeRate.countDocuments({ currency: 'USD' });
+      const total = await ExchangeRate.countDocuments({ currency });
 
       res.json({
         success: true,
@@ -510,6 +513,155 @@ export class MonetizationController {
       });
     } catch (error) {
       console.error('Error al eliminar impuesto:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // ===== CONFIGURACIÓN DE TASA POR TIENDA =====
+
+  /**
+   * Obtiene la preferencia de tasa de cambio de una tienda
+   */
+  async getStoreExchangeRatePreference(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { storeId } = req.params;
+      const user = req.user;
+
+      // Verificar que el usuario tenga acceso a la tienda
+      const store = await Store.findOne({
+        _id: storeId,
+        $or: [
+          { owner: user._id },
+          { managers: user._id }
+        ]
+      });
+
+      if (!store) {
+        res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada o sin permisos'
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        preferredExchangeRate: store.settings.preferredExchangeRate
+      });
+    } catch (error) {
+      console.error('Error al obtener preferencia de tasa:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Actualiza la preferencia de tasa de cambio de una tienda
+   */
+  async updateStoreExchangeRatePreference(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { storeId } = req.params;
+      const { preferredExchangeRate } = req.body;
+      const user = req.user;
+
+      // Validar que la tasa sea válida
+      if (!['USD', 'EUR'].includes(preferredExchangeRate)) {
+        res.status(400).json({
+          success: false,
+          message: 'Tipo de tasa inválido. Debe ser USD o EUR'
+        });
+        return;
+      }
+
+      // Verificar que el usuario tenga acceso a la tienda
+      const store = await Store.findOne({
+        _id: storeId,
+        $or: [
+          { owner: user._id },
+          { managers: user._id }
+        ]
+      });
+
+      if (!store) {
+        res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada o sin permisos'
+        });
+        return;
+      }
+
+      // Actualizar la preferencia
+      store.settings.preferredExchangeRate = preferredExchangeRate;
+      await store.save();
+
+      res.json({
+        success: true,
+        message: 'Preferencia de tasa actualizada exitosamente',
+        preferredExchangeRate: store.settings.preferredExchangeRate
+      });
+    } catch (error) {
+      console.error('Error al actualizar preferencia de tasa:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Obtiene la tasa de cambio actual según la preferencia de la tienda
+   */
+  async getStoreExchangeRate(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { storeId } = req.params;
+      const user = req.user;
+
+      // Verificar que el usuario tenga acceso a la tienda
+      const store = await Store.findOne({
+        _id: storeId,
+        $or: [
+          { owner: user._id },
+          { managers: user._id }
+        ]
+      });
+
+      if (!store) {
+        res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada o sin permisos'
+        });
+        return;
+      }
+
+      // Obtener la tasa según la preferencia de la tienda
+      const result = await exchangeRateService.getCurrentRate(store.settings.preferredExchangeRate);
+      
+      if (!result.success) {
+        res.status(404).json({
+          success: false,
+          message: result.message
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        exchangeRate: {
+          rate: result.rate,
+          currency: store.settings.preferredExchangeRate,
+          source: result.source,
+          sourceUrl: result.source,
+          lastUpdated: result.lastUpdated,
+          isActive: true
+        }
+      });
+    } catch (error) {
+      console.error('Error al obtener tasa de cambio de tienda:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

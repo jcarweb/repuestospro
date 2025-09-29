@@ -702,6 +702,105 @@ class ApiService {
       throw error;
     }
   }
+
+  // ==================== STORE MANAGER ENDPOINTS ====================
+
+  /**
+   * Obtener configuración de la tienda
+   */
+  async getStoreConfiguration(storeId: string): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/stores/${storeId}`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting store configuration:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualizar configuración de la tienda
+   */
+  async updateStoreConfiguration(storeId: string, configData: any): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/stores/${storeId}`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify(configData),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error updating store configuration:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener preferencia de tasa de cambio de la tienda
+   */
+  async getStoreExchangeRatePreference(storeId: string): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/monetization/store/${storeId}/exchange-rate/preference`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting store exchange rate preference:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualizar preferencia de tasa de cambio de la tienda
+   */
+  async updateStoreExchangeRatePreference(storeId: string, preferredExchangeRate: 'USD' | 'EUR'): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/monetization/store/${storeId}/exchange-rate/preference`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ preferredExchangeRate }),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error updating store exchange rate preference:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener tasa de cambio actual según preferencia de la tienda
+   */
+  async getStoreExchangeRate(storeId: string): Promise<ApiResponse<any>> {
+    try {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/api/monetization/store/${storeId}/exchange-rate/current`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting store exchange rate:', error);
+      throw error;
+    }
+  }
 }
 
 export const apiService = new ApiService();

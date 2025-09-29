@@ -693,33 +693,49 @@ class StoreController {
     try {
       const { id } = req.params;
       const store = await Store.findById(id);
+      
       if (!store) {
         res.status(404).json({
           success: false,
           message: 'Tienda no encontrada'
         });
+        return;
       }
+
       const userId = (req as any).user._id;
-      // Solo el owner puede cambiar el status de la tienda
-      if (!store) {
-        res.status(404).json({
-          success: false,
-          message: 'Tienda no encontrada'
-        });
-      }
-      if (store?.owner.toString() !== userId.toString()) {
+      const userRole = (req as any).user.role;
+      
+      // Verificar permisos: admin, owner o store_manager de esta tienda
+      const isAdmin = userRole === 'admin';
+      const isOwner = store.owner.toString() === userId.toString();
+      const isStoreManager = userRole === 'store_manager' && 
+        store.managers.some(managerId => managerId.toString() === userId.toString());
+      
+      if (!isAdmin && !isOwner && !isStoreManager) {
         res.status(403).json({
           success: false,
-          message: 'Solo el propietario puede cambiar el estado de la tienda'
+          message: 'No tienes permisos para cambiar el estado de esta tienda'
         });
+        return;
       }
-      store!.isActive = !store!.isActive;
-      await store?.save();
-      const action = store!.isActive ? 'activada' : 'desactivada';
+
+      // Cambiar estado
+      store.isActive = !store.isActive;
+      await store.save();
+      
+      const action = store.isActive ? 'activada' : 'desactivada';
+      const actorType = isAdmin ? 'administrador' : isOwner ? 'propietario' : 'gestor';
+      
       res.json({
         success: true,
-        message: `Tienda ${action} exitosamente`,
-        data: { isActive: store!.isActive }
+        message: `Tienda ${action} exitosamente por ${actorType}`,
+        data: { 
+          isActive: store.isActive,
+          changedBy: {
+            role: userRole,
+            type: actorType
+          }
+        }
       });
     } catch (error) {
       console.error('Error cambiando estado de la tienda:', error);

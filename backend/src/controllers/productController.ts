@@ -71,6 +71,11 @@ class ProductController {
         search
       } = req.query;
       const filter: any = { isActive: true, deleted: { $ne: true } };
+      
+      // Filtrar por tiendas activas
+      const activeStores = await Store.find({ isActive: true }).select('_id');
+      const activeStoreIds = activeStores.map(store => store._id);
+      filter.store = { $in: activeStoreIds };
       // Filtros
       if (category) filter.category = category;
       if (brand) filter.brand = brand;

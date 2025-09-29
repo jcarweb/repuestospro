@@ -53,9 +53,14 @@ import StorePhotosListScreen from '../screens/admin/StorePhotosListScreen';
 import StoreManagerDashboardScreen from '../screens/store-manager/StoreManagerDashboardScreen';
 import StoreManagerProfileScreen from '../screens/store-manager/StoreManagerProfileScreen';
 import StoreManagerEditProfileScreen from '../screens/store-manager/StoreManagerEditProfileScreen';
+import StoreConfigurationScreen from '../screens/store-manager/StoreConfigurationScreen';
 
 // Seller Screens
 import SellerDashboardScreen from '../screens/seller/SellerDashboardScreen';
+import QuotationsScreen from '../screens/QuotationsScreen';
+import CreateQuotationScreen from '../screens/CreateQuotationScreen';
+import QuotationDetailsScreen from '../screens/QuotationDetailsScreen';
+import QuotationConfigScreen from '../screens/QuotationConfigScreen';
 
 // Delivery Screens
 import DeliveryDashboardScreen from '../screens/delivery/DeliveryDashboardScreen';
@@ -554,6 +559,26 @@ const AppNavigator = () => {
                   options={{ headerShown: false }} 
                 />
                 <Stack.Screen 
+                  name="Quotations" 
+                  component={QuotationsScreen} 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="CreateQuotation" 
+                  component={CreateQuotationScreen} 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="QuotationDetails" 
+                  component={QuotationDetailsScreen} 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="QuotationConfig" 
+                  component={QuotationConfigScreen} 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
                   name="StoreManagerProfile" 
                   component={StoreManagerProfileScreen} 
                   options={{ 
@@ -571,6 +596,13 @@ const AppNavigator = () => {
                     headerBackTitle: 'Perfil'
                   }} 
                 />
+                <Stack.Screen 
+                  name="StoreConfiguration" 
+                  component={StoreConfigurationScreen} 
+                  options={{ 
+                    headerShown: false
+                  }} 
+                />
               </>
             )}
             
@@ -581,6 +613,26 @@ const AppNavigator = () => {
                 <Stack.Screen 
                   name="SellerDashboard" 
                   component={SellerDashboardScreen} 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="Quotations" 
+                  component={QuotationsScreen} 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="CreateQuotation" 
+                  component={CreateQuotationScreen} 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="QuotationDetails" 
+                  component={QuotationDetailsScreen} 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="QuotationConfig" 
+                  component={QuotationConfigScreen} 
                   options={{ headerShown: false }} 
                 />
               </>
