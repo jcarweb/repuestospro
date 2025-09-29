@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import WhatsAppTestModal from '../components/WhatsAppTestModal';
+// import WhatsAppTestModal from '../components/WhatsAppTestModal';
 import { 
   PlusIcon, 
   MagnifyingGlassIcon, 
@@ -218,13 +218,13 @@ const Quotations: React.FC = () => {
           <PlusIcon className="h-5 w-5" />
           Nueva Cotización
         </button>
-        <button
+        {/* <button
           onClick={() => setShowWhatsAppTest(true)}
           className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
         >
           <ChatBubbleLeftRightIcon className="h-5 w-5" />
           Probar WhatsApp
-        </button>
+        </button> */}
       </div>
 
       {/* Stats Cards */}
@@ -460,12 +460,12 @@ const Quotations: React.FC = () => {
         />
       )}
 
-      {showWhatsAppTest && (
+      {/* {showWhatsAppTest && (
         <WhatsAppTestModal
           isOpen={showWhatsAppTest}
           onClose={() => setShowWhatsAppTest(false)}
         />
-      )}
+      )} */}
     </div>
   );
 };

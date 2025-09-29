@@ -51,9 +51,9 @@ import masterRoutes from './routes/masterRoutes';
 import quotationRoutes from './routes/quotationRoutes';
 import quotationConfigRoutes from './routes/quotationConfigRoutes';
 import advancedSearchRoutes from './routes/advancedSearchRoutes';
-import whatsappTestRoutes from './routes/whatsappTestRoutes';
+// import whatsappTestRoutes from './routes/whatsappTestRoutes';
 import { enrichmentWorker } from './services/enrichmentWorker';
-import { initializeWhatsAppForVenezuela } from './scripts/initWhatsApp';
+// import { initializeWhatsAppForVenezuela } from './scripts/initWhatsApp';
 const app = express();
 // Configurar rate limiting
 const limiter = rateLimit({
@@ -379,7 +379,7 @@ app.use('/api/masters', masterRoutes);
 app.use('/api/quotations', quotationRoutes);
 app.use('/api/quotation-config', quotationConfigRoutes);
 app.use('/api/advanced-search', advancedSearchRoutes);
-app.use('/api/whatsapp', whatsappTestRoutes);
+// app.use('/api/whatsapp', whatsappTestRoutes);
 // Variables globales para chat
 let chatService: ChatService;
 let chatController: ChatController;
@@ -466,14 +466,15 @@ const initializeApp = async () => {
     // Iniciar worker de enriquecimiento
     await enrichmentWorker.startWorker();
     
-    // Inicializar WhatsApp para Venezuela
-    console.log('🇻🇪 Inicializando WhatsApp para Venezuela...');
-    try {
-      await initializeWhatsAppForVenezuela();
-    } catch (error) {
-      console.log('⚠️ WhatsApp no se pudo inicializar, pero el sistema funcionará con email');
-      console.log('💡 Para configurar WhatsApp, revisa la documentación en WHATSAPP_SETUP.md');
-    }
+    // Inicializar WhatsApp para Venezuela (COMENTADO TEMPORALMENTE)
+    // console.log('🇻🇪 Inicializando WhatsApp para Venezuela...');
+    // try {
+    //   await initializeWhatsAppForVenezuela();
+    // } catch (error) {
+    //   console.log('⚠️ WhatsApp no se pudo inicializar, pero el sistema funcionará con email');
+    //   console.log('💡 Para configurar WhatsApp, revisa la documentación en WHATSAPP_SETUP.md');
+    // }
+    console.log('📧 WhatsApp deshabilitado temporalmente - Solo email disponible');
     // Manejo de señales de terminación
     const gracefulShutdown = async (signal: string) => {
       console.log(`\n🛑 Recibida señal ${signal}. Cerrando aplicación...`);
