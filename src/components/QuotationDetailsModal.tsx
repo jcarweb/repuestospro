@@ -1,5 +1,5 @@
 import React from 'react';
-import { XMarkIcon, DocumentArrowDownIcon, EnvelopeIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/outline';
+import { XMarkIcon, DocumentArrowDownIcon, EnvelopeIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
 interface Quotation {
   _id: string;

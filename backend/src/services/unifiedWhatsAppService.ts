@@ -145,11 +145,11 @@ export class UnifiedWhatsAppService {
         available = true;
         break;
       case 'twilio':
-        connected = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
+        connected = !!(process.env['TWILIO_ACCOUNT_SID'] && process.env['TWILIO_AUTH_TOKEN']);
         available = connected;
         break;
       case 'web':
-        connected = this.webService.isReady;
+        connected = (this.webService as any).isReady;
         available = true;
         break;
       default:

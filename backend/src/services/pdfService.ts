@@ -67,7 +67,7 @@ export class PDFService {
     });
   }
 
-  private static addHeader(doc: PDFDocument, config: IQuotationConfig, quotation: IQuotation): void {
+  private static addHeader(doc: InstanceType<typeof PDFDocument>, config: IQuotationConfig, quotation: IQuotation): void {
     // Logo (si existe)
     if (config.pdfTemplate.logo) {
       // Aquí se podría agregar el logo si está disponible
@@ -88,7 +88,7 @@ export class PDFService {
     doc.moveDown(1);
   }
 
-  private static addCompanyInfo(doc: PDFDocument, config: IQuotationConfig): void {
+  private static addCompanyInfo(doc: InstanceType<typeof PDFDocument>, config: IQuotationConfig): void {
     const companyInfo = config.pdfTemplate.companyInfo;
     
     doc.fontSize(12)
@@ -115,7 +115,7 @@ export class PDFService {
     doc.moveDown(1);
   }
 
-  private static addCustomerInfo(doc: PDFDocument, quotation: IQuotation): void {
+  private static addCustomerInfo(doc: InstanceType<typeof PDFDocument>, quotation: IQuotation): void {
     doc.fontSize(14)
        .font('Helvetica-Bold')
        .text('Información del Cliente');
@@ -143,7 +143,7 @@ export class PDFService {
     doc.moveDown(1);
   }
 
-  private static addQuotationInfo(doc: PDFDocument, quotation: IQuotation): void {
+  private static addQuotationInfo(doc: InstanceType<typeof PDFDocument>, quotation: IQuotation): void {
     doc.fontSize(14)
        .font('Helvetica-Bold')
        .text('Detalles de la Cotización');
@@ -164,7 +164,7 @@ export class PDFService {
     doc.moveDown(1);
   }
 
-  private static addProductsTable(doc: PDFDocument, quotation: IQuotation): void {
+  private static addProductsTable(doc: InstanceType<typeof PDFDocument>, quotation: IQuotation): void {
     doc.fontSize(14)
        .font('Helvetica-Bold')
        .text('Productos');
@@ -231,7 +231,7 @@ export class PDFService {
     doc.y = currentY + 10;
   }
 
-  private static addTotals(doc: PDFDocument, quotation: IQuotation): void {
+  private static addTotals(doc: InstanceType<typeof PDFDocument>, quotation: IQuotation): void {
     const rightMargin = doc.page.width - 50;
     const currentY = doc.y;
 
@@ -264,7 +264,7 @@ export class PDFService {
     doc.y = currentY + 100;
   }
 
-  private static addTermsAndConditions(doc: PDFDocument, quotation: IQuotation, config: IQuotationConfig): void {
+  private static addTermsAndConditions(doc: InstanceType<typeof PDFDocument>, quotation: IQuotation, config: IQuotationConfig): void {
     if (quotation.terms || quotation.conditions) {
       doc.fontSize(12)
          .font('Helvetica-Bold')
@@ -301,7 +301,7 @@ export class PDFService {
     }
   }
 
-  private static addFooter(doc: PDFDocument, config: IQuotationConfig): void {
+  private static addFooter(doc: InstanceType<typeof PDFDocument>, config: IQuotationConfig): void {
     const pageHeight = doc.page.height;
     const footerY = pageHeight - 50;
 
@@ -310,7 +310,7 @@ export class PDFService {
        .text(config.pdfTemplate.footer, { align: 'center' });
 
     // Número de página
-    doc.text(`Página ${doc.page.number}`, { align: 'right' });
+    doc.text(`Página ${(doc as any).page.number}`, { align: 'right' });
   }
 
   private static getStatusText(status: string): string {

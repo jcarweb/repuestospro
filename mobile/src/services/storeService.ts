@@ -1,6 +1,7 @@
 import { getBaseURL } from '../config/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { userService, User } from './userService';
+import { fetchUsers, createUser, updateUser, deleteUser } from './userService';
+import type { User } from './userService';
 import { makeRequestWithRetry, requestSemaphore, randomDelay, makeCachedRequest, circuitBreaker } from '../utils/requestUtils';
 import { mockStores, mockStoreStats } from '../utils/mockData';
 

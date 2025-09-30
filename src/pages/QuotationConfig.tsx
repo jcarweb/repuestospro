@@ -9,7 +9,7 @@ import {
   DocumentArrowDownIcon,
   BellIcon,
   CheckCircleIcon
-} from '@heroicons/react/outline';
+} from '@heroicons/react/24/outline';
 
 interface QuotationConfig {
   _id: string;

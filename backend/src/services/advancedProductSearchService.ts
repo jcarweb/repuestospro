@@ -1,5 +1,5 @@
-import { Product } from '../models/Product';
-import { Store } from '../models/Store';
+import Product from '../models/Product';
+import Store from '../models/Store';
 
 export interface AdvancedSearchFilters {
   searchTerm?: string;
@@ -7,9 +7,9 @@ export interface AdvancedSearchFilters {
   brand?: string;
   subcategory?: string;
   vehicleType?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  inStock?: boolean;
+  minPrice?: number | undefined;
+  maxPrice?: number | undefined;
+  inStock?: boolean | undefined;
   store?: string;
   sortBy?: 'name' | 'price' | 'popularity' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
@@ -123,7 +123,7 @@ export class AdvancedProductSearchService {
       const total = await Product.countDocuments(mongoFilters);
 
       // Calcular relevancia para cada producto
-      const searchResults: SearchResult[] = products.map(product => {
+      const searchResults: SearchResult[] = products.map((product: any) => {
         const relevanceScore = searchTerm ? 
           this.calculateRelevanceScore(product, searchTerm) : 0;
         
@@ -143,7 +143,7 @@ export class AdvancedProductSearchService {
       }
 
       // Generar sugerencias
-      const suggestions = await this.generateSuggestions(searchTerm, mongoFilters);
+      const suggestions = await this.generateSuggestions(searchTerm || '', mongoFilters);
 
       return {
         products: searchResults,
@@ -300,7 +300,7 @@ export class AdvancedProductSearchService {
     const termWords = term.split(' ');
     
     termWords.forEach(termWord => {
-      nameWords.forEach(nameWord => {
+      nameWords.forEach((nameWord: any) => {
         if (nameWord.includes(termWord)) score += 2;
       });
     });
@@ -342,7 +342,7 @@ export class AdvancedProductSearchService {
       .select('name')
       .limit(5);
 
-      const suggestions = products.map(product => product.name);
+      const suggestions = products.map((product: any) => product.name);
       return [...new Set(suggestions)]; // Eliminar duplicados
     } catch (error) {
       console.error('Error generando sugerencias:', error);

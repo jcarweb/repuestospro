@@ -13,7 +13,7 @@ import {
   TrashIcon,
   CalendarIcon,
   CurrencyDollarIcon
-} from '@heroicons/react/outline';
+} from '@heroicons/react/24/outline';
 
 interface Quotation {
   _id: string;
@@ -57,7 +57,7 @@ const Quotations: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showWhatsAppTest, setShowWhatsAppTest] = useState(false);
+  // const [showWhatsAppTest, setShowWhatsAppTest] = useState(false);
 
   useEffect(() => {
     fetchQuotations();

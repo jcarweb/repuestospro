@@ -49,7 +49,7 @@ router.post('/test-message', async (req, res) => {
     const unifiedService = UnifiedWhatsAppService.getInstance();
     const result = await unifiedService.sendTextMessage(phone, message);
     
-    res.json({
+    return res.json({
       success: result,
       message: result ? 'Mensaje enviado exitosamente' : 'Error enviando mensaje',
       data: {
@@ -59,7 +59,7 @@ router.post('/test-message', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Error enviando mensaje de prueba',
       details: error instanceof Error ? error.message : 'Error desconocido'
@@ -93,7 +93,7 @@ router.post('/test-document', async (req, res) => {
       caption || 'Documento de prueba'
     );
     
-    res.json({
+    return res.json({
       success: result,
       message: result ? 'Documento enviado exitosamente' : 'Error enviando documento',
       data: {
@@ -104,7 +104,7 @@ router.post('/test-document', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Error enviando documento de prueba',
       details: error instanceof Error ? error.message : 'Error desconocido'

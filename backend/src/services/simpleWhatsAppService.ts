@@ -17,8 +17,8 @@ export class SimpleWhatsAppService {
   private apiKey: string;
 
   constructor() {
-    this.apiUrl = process.env.WHATSAPP_API_URL || 'https://api.whatsapp.com';
-    this.apiKey = process.env.WHATSAPP_API_KEY || '';
+    this.apiUrl = process.env['WHATSAPP_API_URL'] || 'https://api.whatsapp.com';
+    this.apiKey = process.env['WHATSAPP_API_KEY'] || '';
   }
 
   static getInstance(): SimpleWhatsAppService {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { XMarkIcon, PlusIcon, MagnifyingGlassIcon, TrashIcon } from '@heroicons/react/outline';
+import { XMarkIcon, PlusIcon, MagnifyingGlassIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface Product {
   _id: string;

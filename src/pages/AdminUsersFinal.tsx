@@ -54,15 +54,10 @@ const AdminUsersFinal: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('🔍 Fetching users with params:', { currentPage, usersPerPage, searchTerm, roleFilter, statusFilter });
       const data = await fetchUsers(currentPage, usersPerPage, searchTerm, roleFilter, statusFilter);
-      console.log('📊 Data received:', data);
-      console.log('👥 Users array:', data.users);
-      console.log('📄 Users length:', data.users?.length);
       setUsers(data.users || []);
       setTotalUsers(data.pagination?.totalUsers || data.users?.length || 0);
       setTotalPages(data.pagination?.totalPages || 1);
-      console.log('✅ State updated - users:', data.users?.length, 'total:', data.pagination?.totalUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       setError('Error al cargar usuarios');
@@ -300,38 +295,37 @@ const AdminUsersFinal: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {console.log('🎯 Rendering users:', users, 'Length:', users.length)}
                   {users.map((user) => (
                     <tr key={user._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                             <span className="text-sm font-medium text-gray-700">
-                              {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                              {user.name.charAt(0).toUpperCase()}
                             </span>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{user.name || 'Sin nombre'}</div>
+                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {user.email || 'Sin email'}
+                        {user.email}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {getRoleLabel(user.role || 'seller')}
+                          {getRoleLabel(user.role)}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          (user.status || 'inactive') === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
-                          {getStatusLabel(user.status || 'inactive')}
+                          {getStatusLabel(user.status)}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                        {new Date(user.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">

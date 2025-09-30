@@ -1,4 +1,5 @@
 import { UnifiedWhatsAppService } from './unifiedWhatsAppService';
+import axios from 'axios';
 
 interface WhatsAppMessage {
   to: string;
@@ -14,9 +15,13 @@ interface WhatsAppMessage {
 export class WhatsAppService {
   private static instance: WhatsAppService;
   private unifiedService: UnifiedWhatsAppService;
+  private apiUrl: string;
+  private apiKey: string;
 
   constructor() {
     this.unifiedService = UnifiedWhatsAppService.getInstance();
+    this.apiUrl = process.env['WHATSAPP_API_URL'] || 'https://api.whatsapp.com';
+    this.apiKey = process.env['WHATSAPP_API_KEY'] || '';
   }
 
   static getInstance(): WhatsAppService {
@@ -39,6 +44,12 @@ export class WhatsAppService {
   // Enviar cotización por WhatsApp
   async sendQuotationMessage(to: string, message: string, pdfBuffer: Buffer, quotationNumber: string): Promise<boolean> {
     return await this.unifiedService.sendQuotationMessage(to, message, pdfBuffer, quotationNumber);
+  }
+
+  // Método estático para enviar cotización (compatibilidad)
+  static async sendQuotationMessage(to: string, message: string, pdfBuffer: Buffer, quotationNumber: string): Promise<boolean> {
+    const instance = WhatsAppService.getInstance();
+    return await instance.sendQuotationMessage(to, message, pdfBuffer, quotationNumber);
   }
 
   // Verificar si un número de teléfono es válido para WhatsApp

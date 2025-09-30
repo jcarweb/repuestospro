@@ -239,7 +239,7 @@ QuotationSchema.index({ createdAt: -1 });
 // Middleware para generar número de cotización
 QuotationSchema.pre('save', async function(next) {
   if (this.isNew && !this.quotationNumber) {
-    const count = await this.constructor.countDocuments();
+    const count = await (this.constructor as any).countDocuments();
     const year = new Date().getFullYear();
     this.quotationNumber = `COT-${year}-${String(count + 1).padStart(6, '0')}`;
   }

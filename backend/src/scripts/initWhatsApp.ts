@@ -30,7 +30,7 @@ export class WhatsAppInitializer {
     
     try {
       // Configurar método preferido
-      process.env.WHATSAPP_METHOD = 'baileys';
+      process.env['WHATSAPP_METHOD'] = 'baileys';
       
       console.log('📱 Configurando Baileys WhatsApp...');
       
@@ -130,8 +130,8 @@ export class WhatsAppInitializer {
     console.log('🏭 Configurando WhatsApp para producción...');
     
     // Configuraciones específicas para producción
-    process.env.NODE_ENV = 'production';
-    process.env.WHATSAPP_METHOD = 'baileys';
+    process.env['NODE_ENV'] = 'production';
+    process.env['WHATSAPP_METHOD'] = 'baileys';
     
     console.log('✅ Configuración de producción aplicada');
     console.log('📋 Configuraciones:');

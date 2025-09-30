@@ -16,8 +16,8 @@ export class TwilioWhatsAppService {
   private client: any;
 
   constructor() {
-    const accountSid = process.env.TWILIO_ACCOUNT_SID;
-    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    const accountSid = process.env['TWILIO_ACCOUNT_SID'];
+    const authToken = process.env['TWILIO_AUTH_TOKEN'];
     
     if (accountSid && authToken) {
       this.client = twilio(accountSid, authToken);
@@ -41,7 +41,7 @@ export class TwilioWhatsAppService {
       const formattedPhone = this.formatPhoneNumber(to);
       
       await this.client.messages.create({
-        from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
+        from: `whatsapp:${process.env['TWILIO_WHATSAPP_NUMBER']}`,
         to: `whatsapp:+${formattedPhone}`,
         body: message
       });
@@ -67,7 +67,7 @@ export class TwilioWhatsAppService {
       const mediaUrl = `data:application/pdf;base64,${base64Document}`;
       
       await this.client.messages.create({
-        from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
+        from: `whatsapp:${process.env['TWILIO_WHATSAPP_NUMBER']}`,
         to: `whatsapp:+${formattedPhone}`,
         body: caption || `Documento: ${filename}`,
         mediaUrl: [mediaUrl]

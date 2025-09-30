@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { QuotationConfig, IQuotationConfig } from '../models/QuotationConfig';
-import { User } from '../models/User';
+import User from '../models/User';
 
 interface AuthenticatedRequest extends Request {
   user?: any;
@@ -20,12 +20,12 @@ export class QuotationConfigController {
         return;
       }
 
-      let config = await QuotationConfig.findOne({ store: user.store });
+      let config = await QuotationConfig.findOne({ store: user.stores?.[0] });
       
       // Si no existe configuración, crear una por defecto
       if (!config) {
         config = new QuotationConfig({
-          store: user.store,
+          store: user.stores?.[0],
           createdBy: userId,
           updatedBy: userId
         });
@@ -62,7 +62,7 @@ export class QuotationConfigController {
       updateData.updatedBy = userId;
 
       const config = await QuotationConfig.findOneAndUpdate(
-        { store: user.store },
+        { store: user.stores?.[0] },
         updateData,
         { new: true, upsert: true, runValidators: true }
       );
@@ -95,7 +95,7 @@ export class QuotationConfigController {
       }
 
       const defaultConfig = {
-        store: user.store,
+        store: user.stores?.[0],
         defaultValidityDays: 30,
         defaultTaxRate: 0,
         defaultDiscountRate: 0,
@@ -138,7 +138,7 @@ export class QuotationConfigController {
       };
 
       const config = await QuotationConfig.findOneAndUpdate(
-        { store: user.store },
+        { store: user.stores?.[0] },
         defaultConfig,
         { new: true, upsert: true, runValidators: true }
       );

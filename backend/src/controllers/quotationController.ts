@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { Quotation, IQuotation } from '../models/Quotation';
 import { QuotationConfig } from '../models/QuotationConfig';
-import { Product } from '../models/Product';
-import { User } from '../models/User';
-import { Store } from '../models/Store';
-import { EmailService } from '../services/emailService';
+import Product from '../models/Product';
+import User from '../models/User';
+import Store from '../models/Store';
+import EmailService from '../services/emailService';
 import { WhatsAppService } from '../services/whatsappService';
 import { PDFService } from '../services/pdfService';
 
@@ -38,7 +38,7 @@ export class QuotationController {
       }
 
       // Obtener configuración de la tienda
-      const config = await QuotationConfig.findOne({ store: user.store });
+      const config = await QuotationConfig.findOne({ store: user.stores?.[0] });
       if (!config) {
         res.status(404).json({
           success: false,
@@ -61,7 +61,7 @@ export class QuotationController {
 
       // Crear items de cotización
       const quotationItems = items.map((item: any) => {
-        const product = products.find(p => p._id.toString() === item.product);
+        const product = products.find((p: any) => p._id.toString() === item.product);
         if (!product) throw new Error('Producto no encontrado');
         
         return {
@@ -88,7 +88,7 @@ export class QuotationController {
         terms: terms || config.defaultTerms,
         conditions: conditions || config.defaultConditions,
         createdBy: userId,
-        store: user.store
+        store: user.stores?.[0]
       });
 
       await quotation.save();
@@ -237,7 +237,7 @@ export class QuotationController {
         const products = await Product.find({ _id: { $in: productIds } });
         
         updateData.items = updateData.items.map((item: any) => {
-          const product = products.find(p => p._id.toString() === item.product);
+          const product = products.find((p: any) => p._id.toString() === item.product);
           if (!product) throw new Error('Producto no encontrado');
           
           return {
@@ -329,10 +329,12 @@ export class QuotationController {
 
         await EmailService.sendQuotationEmail(
           quotation.customer.email,
-          emailSubject,
-          emailBody,
-          pdfBuffer,
-          quotation.quotationNumber
+          quotation.quotationNumber,
+          quotation.customer.name,
+          quotation.total,
+          quotation.currency,
+          quotation.validUntil,
+          pdfBuffer
         );
       }
 
@@ -345,9 +347,10 @@ export class QuotationController {
           .replace('{validUntil}', quotation.validUntil.toLocaleDateString());
 
         await WhatsAppService.sendQuotationMessage(
-          quotation.customer.phone,
+          quotation.customer.phone || '',
           whatsappMessage,
-          pdfBuffer
+          pdfBuffer,
+          quotation.quotationNumber
         );
       }
 

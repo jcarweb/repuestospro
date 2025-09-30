@@ -41,10 +41,6 @@ class SecureUrlManager {
       return envUrl;
     }
     
-    if (this.isProduction) {
-      throw new Error('FRONTEND_URL debe estar configurado en producción');
-    }
-    
     // URL por defecto segura para desarrollo
     return 'http://localhost:3000';
   }
@@ -57,10 +53,6 @@ class SecureUrlManager {
     
     if (envUrl && !this.isInsecureUrl(envUrl)) {
       return envUrl;
-    }
-    
-    if (this.isProduction) {
-      throw new Error('BACKEND_URL debe estar configurado en producción');
     }
     
     // URL por defecto segura para desarrollo

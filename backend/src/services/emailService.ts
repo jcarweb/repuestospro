@@ -728,5 +728,73 @@ class EmailService {
       html
     });
   }
+
+  // Enviar email de cotización
+  async sendQuotationEmail(
+    email: string,
+    quotationNumber: string,
+    customerName: string,
+    total: number,
+    currency: string,
+    validUntil: Date,
+    pdfBuffer?: Buffer
+  ): Promise<void> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Cotización - PiezasYA</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #FFC300 0%, #E6B800 100%); color: #333; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .quotation-info { background: white; margin: 20px 0; padding: 20px; border-radius: 5px; border: 2px solid #FFC300; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>📋 Nueva Cotización</h1>
+            <p>PiezasYA - Repuestos Automotrices</p>
+          </div>
+          <div class="content">
+            <h2>Hola ${customerName},</h2>
+            <p>Hemos preparado una cotización personalizada para ti.</p>
+            <div class="quotation-info">
+              <h3>📊 Detalles de la Cotización</h3>
+              <p><strong>Número:</strong> ${quotationNumber}</p>
+              <p><strong>Total:</strong> ${currency} ${total.toFixed(2)}</p>
+              <p><strong>Válida hasta:</strong> ${validUntil.toLocaleDateString()}</p>
+            </div>
+            <p>Adjunto encontrarás el PDF con todos los detalles de tu cotización.</p>
+            <p>Si tienes alguna pregunta o deseas proceder con la compra, no dudes en contactarnos.</p>
+            <p>Saludos,<br>El equipo de PiezasYA</p>
+          </div>
+          <div class="footer">
+            <p>Este es un email automático, por favor no respondas a este mensaje.</p>
+            <p>© 2025 PiezasYA. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const attachments = pdfBuffer ? [{
+      filename: `cotizacion-${quotationNumber}.pdf`,
+      content: pdfBuffer,
+      contentType: 'application/pdf'
+    }] : [];
+
+    await this.transporter.sendMail({
+      from: `"PiezasYA" <${process.env['EMAIL_USER']}>`,
+      to: email,
+      subject: `Cotización ${quotationNumber} - PiezasYA`,
+      html,
+      attachments
+    });
+  }
 }
 export default new EmailService();

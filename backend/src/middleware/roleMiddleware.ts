@@ -4,7 +4,7 @@ export interface AuthRequest extends Request {
   user?: any;
 }
 
-type UserRole = 'admin' | 'client' | 'delivery' | 'store_manager';
+type UserRole = 'admin' | 'client' | 'delivery' | 'store_manager' | 'seller';
 
 // Middleware para verificar si el usuario es cliente
 export const clientMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {

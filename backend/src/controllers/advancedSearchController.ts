@@ -99,9 +99,17 @@ export class AdvancedSearchController {
   async getSimilarProducts(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { productId } = req.params;
-      const { limit = 5 } = req.query;
+      if (!productId) {
+        res.status(400).json({
+          success: false,
+          message: 'ID de producto requerido'
+        });
+        return;
+      }
+      const { limit } = req.query;
+      const limitNumber = limit ? Number(limit) : 5;
 
-      const products = await this.searchService.getSimilarProducts(productId, Number(limit));
+      const products = await this.searchService.getSimilarProducts(productId, limitNumber);
 
       res.json({
         success: true,
