@@ -5,6 +5,7 @@ import Subscription from '../models/Subscription';
 import Tax from '../models/Tax';
 import Store from '../models/Store';
 import exchangeRateService from '../services/exchangeRateService';
+import autoUpdateService from '../services/autoUpdateService';
 import { sendNotificationToAdmin } from '../services/notificationService';
 
 interface AuthenticatedRequest extends Request {
@@ -15,31 +16,35 @@ export class MonetizationController {
   // ===== TASAS DE CAMBIO =====
   
   /**
-   * Obtiene la tasa de cambio actual
+   * Obtiene las tasas de cambio actuales (USD y EUR)
    */
   async getCurrentExchangeRate(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const result = await exchangeRateService.getCurrentRate();
-      
-      if (!result.success) {
-        res.status(404).json({
-          success: false,
-          message: result.message
-        });
-      }
+      // Obtener tasas activas para USD y EUR
+      const usdRate = await ExchangeRate.findOne({ currency: 'USD', isActive: true }).sort({ lastUpdated: -1 });
+      const eurRate = await ExchangeRate.findOne({ currency: 'EUR', isActive: true }).sort({ lastUpdated: -1 });
 
       res.json({
         success: true,
-        exchangeRate: {
-          rate: result.rate,
-          source: result.source,
-          sourceUrl: result.source,
-          lastUpdated: result.lastUpdated,
-          isActive: true
+        exchangeRates: {
+          USD: usdRate ? {
+            rate: usdRate.rate,
+            source: usdRate.source,
+            sourceUrl: usdRate.sourceUrl,
+            lastUpdated: usdRate.lastUpdated,
+            isActive: usdRate.isActive
+          } : null,
+          EUR: eurRate ? {
+            rate: eurRate.rate,
+            source: eurRate.source,
+            sourceUrl: eurRate.sourceUrl,
+            lastUpdated: eurRate.lastUpdated,
+            isActive: eurRate.isActive
+          } : null
         }
       });
     } catch (error) {
-      console.error('Error al obtener tasa de cambio:', error);
+      console.error('Error al obtener tasas de cambio:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
@@ -82,35 +87,60 @@ export class MonetizationController {
   }
 
   /**
-   * Actualiza la tasa de cambio automáticamente desde BCV
+   * Actualiza las tasas de cambio automáticamente desde BCV (USD y EUR)
    */
   async updateExchangeRateFromBcv(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const { sourceUrl, currency = 'USD' } = req.body;
-      const result = await exchangeRateService.getBcvRate(sourceUrl, currency);
-      
-      if (!result.success) {
-        res.status(400).json({
-          success: false,
-          message: result.message
-        });
-        return;
+      const { sourceUrl } = req.body;
+      const results: {
+        USD: any;
+        EUR: any;
+      } = {
+        USD: null,
+        EUR: null
+      };
+
+      // Actualizar USD
+      try {
+        const usdResult = await exchangeRateService.getBcvRate(sourceUrl, 'USD');
+        if (usdResult.success) {
+          results.USD = {
+            rate: usdResult.rate,
+            currency: 'USD',
+            source: usdResult.source,
+            sourceUrl: usdResult.source,
+            lastUpdated: usdResult.lastUpdated,
+            isActive: true
+          };
+        }
+      } catch (error) {
+        console.error('Error actualizando USD:', error);
+      }
+
+      // Actualizar EUR
+      try {
+        const eurResult = await exchangeRateService.getBcvRate(sourceUrl, 'EUR');
+        if (eurResult.success) {
+          results.EUR = {
+            rate: eurResult.rate,
+            currency: 'EUR',
+            source: eurResult.source,
+            sourceUrl: eurResult.source,
+            lastUpdated: eurResult.lastUpdated,
+            isActive: true
+          };
+        }
+      } catch (error) {
+        console.error('Error actualizando EUR:', error);
       }
 
       res.json({
         success: true,
-        message: `Tasa de cambio ${currency} actualizada exitosamente`,
-        exchangeRate: {
-          rate: result.rate,
-          currency,
-          source: result.source,
-          sourceUrl: result.source,
-          lastUpdated: result.lastUpdated,
-          isActive: true
-        }
+        message: 'Tasas de cambio actualizadas',
+        exchangeRates: results
       });
     } catch (error) {
-      console.error('Error al actualizar tasa de cambio:', error);
+      console.error('Error al actualizar tasas de cambio:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
@@ -119,32 +149,137 @@ export class MonetizationController {
   }
 
   /**
-   * Obtiene el historial de tasas de cambio
+   * Obtiene el historial de tasas de cambio para ambas monedas
    */
   async getExchangeRateHistory(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const { page = 1, limit = 20, currency = 'USD' } = req.query;
+      const { page = 1, limit = 20 } = req.query;
       const skip = (Number(page) - 1) * Number(limit);
 
-      const rates = await ExchangeRate.find({ currency })
-        .sort({ lastUpdated: -1 })
-        .skip(skip)
-        .limit(Number(limit));
+      // Obtener historial para USD y EUR
+      const [usdRates, eurRates] = await Promise.all([
+        ExchangeRate.find({ currency: 'USD' })
+          .sort({ lastUpdated: -1 })
+          .skip(skip)
+          .limit(Number(limit)),
+        ExchangeRate.find({ currency: 'EUR' })
+          .sort({ lastUpdated: -1 })
+          .skip(skip)
+          .limit(Number(limit))
+      ]);
 
-      const total = await ExchangeRate.countDocuments({ currency });
+      const [usdTotal, eurTotal] = await Promise.all([
+        ExchangeRate.countDocuments({ currency: 'USD' }),
+        ExchangeRate.countDocuments({ currency: 'EUR' })
+      ]);
 
       res.json({
         success: true,
-        rates,
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total,
-          pages: Math.ceil(total / Number(limit))
+        history: {
+          USD: {
+            rates: usdRates,
+            pagination: {
+              page: Number(page),
+              limit: Number(limit),
+              total: usdTotal,
+              pages: Math.ceil(usdTotal / Number(limit))
+            }
+          },
+          EUR: {
+            rates: eurRates,
+            pagination: {
+              page: Number(page),
+              limit: Number(limit),
+              total: eurTotal,
+              pages: Math.ceil(eurTotal / Number(limit))
+            }
+          }
         }
       });
     } catch (error) {
       console.error('Error al obtener historial de tasas:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Inicia la actualización automática
+   */
+  async startAutoUpdate(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      autoUpdateService.startAutoUpdate();
+      const status = autoUpdateService.getStatus();
+      
+      res.json({
+        success: true,
+        message: 'Actualización automática iniciada',
+        status
+      });
+    } catch (error) {
+      console.error('Error al iniciar actualización automática:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Detiene la actualización automática
+   */
+  async stopAutoUpdate(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      autoUpdateService.stopAutoUpdate();
+      
+      res.json({
+        success: true,
+        message: 'Actualización automática detenida'
+      });
+    } catch (error) {
+      console.error('Error al detener actualización automática:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Obtiene el estado de la actualización automática
+   */
+  async getAutoUpdateStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const status = autoUpdateService.getStatus();
+      
+      res.json({
+        success: true,
+        status
+      });
+    } catch (error) {
+      console.error('Error al obtener estado de actualización automática:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Fuerza una actualización manual
+   */
+  async forceUpdate(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      await autoUpdateService.forceUpdate();
+      
+      res.json({
+        success: true,
+        message: 'Actualización forzada completada'
+      });
+    } catch (error) {
+      console.error('Error al forzar actualización:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
