@@ -18,6 +18,12 @@ router.post('/exchange-rate/update', monetizationController.updateExchangeRateFr
 // Obtener historial de tasas (público)
 router.get('/exchange-rate/history', monetizationController.getExchangeRateHistory);
 
+// Rutas para actualización automática (público)
+router.post('/exchange-rate/auto-update/start', monetizationController.startAutoUpdate);
+router.post('/exchange-rate/auto-update/stop', monetizationController.stopAutoUpdate);
+router.get('/exchange-rate/auto-update/status', monetizationController.getAutoUpdateStatus);
+router.post('/exchange-rate/force-update', monetizationController.forceUpdate);
+
 // ===== COMISIONES =====
 
 // Obtener todas las comisiones (público)

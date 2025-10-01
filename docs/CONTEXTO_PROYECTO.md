@@ -1,4 +1,10 @@
-# Contexto del Proyecto - PiezasYA
+# Contexto del Proyecto - PiezasYA v1.4.0
+
+**Versión**: 1.4.0  
+**Desarrollador**: Juan Hernandez  
+**Empresa**: LDJ Digital Solutions  
+**Equipo de Desarrollo**: PiezasYA  
+**Última actualización**: Octubre 2025
 
 ## Descripción General
 

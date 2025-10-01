@@ -2,7 +2,7 @@ const { getDefaultConfig } = require('expo/metro-config');
 
 const config = getDefaultConfig(__dirname);
 
-// Configuración optimizada para desarrollo
+// Configuración optimizada para desarrollo y assets
 module.exports = {
   ...config,
   
@@ -11,6 +11,8 @@ module.exports = {
     ...config.resolver,
     // Resolver módulos de manera más eficiente
     resolverMainFields: ['react-native', 'browser', 'main'],
+    // Asegurar que los assets se resuelvan correctamente
+    assetExts: [...config.resolver.assetExts, 'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'],
   },
   
   // Configuración de transformer

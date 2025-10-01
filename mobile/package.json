@@ -1,6 +1,6 @@
 {
-  "name": "mobile",
-  "version": "1.0.0",
+  "name": "piezasyaya-mobile",
+  "version": "1.4.0",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
@@ -11,6 +11,7 @@
   "dependencies": {
     "@babel/plugin-transform-runtime": "^7.28.3",
     "@babel/preset-env": "^7.28.3",
+    "@expo/vector-icons": "^14.0.4",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/netinfo": "^11.4.1",
     "@react-navigation/bottom-tabs": "^7.3.10",
@@ -43,5 +44,10 @@
     "@types/react": "~19.0.10",
     "typescript": "~5.8.3"
   },
+  "author": "Juan Hernandez <jcarweb.designer@gmail.com> (LDJ Digital Solutions)",
+  "contributors": [
+    "PiezasYA Development Team"
+  ],
+  "license": "MIT",
   "private": true
 }

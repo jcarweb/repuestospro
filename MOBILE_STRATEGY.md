@@ -1,5 +1,11 @@
 # 📱 Estrategia Móvil - React Native Sin Expo
 
+**Versión**: 1.4.0  
+**Desarrollador**: Juan Hernandez  
+**Empresa**: LDJ Digital Solutions  
+**Equipo de Desarrollo**: PiezasYA  
+**Última actualización**: Octubre 2025
+
 ## 🎯 **Objetivo**
 Migrar de Expo a React Native puro para evitar problemas de build y deployment, manteniendo todo el desarrollo existente de perfiles de usuario.
 

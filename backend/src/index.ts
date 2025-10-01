@@ -56,6 +56,7 @@ import userManagementTestRoutes from './routes/userManagementTestRoutes';
 import diagnosticRoutes from './routes/diagnosticRoutes';
 // import whatsappTestRoutes from './routes/whatsappTestRoutes';
 import { enrichmentWorker } from './services/enrichmentWorker';
+import autoUpdateService from './services/autoUpdateService';
 // import { initializeWhatsAppForVenezuela } from './scripts/initWhatsApp';
 const app = express();
 // Configurar rate limiting
@@ -472,6 +473,10 @@ const initializeApp = async () => {
     // Iniciar worker de enriquecimiento
     await enrichmentWorker.startWorker();
     
+    // Iniciar actualización automática de tasas de cambio
+    console.log('💱 Iniciando actualización automática de tasas de cambio...');
+    autoUpdateService.startAutoUpdate();
+    
     // Inicializar WhatsApp para Venezuela (COMENTADO TEMPORALMENTE)
     // console.log('🇻🇪 Inicializando WhatsApp para Venezuela...');
     // try {
@@ -488,6 +493,8 @@ const initializeApp = async () => {
         try {
           // Detener worker de enriquecimiento
           enrichmentWorker.stopWorker();
+          // Detener actualización automática
+          autoUpdateService.stopAutoUpdate();
           await dbService.disconnectFromDatabase();
         } catch (error) {
           console.error('❌ Error desconectando base de datos:', error);

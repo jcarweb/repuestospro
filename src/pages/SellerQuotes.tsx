@@ -4,7 +4,6 @@ import {
   Plus,
   Search,
   Filter,
-  Download,
   Send,
   Eye,
   Edit,
@@ -17,16 +16,15 @@ import {
   User,
   Phone,
   Mail,
-  Calendar,
-  Package,
   RefreshCcw,
-  TrendingUp,
-  TrendingDown,
   Copy,
-  Share,
-  Archive,
-  Star,
+  Settings,
+  Building,
 } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
+import NewQuoteModal from '../components/NewQuoteModal';
+import QuoteConditionsConfig from '../components/QuoteConditionsConfig';
+import StoreInfoConfig from '../components/StoreInfoConfig';
 
 interface Quote {
   _id: string;
@@ -70,6 +68,7 @@ interface QuoteStats {
 }
 
 const SellerQuotes: React.FC = () => {
+  const { t } = useLanguage();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [stats, setStats] = useState<QuoteStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -79,33 +78,35 @@ const SellerQuotes: React.FC = () => {
   const [filterDateRange, setFilterDateRange] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('createdAt');
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
-  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [showNewQuoteModal, setShowNewQuoteModal] = useState<boolean>(false);
+  const [showConditionsConfig, setShowConditionsConfig] = useState<boolean>(false);
+  const [showStoreInfoConfig, setShowStoreInfoConfig] = useState<boolean>(false);
 
   const statusOptions = [
-    { value: 'all', label: 'Todos los estados' },
-    { value: 'draft', label: 'Borrador' },
-    { value: 'sent', label: 'Enviado' },
-    { value: 'viewed', label: 'Visto' },
-    { value: 'accepted', label: 'Aceptado' },
-    { value: 'rejected', label: 'Rechazado' },
-    { value: 'expired', label: 'Expirado' },
+    { value: 'all', label: t('quotes.filters.allStatuses') || 'Todos los estados' },
+    { value: 'draft', label: t('quotes.status.draft') || 'Borrador' },
+    { value: 'sent', label: t('quotes.status.sent') || 'Enviado' },
+    { value: 'viewed', label: t('quotes.status.viewed') || 'Visto' },
+    { value: 'accepted', label: t('quotes.status.accepted') || 'Aceptado' },
+    { value: 'rejected', label: t('quotes.status.rejected') || 'Rechazado' },
+    { value: 'expired', label: t('quotes.status.expired') || 'Expirado' },
   ];
 
   const dateRangeOptions = [
-    { value: 'all', label: 'Todas las fechas' },
-    { value: 'today', label: 'Hoy' },
-    { value: 'week', label: 'Esta semana' },
-    { value: 'month', label: 'Este mes' },
-    { value: 'quarter', label: 'Este trimestre' },
+    { value: 'all', label: t('quotes.filters.allDates') || 'Todas las fechas' },
+    { value: 'today', label: t('quotes.filters.today') || 'Hoy' },
+    { value: 'week', label: t('quotes.filters.thisWeek') || 'Esta semana' },
+    { value: 'month', label: t('quotes.filters.thisMonth') || 'Este mes' },
+    { value: 'quarter', label: t('quotes.filters.thisQuarter') || 'Este trimestre' },
   ];
 
   const sortOptions = [
-    { value: 'createdAt', label: 'Fecha de creación' },
-    { value: 'expiresAt', label: 'Fecha de expiración' },
-    { value: 'finalTotal', label: 'Valor total' },
-    { value: 'customerName', label: 'Cliente' },
-    { value: 'status', label: 'Estado' },
+    { value: 'createdAt', label: t('quotes.sort.createdAt') || 'Fecha de creación' },
+    { value: 'expiresAt', label: t('quotes.sort.expiresAt') || 'Fecha de expiración' },
+    { value: 'finalTotal', label: t('quotes.sort.finalTotal') || 'Valor total' },
+    { value: 'customerName', label: t('quotes.sort.customerName') || 'Cliente' },
+    { value: 'status', label: t('quotes.sort.status') || 'Estado' },
   ];
 
   useEffect(() => {
@@ -354,17 +355,17 @@ const SellerQuotes: React.FC = () => {
   const getStatusLabel = (status: Quote['status']) => {
     switch (status) {
       case 'draft':
-        return 'Borrador';
+        return t('quotes.status.draft') || 'Borrador';
       case 'sent':
-        return 'Enviado';
+        return t('quotes.status.sent') || 'Enviado';
       case 'viewed':
-        return 'Visto';
+        return t('quotes.status.viewed') || 'Visto';
       case 'accepted':
-        return 'Aceptado';
+        return t('quotes.status.accepted') || 'Aceptado';
       case 'rejected':
-        return 'Rechazado';
+        return t('quotes.status.rejected') || 'Rechazado';
       case 'expired':
-        return 'Expirado';
+        return t('quotes.status.expired') || 'Expirado';
       default:
         return status;
     }
@@ -424,6 +425,55 @@ const SellerQuotes: React.FC = () => {
     }
   };
 
+  const handleSaveNewQuote = (quoteData: any) => {
+    // Crear nueva cotización con los datos del modal
+    const newQuote: Quote = {
+      _id: `quote${Date.now()}`,
+      customerId: quoteData.customer._id,
+      customerName: quoteData.customer.name,
+      customerPhone: quoteData.customer.phone,
+      customerEmail: quoteData.customer.email,
+      products: quoteData.items.map((item: any) => ({
+        productId: item.product._id,
+        productName: item.product.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        totalPrice: item.totalPrice,
+        image: item.product.image
+      })),
+      total: quoteData.totals.subtotal,
+      discount: quoteData.totals.discount,
+      discountPercentage: quoteData.config.discountType === 'percentage' ? quoteData.config.discount : 0,
+      finalTotal: quoteData.totals.total,
+      status: 'draft',
+      createdAt: quoteData.createdAt,
+      updatedAt: quoteData.createdAt,
+      expiresAt: new Date(new Date(quoteData.createdAt).getTime() + quoteData.config.validityDays * 24 * 60 * 60 * 1000).toISOString(),
+      notes: quoteData.config.notes,
+      terms: quoteData.config.terms,
+      validFor: quoteData.config.validityDays,
+      quoteNumber: `COT-2023-${String(quotes.length + 1).padStart(3, '0')}`,
+      isUrgent: false,
+      tags: []
+    };
+
+    // Agregar a la lista de cotizaciones
+    setQuotes(prev => [newQuote, ...prev]);
+    
+    // Actualizar estadísticas
+    if (stats) {
+      setStats(prev => prev ? {
+        ...prev,
+        total: prev.total + 1,
+        pending: prev.pending + 1,
+        totalValue: prev.totalValue + newQuote.finalTotal,
+        averageValue: (prev.totalValue + newQuote.finalTotal) / (prev.total + 1)
+      } : null);
+    }
+
+    alert('Cotización creada exitosamente');
+  };
+
   const isExpired = (expiresAt: string) => {
     return new Date(expiresAt) < new Date();
   };
@@ -453,26 +503,46 @@ const SellerQuotes: React.FC = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 bg-gray-50 dark:bg-[#333333] min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Cotizaciones</h1>
-          <p className="text-gray-600 mt-2">Crea, envía y gestiona cotizaciones para tus clientes</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            {t('quotes.title') || 'Gestión de Cotizaciones'}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            {t('quotes.subtitle') || 'Crea, envía y gestiona cotizaciones para tus clientes'}
+          </p>
         </div>
         <div className="flex items-center space-x-3">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-[#444444] text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-[#555555] transition-colors shadow-sm"
           >
             <Filter className="w-4 h-4" />
-            <span>Filtros</span>
+            <span>{t('quotes.filters.title') || 'Filtros'}</span>
           </button>
           <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={() => setShowConditionsConfig(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-[#444444] text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-[#555555] transition-colors shadow-sm"
+            title={t('quotes.conditions.configure') || 'Configurar condiciones de cotizaciones'}
           >
-            <Plus className="w-4 h-4" />
-            <span>Nueva Cotización</span>
+            <Settings className="w-4 h-4" />
+            <span>{t('quotes.conditions.configure') || 'Condiciones'}</span>
+          </button>
+          <button
+            onClick={() => setShowStoreInfoConfig(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-[#444444] text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-[#555555] transition-colors shadow-sm"
+            title={t('quotes.storeConfig.configure') || 'Configurar información de la tienda'}
+          >
+            <Building className="w-4 h-4" />
+            <span>{t('quotes.storeConfig.configure') || 'Tienda'}</span>
+          </button>
+          <button
+            onClick={() => setShowNewQuoteModal(true)}
+            className="flex items-center space-x-2 px-6 py-3 bg-[#FFC300] text-[#333333] font-semibold rounded-lg hover:bg-[#E6B800] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            <Plus className="w-5 h-5" />
+            <span>{t('quotes.actions.newQuote') || 'Nueva Cotización'}</span>
           </button>
         </div>
       </div>
@@ -480,50 +550,58 @@ const SellerQuotes: React.FC = () => {
       {/* Estadísticas */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="bg-white dark:bg-[#444444] p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 hover:shadow-md transition-shadow">
             <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <FileText className="h-6 w-6 text-blue-600" />
+              <div className="p-3 bg-[#FFC300] rounded-lg">
+                <FileText className="h-6 w-6 text-[#333333]" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Cotizaciones</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  {t('quotes.stats.total') || 'Total Cotizaciones'}
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="bg-white dark:bg-[#444444] p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 hover:shadow-md transition-shadow">
             <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Clock className="h-6 w-6 text-yellow-600" />
+              <div className="p-3 bg-[#E63946] rounded-lg">
+                <Clock className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pendientes</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  {t('quotes.stats.pending') || 'Pendientes'}
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.pending}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="bg-white dark:bg-[#444444] p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 hover:shadow-md transition-shadow">
             <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-green-600" />
+              <div className="p-3 bg-[#333333] rounded-lg">
+                <CheckCircle className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Aceptadas</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.accepted}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  {t('quotes.stats.accepted') || 'Aceptadas'}
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.accepted}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="bg-white dark:bg-[#444444] p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 hover:shadow-md transition-shadow">
             <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <DollarSign className="h-6 w-6 text-purple-600" />
+              <div className="p-3 bg-[#000000] rounded-lg">
+                <DollarSign className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Valor Total</p>
-                <p className="text-2xl font-bold text-gray-900">${stats.totalValue.toFixed(2)}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  {t('quotes.stats.totalValue') || 'Valor Total'}
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">${stats.totalValue.toFixed(2)}</p>
               </div>
             </div>
           </div>
@@ -532,12 +610,14 @@ const SellerQuotes: React.FC = () => {
 
       {/* Filtros */}
       {showFilters && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white dark:bg-[#444444] rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Estado</label>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                {t('quotes.filters.status') || 'Estado'}
+              </label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#555555] text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
               >
@@ -547,9 +627,11 @@ const SellerQuotes: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Rango de Fecha</label>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                {t('quotes.filters.dateRange') || 'Rango de Fecha'}
+              </label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#555555] text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
                 value={filterDateRange}
                 onChange={(e) => setFilterDateRange(e.target.value)}
               >
@@ -559,9 +641,11 @@ const SellerQuotes: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Ordenar por</label>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                {t('quotes.filters.sortBy') || 'Ordenar por'}
+              </label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#555555] text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
@@ -571,13 +655,15 @@ const SellerQuotes: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Buscar</label>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                {t('quotes.filters.search') || 'Buscar'}
+              </label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Cliente, teléfono, email..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder={t('quotes.filters.searchPlaceholder') || 'Cliente, teléfono, email...'}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#555555] text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -588,132 +674,132 @@ const SellerQuotes: React.FC = () => {
       )}
 
       {/* Lista de cotizaciones */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white dark:bg-[#444444] rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+            <thead className="bg-gray-50 dark:bg-[#555555]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Cotización
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  {t('quotes.table.quote') || 'Cotización'}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Cliente
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  {t('quotes.table.customer') || 'Cliente'}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Productos
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  {t('quotes.table.products') || 'Productos'}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  {t('quotes.table.total') || 'Total'}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  {t('quotes.table.status') || 'Estado'}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Expira
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  {t('quotes.table.expires') || 'Expira'}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  {t('quotes.table.actions') || 'Acciones'}
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-[#444444] divide-y divide-gray-200 dark:divide-gray-600">
               {sortedQuotes.map(quote => {
                 const StatusIcon = getStatusIcon(quote.status);
                 const expired = isExpired(quote.expiresAt);
                 
                 return (
-                  <tr key={quote._id} className="hover:bg-gray-50">
+                  <tr key={quote._id} className="hover:bg-gray-50 dark:hover:bg-[#555555] transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <FileText className="h-8 w-8 text-gray-400" />
+                          <FileText className="h-8 w-8 text-[#FFC300]" />
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
                             {quote.quoteNumber}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
                             {new Date(quote.createdAt).toLocaleDateString()}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {quote.customerName}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
                         {quote.customerPhone}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {quote.products.length} producto{quote.products.length !== 1 ? 's' : ''}
+                      <div className="text-sm text-gray-900 dark:text-white">
+                        {quote.products.length} {t('quotes.table.productCount') || 'producto'}{quote.products.length !== 1 ? 's' : ''}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
                         {quote.products.map(p => p.productName).join(', ')}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
                         ${quote.finalTotal.toFixed(2)}
                       </div>
                       {quote.discount > 0 && (
-                        <div className="text-sm text-green-600">
+                        <div className="text-sm text-green-600 dark:text-green-400">
                           -${quote.discount.toFixed(2)} ({quote.discountPercentage.toFixed(1)}%)
                         </div>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <StatusIcon className="h-4 w-4 mr-2" />
+                        <StatusIcon className="h-4 w-4 mr-2 text-[#FFC300]" />
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(quote.status)}`}>
                           {getStatusLabel(quote.status)}
                         </span>
                         {quote.isUrgent && (
-                          <span className="ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                            Urgente
+                          <span className="ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400">
+                            {t('quotes.urgent') || 'Urgente'}
                           </span>
                         )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`text-sm ${expired ? 'text-red-600' : 'text-gray-900'}`}>
+                      <div className={`text-sm ${expired ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
                         {new Date(quote.expiresAt).toLocaleDateString()}
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {expired ? 'Expirado' : `${Math.ceil((new Date(quote.expiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} días`}
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {expired ? (t('quotes.expired') || 'Expirado') : `${Math.ceil((new Date(quote.expiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} ${t('quotes.days') || 'días'}`}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => setSelectedQuote(quote)}
-                          className="text-blue-600 hover:text-blue-900"
-                          title="Ver detalles"
+                          className="text-[#FFC300] hover:text-[#E6B800] transition-colors"
+                          title={t('quotes.actions.view') || 'Ver detalles'}
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         {quote.status === 'draft' && (
                           <button
                             onClick={() => handleSendQuote(quote._id)}
-                            className="text-green-600 hover:text-green-900"
-                            title="Enviar cotización"
+                            className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors"
+                            title={t('quotes.actions.send') || 'Enviar cotización'}
                           >
                             <Send className="w-4 h-4" />
                           </button>
                         )}
                         <button
                           onClick={() => handleDuplicateQuote(quote._id)}
-                          className="text-gray-600 hover:text-gray-900"
-                          title="Duplicar"
+                          className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
+                          title={t('quotes.actions.duplicate') || 'Duplicar'}
                         >
                           <Copy className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDeleteQuote(quote._id)}
-                          className="text-red-600 hover:text-red-900"
-                          title="Eliminar"
+                          className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                          title={t('quotes.actions.delete') || 'Eliminar'}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -730,14 +816,14 @@ const SellerQuotes: React.FC = () => {
       {/* Modal de Detalle de Cotización */}
       {selectedQuote && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">
-                Cotización {selectedQuote.quoteNumber}
+          <div className="bg-white dark:bg-[#444444] rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {t('quotes.details.title') || 'Cotización'} {selectedQuote.quoteNumber}
               </h2>
               <button
                 onClick={() => setSelectedQuote(null)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
               >
                 <XCircle className="w-6 h-6" />
               </button>
@@ -746,48 +832,52 @@ const SellerQuotes: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Información del cliente */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Información del Cliente</h3>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                    {t('quotes.details.customerInfo') || 'Información del Cliente'}
+                  </h3>
                   <div className="space-y-3">
                     <div className="flex items-center">
-                      <User className="w-4 h-4 text-gray-400 mr-3" />
-                      <span className="text-sm text-gray-900">{selectedQuote.customerName}</span>
+                      <User className="w-4 h-4 text-[#FFC300] mr-3" />
+                      <span className="text-sm text-gray-900 dark:text-white">{selectedQuote.customerName}</span>
                     </div>
                     <div className="flex items-center">
-                      <Phone className="w-4 h-4 text-gray-400 mr-3" />
-                      <span className="text-sm text-gray-900">{selectedQuote.customerPhone}</span>
+                      <Phone className="w-4 h-4 text-[#FFC300] mr-3" />
+                      <span className="text-sm text-gray-900 dark:text-white">{selectedQuote.customerPhone}</span>
                     </div>
                     <div className="flex items-center">
-                      <Mail className="w-4 h-4 text-gray-400 mr-3" />
-                      <span className="text-sm text-gray-900">{selectedQuote.customerEmail}</span>
+                      <Mail className="w-4 h-4 text-[#FFC300] mr-3" />
+                      <span className="text-sm text-gray-900 dark:text-white">{selectedQuote.customerEmail}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Información de la cotización */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Detalles de la Cotización</h3>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                    {t('quotes.details.quoteDetails') || 'Detalles de la Cotización'}
+                  </h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Estado:</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{t('quotes.details.status') || 'Estado'}:</span>
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedQuote.status)}`}>
                         {getStatusLabel(selectedQuote.status)}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Creada:</span>
-                      <span className="text-sm text-gray-900">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{t('quotes.details.created') || 'Creada'}:</span>
+                      <span className="text-sm text-gray-900 dark:text-white">
                         {new Date(selectedQuote.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Expira:</span>
-                      <span className="text-sm text-gray-900">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{t('quotes.details.expires') || 'Expira'}:</span>
+                      <span className="text-sm text-gray-900 dark:text-white">
                         {new Date(selectedQuote.expiresAt).toLocaleDateString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Válida por:</span>
-                      <span className="text-sm text-gray-900">{selectedQuote.validFor} días</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{t('quotes.details.validFor') || 'Válida por'}:</span>
+                      <span className="text-sm text-gray-900 dark:text-white">{selectedQuote.validFor} {t('quotes.days') || 'días'}</span>
                     </div>
                   </div>
                 </div>
@@ -795,21 +885,23 @@ const SellerQuotes: React.FC = () => {
 
               {/* Productos */}
               <div className="mt-8">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Productos</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                  {t('quotes.details.products') || 'Productos'}
+                </h3>
                 <div className="space-y-4">
                   {selectedQuote.products.map((product, index) => (
-                    <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                    <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-[#555555] rounded-lg">
                       <img
                         src={product.image}
                         alt={product.productName}
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                       <div className="flex-1">
-                        <h4 className="text-sm font-medium text-gray-900">{product.productName}</h4>
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white">{product.productName}</h4>
                         <div className="flex items-center space-x-4 mt-2">
-                          <span className="text-sm text-gray-600">Cantidad: {product.quantity}</span>
-                          <span className="text-sm text-gray-600">Precio unitario: ${product.unitPrice.toFixed(2)}</span>
-                          <span className="text-sm font-medium text-gray-900">Total: ${product.totalPrice.toFixed(2)}</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{t('quotes.details.quantity') || 'Cantidad'}: {product.quantity}</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{t('quotes.details.unitPrice') || 'Precio unitario'}: ${product.unitPrice.toFixed(2)}</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">{t('quotes.details.total') || 'Total'}: ${product.totalPrice.toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
@@ -818,22 +910,24 @@ const SellerQuotes: React.FC = () => {
               </div>
 
               {/* Resumen de precios */}
-              <div className="mt-8 bg-gray-50 rounded-lg p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Resumen de Precios</h3>
+              <div className="mt-8 bg-gray-50 dark:bg-[#555555] rounded-lg p-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                  {t('quotes.details.priceSummary') || 'Resumen de Precios'}
+                </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Subtotal:</span>
-                    <span className="text-sm text-gray-900">${selectedQuote.total.toFixed(2)}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">{t('quotes.details.subtotal') || 'Subtotal'}:</span>
+                    <span className="text-sm text-gray-900 dark:text-white">${selectedQuote.total.toFixed(2)}</span>
                   </div>
                   {selectedQuote.discount > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Descuento ({selectedQuote.discountPercentage.toFixed(1)}%):</span>
-                      <span className="text-sm text-green-600">-${selectedQuote.discount.toFixed(2)}</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{t('quotes.details.discount') || 'Descuento'} ({selectedQuote.discountPercentage.toFixed(1)}%):</span>
+                      <span className="text-sm text-green-600 dark:text-green-400">-${selectedQuote.discount.toFixed(2)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between border-t border-gray-200 pt-2">
-                    <span className="text-lg font-medium text-gray-900">Total:</span>
-                    <span className="text-lg font-bold text-gray-900">${selectedQuote.finalTotal.toFixed(2)}</span>
+                  <div className="flex justify-between border-t border-gray-200 dark:border-gray-600 pt-2">
+                    <span className="text-lg font-medium text-gray-900 dark:text-white">{t('quotes.details.total') || 'Total'}:</span>
+                    <span className="text-lg font-bold text-[#FFC300]">${selectedQuote.finalTotal.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -844,16 +938,20 @@ const SellerQuotes: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {selectedQuote.notes && (
                       <div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Notas</h3>
-                        <p className="text-sm text-gray-600 bg-yellow-50 p-3 rounded-lg">
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                          {t('quotes.details.notes') || 'Notas'}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
                           {selectedQuote.notes}
                         </p>
                       </div>
                     )}
                     {selectedQuote.terms && (
                       <div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Términos y Condiciones</h3>
-                        <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                          {t('quotes.details.terms') || 'Términos y Condiciones'}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
                           {selectedQuote.terms}
                         </p>
                       </div>
@@ -867,31 +965,58 @@ const SellerQuotes: React.FC = () => {
                 {selectedQuote.status === 'draft' && (
                   <button
                     onClick={() => handleSendQuote(selectedQuote._id)}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg"
                   >
-                    Enviar Cotización
+                    {t('quotes.actions.sendQuote') || 'Enviar Cotización'}
                   </button>
                 )}
                 <button
                   onClick={() => handleDuplicateQuote(selectedQuote._id)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-[#FFC300] text-[#333333] rounded-lg hover:bg-[#E6B800] transition-all duration-200 shadow-md hover:shadow-lg"
                 >
-                  Duplicar
+                  {t('quotes.actions.duplicate') || 'Duplicar'}
                 </button>
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(`Cotización ${selectedQuote.quoteNumber} - ${selectedQuote.customerName}`);
-                    alert('Información copiada al portapapeles');
+                    alert(t('quotes.actions.copied') || 'Información copiada al portapapeles');
                   }}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  className="px-4 py-2 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-800 transition-colors"
                 >
-                  Copiar Info
+                  {t('quotes.actions.copyInfo') || 'Copiar Info'}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Modal de Nueva Cotización */}
+      <NewQuoteModal
+        isOpen={showNewQuoteModal}
+        onClose={() => setShowNewQuoteModal(false)}
+        onSave={handleSaveNewQuote}
+      />
+
+      {/* Modal de Configuración de Condiciones */}
+      <QuoteConditionsConfig
+        isOpen={showConditionsConfig}
+        onClose={() => setShowConditionsConfig(false)}
+        onSave={(conditions) => {
+          console.log('Condiciones guardadas:', conditions);
+          setShowConditionsConfig(false);
+        }}
+      />
+
+      {/* Modal de Configuración de la Tienda */}
+      <StoreInfoConfig
+        isOpen={showStoreInfoConfig}
+        onClose={() => setShowStoreInfoConfig(false)}
+        onSave={(storeInfo) => {
+          console.log('Información de la tienda guardada:', storeInfo);
+          setShowStoreInfoConfig(false);
+        }}
+      />
     </div>
   );
 };

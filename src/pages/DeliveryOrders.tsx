@@ -42,6 +42,8 @@ const DeliveryOrders: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<DeliveryOrder | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Cargar datos al montar el componente
   useEffect(() => {
@@ -175,6 +177,82 @@ const DeliveryOrders: React.FC = () => {
     window.open(`tel:${phone}`, '_self');
   };
 
+  const handleExport = () => {
+    setShowExportModal(true);
+  };
+
+  const handleShare = () => {
+    setShowShareModal(true);
+  };
+
+  const exportToCSV = () => {
+    const headers = ['Código', 'Cliente', 'Estado', 'Entrega Estimada', 'Ganancias', 'Fecha'];
+    const csvContent = [
+      headers.join(','),
+      ...filteredOrders.map(order => [
+        order.trackingCode,
+        order.customerId.name,
+        getStatusTranslation(order.status),
+        order.estimatedDeliveryTime ? new Date(order.estimatedDeliveryTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : 'N/A',
+        order.riderPayment.toFixed(2),
+        new Date(order.createdAt).toLocaleDateString()
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `pedidos_delivery_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setShowExportModal(false);
+  };
+
+  const exportToExcel = () => {
+    // Para Excel necesitaríamos una librería como xlsx
+    // Por ahora exportamos como CSV con extensión .xlsx
+    exportToCSV();
+  };
+
+  const exportToPDF = () => {
+    // Para PDF necesitaríamos una librería como jsPDF
+    // Por ahora mostramos un mensaje
+    alert('Funcionalidad de PDF en desarrollo');
+    setShowExportModal(false);
+  };
+
+  const shareViaEmail = (recipient: string, message: string) => {
+    const subject = 'Pedidos de Delivery - PiezasYA';
+    const body = `${message}\n\nResumen de pedidos:\n${filteredOrders.map(order => 
+      `- ${order.trackingCode}: ${order.customerId.name} (${getStatusTranslation(order.status)})`
+    ).join('\n')}`;
+    
+    const mailtoUrl = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(mailtoUrl);
+    setShowShareModal(false);
+  };
+
+  const shareViaWhatsApp = (message: string) => {
+    const text = `${message}\n\nResumen de pedidos:\n${filteredOrders.map(order => 
+      `- ${order.trackingCode}: ${order.customerId.name} (${getStatusTranslation(order.status)})`
+    ).join('\n')}`;
+    
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(whatsappUrl, '_blank');
+    setShowShareModal(false);
+  };
+
+  const shareViaLink = () => {
+    const link = `${window.location.origin}/delivery/orders`;
+    navigator.clipboard.writeText(link).then(() => {
+      alert('Enlace copiado al portapapeles');
+    });
+    setShowShareModal(false);
+  };
+
   const getStats = () => {
     const total = orders.length;
     const pending = orders.filter(o => ['pending', 'assigned'].includes(o.status)).length;
@@ -229,13 +307,19 @@ const DeliveryOrders: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="px-4 py-2 bg-carbon-600 text-snow-500 rounded-lg hover:bg-carbon-700 transition-colors flex items-center gap-2">
+          <button 
+            onClick={handleExport}
+            className="px-4 py-2 bg-[#333333] text-white rounded-lg hover:bg-[#000000] transition-colors flex items-center gap-2"
+          >
             <Download className="h-4 w-4" />
-            Exportar
+            {t('deliveryOrders.export.export') || 'Exportar'}
           </button>
-          <button className="px-4 py-2 bg-primary-600 text-snow-500 rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2">
+          <button 
+            onClick={handleShare}
+            className="px-4 py-2 bg-[#FFC300] text-[#333333] rounded-lg hover:bg-[#E6B800] transition-colors flex items-center gap-2"
+          >
             <Share2 className="h-4 w-4" />
-            Compartir
+            {t('deliveryOrders.share.share') || 'Compartir'}
           </button>
         </div>
       </div>
@@ -607,6 +691,113 @@ const DeliveryOrders: React.FC = () => {
                   {t('deliveryOrders.actions.startNavigation')}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Exportar */}
+      {showExportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#444444] rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-600">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {t('deliveryOrders.export.title') || 'Exportar Pedidos'}
+              </h3>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t('deliveryOrders.export.format') || 'Formato'}
+                </label>
+                <div className="space-y-2">
+                  <button
+                    onClick={exportToCSV}
+                    className="w-full px-4 py-2 bg-[#FFC300] text-[#333333] rounded-lg hover:bg-[#E6B800] transition-colors text-left"
+                  >
+                    {t('deliveryOrders.export.csv') || 'CSV'}
+                  </button>
+                  <button
+                    onClick={exportToExcel}
+                    className="w-full px-4 py-2 bg-[#333333] text-white rounded-lg hover:bg-[#000000] transition-colors text-left"
+                  >
+                    {t('deliveryOrders.export.excel') || 'Excel'}
+                  </button>
+                  <button
+                    onClick={exportToPDF}
+                    className="w-full px-4 py-2 bg-[#E63946] text-white rounded-lg hover:bg-[#D63031] transition-colors text-left"
+                  >
+                    {t('deliveryOrders.export.pdf') || 'PDF'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-200 dark:border-gray-600 flex justify-end">
+              <button
+                onClick={() => setShowExportModal(false)}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                {t('deliveryOrders.export.cancel') || 'Cancelar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Compartir */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#444444] rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-600">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {t('deliveryOrders.share.title') || 'Compartir Pedidos'}
+              </h3>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t('deliveryOrders.share.method') || 'Método'}
+                </label>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      const recipient = prompt('Email del destinatario:');
+                      const message = prompt('Mensaje:') || 'Resumen de pedidos de delivery';
+                      if (recipient) shareViaEmail(recipient, message);
+                    }}
+                    className="w-full px-4 py-2 bg-[#FFC300] text-[#333333] rounded-lg hover:bg-[#E6B800] transition-colors text-left"
+                  >
+                    📧 {t('deliveryOrders.share.email') || 'Email'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      const message = prompt('Mensaje:') || 'Resumen de pedidos de delivery';
+                      shareViaWhatsApp(message);
+                    }}
+                    className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-left"
+                  >
+                    📱 {t('deliveryOrders.share.whatsapp') || 'WhatsApp'}
+                  </button>
+                  <button
+                    onClick={shareViaLink}
+                    className="w-full px-4 py-2 bg-[#333333] text-white rounded-lg hover:bg-[#000000] transition-colors text-left"
+                  >
+                    🔗 {t('deliveryOrders.share.link') || 'Enlace'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-200 dark:border-gray-600 flex justify-end">
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                {t('deliveryOrders.share.cancel') || 'Cancelar'}
+              </button>
             </div>
           </div>
         </div>

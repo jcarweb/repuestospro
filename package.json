@@ -1,7 +1,7 @@
 {
   "name": "piezasyaya-ecommerce",
-  "version": "1.0.0",
-  "description": "Ecommerce multiplataforma para repuestos de vehículos - PiezasYA",
+  "version": "1.4.0",
+  "description": "Ecommerce multiplataforma para repuestos de vehículos - PiezasYA v1.4.0",
   "scripts": {
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend:network\"",
     "dev:frontend": "vite --port 3000",
@@ -24,7 +24,10 @@
     "express",
     "mongodb"
   ],
-  "author": "PiezasYA Team",
+  "author": "Juan Hernandez <jcarweb.designer@gmail.com> (LDJ Digital Solutions)",
+  "contributors": [
+    "PiezasYA Development Team"
+  ],
   "license": "MIT",
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",

@@ -1,8 +1,14 @@
-# Sistema de Roles Actualizado - PiezasYA
+# Sistema de Roles Actualizado - PiezasYA v1.4.0
+
+**Versión**: 1.4.0  
+**Desarrollador**: Juan Hernandez  
+**Empresa**: LDJ Digital Solutions  
+**Equipo de Desarrollo**: PiezasYA  
+**Última actualización**: Octubre 2025
 
 ## Resumen de Cambios
 
-Se ha actualizado completamente el sistema de roles de la aplicación PiezasYA para implementar las directrices especificadas. Los cambios incluyen la reestructuración de roles, nuevos campos específicos para cada rol, middlewares de autorización mejorados y funcionalidades específicas por rol.
+Se ha actualizado completamente el sistema de roles de la aplicación PiezasYA v1.4.0 para implementar las directrices especificadas. Los cambios incluyen la reestructuración de roles, nuevos campos específicos para cada rol, middlewares de autorización mejorados y funcionalidades específicas por rol.
 
 ## Roles Implementados
 

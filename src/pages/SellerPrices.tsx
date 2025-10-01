@@ -18,7 +18,19 @@ import {
   BarChart3,
   TrendingUp,
   TrendingDown,
+  Plus,
+  FileText,
+  Send,
+  Phone,
+  Mail,
+  User,
+  Calendar,
+  MapPin,
+  Building,
 } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
+import NewQuoteModal from '../components/NewQuoteModal';
 
 interface Product {
   _id: string;
@@ -55,6 +67,9 @@ interface PriceHistory {
 }
 
 const SellerPrices: React.FC = () => {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
+  
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +81,8 @@ const SellerPrices: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([]);
   const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [showNewQuoteModal, setShowNewQuoteModal] = useState<boolean>(false);
+  const [selectedProductForQuote, setSelectedProductForQuote] = useState<Product | null>(null);
 
   const categories = [
     'Motores',
@@ -271,13 +288,40 @@ const SellerPrices: React.FC = () => {
   };
 
   const handleCreateQuote = (product: Product) => {
-    // Lógica para crear cotización
-    alert(`Cotización creada para ${product.name}`);
+    setSelectedProductForQuote(product);
+    setShowNewQuoteModal(true);
   };
 
   const handleSendToChat = (product: Product) => {
-    // Lógica para enviar por chat
-    alert(`Producto ${product.name} enviado por chat`);
+    // Navegar al chat con el producto seleccionado
+    navigate('/seller/chat', { 
+      state: { 
+        product: product,
+        message: `Consulta sobre ${product.name} - Precio: $${product.price.toFixed(2)}`
+      } 
+    });
+  };
+
+  const handleSaveQuote = (quoteData: any) => {
+    // Crear cotización con el producto seleccionado
+    const newQuote = {
+      ...quoteData,
+      product: selectedProductForQuote,
+      createdAt: new Date().toISOString(),
+      status: 'draft'
+    };
+    
+    console.log('Cotización creada:', newQuote);
+    setShowNewQuoteModal(false);
+    setSelectedProductForQuote(null);
+    
+    // Mostrar mensaje de éxito
+    alert(t('prices.quoteCreated') || 'Cotización creada exitosamente');
+  };
+
+  const handleCloseQuoteModal = () => {
+    setShowNewQuoteModal(false);
+    setSelectedProductForQuote(null);
   };
 
   if (loading) {
@@ -305,64 +349,74 @@ const SellerPrices: React.FC = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 bg-gray-50 dark:bg-[#333333] min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Consulta de Precios</h1>
-          <p className="text-gray-600 mt-2">Busca productos y consulta precios en tiempo real</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            {t('prices.title') || 'Consulta de Precios'}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            {t('prices.subtitle') || 'Busca productos y consulta precios en tiempo real'}
+          </p>
         </div>
         <div className="flex items-center space-x-3">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-[#444444] text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-[#555555] transition-colors shadow-sm"
           >
             <Filter className="w-4 h-4" />
-            <span>Filtros</span>
+            <span>{t('prices.filters') || 'Filtros'}</span>
           </button>
           <button
             onClick={fetchProducts}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-[#FFC300] text-[#333333] rounded-lg hover:bg-[#E6B800] transition-colors shadow-sm"
           >
             <RefreshCcw className="w-4 h-4" />
-            <span>Actualizar</span>
+            <span>{t('prices.update') || 'Actualizar'}</span>
           </button>
         </div>
       </div>
 
       {/* Filtros */}
       {showFilters && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white dark:bg-[#444444] rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Categoría</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('prices.category') || 'Categoría'}
+              </label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#666666] text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
               >
-                <option value="all">Todas las categorías</option>
+                <option value="all">{t('prices.allCategories') || 'Todas las categorías'}</option>
                 {categories.map(category => (
                   <option key={category} value={category}>{category}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Marca</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('prices.brand') || 'Marca'}
+              </label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#666666] text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
                 value={filterBrand}
                 onChange={(e) => setFilterBrand(e.target.value)}
               >
-                <option value="all">Todas las marcas</option>
+                <option value="all">{t('prices.allBrands') || 'Todas las marcas'}</option>
                 {brands.map(brand => (
                   <option key={brand} value={brand}>{brand}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Rango de Precio</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('prices.priceRange') || 'Rango de Precio'}
+              </label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#666666] text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
                 value={filterPriceRange}
                 onChange={(e) => setFilterPriceRange(e.target.value)}
               >
@@ -372,17 +426,19 @@ const SellerPrices: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Ordenar por</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('prices.sortBy') || 'Ordenar por'}
+              </label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#666666] text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
-                <option value="name">Nombre</option>
-                <option value="price-low">Precio: Menor a Mayor</option>
-                <option value="price-high">Precio: Mayor a Menor</option>
-                <option value="rating">Calificación</option>
-                <option value="stock">Stock</option>
+                <option value="name">{t('prices.sortOptions.name') || 'Nombre'}</option>
+                <option value="price-low">{t('prices.sortOptions.priceLow') || 'Precio: Menor a Mayor'}</option>
+                <option value="price-high">{t('prices.sortOptions.priceHigh') || 'Precio: Mayor a Menor'}</option>
+                <option value="rating">{t('prices.sortOptions.rating') || 'Calificación'}</option>
+                <option value="stock">{t('prices.sortOptions.stock') || 'Stock'}</option>
               </select>
             </div>
           </div>
@@ -390,13 +446,13 @@ const SellerPrices: React.FC = () => {
       )}
 
       {/* Búsqueda */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white dark:bg-[#444444] rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6 mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
-            placeholder="Buscar productos por nombre, marca o descripción..."
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder={t('prices.searchPlaceholder') || 'Buscar productos por nombre, marca o descripción...'}
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#666666] text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#FFC300] focus:border-transparent"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -408,7 +464,7 @@ const SellerPrices: React.FC = () => {
         {sortedProducts.map(product => (
           <div
             key={product._id}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+            className="bg-white dark:bg-[#444444] rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 hover:shadow-md transition-shadow cursor-pointer"
             onClick={() => handleProductClick(product)}
           >
             <div className="p-6">
@@ -419,22 +475,22 @@ const SellerPrices: React.FC = () => {
                   className="w-20 h-20 object-cover rounded-lg"
                 />
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-medium text-gray-900 truncate">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white truncate">
                     {product.name}
                   </h3>
-                  <p className="text-sm text-gray-500 mt-1">{product.brand}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{product.brand}</p>
                   
                   <div className="flex items-center mt-2">
-                    <span className="text-2xl font-bold text-gray-900">
+                    <span className="text-2xl font-bold text-[#FFC300]">
                       ${product.price.toFixed(2)}
                     </span>
                     {product.originalPrice && (
-                      <span className="text-sm text-gray-500 line-through ml-2">
+                      <span className="text-sm text-gray-500 dark:text-gray-400 line-through ml-2">
                         ${product.originalPrice.toFixed(2)}
                       </span>
                     )}
                     {product.discountPercentage && (
-                      <span className="ml-2 px-2 py-1 text-xs bg-red-100 text-red-800 rounded">
+                      <span className="ml-2 px-2 py-1 text-xs bg-[#E63946] text-white rounded">
                         -{product.discountPercentage}%
                       </span>
                     )}
@@ -442,11 +498,11 @@ const SellerPrices: React.FC = () => {
 
                   <div className="flex items-center mt-2 space-x-4">
                     <div className="flex items-center">
-                      <Star className="w-4 h-4 text-yellow-400" />
-                      <span className="ml-1 text-sm text-gray-600">{product.rating}</span>
+                      <Star className="w-4 h-4 text-[#FFC300]" />
+                      <span className="ml-1 text-sm text-gray-600 dark:text-gray-400">{product.rating}</span>
                     </div>
-                    <span className="text-sm text-gray-500">
-                      Stock: {product.stock}
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {t('prices.stock') || 'Stock'}: {product.stock}
                     </span>
                   </div>
 
@@ -456,18 +512,20 @@ const SellerPrices: React.FC = () => {
                         e.stopPropagation();
                         handleCreateQuote(product);
                       }}
-                      className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                      className="flex-1 px-3 py-2 bg-[#FFC300] text-[#333333] text-sm rounded-lg hover:bg-[#E6B800] transition-colors font-medium"
                     >
-                      Cotizar
+                      <FileText className="w-4 h-4 inline mr-1" />
+                      {t('prices.quote') || 'Cotizar'}
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleSendToChat(product);
                       }}
-                      className="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
+                      className="flex-1 px-3 py-2 bg-[#333333] text-white text-sm rounded-lg hover:bg-[#000000] transition-colors font-medium"
                     >
-                      Chat
+                      <MessageSquare className="w-4 h-4 inline mr-1" />
+                      {t('prices.chat') || 'Chat'}
                     </button>
                   </div>
                 </div>
@@ -625,6 +683,13 @@ const SellerPrices: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Nueva Cotización */}
+      <NewQuoteModal
+        isOpen={showNewQuoteModal}
+        onClose={handleCloseQuoteModal}
+        onSave={handleSaveQuote}
+      />
     </div>
   );
 };

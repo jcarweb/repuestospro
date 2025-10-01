@@ -1,7 +1,7 @@
 {
   "name": "piezasyaya-backend",
-  "version": "1.0.0",
-  "description": "Backend reactivo para ecommerce de repuestos de vehículos - PiezasYA",
+  "version": "1.4.0",
+  "description": "Backend reactivo para ecommerce de repuestos de vehículos - PiezasYA v1.4.0",
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
@@ -36,7 +36,10 @@
     "express",
     "mongodb"
   ],
-  "author": "PiezasYA Team",
+  "author": "Juan Hernandez <jcarweb.designer@gmail.com> (LDJ Digital Solutions)",
+  "contributors": [
+    "PiezasYA Development Team"
+  ],
   "license": "MIT",
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",
@@ -44,6 +47,7 @@
     "@heroicons/react": "^2.2.0",
     "@types/express-session": "^1.18.2",
     "@types/google.maps": "^3.58.1",
+    "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^7.0.1",
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.16",
@@ -71,6 +75,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "multer-storage-cloudinary": "^4.0.0",
+    "node-cron": "^4.2.1",
     "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.5",
     "otplib": "^12.0.1",
