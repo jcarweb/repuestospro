@@ -405,8 +405,8 @@ app.use('/api/diagnostic', diagnosticRoutes);
 // Variables globales para chat
 let chatService: ChatService;
 let chatController: ChatController;
-// Middleware para manejar rutas no encontradas
-app.use('*', (req, res) => {
+// Middleware para manejar rutas no encontradas (catch-all)
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: 'Ruta no encontrada'
