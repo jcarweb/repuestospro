@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { API_BASE_URL } from '../../config/api';
 import { useAuth } from './AuthContext';
 
 interface Store {

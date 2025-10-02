@@ -161,7 +161,7 @@ class NotificationController {
         pushEnabled: true,
         pushToken: { $exists: true, $ne: null }
       });
-      const userIds = users.map(user => user._id.toString());
+      const userIds = users.map(user => (user._id as any).toString());
       return await this.sendPushToUsers(userIds, notification);
     } catch (error) {
       console.error('Error sending push to all users:', error);
@@ -192,7 +192,7 @@ class NotificationController {
         pushEnabled: true,
         pushToken: { $exists: true, $ne: null }
       });
-      const userIds = users.map(user => user._id.toString());
+      const userIds = users.map(user => (user._id as any).toString());
       return await this.sendPushToUsers(userIds, notification);
     } catch (error) {
       console.error('Error sending push by role:', error);
@@ -231,7 +231,7 @@ class NotificationController {
           }
         }
       });
-      const userIds = users.map(user => user._id.toString());
+      const userIds = users.map(user => (user._id as any).toString());
       return await this.sendPushToUsers(userIds, notification);
     } catch (error) {
       console.error('Error sending push by location:', error);

@@ -42,7 +42,7 @@ export interface CartItem {
 export type UserRole = 'admin' | 'client' | 'delivery' | 'store_manager' | 'seller';
 
 export interface User {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   phone?: string;

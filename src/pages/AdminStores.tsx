@@ -5,7 +5,6 @@ import {
   Store, 
   Plus, 
   Search, 
-  Filter, 
   Edit, 
   Trash2, 
   Eye, 
@@ -14,18 +13,15 @@ import {
   Phone, 
   Mail, 
   Globe, 
-  Clock, 
-  Settings,
   ChevronLeft,
   ChevronRight,
-  MoreVertical,
   BarChart3,
   CheckCircle,
   XCircle,
   AlertCircle
 } from 'lucide-react';
 import FreeStoreLocationMap from '../components/FreeStoreLocationMap';
-import { fetchUsers, createUser, updateUser, deleteUser } from '../services/userService';
+import { fetchUsers } from '../services/userService';
 import type { User } from '../types';
 import { API_BASE_URL } from '../config/api';
 
@@ -232,17 +228,15 @@ const AdminStores: React.FC = () => {
   // Función para cargar usuarios disponibles
   const loadAvailableUsers = async () => {
     try {
-      const [ownersResponse, managersResponse] = await Promise.all([
-        userService.getStoreOwners(),
-        userService.getStoreManagers()
-      ]);
-
-      if (ownersResponse.success && ownersResponse.data) {
-        setAvailableOwners(ownersResponse.data);
-      }
-
-      if (managersResponse.success && managersResponse.data) {
-        setAvailableManagers(managersResponse.data);
+      const response = await fetchUsers(1, 100); // Get all users
+      
+      if (response.success && response.users) {
+        const users = response.users;
+        const owners = users.filter((user: User) => user.role === 'admin');
+        const managers = users.filter((user: User) => user.role === 'store_manager');
+        
+        setAvailableOwners(owners);
+        setAvailableManagers(managers);
       }
     } catch (error) {
       console.error('Error cargando usuarios disponibles:', error);

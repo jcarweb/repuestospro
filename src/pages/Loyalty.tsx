@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import ShareModal from '../components/ShareModal';
 import ReferralModal from '../components/ReferralModal';
+import { API_BASE_URL } from '../../config/api';
 import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics';
 
 interface LoyaltyStats {

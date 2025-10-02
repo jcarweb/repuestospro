@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User, UserRole } from '../types';
+import { API_BASE_URL } from '../../config/api';
 
 interface AuthContextType {
   user: User | null | undefined;
@@ -213,7 +214,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Manejar errores específicos de red
       if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-        throw new Error('No se pudo conectar con el servidor. Verifica que el backend esté ejecutándose en http://localhost:5000');
+        throw new Error('No se pudo conectar con el servidor. Verifica que el backend esté ejecutándose en API_BASE_URL');
       }
       
       throw error;
@@ -242,6 +243,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const hasRole = (role: UserRole): boolean => {
+    console.log('🔍 hasRole check:', { userRole: user?.role, requestedRole: role, match: user?.role === role });
     return user?.role === role;
   };
 

@@ -386,7 +386,7 @@ export class AdvertisementRequestController {
       request.adminNotes = adminNotes;
       request.approvedBy = req.user?._id;
       request.approvedAt = new Date();
-      request.createdAdvertisement = advertisement._id;
+      request.createdAdvertisement = advertisement._id as any;
       await request.save();
 
       // Enviar email de aprobación al gestor
@@ -394,7 +394,7 @@ export class AdvertisementRequestController {
         await emailService.sendAdvertisementApproval(
           (request.storeManager as any).email,
           request.campaignName,
-          advertisement._id.toString(),
+          (advertisement._id as any).toString(),
           adminNotes
         );
       } catch (emailError) {

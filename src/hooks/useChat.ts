@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { API_BASE_URL } from '../../config/api';
 import { io, Socket } from 'socket.io-client';
 
 export interface ChatMessage {

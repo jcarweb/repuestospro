@@ -3,8 +3,6 @@ const CACHE_NAME = 'piezasya-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
   '/piezasya.png'
 ];
 
@@ -126,8 +124,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // SIEMPRE usar solo cache - NO intentar actualizaciones remotas
-  log('🔒 Usando SOLO cache local - SIN actualizaciones remotas');
+  // Estrategia: Cache First, luego Network
+  log('🔄 Estrategia: Cache First, luego Network');
   
   event.respondWith(
     caches.match(request)
@@ -138,24 +136,67 @@ self.addEventListener('fetch', (event) => {
         }
         
         log('❌ Recurso NO encontrado en cache:', url);
-        log('🔒 NO intentando descarga remota - devolviendo respuesta offline');
+        log('🌐 Intentando descarga remota...');
         
-        // Si no está en cache, devolver una respuesta básica
-        return new Response('Recurso no disponible en modo offline', {
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: { 'Content-Type': 'text/plain' }
-        });
+        // Si no está en cache, intentar descargar de la red
+        return fetch(request)
+          .then((response) => {
+            // Verificar si la respuesta es válida
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              log('❌ Respuesta de red inválida:', {
+                status: response?.status,
+                type: response?.type
+              });
+              throw new Error('Respuesta inválida');
+            }
+            
+            log('✅ Recurso descargado exitosamente:', url);
+            
+            // Clonar la respuesta para cachearla
+            const responseToCache = response.clone();
+            
+            // Cachear el recurso para futuras peticiones
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(request, responseToCache);
+                log('💾 Recurso agregado al cache:', url);
+              })
+              .catch((error) => {
+                log('❌ Error cacheando recurso:', error);
+              });
+            
+            return response;
+          })
+          .catch((error) => {
+            log('❌ Error en descarga remota:', error);
+            log('🔒 Devolviendo respuesta offline');
+            
+            // Si falla la descarga, devolver una respuesta básica
+            return new Response('Recurso no disponible', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: { 'Content-Type': 'text/plain' }
+            });
+          });
       })
       .catch((error) => {
         log('❌ Error en cache.match:', error);
-        log('🔒 Devolviendo respuesta de error offline');
+        log('🌐 Intentando descarga directa...');
         
-        return new Response('Error de conexión', {
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: { 'Content-Type': 'text/plain' }
-        });
+        // Si falla el cache, intentar descarga directa
+        return fetch(request)
+          .then((response) => {
+            log('✅ Descarga directa exitosa:', url);
+            return response;
+          })
+          .catch((error) => {
+            log('❌ Error en descarga directa:', error);
+            return new Response('Error de conexión', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: { 'Content-Type': 'text/plain' }
+            });
+          });
       })
   );
 });

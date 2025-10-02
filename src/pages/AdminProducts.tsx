@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config/api';
 import { useLanguage } from '../contexts/LanguageContext';
-import { 
+import {
   Package, 
   Plus, 
   Search, 

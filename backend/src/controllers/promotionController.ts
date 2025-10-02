@@ -57,7 +57,7 @@ export class PromotionController {
         return;
       }
       // Verificar acceso a promociones según el plan de suscripción
-      const accessCheck = await SubscriptionService.hasPromotionsAccess(userStore._id.toString());
+      const accessCheck = await SubscriptionService.hasPromotionsAccess((userStore._id as any).toString());
       if (!accessCheck.hasAccess) {
         res.status(403).json({
           success: false,
