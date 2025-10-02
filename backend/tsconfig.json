@@ -28,6 +28,8 @@
     "paths": {
       "@/*": ["src/*"]
     },
+    "allowImportingTsExtensions": false,
+    "noEmit": false,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
