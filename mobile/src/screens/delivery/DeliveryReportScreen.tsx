@@ -14,6 +14,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { apiService } from '../../services/api';
+import { deliveryService } from '../../services/deliveryService';
 
 interface DeliveryStats {
   totalDeliveries: number;
@@ -70,53 +71,74 @@ const DeliveryReportScreen: React.FC = () => {
 
   const { width } = Dimensions.get('window');
 
+  const getDateFromPeriod = (period: string): string => {
+    const today = new Date();
+    switch (period) {
+      case 'today':
+        return today.toISOString().split('T')[0];
+      case 'week':
+        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return weekAgo.toISOString().split('T')[0];
+      case 'month':
+        const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+        return monthAgo.toISOString().split('T')[0];
+      case 'year':
+        const yearAgo = new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000);
+        return yearAgo.toISOString().split('T')[0];
+      default:
+        return today.toISOString().split('T')[0];
+    }
+  };
+
   const loadReports = async () => {
     try {
       setLoading(true);
-      const response = await apiService.getDeliveryReports({ period: selectedPeriod });
       
-      if (response.success) {
-        setStats(response.data.stats);
-        setDailyReports(response.data.daily);
-        // setWeeklyReports(response.data.weekly); // TODO: Implementar reportes semanales
+      const response = await deliveryService.getDeliveryReports({ 
+        dateFrom: getDateFromPeriod(selectedPeriod),
+        dateTo: new Date().toISOString().split('T')[0]
+      });
+      
+      if (response.success && response.data) {
+        setStats(response.data.stats || {});
+        setDailyReports(response.data.daily || []);
+        setWeeklyReports(response.data.weekly || []);
+        console.log('✅ Reportes del delivery cargados:', response.data);
       } else {
-        throw new Error(response.message || 'Error al cargar reportes');
+        console.warn('⚠️ No se pudieron cargar los reportes, usando datos por defecto');
+        // Datos por defecto en caso de error
+        setStats({
+          totalDeliveries: 0,
+          completedDeliveries: 0,
+          failedDeliveries: 0,
+          averageDeliveryTime: 0,
+          totalEarnings: 0,
+          averageRating: 0,
+          totalDistance: 0,
+          fuelCost: 0,
+          netEarnings: 0,
+        });
+        setDailyReports([]);
+        setWeeklyReports([]);
       }
     } catch (error) {
       console.error('Error loading reports:', error);
       showToast('Error al cargar reportes', 'error');
       
-      // Fallback a datos mock en caso de error
-      const mockStats: DeliveryStats = {
-        totalDeliveries: 156,
-        completedDeliveries: 142,
-        failedDeliveries: 14,
-        averageDeliveryTime: 28, // minutos
-        totalEarnings: 2340.50,
-        averageRating: 4.7,
-        totalDistance: 1250.75, // km
-        fuelCost: 187.50,
-        netEarnings: 2153.00,
-      };
-
-      const mockDailyReports: DailyReport[] = [
-        { date: '2024-01-15', deliveries: 8, completed: 7, failed: 1, earnings: 120.50, distance: 65.2, rating: 4.8 },
-        { date: '2024-01-14', deliveries: 6, completed: 6, failed: 0, earnings: 95.25, distance: 48.7, rating: 4.9 },
-        { date: '2024-01-13', deliveries: 9, completed: 8, failed: 1, earnings: 145.75, distance: 72.1, rating: 4.6 },
-        { date: '2024-01-12', deliveries: 7, completed: 7, failed: 0, earnings: 112.00, distance: 58.3, rating: 4.7 },
-        { date: '2024-01-11', deliveries: 5, completed: 4, failed: 1, earnings: 78.50, distance: 42.8, rating: 4.5 },
-      ];
-
-      const mockWeeklyReports: WeeklyReport[] = [
-        { week: 'Semana 1', totalDeliveries: 35, completedDeliveries: 32, totalEarnings: 451.00, averageRating: 4.7, totalDistance: 287.1 },
-        { week: 'Semana 2', totalDeliveries: 42, completedDeliveries: 38, totalEarnings: 567.25, averageRating: 4.8, totalDistance: 345.6 },
-        { week: 'Semana 3', totalDeliveries: 38, completedDeliveries: 35, totalEarnings: 512.75, averageRating: 4.6, totalDistance: 298.4 },
-        { week: 'Semana 4', totalDeliveries: 41, completedDeliveries: 37, totalEarnings: 589.50, averageRating: 4.9, totalDistance: 319.7 },
-      ];
-
-      setStats(mockStats);
-      setDailyReports(mockDailyReports);
-      setWeeklyReports(mockWeeklyReports);
+      // Datos por defecto en caso de error
+      setStats({
+        totalDeliveries: 0,
+        completedDeliveries: 0,
+        failedDeliveries: 0,
+        averageDeliveryTime: 0,
+        totalEarnings: 0,
+        averageRating: 0,
+        totalDistance: 0,
+        fuelCost: 0,
+        netEarnings: 0,
+      });
+      setDailyReports([]);
+      setWeeklyReports([]);
     } finally {
       setLoading(false);
     }

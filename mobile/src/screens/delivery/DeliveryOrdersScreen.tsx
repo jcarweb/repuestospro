@@ -15,30 +15,8 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { apiService } from '../../services/api';
-
-interface DeliveryOrder {
-  id: string;
-  orderNumber: string;
-  customerName: string;
-  customerPhone: string;
-  customerAddress: string;
-  deliveryAddress: string;
-  totalAmount: number;
-  status: 'assigned' | 'picked_up' | 'in_transit' | 'delivered' | 'failed';
-  assignedAt: string;
-  estimatedDeliveryTime: string;
-  items: Array<{
-    name: string;
-    quantity: number;
-    price: number;
-  }>;
-  specialInstructions?: string;
-  paymentMethod: 'cash' | 'card' | 'transfer';
-  coordinates?: {
-    latitude: number;
-    longitude: number;
-  };
-}
+import { deliveryService, DeliveryOrder } from '../../services/deliveryService';
+import SignatureCapture from '../../components/SignatureCapture';
 
 const DeliveryOrdersScreen: React.FC = () => {
   const { colors } = useTheme();
@@ -49,70 +27,27 @@ const DeliveryOrdersScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'assigned' | 'picked_up' | 'in_transit' | 'delivered'>('all');
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<DeliveryOrder | null>(null);
 
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const response = await apiService.getDeliveryOrders({ 
-        status: selectedFilter !== 'all' ? selectedFilter : undefined,
-        limit: 50,
-        page: 1
-      });
       
-      if (response.success) {
-        // Transformar los datos del backend al formato esperado por el frontend
-        const transformedOrders: DeliveryOrder[] = response.data.map((delivery: any) => ({
-          id: delivery._id,
-          orderNumber: delivery.orderId?.orderNumber || 'N/A',
-          customerName: delivery.customerId?.name || 'Cliente',
-          customerPhone: delivery.customerId?.phone || '+58 000 000 0000',
-          customerAddress: delivery.deliveryLocation?.address || 'Dirección no disponible',
-          deliveryAddress: delivery.deliveryLocation?.address || 'Dirección no disponible',
-          totalAmount: delivery.deliveryFee || 0,
-          status: delivery.status,
-          assignedAt: delivery.createdAt,
-          estimatedDeliveryTime: delivery.estimatedDeliveryTime,
-          items: delivery.orderId?.items || [],
-          specialInstructions: delivery.deliveryLocation?.instructions,
-          paymentMethod: delivery.orderId?.paymentMethod || 'cash',
-          coordinates: delivery.deliveryLocation?.coordinates
-        }));
-        
-        setOrders(transformedOrders);
+      const response = await deliveryService.getAssignedOrders();
+      
+      if (response.success && response.data) {
+        setOrders(response.data);
+        console.log('✅ Órdenes asignadas cargadas:', response.data.length);
       } else {
-        throw new Error(response.message || 'Error al cargar órdenes');
+        console.warn('⚠️ No se pudieron cargar las órdenes asignadas');
+        setOrders([]);
+        showToast('No se pudieron cargar las órdenes asignadas', 'error');
       }
     } catch (error) {
       console.error('Error loading orders:', error);
       showToast('Error al cargar órdenes', 'error');
-      
-      // Fallback a datos mock en caso de error
-      const mockOrders: DeliveryOrder[] = [
-        {
-          id: '1',
-          orderNumber: 'ORD-001',
-          customerName: 'Juan Pérez',
-          customerPhone: '+58 412 123 4567',
-          customerAddress: 'Av. Principal, Caracas',
-          deliveryAddress: 'Calle 5, Edificio Los Rosales, Apto 3B, Caracas',
-          totalAmount: 125.50,
-          status: 'assigned',
-          assignedAt: '2024-01-15T10:30:00Z',
-          estimatedDeliveryTime: '2024-01-15T12:00:00Z',
-          items: [
-            { name: 'Filtro de Aceite', quantity: 2, price: 25.00 },
-            { name: 'Pastillas de Freno', quantity: 1, price: 75.50 }
-          ],
-          specialInstructions: 'Llamar antes de llegar',
-          paymentMethod: 'cash',
-          coordinates: {
-            latitude: 10.4806,
-            longitude: -66.9036
-          }
-        }
-      ];
-      
-      setOrders(mockOrders);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -126,7 +61,7 @@ const DeliveryOrdersScreen: React.FC = () => {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      const response = await apiService.updateOrderStatus(orderId, newStatus);
+      const response = await deliveryService.updateOrderStatus(orderId, newStatus);
       
       if (response.success) {
         setOrders(prev => prev.map(order => 
@@ -148,6 +83,49 @@ const DeliveryOrdersScreen: React.FC = () => {
       console.error('Error updating order status:', error);
       showToast('Error al actualizar estado', 'error');
     }
+  };
+
+  const handleDeliverOrder = (order: DeliveryOrder) => {
+    setSelectedOrder(order);
+    setShowSignatureModal(true);
+  };
+
+  const handleSignatureSave = async (signature: string) => {
+    if (!selectedOrder) return;
+
+    try {
+      // Guardar la firma en el backend
+      const signatureResponse = await deliveryService.saveDeliverySignature(
+        selectedOrder.id,
+        signature,
+        selectedOrder.customerName,
+        'Entrega confirmada con firma del cliente'
+      );
+      
+      if (signatureResponse.success) {
+        // Actualizar el estado de la orden a entregada
+        await updateOrderStatus(selectedOrder.id, 'delivered');
+        
+        console.log('✅ Firma capturada y guardada para orden:', selectedOrder.orderNumber);
+        showToast('Orden entregada exitosamente con firma del cliente', 'success');
+        
+        // Recargar órdenes para reflejar el cambio
+        await loadOrders();
+      } else {
+        throw new Error(signatureResponse.error || 'Error al guardar firma');
+      }
+    } catch (error) {
+      console.error('Error al procesar entrega:', error);
+      showToast('Error al procesar la entrega', 'error');
+    } finally {
+      setShowSignatureModal(false);
+      setSelectedOrder(null);
+    }
+  };
+
+  const handleSignatureClose = () => {
+    setShowSignatureModal(false);
+    setSelectedOrder(null);
   };
 
   const showStatusUpdateDialog = (order: DeliveryOrder) => {
@@ -326,6 +304,16 @@ const DeliveryOrdersScreen: React.FC = () => {
       </View>
 
       <View style={styles.orderActions}>
+        {order.status === 'in_transit' && (
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: '#34C759' }]}
+            onPress={() => handleDeliverOrder(order)}
+          >
+            <Ionicons name="create" size={16} color="white" />
+            <Text style={styles.actionButtonText}>Entregar con Firma</Text>
+          </TouchableOpacity>
+        )}
+        
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: colors.primary }]}
           onPress={() => showStatusUpdateDialog(order)}
@@ -420,6 +408,15 @@ const DeliveryOrdersScreen: React.FC = () => {
             </Text>
           </View>
         }
+      />
+
+      {/* Signature Modal */}
+      <SignatureCapture
+        visible={showSignatureModal}
+        onClose={handleSignatureClose}
+        onSave={handleSignatureSave}
+        customerName={selectedOrder?.customerName}
+        orderNumber={selectedOrder?.orderNumber}
       />
     </View>
   );

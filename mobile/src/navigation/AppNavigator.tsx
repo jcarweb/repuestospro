@@ -46,6 +46,8 @@ import AdminEditProfileScreen from '../screens/admin/AdminEditProfileScreen';
 import OrderDetailsScreen from '../screens/admin/OrderDetailsScreen';
 import AdminCreateUserScreen from '../screens/admin/AdminCreateUserScreen';
 import AdminCreateProductScreen from '../screens/admin/AdminCreateProductScreen';
+import AdminDeliveryScreen from '../screens/admin/AdminDeliveryScreen';
+import AdminSearchConfigScreen from '../screens/admin/AdminSearchConfigScreen';
 import StorePhotoCaptureScreen from '../screens/admin/StorePhotoCaptureScreen';
 import StorePhotosListScreen from '../screens/admin/StorePhotosListScreen';
 
@@ -57,6 +59,7 @@ import StoreConfigurationScreen from '../screens/store-manager/StoreConfiguratio
 
 // Seller Screens
 import SellerDashboardScreen from '../screens/seller/SellerDashboardScreen';
+import SellerProfileScreen from '../screens/seller/SellerProfileScreen';
 import QuotationsScreen from '../screens/QuotationsScreen';
 import CreateQuotationScreen from '../screens/CreateQuotationScreen';
 import QuotationDetailsScreen from '../screens/QuotationDetailsScreen';
@@ -546,6 +549,24 @@ const AppNavigator = () => {
                     headerBackTitle: 'Perfil'
                   }} 
                 />
+                <Stack.Screen 
+                  name="AdminDelivery" 
+                  component={AdminDeliveryScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Gestión de Delivery',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="AdminSearchConfig" 
+                  component={AdminSearchConfigScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Configuración de Búsqueda',
+                    headerBackTitle: 'Dashboard'
+                  }} 
+                />
               </>
             )}
             
@@ -614,6 +635,15 @@ const AppNavigator = () => {
                   name="SellerDashboard" 
                   component={SellerDashboardScreen} 
                   options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="SellerProfile" 
+                  component={SellerProfileScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Perfil de Vendedor',
+                    headerBackTitle: 'Dashboard'
+                  }} 
                 />
                 <Stack.Screen 
                   name="Quotations" 

@@ -19,6 +19,8 @@ import * as ImagePicker from 'expo-image-picker';
 import LocationPicker from '../../components/LocationPicker';
 import apiService from '../../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { deliveryService } from '../../services/deliveryService';
+import { getBaseURL } from '../../config/api';
 
 const DeliveryEditProfileScreen: React.FC = () => {
   const { colors } = useTheme();
@@ -58,6 +60,21 @@ const DeliveryEditProfileScreen: React.FC = () => {
         return;
       }
 
+      // Cargar datos del backend primero
+      await loadUserProfile();
+      
+      // Usar datos del usuario actualizado
+      setName(user?.name || '');
+      setEmail(user?.email || '');
+      setPhone(user?.phone || '');
+      setAddress(user?.address || '');
+      
+      // Cargar imagen de perfil
+      if (user?.avatar) {
+        const imageUrl = user.avatar.startsWith('http') ? user.avatar : `${getBaseURL()}${user.avatar}`;
+        setProfileImage(imageUrl);
+      }
+      
       // Cargar datos guardados del perfil específicos del usuario
       const userProfileKey = `profileData_${user.id}`;
       const savedProfileData = await AsyncStorage.getItem(userProfileKey);
@@ -68,9 +85,12 @@ const DeliveryEditProfileScreen: React.FC = () => {
         
         setName(profileData.name || user?.name || '');
         setEmail(profileData.email || user?.email || '');
-        setPhone(profileData.phone || '');
-        setAddress(profileData.address || '');
-        setProfileImage(profileData.profileImage || null);
+        setPhone(profileData.phone || user?.phone || '');
+        setAddress(profileData.address || user?.address || '');
+        
+        if (profileData.profileImage) {
+          setProfileImage(profileData.profileImage);
+        }
         
         // Cargar ubicación GPS
         if (profileData.location && profileData.location.coordinates && profileData.location.coordinates.length === 2) {
@@ -84,12 +104,9 @@ const DeliveryEditProfileScreen: React.FC = () => {
         } else {
           console.log('No hay datos de ubicación GPS guardados');
         }
-      } else {
-        // Usar datos del usuario actual
-        setName(user?.name || '');
-        setEmail(user?.email || '');
-        console.log(`No hay datos de perfil guardados para usuario ${user.id}, usando datos del usuario:`, user);
       }
+      
+      console.log('✅ Datos del perfil del delivery cargados');
     } catch (error) {
       console.error('Error cargando datos del perfil:', error);
     }
@@ -183,6 +200,7 @@ const DeliveryEditProfileScreen: React.FC = () => {
       
       // Intentar guardar en el backend
       try {
+        // Primero actualizar datos básicos
         const response = await apiService.updateUserProfile({
           name,
           email,
@@ -190,6 +208,25 @@ const DeliveryEditProfileScreen: React.FC = () => {
           address,
           location: profileData.location
         });
+        
+        // Si hay imagen de perfil, subirla
+        if (profileImage && profileImage.startsWith('file://')) {
+          try {
+            const formData = new FormData();
+            formData.append('image', {
+              uri: profileImage,
+              type: 'image/jpeg',
+              name: 'profile.jpg',
+            } as any);
+            
+            const imageResponse = await apiService.uploadAvatar(formData);
+            if (imageResponse.success) {
+              console.log('✅ Imagen de perfil subida exitosamente');
+            }
+          } catch (imageError) {
+            console.error('Error subiendo imagen:', imageError);
+          }
+        }
         
         if (response.success) {
           showToast('Perfil actualizado exitosamente', 'success');
@@ -357,6 +394,22 @@ const DeliveryEditProfileScreen: React.FC = () => {
             </Text>
           </View>
         )}
+
+        {/* Manual Save Button */}
+        <TouchableOpacity
+          style={[styles.saveButton, { backgroundColor: colors.primary }]}
+          onPress={saveProfileData}
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Ionicons name="save" size={20} color="white" />
+          )}
+          <Text style={styles.saveButtonText}>
+            {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+          </Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -434,6 +487,22 @@ const styles = StyleSheet.create({
   savingText: {
     marginLeft: 10,
     fontSize: 14,
+  },
+  saveButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
 });
 

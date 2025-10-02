@@ -15,6 +15,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { apiService } from '../../services/api';
+import { deliveryService } from '../../services/deliveryService';
 
 interface WorkDay {
   day: string;
@@ -73,11 +74,16 @@ const DeliveryScheduleScreen: React.FC = () => {
   const loadSchedule = async () => {
     try {
       setLoading(true);
-      // TODO: Implementar endpoint real para horario de trabajo
-      // const response = await apiService.getDeliverySchedule();
-      // setSchedule(response.data);
       
-      // Datos mock por ahora - ya están en el estado inicial
+      const response = await deliveryService.getDeliverySettings();
+      
+      if (response.success && response.data?.schedule) {
+        setSchedule(response.data.schedule);
+        console.log('✅ Horario de trabajo cargado:', response.data.schedule);
+      } else {
+        console.warn('⚠️ No se pudo cargar el horario, usando configuración por defecto');
+        // Mantener configuración por defecto que ya está en el estado
+      }
     } catch (error) {
       console.error('Error loading schedule:', error);
       showToast('Error al cargar horario', 'error');
@@ -89,10 +95,17 @@ const DeliveryScheduleScreen: React.FC = () => {
   const saveSchedule = async () => {
     try {
       setSaving(true);
-      // TODO: Implementar endpoint real para guardar horario
-      // await apiService.updateDeliverySchedule(schedule);
       
-      showToast('Horario guardado exitosamente', 'success');
+      const response = await deliveryService.updateDeliverySettings({
+        schedule: schedule
+      });
+      
+      if (response.success) {
+        showToast('Horario guardado exitosamente', 'success');
+        console.log('✅ Horario de trabajo guardado:', schedule);
+      } else {
+        throw new Error(response.message || 'Error al guardar horario');
+      }
     } catch (error) {
       console.error('Error saving schedule:', error);
       showToast('Error al guardar horario', 'error');

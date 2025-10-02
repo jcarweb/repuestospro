@@ -8,6 +8,7 @@ import {
   Alert,
   RefreshControl,
   Switch,
+  Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,20 +16,8 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { apiService } from '../../services/api';
-
-interface DeliveryStats {
-  assignedOrders: number;
-  completedToday: number;
-  averageRating: number;
-  totalEarnings: number;
-  currentStatus: 'available' | 'unavailable' | 'busy' | 'on_route' | 'returning_to_store';
-  autoStatusMode: boolean;
-  workHours: string;
-  deliveryZone: {
-    center: [number, number];
-    radius: number;
-  };
-}
+import { getBaseURL } from '../../config/api';
+import { deliveryService, DeliveryStats } from '../../services/deliveryService';
 
 const DeliveryDashboardScreen: React.FC = () => {
   const { colors } = useTheme();
@@ -54,38 +43,54 @@ const DeliveryDashboardScreen: React.FC = () => {
   const loadDeliveryStats = async () => {
     try {
       setLoading(true);
-      const response = await apiService.getDeliveryStats();
       
-      if (response.success) {
+      const response = await deliveryService.getDeliveryStats();
+      
+      if (response.success && response.data) {
         const data = response.data;
         setStats({
-          assignedOrders: data.totalDeliveries || 0,
-          completedToday: data.completedDeliveries || 0,
+          assignedOrders: data.assignedOrders || 0,
+          completedToday: data.completedToday || 0,
           averageRating: data.averageRating || 0,
           totalEarnings: data.totalEarnings || 0,
-          currentStatus: user?.deliveryStatus || 'unavailable',
-          autoStatusMode: user?.autoStatusMode || false,
-          workHours: user?.workSchedule ? `${user.workSchedule.startTime} - ${user.workSchedule.endTime}` : '8:00 - 17:00',
-          deliveryZone: user?.deliveryZone || {
+          currentStatus: data.currentStatus || 'unavailable',
+          autoStatusMode: data.autoStatusMode || false,
+          workHours: data.workHours || '8:00 - 17:00',
+          deliveryZone: data.deliveryZone || {
             center: [-66.98422315655894, 10.462530926442378],
             radius: 10,
           },
         });
+        console.log('✅ Estadísticas del delivery cargadas:', data);
       } else {
-        throw new Error(response.message || 'Error al cargar estadísticas');
+        console.warn('⚠️ No se pudieron cargar las estadísticas, usando datos por defecto');
+        // Datos por defecto en caso de error
+        setStats({
+          assignedOrders: 0,
+          completedToday: 0,
+          averageRating: 0,
+          totalEarnings: 0,
+          currentStatus: 'unavailable',
+          autoStatusMode: false,
+          workHours: '8:00 - 17:00',
+          deliveryZone: {
+            center: [-66.98422315655894, 10.462530926442378],
+            radius: 10,
+          },
+        });
       }
     } catch (error) {
       console.error('Error loading delivery stats:', error);
       showToast('Error al cargar estadísticas de delivery', 'error');
       
-      // Fallback a datos mock en caso de error
+      // Datos por defecto en caso de error
       setStats({
-        assignedOrders: 5,
-        completedToday: 12,
-        averageRating: 4.9,
-        totalEarnings: 850,
-        currentStatus: 'available',
-        autoStatusMode: true,
+        assignedOrders: 0,
+        completedToday: 0,
+        averageRating: 0,
+        totalEarnings: 0,
+        currentStatus: 'unavailable',
+        autoStatusMode: false,
         workHours: '8:00 - 17:00',
         deliveryZone: {
           center: [-66.98422315655894, 10.462530926442378],
@@ -290,7 +295,14 @@ const DeliveryDashboardScreen: React.FC = () => {
             style={[styles.profileButton, { backgroundColor: '#34C759' }]}
             onPress={() => navigation.navigate('DeliveryProfile')}
           >
-            <Ionicons name="person" size={20} color="white" />
+            {user?.avatar ? (
+              <Image 
+                source={{ uri: user.avatar.startsWith('http') ? user.avatar : `${getBaseURL()}${user.avatar}` }}
+                style={styles.profileImage}
+              />
+            ) : (
+              <Ionicons name="person" size={20} color="white" />
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -486,7 +498,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   header: {
-    padding: 20,
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
     borderBottomWidth: 1,
   },
   headerContent: {
@@ -512,6 +526,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 16,
+    overflow: 'hidden',
+  },
+  profileImage: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
   },
   roleBadge: {
     flexDirection: 'row',

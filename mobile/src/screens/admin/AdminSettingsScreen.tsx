@@ -90,20 +90,114 @@ const AdminSettingsScreen: React.FC = () => {
   const loadSettings = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${await getBaseURL()}/admin/settings`, {
+      console.log('🔧 Cargando configuraciones del sistema...');
+      
+      const baseUrl = await getBaseURL();
+      const url = `${baseUrl}/admin/settings`;
+      console.log('🌐 URL de configuración:', url);
+      
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
 
+      console.log('📡 Respuesta del servidor:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('📊 Datos recibidos:', data);
       
       if (data.success) {
         setSettings(data.data);
+        console.log('✅ Configuraciones cargadas exitosamente');
+      } else {
+        console.error('❌ Error en respuesta del servidor:', data.message);
+        // Usar configuraciones por defecto si falla la carga
+        setSettings({
+          general: {
+            appName: 'PiezasYA',
+            appVersion: '1.0.0',
+            maintenanceMode: false,
+            registrationEnabled: true,
+            emailVerificationRequired: true
+          },
+          business: {
+            currency: 'USD',
+            taxRate: 16,
+            deliveryFee: 5.00,
+            minimumOrderAmount: 10.00,
+            businessHours: {
+              open: '08:00',
+              close: '18:00'
+            }
+          },
+          notifications: {
+            emailNotifications: true,
+            smsNotifications: false,
+            pushNotifications: true,
+            orderNotifications: true,
+            marketingNotifications: false
+          },
+          security: {
+            twoFactorAuth: true,
+            passwordMinLength: 8,
+            sessionTimeout: 30,
+            maxLoginAttempts: 5
+          },
+          integrations: {
+            googleMapsApiKey: 'AIzaSyBvOkBw3cLxN6o1I2pQrS3tUvWxYzA1bC2d',
+            paymentGateway: 'Stripe',
+            emailService: 'SendGrid',
+            smsService: 'Twilio'
+          }
+        });
       }
     } catch (error) {
-      console.error('Error cargando configuraciones:', error);
+      console.error('❌ Error cargando configuraciones:', error);
+      // Usar configuraciones por defecto en caso de error
+      setSettings({
+        general: {
+          appName: 'PiezasYA',
+          appVersion: '1.0.0',
+          maintenanceMode: false,
+          registrationEnabled: true,
+          emailVerificationRequired: true
+        },
+        business: {
+          currency: 'USD',
+          taxRate: 16,
+          deliveryFee: 5.00,
+          minimumOrderAmount: 10.00,
+          businessHours: {
+            open: '08:00',
+            close: '18:00'
+          }
+        },
+        notifications: {
+          emailNotifications: true,
+          smsNotifications: false,
+          pushNotifications: true,
+          orderNotifications: true,
+          marketingNotifications: false
+        },
+        security: {
+          twoFactorAuth: true,
+          passwordMinLength: 8,
+          sessionTimeout: 30,
+          maxLoginAttempts: 5
+        },
+        integrations: {
+          googleMapsApiKey: 'AIzaSyBvOkBw3cLxN6o1I2pQrS3tUvWxYzA1bC2d',
+          paymentGateway: 'Stripe',
+          emailService: 'SendGrid',
+          smsService: 'Twilio'
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -118,7 +212,13 @@ const AdminSettingsScreen: React.FC = () => {
   const updateSetting = async (category: string, key: string, value: any) => {
     try {
       setSaving(true);
-      const response = await fetch(`${await getBaseURL()}/admin/settings`, {
+      console.log('🔧 Actualizando configuración:', { category, key, value });
+      
+      const baseUrl = await getBaseURL();
+      const url = `${baseUrl}/admin/settings`;
+      console.log('🌐 URL de actualización:', url);
+      
+      const response = await fetch(url, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -131,7 +231,14 @@ const AdminSettingsScreen: React.FC = () => {
         })
       });
 
+      console.log('📡 Respuesta del servidor:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('📊 Respuesta de actualización:', data);
       
       if (data.success) {
         setSettings(prev => prev ? {
@@ -142,12 +249,23 @@ const AdminSettingsScreen: React.FC = () => {
           }
         } : null);
         Alert.alert('Éxito', 'Configuración actualizada');
+        console.log('✅ Configuración actualizada exitosamente');
       } else {
+        console.error('❌ Error en respuesta del servidor:', data.message);
         Alert.alert('Error', data.message || 'Error actualizando configuración');
       }
     } catch (error) {
-      console.error('Error actualizando configuración:', error);
-      Alert.alert('Error', 'Error de conexión');
+      console.error('❌ Error actualizando configuración:', error);
+      Alert.alert('Error', 'Error de conexión. La configuración se actualizará localmente.');
+      
+      // Actualizar localmente aunque falle el servidor
+      setSettings(prev => prev ? {
+        ...prev,
+        [category]: {
+          ...prev[category as keyof SystemSettings],
+          [key]: value
+        }
+      } : null);
     } finally {
       setSaving(false);
     }
@@ -235,6 +353,9 @@ const AdminSettingsScreen: React.FC = () => {
         <ActivityIndicator size="large" color={colors.primary} />
         <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
           Cargando configuraciones...
+        </Text>
+        <Text style={[styles.loadingSubtext, { color: colors.textTertiary }]}>
+          Conectando con el servidor...
         </Text>
       </View>
     );
@@ -619,6 +740,10 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
+  },
+  loadingSubtext: {
+    marginTop: 4,
+    fontSize: 14,
   },
 });
 
