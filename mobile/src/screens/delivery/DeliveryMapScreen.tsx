@@ -14,6 +14,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { apiService } from '../../services/api';
+import { deliveryService } from '../../services/deliveryService';
 
 // Mock MapView component - En una implementación real usarías react-native-maps
 const MockMapView = ({ 
@@ -83,25 +84,28 @@ const DeliveryMapScreen: React.FC = () => {
   const loadDeliveryLocations = async () => {
     try {
       setLoading(true);
-      const response = await apiService.getDeliveryLocations();
       
-      if (response.success) {
-        // Transformar los datos del backend al formato esperado por el frontend
-        const transformedLocations: DeliveryLocation[] = response.data.map((location: any) => ({
-          id: location.id,
-          orderNumber: location.orderNumber,
-          customerName: location.customerName,
-          address: location.address,
-          coordinates: location.coordinates,
-          status: location.status === 'assigned' ? 'pending' : 
-                  location.status === 'picked_up' || location.status === 'in_transit' ? 'in_progress' : 'completed',
-          estimatedTime: location.estimatedTime,
-          priority: location.priority
+      const response = await deliveryService.getAssignedOrders();
+      
+      if (response.success && response.data) {
+        // Transformar las órdenes asignadas en ubicaciones de entrega
+        const transformedLocations: DeliveryLocation[] = response.data.map((order: any) => ({
+          id: order._id,
+          orderNumber: order.orderNumber,
+          customerName: order.customer.name,
+          address: order.deliveryAddress,
+          coordinates: order.coordinates || { latitude: 10.4806, longitude: -66.9036 },
+          status: order.status === 'assigned' ? 'pending' : 
+                  order.status === 'picked_up' || order.status === 'in_transit' ? 'in_progress' : 'completed',
+          estimatedTime: order.estimatedDelivery,
+          priority: 'medium' as const
         }));
         
         setDeliveryLocations(transformedLocations);
+        console.log('✅ Ubicaciones de entrega cargadas:', transformedLocations.length);
       } else {
-        throw new Error(response.message || 'Error al cargar ubicaciones');
+        console.warn('⚠️ No se pudieron cargar las ubicaciones de entrega');
+        setDeliveryLocations([]);
       }
       
       // Simular ubicación actual
@@ -112,31 +116,7 @@ const DeliveryMapScreen: React.FC = () => {
     } catch (error) {
       console.error('Error loading delivery locations:', error);
       showToast('Error al cargar ubicaciones', 'error');
-      
-      // Fallback a datos mock en caso de error
-      const mockLocations: DeliveryLocation[] = [
-        {
-          id: '1',
-          orderNumber: 'ORD-001',
-          customerName: 'Juan Pérez',
-          address: 'Calle 5, Edificio Los Rosales, Apto 3B, Caracas',
-          coordinates: {
-            latitude: 10.4806,
-            longitude: -66.9036
-          },
-          status: 'pending',
-          estimatedTime: '12:00 PM',
-          priority: 'high'
-        }
-      ];
-      
-      setDeliveryLocations(mockLocations);
-      
-      // Simular ubicación actual
-      setCurrentLocation({
-        latitude: 10.4806,
-        longitude: -66.9036
-      });
+      setDeliveryLocations([]);
     } finally {
       setLoading(false);
     }

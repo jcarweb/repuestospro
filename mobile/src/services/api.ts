@@ -295,12 +295,31 @@ class ApiService {
     const endpoint = `/products${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     const cacheKey = `products_${queryParams.toString()}`;
     
-    // Usar cache para productos (5 minutos de TTL)
-    return offlineService.getData(
-      cacheKey,
-      () => this.request<ApiResponse<any[]>>(endpoint),
-      5 * 60 * 1000
-    );
+    try {
+      const response = await this.request<any>(endpoint);
+      
+      // Transformar la respuesta del backend al formato esperado
+      if (response.success && response.data) {
+        return {
+          success: true,
+          data: response.data.products || response.data,
+          message: response.message
+        };
+      } else {
+        return {
+          success: false,
+          data: [],
+          message: response.message || 'Error al cargar productos'
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      return {
+        success: false,
+        data: [],
+        message: 'Error de conexión al cargar productos'
+      };
+    }
   }
 
   async getProduct(id: string): Promise<ApiResponse<any>> {
@@ -689,7 +708,7 @@ class ApiService {
   async updateDeliveryStatus(statusData: any): Promise<ApiResponse<any>> {
     try {
       const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/delivery/status`, {
+      const response = await fetch(`${baseURL}/api/admin/delivery/status`, {
         method: 'PUT',
         headers: this.getHeaders(),
         body: JSON.stringify(statusData),

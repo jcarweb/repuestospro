@@ -14,6 +14,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { apiService } from '../../services/api';
+import { deliveryService } from '../../services/deliveryService';
 
 interface Rating {
   id: string;
@@ -71,56 +72,43 @@ const DeliveryRatingsScreen: React.FC = () => {
   const loadRatings = async () => {
     try {
       setLoading(true);
-      const response = await apiService.getDeliveryRatings({ 
-        rating: selectedFilter !== 'all' ? parseInt(selectedFilter) : undefined,
-        limit: 50,
-        page: 1
-      });
       
-      if (response.success) {
-        setRatings(response.data.ratings);
-        setStats(response.data.stats);
+      const response = await deliveryService.getDeliveryRatings();
+      
+      if (response.success && response.data) {
+        setRatings(response.data.ratings || []);
+        setStats(response.data.stats || {
+          averageRating: 0,
+          totalRatings: 0,
+          ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+          categoryAverages: { punctuality: 0, service: 0, communication: 0, packaging: 0 },
+          recentTrend: 'stable'
+        });
+        console.log('✅ Calificaciones del delivery cargadas:', response.data);
       } else {
-        throw new Error(response.message || 'Error al cargar calificaciones');
+        console.warn('⚠️ No se pudieron cargar las calificaciones, usando datos por defecto');
+        setRatings([]);
+        setStats({
+          averageRating: 0,
+          totalRatings: 0,
+          ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+          categoryAverages: { punctuality: 0, service: 0, communication: 0, packaging: 0 },
+          recentTrend: 'stable'
+        });
       }
     } catch (error) {
       console.error('Error loading ratings:', error);
       showToast('Error al cargar calificaciones', 'error');
       
-      // Fallback a datos mock en caso de error
-      const mockRatings: Rating[] = [
-        {
-          id: '1',
-          orderNumber: 'ORD-001',
-          customerName: 'Juan Pérez',
-          rating: 5,
-          comment: 'Excelente servicio, muy puntual y amable. El repartidor llegó exactamente a la hora acordada y el producto llegó en perfecto estado.',
-          date: '2024-01-15T14:30:00Z',
-          categories: {
-            punctuality: 5,
-            service: 5,
-            communication: 4,
-            packaging: 5
-          },
-          isVerified: true
-        }
-      ];
-
-      const mockStats: RatingStats = {
-        averageRating: 4.4,
-        totalRatings: 5,
-        ratingDistribution: { 5: 3, 4: 1, 3: 1, 2: 0, 1: 0 },
-        categoryAverages: {
-          punctuality: 4.0,
-          service: 4.4,
-          communication: 4.2,
-          packaging: 4.6
-        },
-        recentTrend: 'up'
-      };
-
-      setRatings(mockRatings);
-      setStats(mockStats);
+      // Datos por defecto en caso de error
+      setRatings([]);
+      setStats({
+        averageRating: 0,
+        totalRatings: 0,
+        ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+        categoryAverages: { punctuality: 0, service: 0, communication: 0, packaging: 0 },
+        recentTrend: 'stable'
+      });
     } finally {
       setLoading(false);
     }

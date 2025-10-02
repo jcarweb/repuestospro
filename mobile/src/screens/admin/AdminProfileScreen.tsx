@@ -68,42 +68,43 @@ const AdminProfileScreen: React.FC = () => {
         console.log('No se pudieron cargar datos del backend, usando datos locales');
       }
 
-      // Cargar datos del perfil guardados específicos del usuario
+      // Usar la imagen del usuario actualizado
+      const avatarUrl = user.avatar || null;
+      console.log('🖼️ Avatar URL del usuario:', avatarUrl);
+      
+      if (avatarUrl) {
+        if (avatarUrl.startsWith('http')) {
+          // URL completa de Cloudinary o externa
+          console.log('🖼️ Usando URL completa:', avatarUrl);
+          setProfileImage(avatarUrl);
+        } else if (avatarUrl.startsWith('/uploads/')) {
+          // Ruta relativa del servidor
+          const baseUrl = await getBaseUrl();
+          const fullImageUrl = `${baseUrl}${avatarUrl}`;
+          console.log('🖼️ URL completa construida desde ruta relativa:', fullImageUrl);
+          setProfileImage(fullImageUrl);
+        } else {
+          // Otra ruta relativa
+          const baseUrl = await getBaseUrl();
+          const fullImageUrl = `${baseUrl}${avatarUrl}`;
+          console.log('🖼️ URL completa construida:', fullImageUrl);
+          setProfileImage(fullImageUrl);
+        }
+      } else {
+        console.log('🖼️ No hay avatar del usuario');
+        setProfileImage(null);
+      }
+
+      // Cargar datos del perfil guardados específicos del usuario para información adicional
       const userProfileKey = `profileData_${user.id}`;
       const savedProfileData = await AsyncStorage.getItem(userProfileKey);
       
       if (savedProfileData) {
         const data = JSON.parse(savedProfileData);
         setProfileData(data);
-        // Usar la imagen del usuario actualizado si está disponible, sino usar la guardada localmente
-        const avatarUrl = user.avatar || data.profileImage || null;
-        console.log('🖼️ Avatar URL encontrada:', avatarUrl);
-        if (avatarUrl && !avatarUrl.startsWith('http')) {
-          // Si es una ruta relativa, construir la URL completa
-          const baseUrl = await getBaseUrl();
-          const fullImageUrl = `${baseUrl}${avatarUrl}`;
-          console.log('🖼️ URL completa de imagen construida:', fullImageUrl);
-          setProfileImage(fullImageUrl);
-        } else {
-          console.log('🖼️ Usando URL de imagen directa:', avatarUrl);
-          setProfileImage(avatarUrl);
-        }
         console.log(`Datos del perfil cargados para usuario ${user.id}:`, data);
       } else {
-        // Si no hay datos guardados localmente, usar los datos del usuario actualizado
-        const avatarUrl = user.avatar || null;
-        console.log('🖼️ Avatar URL del usuario:', avatarUrl);
-        if (avatarUrl && !avatarUrl.startsWith('http')) {
-          // Si es una ruta relativa, construir la URL completa
-          const baseUrl = await getBaseUrl();
-          const fullImageUrl = `${baseUrl}${avatarUrl}`;
-          console.log('🖼️ URL completa de imagen construida:', fullImageUrl);
-          setProfileImage(fullImageUrl);
-        } else {
-          console.log('🖼️ Usando URL de imagen directa:', avatarUrl);
-          setProfileImage(avatarUrl);
-        }
-        console.log(`No hay datos de perfil guardados para usuario ${user.id}, usando datos del usuario actualizado`);
+        console.log(`No hay datos de perfil guardados para usuario ${user.id}`);
       }
     } catch (error) {
       console.error('Error cargando datos del perfil:', error);
@@ -128,7 +129,13 @@ const AdminProfileScreen: React.FC = () => {
   };
 
   const handleAnalyticsPress = () => {
-    showToast('Funcionalidad de analíticas próximamente', 'info');
+    Alert.alert(
+      'Analíticas y Reportes',
+      'Esta funcionalidad está en desarrollo y estará disponible en una próxima actualización.\n\nPodrás acceder a:\n• Estadísticas de ventas\n• Reportes de usuarios\n• Métricas de rendimiento\n• Análisis de tendencias',
+      [
+        { text: 'Entendido', style: 'default' }
+      ]
+    );
   };
 
   const handleSettingsPress = () => {

@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { fetchUsers, createUser, updateUser, deleteUser } from '../../services/userService';
+import { userService } from '../../services/userService';
 import type { User } from '../../services/userService';
 import { Ionicons } from '@expo/vector-icons';
 

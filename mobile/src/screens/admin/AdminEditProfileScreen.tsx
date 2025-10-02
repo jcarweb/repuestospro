@@ -39,6 +39,17 @@ const AdminEditProfileScreen: React.FC = () => {
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const saveAttemptRef = useRef(0);
 
+  const getBaseUrl = async () => {
+    try {
+      const { getBaseURL } = await import('../../config/api');
+      const baseUrl = await getBaseURL();
+      return baseUrl.replace('/api', '');
+    } catch (error) {
+      console.error('Error obteniendo URL base:', error);
+      return 'https://piezasya-back.onrender.com'; // Fallback
+    }
+  };
+
   useEffect(() => {
     requestPermissions();
     loadProfileData();
@@ -58,38 +69,67 @@ const AdminEditProfileScreen: React.FC = () => {
         return;
       }
 
-      // Cargar datos guardados del perfil específicos del usuario
-      const userProfileKey = `profileData_${user.id}`;
-      const savedProfileData = await AsyncStorage.getItem(userProfileKey);
+      // Primero intentar cargar datos reales del backend
+      try {
+        console.log('Cargando datos reales del usuario desde el backend...');
+        await loadUserProfile();
+      } catch (error) {
+        console.log('No se pudieron cargar datos del backend, usando datos locales');
+      }
+
+      // Usar datos del usuario actualizado del backend
+      setName(user?.name || '');
+      setEmail(user?.email || '');
+      setPhone(user?.phone || '');
+      setAddress(user?.address || '');
       
-      if (savedProfileData) {
-        const profileData = JSON.parse(savedProfileData);
-        console.log(`Datos del perfil cargados para usuario ${user.id}:`, profileData);
-        
-        setName(profileData.name || user?.name || '');
-        setEmail(profileData.email || user?.email || '');
-        setPhone(profileData.phone || '');
-        setAddress(profileData.address || '');
-        setProfileImage(profileData.profileImage || null);
-        
-        // Cargar ubicación GPS
-        if (profileData.location && profileData.location.coordinates && profileData.location.coordinates.length === 2) {
-          const locationData = {
-            latitude: profileData.location.coordinates[1],
-            longitude: profileData.location.coordinates[0],
-            address: profileData.location.address || 'Ubicación guardada'
-          };
-          setLocation(locationData);
-          console.log('Ubicación GPS cargada:', locationData);
+      // Cargar imagen de perfil
+      const avatarUrl = user?.avatar || null;
+      console.log('🖼️ Avatar URL del usuario:', avatarUrl);
+      
+      if (avatarUrl) {
+        if (avatarUrl.startsWith('http')) {
+          // URL completa de Cloudinary o externa
+          console.log('🖼️ Usando URL completa:', avatarUrl);
+          setProfileImage(avatarUrl);
+        } else if (avatarUrl.startsWith('/uploads/')) {
+          // Ruta relativa del servidor
+          const baseUrl = await getBaseUrl();
+          const fullImageUrl = `${baseUrl}${avatarUrl}`;
+          console.log('🖼️ URL completa construida desde ruta relativa:', fullImageUrl);
+          setProfileImage(fullImageUrl);
         } else {
-          console.log('No hay datos de ubicación GPS guardados');
+          // Otra ruta relativa
+          const baseUrl = await getBaseUrl();
+          const fullImageUrl = `${baseUrl}${avatarUrl}`;
+          console.log('🖼️ URL completa construida:', fullImageUrl);
+          setProfileImage(fullImageUrl);
         }
       } else {
-        // Usar datos del usuario actual
-        setName(user?.name || '');
-        setEmail(user?.email || '');
-        console.log(`No hay datos de perfil guardados para usuario ${user.id}, usando datos del usuario:`, user);
+        console.log('🖼️ No hay avatar del usuario');
+        setProfileImage(null);
       }
+
+      // Cargar ubicación GPS si existe
+      if (user?.location && user.location.coordinates && user.location.coordinates.length === 2) {
+        const locationData = {
+          latitude: user.location.coordinates[1],
+          longitude: user.location.coordinates[0],
+          address: user.location.address || 'Ubicación guardada'
+        };
+        setLocation(locationData);
+        console.log('Ubicación GPS cargada:', locationData);
+      } else {
+        console.log('No hay datos de ubicación GPS del usuario');
+      }
+
+      console.log(`Datos del perfil cargados para usuario ${user.id}:`, {
+        name: user?.name,
+        email: user?.email,
+        phone: user?.phone,
+        address: user?.address,
+        avatar: user?.avatar
+      });
     } catch (error) {
       console.error('Error cargando datos del perfil:', error);
     }
@@ -157,7 +197,7 @@ const AdminEditProfileScreen: React.FC = () => {
     );
   };
 
-  const saveProfileData = async () => {
+  const saveProfileData = async (isManualSave = false) => {
     try {
       setIsSaving(true);
       saveAttemptRef.current += 1;
@@ -200,7 +240,11 @@ const AdminEditProfileScreen: React.FC = () => {
         }
       } catch (error) {
         console.error('Error guardando en backend:', error);
-        showToast('Perfil guardado localmente', 'info');
+        if (isManualSave) {
+          showToast('Error al guardar en el servidor. Datos guardados localmente.', 'warning');
+        } else {
+          showToast('Perfil guardado localmente', 'info');
+        }
       }
       
     } catch (error) {
@@ -209,6 +253,10 @@ const AdminEditProfileScreen: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleManualSave = () => {
+    saveProfileData(true);
   };
 
   // Auto-guardar después de cambios
@@ -348,6 +396,24 @@ const AdminEditProfileScreen: React.FC = () => {
           />
         </View>
 
+        {/* Save Button */}
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+          <TouchableOpacity
+            style={[styles.saveButton, { backgroundColor: colors.primary }]}
+            onPress={handleManualSave}
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              <Ionicons name="save" size={20} color="white" />
+            )}
+            <Text style={styles.saveButtonText}>
+              {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Save Status */}
         {isSaving && (
           <View style={styles.savingContainer}>
@@ -434,6 +500,21 @@ const styles = StyleSheet.create({
   savingText: {
     marginLeft: 10,
     fontSize: 14,
+  },
+  saveButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
 });
 

@@ -160,21 +160,42 @@ const StorePhotoCaptureScreen: React.FC = () => {
       const { getBaseURL } = await import('../../config/api');
       const baseUrl = await getBaseURL();
       
+      console.log('📤 Subiendo foto de local...');
+      console.log('🌐 URL:', `${baseUrl}/admin/upload-store-photo`);
+      console.log('📋 Datos del formulario:', {
+        name: storeName.trim(),
+        phone: storePhone.trim(),
+        lat: location.latitude,
+        lng: location.longitude,
+        image: 'presente'
+      });
+      
       const response = await fetch(`${baseUrl}/admin/upload-store-photo`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${user?.token}`,
-          'Content-Type': 'multipart/form-data',
+          // No incluir Content-Type para multipart/form-data, el navegador lo maneja automáticamente
         },
         body: formData,
       });
 
+      console.log('📡 Respuesta del servidor:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Error del servidor:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
+      console.log('📊 Resultado de la subida:', result);
       
       if (!result.success) {
+        console.error('❌ Error en la respuesta:', result.message);
         throw new Error(result.message || 'Error subiendo la foto');
       }
       
+      console.log('✅ Foto subida exitosamente');
       showToast('Foto subida exitosamente', 'success');
       
       // Limpiar formulario
@@ -184,8 +205,20 @@ const StorePhotoCaptureScreen: React.FC = () => {
       setStorePhone('');
       
     } catch (error) {
-      console.error('Error uploading photo:', error);
-      showToast('Error al subir la foto', 'error');
+      console.error('❌ Error uploading photo:', error);
+      let errorMessage = 'Error al subir la foto';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Network request failed')) {
+          errorMessage = 'Error de conexión. Verifica tu internet.';
+        } else if (error.message.includes('HTTP error')) {
+          errorMessage = 'Error del servidor. Intenta nuevamente.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      showToast(errorMessage, 'error');
     } finally {
       setIsUploading(false);
     }

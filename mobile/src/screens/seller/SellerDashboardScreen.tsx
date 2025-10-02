@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,17 +15,8 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { apiService } from '../../services/api';
-
-interface SellerStats {
-  totalQueries: number;
-  successfulSales: number;
-  averageResponseTime: number;
-  customerRating: number;
-  unreadMessages: number;
-  pendingQuotes: number;
-  todayQueries: number;
-  monthlySales: number;
-}
+import { getBaseURL } from '../../config/api';
+import { sellerService, SellerStats } from '../../services/sellerService';
 
 const SellerDashboardScreen: React.FC = () => {
   const { colors } = useTheme();
@@ -47,24 +39,41 @@ const SellerDashboardScreen: React.FC = () => {
   const loadSellerStats = async () => {
     try {
       setLoading(true);
-      // TODO: Implementar endpoint real para estadísticas de vendedor
-      // const response = await apiService.getSellerStats();
-      // setStats(response.data);
       
-      // Datos mock por ahora
-      setStats({
-        totalQueries: 245,
-        successfulSales: 89,
-        averageResponseTime: 2.3,
-        customerRating: 4.8,
-        unreadMessages: 12,
-        pendingQuotes: 5,
-        todayQueries: 8,
-        monthlySales: 15600,
-      });
+      const response = await sellerService.getSellerStats();
+      
+      if (response.success && response.data) {
+        setStats(response.data);
+        console.log('✅ Estadísticas del vendedor cargadas:', response.data);
+      } else {
+        console.warn('⚠️ No se pudieron cargar las estadísticas, usando datos por defecto');
+        // Datos por defecto en caso de error
+        setStats({
+          totalQueries: 0,
+          successfulSales: 0,
+          averageResponseTime: 0,
+          customerRating: 0,
+          unreadMessages: 0,
+          pendingQuotes: 0,
+          todayQueries: 0,
+          monthlySales: 0,
+        });
+      }
     } catch (error) {
       console.error('Error loading seller stats:', error);
       showToast('Error al cargar estadísticas del vendedor', 'error');
+      
+      // Datos por defecto en caso de error
+      setStats({
+        totalQueries: 0,
+        successfulSales: 0,
+        averageResponseTime: 0,
+        customerRating: 0,
+        unreadMessages: 0,
+        pendingQuotes: 0,
+        todayQueries: 0,
+        monthlySales: 0,
+      });
     } finally {
       setLoading(false);
     }
@@ -139,8 +148,46 @@ const SellerDashboardScreen: React.FC = () => {
   );
 
   const handleQuickAction = (action: string) => {
-    showToast(`Acción: ${action}`, 'info');
-    // TODO: Implementar navegación a pantallas específicas
+    switch (action) {
+      case 'Consulta de Precios':
+        navigation.navigate('Quotations');
+        break;
+      case 'Chat con Clientes':
+        showToast('Chat con clientes próximamente', 'info');
+        break;
+      case 'Gestión de Cotizaciones':
+        navigation.navigate('Quotations');
+        break;
+      case 'Catálogo de Productos':
+        showToast('Catálogo de productos próximamente', 'info');
+        break;
+      case 'Gestión de Clientes':
+        showToast('Gestión de clientes próximamente', 'info');
+        break;
+      case 'Rendimiento':
+        showToast('Rendimiento próximamente', 'info');
+        break;
+      case 'Ver Consultas':
+        navigation.navigate('Quotations');
+        break;
+      case 'Ver Ventas':
+        navigation.navigate('Quotations');
+        break;
+      case 'Ver Tiempo Respuesta':
+        showToast('Tiempo de respuesta próximamente', 'info');
+        break;
+      case 'Ver Calificaciones':
+        showToast('Calificaciones próximamente', 'info');
+        break;
+      case 'Ver Mensajes':
+        showToast('Mensajes próximamente', 'info');
+        break;
+      case 'Ver Cotizaciones':
+        navigation.navigate('Quotations');
+        break;
+      default:
+        showToast(`Acción: ${action}`, 'info');
+    }
   };
 
   if (loading) {
@@ -181,9 +228,16 @@ const SellerDashboardScreen: React.FC = () => {
           </View>
           <TouchableOpacity
             style={[styles.profileButton, { backgroundColor: '#FF9500' }]}
-            onPress={() => showToast('Perfil de vendedor próximamente', 'info')}
+            onPress={() => navigation.navigate('SellerProfile')}
           >
-            <Ionicons name="person" size={20} color="white" />
+            {user?.avatar ? (
+              <Image 
+                source={{ uri: user.avatar.startsWith('http') ? user.avatar : `${getBaseURL()}${user.avatar}` }}
+                style={styles.profileImage}
+              />
+            ) : (
+              <Ionicons name="person" size={20} color="white" />
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -350,7 +404,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   header: {
-    padding: 20,
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
     borderBottomWidth: 1,
   },
   headerContent: {
@@ -376,6 +432,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 16,
+    overflow: 'hidden',
+  },
+  profileImage: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
   },
   roleBadge: {
     flexDirection: 'row',
