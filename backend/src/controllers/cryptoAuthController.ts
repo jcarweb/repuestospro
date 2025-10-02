@@ -55,7 +55,7 @@ export class CryptoAuthController {
 
       // Generar token con crypto
       const token = CryptoAuth.generateToken({
-        id: user?._id.toString(),
+        id: (user?._id as any).toString(),
         email: user?.email || '',
         role: user?.role || ''
       });
@@ -121,7 +121,7 @@ export class CryptoAuthController {
 
       // Generar token
       const token = CryptoAuth.generateToken({
-        id: user?._id.toString(),
+        id: (user?._id as any).toString(),
         email: user?.email,
         role: user?.role
       });

@@ -70,7 +70,7 @@ export class RiderController {
         });
 
         await user.save();
-        rider.userId = user._id;
+        rider.userId = user._id as any;
       }
 
       await rider!.save();

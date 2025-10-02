@@ -467,14 +467,14 @@ class StoreController {
         });
       }
       // Verificar que no sea ya manager
-      if (store.managers.includes(manager?._id)) {
+      if (store.managers.includes(manager?._id as any)) {
         res.status(400).json({
           success: false,
           message: 'El usuario ya es manager de esta tienda'
         });
       }
       // Agregar manager
-      store.managers.push(manager!._id);
+      store.managers.push(manager!._id as any);
       await store?.save();
       // Actualizar el usuario
       await User.findByIdAndUpdate(manager!._id, {

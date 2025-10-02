@@ -225,7 +225,7 @@ class InventoryController {
       }, {});
       // Crear respuesta con información completa
       const response = stores.map(store => {
-        const config = (configsByStore as any)[store._id.toString()];
+        const config = (configsByStore as any)[(store._id as any).toString()];
         return {
           store: {
             _id: store._id,

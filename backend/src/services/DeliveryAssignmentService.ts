@@ -290,7 +290,7 @@ export class DeliveryAssignmentService {
 
     // Verificar límite de órdenes concurrentes
     const currentDeliveries = await Delivery.countDocuments({
-      riderId: rider._id,
+      riderId: rider._id as any,
       status: { $in: ['assigned', 'accepted', 'picked_up', 'in_transit'] }
     });
 
@@ -406,7 +406,7 @@ export class DeliveryAssignmentService {
     delivery: IDelivery, 
     rider: IRider
   ): Promise<void> {
-    delivery.riderId = rider._id;
+    delivery.riderId = rider._id as any;
     delivery.riderType = rider.type;
     delivery.riderName = `${rider.firstName} ${rider.lastName}`;
     delivery.riderPhone = rider.phone;
@@ -439,7 +439,7 @@ export class DeliveryAssignmentService {
     await delivery.save();
 
     // Actualizar estadísticas del rider
-    await this.updateRiderStats(rider._id);
+    await this.updateRiderStats((rider._id as any).toString());
   }
 
   /**
@@ -545,7 +545,7 @@ export class DeliveryAssignmentService {
       }
 
       // Actualizar asignación
-      delivery.riderId = newRider._id;
+      delivery.riderId = newRider._id as any;
       delivery.riderType = newRider.type;
       delivery.riderName = `${newRider.firstName} ${newRider.lastName}`;
       delivery.riderPhone = newRider.phone;
