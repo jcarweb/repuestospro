@@ -9,7 +9,7 @@
     "dev:backend:network": "cd backend && npm run dev:network",
     "dev:fast": "concurrently \"npm run dev:frontend\" \"npm run dev:backend:network\" --kill-others",
     "build": "npm run build:frontend && npm run build:backend",
-    "build:frontend": "vite build",
+    "build:frontend": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js build",
     "build:backend": "cd backend && npm run build",
     "install:all": "npm install && cd backend && npm install",
     "start": "cd backend && npm start",
