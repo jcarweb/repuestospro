@@ -41,7 +41,7 @@ const AdminGenerateProducts: React.FC = () => {
   // Cargar tiendas disponibles
   const fetchStores = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/stores', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""""""/api/stores', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -71,7 +71,7 @@ const AdminGenerateProducts: React.FC = () => {
     setMessage(null);
     
     try {
-      const response = await fetch('http://localhost:5000/api/admin/generate-stores', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/admin/generate-stores', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ const AdminGenerateProducts: React.FC = () => {
     setMessage(null);
     
     try {
-      const response = await fetch('http://localhost:5000/api/admin/products/generate', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/admin/products/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -143,7 +143,7 @@ const AdminGenerateProducts: React.FC = () => {
     setMessage(null);
     
     try {
-      const response = await fetch('http://localhost:5000/api/admin/products/regenerate-images', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/admin/products/regenerate-images', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -173,7 +173,7 @@ const AdminGenerateProducts: React.FC = () => {
 
   const getProductStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/admin/product-stats', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/admin/product-stats', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
