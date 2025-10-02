@@ -32,16 +32,15 @@
     },
     "scheme": "piezasya",
     "plugins": [
-      "expo-router",
       "expo-secure-store"
     ],
     "extra": {
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "f683bfe1-a6cd-46f7-956f-9940ee5de216"
       }
     },
     "development": {
-      "developmentClient": true,
+      "developmentClient": false,
       "distribution": "internal"
     },
     "updates": {

@@ -13,6 +13,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '../../config/api';
 
 const AdminDataEnrichmentUpload: React.FC = () => {
   const { user } = useAuth();

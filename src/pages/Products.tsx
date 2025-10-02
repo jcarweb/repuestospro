@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useLanguageChange } from '../hooks/useLanguageChange';
 import ProductCard from '../components/ProductCard';
-import { 
+import { API_BASE_URL } from '../config/api';
+import {
   Search, 
   Filter, 
   Grid, 

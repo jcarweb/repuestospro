@@ -28,6 +28,7 @@ import FreeStoreLocationMap from '../components/FreeStoreLocationMap';
 import { fetchUsers, createUser, updateUser, deleteUser } from '../services/userService';
 import type { User } from '../types';
 import { API_BASE_URL } from '../config/api';
+import { userService, User } from '../services/userService';
 
 interface Store {
   _id: string;

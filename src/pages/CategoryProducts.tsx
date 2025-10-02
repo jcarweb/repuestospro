@@ -20,6 +20,7 @@ import {
   Circle
 } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import { API_BASE_URL } from '../../config/api';
 import { getBrandsByVehicleType } from '../data/vehicleBrands';
 
 interface Product {

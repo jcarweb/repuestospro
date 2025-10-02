@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Store, CheckCircle, AlertCircle } from 'lucide-react';
 import StoreRegistrationForm from '../components/StoreRegistrationForm';
 import Layout from '../components/Layout';
+import { API_BASE_URL } from '../../config/api';
 
 const StoreRegistration: React.FC = () => {
   const navigate = useNavigate();
