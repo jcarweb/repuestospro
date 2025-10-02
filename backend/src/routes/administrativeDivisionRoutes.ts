@@ -12,8 +12,11 @@ router.get('/states/:stateId/municipalities', administrativeDivisionController.g
 // Obtener parroquias por municipio
 router.get('/municipalities/:municipalityId/parishes', administrativeDivisionController.getParishesByMunicipality);
 
-// Obtener jerarquía de ubicación completa
-router.get('/hierarchy/:stateId?/:municipalityId?/:parishId?', administrativeDivisionController.getLocationHierarchy);
+// Obtener jerarquía de ubicación completa - corregido para evitar parámetros opcionales consecutivos
+router.get('/hierarchy', administrativeDivisionController.getLocationHierarchy);
+router.get('/hierarchy/:stateId', administrativeDivisionController.getLocationHierarchy);
+router.get('/hierarchy/:stateId/:municipalityId', administrativeDivisionController.getLocationHierarchy);
+router.get('/hierarchy/:stateId/:municipalityId/:parishId', administrativeDivisionController.getLocationHierarchy);
 
 // Buscar ubicaciones por texto
 router.get('/search', administrativeDivisionController.searchLocations);
