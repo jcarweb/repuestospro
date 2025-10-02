@@ -188,7 +188,7 @@ export class TransactionService {
             type: 'purchase_protection',
             userId: transaction.userId.toString(),
             storeId: transaction.storeId.toString(),
-            transactionId: transaction._id.toString(),
+            transactionId: (transaction._id as any).toString(),
             productId: item.productId.toString(),
             transactionAmount: item.totalPrice,
             protectionLevel: item.warrantyType as 'basic' | 'premium' | 'extended',

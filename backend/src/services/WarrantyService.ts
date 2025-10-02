@@ -83,7 +83,7 @@ export class WarrantyService {
 
       // Si hay transactionId, crear SecureTransaction
       if (data.transactionId) {
-        await this.createSecureTransaction(data.transactionId, savedWarranty._id, data);
+        await this.createSecureTransaction(data.transactionId, (savedWarranty._id as any).toString(), data);
       }
 
       return savedWarranty;

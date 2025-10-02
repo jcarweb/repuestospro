@@ -102,7 +102,7 @@ export class AuthController {
       }
       // Generar token JWT
       // Generando token JWT - logs removidos por seguridad
-      const token = AuthController.generateToken(user._id.toString());
+      const token = AuthController.generateToken((user._id as any).toString());
       console.log('🎉 Registro completado exitosamente');
       res.status(201).json({
         success: true,
@@ -201,7 +201,7 @@ export class AuthController {
       // Resetear intentos de login
       await user.resetLoginAttempts();
       // Generar token
-      const token = AuthController.generateToken(user._id.toString());
+      const token = AuthController.generateToken((user._id as any).toString());
       // Registrar actividad
       await Activity.create({
         userId: user._id,
@@ -279,7 +279,7 @@ export class AuthController {
         return;
       }
       await user.resetLoginAttempts();
-      const token = AuthController.generateToken(user._id.toString());
+      const token = AuthController.generateToken((user._id as any).toString());
       await Activity.create({
         userId: user._id,
         type: 'login',
@@ -725,7 +725,7 @@ export class AuthController {
         return;
       }
       // Generar token JWT
-      const token = AuthController.generateToken(user._id.toString());
+      const token = AuthController.generateToken((user._id as any).toString());
       // Registrar actividad
       await Activity.create({
         userId: user._id,
@@ -946,7 +946,7 @@ export class AuthController {
         return;
       }
       // Generar token
-      const token = AuthController.generateToken(user._id.toString());
+      const token = AuthController.generateToken((user._id as any).toString());
       // Registrar actividad
       await Activity.create({
         userId: user._id,
@@ -1252,7 +1252,7 @@ export class AuthController {
       // Resetear intentos de login
       await user.resetLoginAttempts();
       // Generar token final
-      const token = AuthController.generateToken(user._id.toString());
+      const token = AuthController.generateToken((user._id as any).toString());
       // Token generado exitosamente - email no loggeado por seguridad
       // Registrar actividad
       await Activity.create({

@@ -335,10 +335,10 @@ export class SalesReportService {
       { $limit: 20 }
     ]);
     // Obtener información de categorías y márgenes de ganancia
-    const productIds = topProducts.map(p => p._id);
+    const productIds = topProducts.map(p => p._id as any);
     const products = await Product.find({ _id: { $in: productIds } }).select('category costPrice');
     return topProducts.map(product => {
-      const productInfo = products.find(p => p._id.toString() === product._id.toString());
+      const productInfo = products.find(p => (p._id as any).toString() === (product._id as any).toString());
       const costPrice = (productInfo as any)?.costPrice || 0;
       const profitMargin = product.averagePrice > 0 ? ((product.averagePrice - costPrice) / product.averagePrice) * 100 : 0;
       return {
@@ -420,10 +420,10 @@ export class SalesReportService {
       this.getCustomerRetention(query, dateFrom, dateTo)
     ]);
     // Obtener información de usuarios
-    const userIds = topCustomers.map(c => c._id);
+    const userIds = topCustomers.map(c => c._id as any);
     const users = await User.find({ _id: { $in: userIds } }).select('name email');
     const topCustomersWithInfo = topCustomers.map(customer => {
-      const user = users.find(u => u._id.toString() === customer._id.toString());
+      const user = users.find(u => (u._id as any).toString() === (customer._id as any).toString());
       return {
         customerId: customer._id,
         customerName: user?.name || 'Cliente',
