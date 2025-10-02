@@ -117,6 +117,8 @@ const AdminOrdersScreen: React.FC = () => {
   const loadOrders = async () => {
     try {
       setLoading(true);
+      console.log('🛒 Cargando órdenes...');
+      
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: '20',
@@ -126,22 +128,40 @@ const AdminOrdersScreen: React.FC = () => {
       });
 
       const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/admin/orders?${params}`, {
+      const url = `${baseURL}/admin/orders?${params}`;
+      console.log('🌐 URL de órdenes:', url);
+      
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
 
+      console.log('📡 Respuesta del servidor:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('📊 Datos recibidos:', data);
       
       if (data.success) {
-        setOrders(data.data.orders || data.data);
+        const ordersData = data.data.orders || data.data || [];
+        setOrders(ordersData);
         setTotalPages(data.data.pagination?.totalPages || 1);
-        setTotalOrders(data.data.pagination?.total || data.data.length || 0);
+        setTotalOrders(data.data.pagination?.total || ordersData.length || 0);
+        console.log(`✅ Cargadas ${ordersData.length} órdenes`);
+      } else {
+        console.warn('⚠️ No se pudieron cargar las órdenes:', data.message);
+        setOrders([]);
+        setTotalOrders(0);
       }
     } catch (error) {
-      console.error('Error cargando órdenes:', error);
+      console.error('❌ Error cargando órdenes:', error);
+      setOrders([]);
+      setTotalOrders(0);
     } finally {
       setLoading(false);
     }
@@ -531,9 +551,28 @@ const AdminOrdersScreen: React.FC = () => {
           {orders.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="receipt-outline" size={64} color={colors.textTertiary} />
-              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                No hay órdenes disponibles
+              <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>
+                No hay órdenes
               </Text>
+              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+                {searchTerm || statusFilter !== 'all' || storeFilter !== 'all' 
+                  ? 'No se encontraron órdenes con los filtros aplicados'
+                  : 'Aún no se han registrado órdenes en el sistema'
+                }
+              </Text>
+              {(searchTerm || statusFilter !== 'all' || storeFilter !== 'all') && (
+                <TouchableOpacity
+                  style={[styles.clearFiltersButton, { backgroundColor: colors.primary }]}
+                  onPress={() => {
+                    setSearchTerm('');
+                    setStatusFilter('all');
+                    setStoreFilter('all');
+                  }}
+                >
+                  <Ionicons name="refresh" size={16} color="white" />
+                  <Text style={styles.clearFiltersText}>Limpiar Filtros</Text>
+                </TouchableOpacity>
+              )}
             </View>
           ) : (
             <View style={styles.ordersList}>
@@ -770,10 +809,32 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginBottom: 8,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  clearFiltersButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
     marginTop: 16,
+    gap: 8,
+  },
+  clearFiltersText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,

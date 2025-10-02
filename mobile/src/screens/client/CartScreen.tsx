@@ -12,22 +12,13 @@ import {
 import { useTheme } from '../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-
-interface CartItem {
-  _id: string;
-  product: {
-    _id: string;
-    name: string;
-    price: number;
-    image: string;
-    stock: number;
-  };
-  quantity: number;
-}
+import { cartService, CartItem } from '../../services/cartService';
+import { useToast } from '../../contexts/ToastContext';
 
 const CartScreen: React.FC = () => {
   const { colors } = useTheme();
   const navigation = useNavigation();
+  const { showToast } = useToast();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,54 +29,51 @@ const CartScreen: React.FC = () => {
   const loadCart = async () => {
     try {
       setLoading(true);
-      // Aquí cargarías el carrito desde el backend
-      // Por ahora usamos datos de ejemplo
-      const mockCartItems: CartItem[] = [
-        {
-          _id: '1',
-          product: {
-            _id: 'p1',
-            name: 'Filtro de Aceite Toyota',
-            price: 25.99,
-            image: 'https://via.placeholder.com/100',
-            stock: 10,
-          },
-          quantity: 2,
-        },
-        {
-          _id: '2',
-          product: {
-            _id: 'p2',
-            name: 'Pastillas de Freno Honda',
-            price: 45.50,
-            image: 'https://via.placeholder.com/100',
-            stock: 5,
-          },
-          quantity: 1,
-        },
-      ];
-      setCartItems(mockCartItems);
+      
+      const response = await cartService.getCart();
+      
+      if (response.success && response.data) {
+        setCartItems(response.data);
+        console.log('✅ Carrito cargado:', response.data.length, 'productos');
+      } else {
+        console.warn('⚠️ No se pudieron cargar los productos del carrito');
+        setCartItems([]);
+        showToast('No se pudieron cargar los productos del carrito', 'error');
+      }
     } catch (error) {
       console.error('Error cargando carrito:', error);
-      Alert.alert('Error', 'No se pudo cargar el carrito');
+      showToast('Error al cargar el carrito', 'error');
+      setCartItems([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateQuantity = (itemId: string, newQuantity: number) => {
+  const updateQuantity = async (itemId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
       removeItem(itemId);
       return;
     }
 
-    setCartItems(prev => 
-      prev.map(item => 
-        item._id === itemId 
-          ? { ...item, quantity: newQuantity }
-          : item
-      )
-    );
+    try {
+      const response = await cartService.updateCartItem(itemId, newQuantity);
+      
+      if (response.success) {
+        setCartItems(prev => 
+          prev.map(item => 
+            item._id === itemId 
+              ? { ...item, quantity: newQuantity }
+              : item
+          )
+        );
+        showToast('Cantidad actualizada', 'success');
+      } else {
+        showToast('Error al actualizar la cantidad', 'error');
+      }
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      showToast('Error al actualizar la cantidad', 'error');
+    }
   };
 
   const removeItem = (itemId: string) => {
@@ -97,8 +85,20 @@ const CartScreen: React.FC = () => {
         {
           text: 'Eliminar',
           style: 'destructive',
-          onPress: () => {
-            setCartItems(prev => prev.filter(item => item._id !== itemId));
+          onPress: async () => {
+            try {
+              const response = await cartService.removeFromCart(itemId);
+              
+              if (response.success) {
+                setCartItems(prev => prev.filter(item => item._id !== itemId));
+                showToast('Producto eliminado del carrito', 'success');
+              } else {
+                showToast('Error al eliminar el producto', 'error');
+              }
+            } catch (error) {
+              console.error('Error removing item:', error);
+              showToast('Error al eliminar el producto', 'error');
+            }
           },
         },
       ]

@@ -264,7 +264,7 @@ class ProductService {
         }
       });
 
-      const response = await this.makeRequest<ProductResponse>(`/products/admin/all?${queryParams.toString()}`);
+      const response = await this.makeRequest<ProductResponse>(`/admin/products/all?${queryParams.toString()}`);
       
       if (response.success && response.data) {
         console.log('✅ Products loaded successfully:', response.data.length);

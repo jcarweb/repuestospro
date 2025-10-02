@@ -15,6 +15,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { apiService } from '../../services/api';
+import { deliveryService } from '../../services/deliveryService';
 
 interface EarningsData {
   totalEarnings: number;
@@ -80,71 +81,77 @@ const DeliveryEarningsScreen: React.FC = () => {
 
   const { width } = Dimensions.get('window');
 
+  const getDateFromPeriod = (period: string): string => {
+    const today = new Date();
+    switch (period) {
+      case 'week':
+        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return weekAgo.toISOString().split('T')[0];
+      case 'month':
+        const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+        return monthAgo.toISOString().split('T')[0];
+      case 'year':
+        const yearAgo = new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000);
+        return yearAgo.toISOString().split('T')[0];
+      default:
+        return today.toISOString().split('T')[0];
+    }
+  };
+
   const loadEarningsData = async () => {
     try {
       setLoading(true);
-      const response = await apiService.getDeliveryEarnings({ 
-        period: selectedPeriod,
-        dateFrom: dateRange.start,
-        dateTo: dateRange.end
+      
+      const response = await deliveryService.getDeliveryEarnings({ 
+        dateFrom: getDateFromPeriod(selectedPeriod),
+        dateTo: new Date().toISOString().split('T')[0]
       });
       
-      if (response.success) {
-        setEarnings(response.data.earnings);
-        setPayments(response.data.payments);
-        setCommissions(response.data.commissions);
+      if (response.success && response.data) {
+        setEarnings(response.data.earnings || {});
+        setPayments(response.data.payments || []);
+        setCommissions(response.data.commissions || []);
+        console.log('✅ Datos de ganancias del delivery cargados:', response.data);
       } else {
-        throw new Error(response.message || 'Error al cargar ganancias');
+        console.warn('⚠️ No se pudieron cargar los datos de ganancias, usando datos por defecto');
+        setEarnings({
+          totalEarnings: 0,
+          baseEarnings: 0,
+          tips: 0,
+          bonuses: 0,
+          deductions: 0,
+          netEarnings: 0,
+          totalDeliveries: 0,
+          averagePerDelivery: 0,
+          thisWeek: 0,
+          lastWeek: 0,
+          thisMonth: 0,
+          lastMonth: 0,
+        });
+        setPayments([]);
+        setCommissions([]);
       }
     } catch (error) {
       console.error('Error loading earnings data:', error);
       showToast('Error al cargar datos de ganancias', 'error');
       
-      // Fallback a datos mock en caso de error
-      const mockEarnings: EarningsData = {
-        totalEarnings: 2840.50,
-        baseEarnings: 2200.00,
-        tips: 340.50,
-        bonuses: 300.00,
+      // Datos por defecto en caso de error
+      setEarnings({
+        totalEarnings: 0,
+        baseEarnings: 0,
+        tips: 0,
+        bonuses: 0,
         deductions: 0,
-        netEarnings: 2840.50,
-        totalDeliveries: 156,
-        averagePerDelivery: 18.21,
-        thisWeek: 420.75,
-        lastWeek: 380.25,
-        thisMonth: 1680.50,
-        lastMonth: 1160.00,
-      };
-
-      const mockPayments: Payment[] = [
-        {
-          id: '1',
-          date: '2024-01-15',
-          amount: 420.75,
-          type: 'weekly',
-          description: 'Pago semanal - Semana del 8-14 Enero',
-          status: 'completed',
-          method: 'bank_transfer',
-          reference: 'TRF-2024-001',
-        }
-      ];
-
-      const mockCommissions: Commission[] = [
-        {
-          orderId: '1',
-          orderNumber: 'ORD-001',
-          date: '2024-01-15',
-          baseAmount: 12.50,
-          tipAmount: 5.00,
-          bonusAmount: 0,
-          totalAmount: 17.50,
-          status: 'paid',
-        }
-      ];
-
-      setEarnings(mockEarnings);
-      setPayments(mockPayments);
-      setCommissions(mockCommissions);
+        netEarnings: 0,
+        totalDeliveries: 0,
+        averagePerDelivery: 0,
+        thisWeek: 0,
+        lastWeek: 0,
+        thisMonth: 0,
+        lastMonth: 0,
+      });
+      setPayments([]);
+      setCommissions([]);
     } finally {
       setLoading(false);
     }

@@ -5,6 +5,7 @@ import Store from '../models/Store';
 import Subscription from '../models/Subscription';
 import Category from '../models/Category';
 import Promotion from '../models/Promotion';
+import Quotation from '../models/Quotation';
 import { SubscriptionService } from '../services/subscriptionService';
 import emailService from '../services/emailService';
 import crypto from 'crypto';
@@ -2181,7 +2182,11 @@ const AdminController = {
   uploadStorePhoto: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       console.log('📸 Subiendo foto de tienda...');
+      console.log('📋 Body:', req.body);
+      console.log('📁 File:', req.file);
+      
       const { name, phone, lat, lng } = req.body;
+      
       if (!name || !lat || !lng) {
         res.status(400).json({
           success: false,
@@ -2189,8 +2194,19 @@ const AdminController = {
         });
         return;
       }
-      // Aquí procesarías la imagen y la guardarías en el sistema de archivos
-      // Por ahora simulamos el guardado
+
+      if (!req.file) {
+        res.status(400).json({
+          success: false,
+          message: 'No se recibió ninguna imagen'
+        });
+        return;
+      }
+
+      // La imagen ya fue procesada por multer y subida a Cloudinary
+      const imageUrl = req.file.path;
+      console.log('🖼️ Imagen subida a Cloudinary:', imageUrl);
+
       const photoData = {
         id: Date.now().toString(),
         name: name.trim(),
@@ -2199,11 +2215,12 @@ const AdminController = {
           latitude: parseFloat(lat),
           longitude: parseFloat(lng)
         },
-        imageUrl: '/uploads/store-photos/' + Date.now() + '.jpg',
+        imageUrl: imageUrl,
         uploadedBy: req.user?.id,
         uploadedAt: new Date(),
         status: 'pending_processing'
       };
+      
       console.log('📸 Foto de tienda guardada:', photoData);
       res.json({
         success: true,
@@ -2871,6 +2888,922 @@ const AdminController = {
       });
     } catch (error) {
       console.error('Error actualizando configuración de búsqueda:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Obtener estadísticas de fotos de tiendas
+   */
+  getStorePhotosStats: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      console.log('📊 Obteniendo estadísticas de fotos de tiendas...');
+      
+      // En una implementación real, calcularías las estadísticas de la base de datos
+      const mockStats = {
+        total: 3,
+        byStatus: {
+          pending: 1,
+          processing: 1,
+          enriched: 1,
+          error: 0
+        },
+        isRunning: false
+      };
+      
+      console.log('📊 Estadísticas calculadas:', mockStats);
+      res.json({
+        success: true,
+        data: mockStats
+      });
+    } catch (error) {
+      console.error('Error obteniendo estadísticas:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Ejecutar proceso de enriquecimiento
+   */
+  runEnrichment: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      console.log('🔄 Iniciando proceso de enriquecimiento...');
+      
+      // En una implementación real, iniciarías el proceso de enriquecimiento
+      // Por ahora simulamos el inicio del proceso
+      
+      console.log('🔄 Proceso de enriquecimiento iniciado');
+      res.json({
+        success: true,
+        message: 'Proceso de enriquecimiento iniciado exitosamente',
+        data: {
+          processId: Date.now().toString(),
+          status: 'running',
+          estimatedTime: '5-10 minutos'
+        }
+      });
+    } catch (error) {
+      console.error('Error ejecutando enriquecimiento:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Obtener todos los productos para admin
+   */
+  getAllProducts: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const { page = 1, limit = 1000, search, category, subcategory, brand, vehicleType, storeId, status } = req.query;
+      
+      // Construir filtros
+      const filters: any = {};
+      
+      if (search) {
+        filters.$or = [
+          { name: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { sku: { $regex: search, $options: 'i' } }
+        ];
+      }
+      
+      if (category && category !== 'all') {
+        filters.category = category;
+      }
+      
+      if (subcategory && subcategory !== 'all') {
+        filters.subcategory = subcategory;
+      }
+      
+      if (brand && brand !== 'all') {
+        filters.brand = brand;
+      }
+      
+      if (vehicleType && vehicleType !== 'all') {
+        filters.vehicleType = vehicleType;
+      }
+      
+      if (storeId && storeId !== 'all') {
+        filters.store = storeId;
+      }
+      
+      if (status && status !== 'all') {
+        filters.isActive = status === 'active';
+      }
+      
+      // Obtener productos con populate
+      const products = await Product.find(filters)
+        .populate('store', 'name city state')
+        .populate('createdBy', 'name email')
+        .sort({ createdAt: -1 })
+        .limit(Number(limit))
+        .skip((Number(page) - 1) * Number(limit));
+      
+      const total = await Product.countDocuments(filters);
+      
+      res.json({
+        success: true,
+        data: products,
+        pagination: {
+          total,
+          page: Number(page),
+          limit: Number(limit),
+          totalPages: Math.ceil(total / Number(limit))
+        }
+      });
+    } catch (error) {
+      console.error('Error obteniendo productos:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Obtener estadísticas del vendedor
+   */
+  getSellerStats: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      // Obtener estadísticas del vendedor
+      const totalQueries = await Quotation.countDocuments({ seller: userId });
+      const successfulSales = await Quotation.countDocuments({ 
+        seller: userId, 
+        status: 'accepted' 
+      });
+      
+      // Calcular tiempo promedio de respuesta (simulado por ahora)
+      const averageResponseTime = 2.3; // En minutos
+      
+      // Calcular calificación promedio del cliente (simulado por ahora)
+      const customerRating = 4.8;
+      
+      // Obtener mensajes sin leer (simulado por ahora)
+      const unreadMessages = 0;
+      
+      // Obtener cotizaciones pendientes
+      const pendingQuotes = await Quotation.countDocuments({ 
+        seller: userId, 
+        status: 'pending' 
+      });
+      
+      // Obtener consultas de hoy
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayQueries = await Quotation.countDocuments({ 
+        seller: userId, 
+        createdAt: { $gte: today } 
+      });
+      
+      // Calcular ventas del mes (simulado por ahora)
+      const monthlySales = 0;
+
+      const stats = {
+        totalQueries,
+        successfulSales,
+        averageResponseTime,
+        customerRating,
+        unreadMessages,
+        pendingQuotes,
+        todayQueries,
+        monthlySales
+      };
+
+      res.json({
+        success: true,
+        data: stats
+      });
+    } catch (error) {
+      console.error('Error obteniendo estadísticas del vendedor:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Obtener carrito del usuario
+   */
+  getCart: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      // En una implementación real, tendrías un modelo Cart
+      // Por ahora simulamos con datos mock
+      const cartItems = [
+        {
+          _id: '1',
+          product: {
+            _id: 'p1',
+            name: 'Filtro de Aceite Toyota',
+            price: 25.99,
+            image: 'https://via.placeholder.com/100',
+            stock: 10,
+            store: {
+              _id: 'store1',
+              name: 'Auto Parts Store'
+            }
+          },
+          quantity: 2
+        }
+      ];
+
+      res.json({
+        success: true,
+        data: cartItems
+      });
+    } catch (error) {
+      console.error('Error obteniendo carrito:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Agregar producto al carrito
+   */
+  addToCart: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      const { productId, quantity } = req.body;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      // En una implementación real, agregarías el producto al carrito
+      console.log(`🛒 Agregando producto ${productId} al carrito del usuario ${userId}, cantidad: ${quantity}`);
+      
+      res.json({
+        success: true,
+        message: 'Producto agregado al carrito'
+      });
+    } catch (error) {
+      console.error('Error agregando al carrito:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Actualizar cantidad de producto en el carrito
+   */
+  updateCartItem: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      const { itemId } = req.params;
+      const { quantity } = req.body;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      // En una implementación real, actualizarías la cantidad en el carrito
+      console.log(`🛒 Actualizando item ${itemId} del carrito del usuario ${userId}, nueva cantidad: ${quantity}`);
+      
+      res.json({
+        success: true,
+        message: 'Cantidad actualizada'
+      });
+    } catch (error) {
+      console.error('Error actualizando carrito:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Eliminar producto del carrito
+   */
+  removeFromCart: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      const { itemId } = req.params;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      // En una implementación real, eliminarías el producto del carrito
+      console.log(`🛒 Eliminando item ${itemId} del carrito del usuario ${userId}`);
+      
+      res.json({
+        success: true,
+        message: 'Producto eliminado del carrito'
+      });
+    } catch (error) {
+      console.error('Error eliminando del carrito:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Vaciar carrito
+   */
+  clearCart: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      // En una implementación real, vaciarías el carrito
+      console.log(`🛒 Vaciando carrito del usuario ${userId}`);
+      
+      res.json({
+        success: true,
+        message: 'Carrito vaciado'
+      });
+    } catch (error) {
+      console.error('Error vaciando carrito:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Actualizar estado del repartidor (para el propio repartidor)
+   */
+  updateDeliveryStatus: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      const { deliveryStatus } = req.body;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      // En una implementación real, actualizarías el estado del repartidor en la base de datos
+      console.log(`🚚 Actualizando estado del repartidor ${userId} a: ${deliveryStatus}`);
+      
+      res.json({
+        success: true,
+        message: 'Estado actualizado correctamente',
+        data: { deliveryStatus }
+      });
+    } catch (error) {
+      console.error('Error actualizando estado del repartidor:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Obtener órdenes asignadas al repartidor
+   */
+  getAssignedOrders: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      // En una implementación real, buscarías las órdenes asignadas al repartidor
+      console.log(`📦 Obteniendo órdenes asignadas al repartidor ${userId}`);
+      
+      // Datos mock para desarrollo
+      const mockOrders = [
+        {
+          _id: '1',
+          orderNumber: 'ORD-001',
+          customer: {
+            name: 'Juan Pérez',
+            phone: '+58 412 123 4567',
+            address: 'Av. Principal, Caracas'
+          },
+          products: [
+            { name: 'Filtro de Aceite', quantity: 2, price: 25.00 },
+            { name: 'Pastillas de Freno', quantity: 1, price: 75.50 }
+          ],
+          total: 125.50,
+          status: 'assigned',
+          assignedAt: '2024-01-15T10:30:00Z',
+          estimatedDelivery: '2024-01-15T12:00:00Z',
+          deliveryAddress: 'Calle 5, Edificio Los Rosales, Apto 3B, Caracas',
+          deliveryInstructions: 'Llamar antes de llegar',
+          signature: null
+        },
+        {
+          _id: '2',
+          orderNumber: 'ORD-002',
+          customer: {
+            name: 'María González',
+            phone: '+58 414 987 6543',
+            address: 'Av. Libertador, Caracas'
+          },
+          products: [
+            { name: 'Bujía', quantity: 4, price: 15.00 },
+            { name: 'Aceite Motor', quantity: 1, price: 45.00 }
+          ],
+          total: 105.00,
+          status: 'picked_up',
+          assignedAt: '2024-01-15T11:00:00Z',
+          estimatedDelivery: '2024-01-15T13:30:00Z',
+          deliveryAddress: 'Urbanización El Rosal, Calle 3, Casa 15',
+          deliveryInstructions: 'Entregar en portería',
+          signature: null
+        }
+      ];
+      
+      res.json({
+        success: true,
+        data: mockOrders,
+        message: 'Órdenes asignadas obtenidas correctamente'
+      });
+    } catch (error) {
+      console.error('Error obteniendo órdenes asignadas:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Obtener reportes del delivery
+   */
+  getDeliveryReports: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      const { dateFrom, dateTo } = req.query;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      console.log(`📊 Obteniendo reportes del delivery ${userId} desde ${dateFrom} hasta ${dateTo}`);
+      
+      // Datos mock para desarrollo
+      const mockData = {
+        stats: {
+          totalDeliveries: 156,
+          completedDeliveries: 142,
+          failedDeliveries: 14,
+          averageDeliveryTime: 28,
+          totalEarnings: 2340.50,
+          averageRating: 4.7,
+          totalDistance: 1250.75,
+          fuelCost: 187.50,
+          netEarnings: 2153.00,
+        },
+        daily: [
+          { date: '2024-01-15', deliveries: 8, completed: 7, failed: 1, earnings: 120.50, distance: 65.2, rating: 4.8 },
+          { date: '2024-01-14', deliveries: 6, completed: 6, failed: 0, earnings: 95.25, distance: 48.7, rating: 4.9 },
+          { date: '2024-01-13', deliveries: 9, completed: 8, failed: 1, earnings: 145.75, distance: 72.1, rating: 4.6 },
+          { date: '2024-01-12', deliveries: 7, completed: 7, failed: 0, earnings: 112.00, distance: 58.3, rating: 4.7 },
+          { date: '2024-01-11', deliveries: 5, completed: 4, failed: 1, earnings: 78.50, distance: 42.8, rating: 4.5 },
+        ],
+        weekly: [
+          { week: 'Semana 1', totalDeliveries: 35, completedDeliveries: 32, totalEarnings: 451.00, averageRating: 4.7, totalDistance: 287.1 },
+          { week: 'Semana 2', totalDeliveries: 42, completedDeliveries: 38, totalEarnings: 567.25, averageRating: 4.8, totalDistance: 345.6 },
+          { week: 'Semana 3', totalDeliveries: 38, completedDeliveries: 35, totalEarnings: 512.75, averageRating: 4.6, totalDistance: 298.4 },
+          { week: 'Semana 4', totalDeliveries: 41, completedDeliveries: 37, totalEarnings: 589.50, averageRating: 4.9, totalDistance: 319.7 },
+        ]
+      };
+      
+      res.json({
+        success: true,
+        data: mockData,
+        message: 'Reportes del delivery obtenidos correctamente'
+      });
+    } catch (error) {
+      console.error('Error obteniendo reportes del delivery:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Obtener calificaciones del delivery
+   */
+  getDeliveryRatings: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      console.log(`⭐ Obteniendo calificaciones del delivery ${userId}`);
+      
+      // Datos mock para desarrollo
+      const mockData = {
+        ratings: [
+          {
+            id: '1',
+            orderNumber: 'ORD-001',
+            customerName: 'Juan Pérez',
+            rating: 5,
+            comment: 'Excelente servicio, muy puntual y amable. El repartidor llegó exactamente a la hora acordada y el producto llegó en perfecto estado.',
+            date: '2024-01-15T14:30:00Z',
+            categories: {
+              punctuality: 5,
+              service: 5,
+              communication: 4,
+              packaging: 5
+            },
+            isVerified: true
+          },
+          {
+            id: '2',
+            orderNumber: 'ORD-002',
+            customerName: 'María González',
+            rating: 4,
+            comment: 'Buen servicio, llegó un poco tarde pero fue muy amable y el producto llegó bien.',
+            date: '2024-01-14T16:45:00Z',
+            categories: {
+              punctuality: 3,
+              service: 4,
+              communication: 5,
+              packaging: 4
+            },
+            isVerified: true
+          },
+          {
+            id: '3',
+            orderNumber: 'ORD-003',
+            customerName: 'Carlos Rodríguez',
+            rating: 5,
+            comment: 'Perfecto! Muy profesional y rápido. Definitivamente lo recomiendo.',
+            date: '2024-01-13T11:20:00Z',
+            categories: {
+              punctuality: 5,
+              service: 5,
+              communication: 5,
+              packaging: 5
+            },
+            isVerified: true
+          }
+        ],
+        stats: {
+          averageRating: 4.7,
+          totalRatings: 3,
+          ratingDistribution: { 5: 2, 4: 1, 3: 0, 2: 0, 1: 0 },
+          categoryAverages: {
+            punctuality: 4.3,
+            service: 4.7,
+            communication: 4.7,
+            packaging: 4.7
+          },
+          recentTrend: 'up'
+        }
+      };
+      
+      res.json({
+        success: true,
+        data: mockData,
+        message: 'Calificaciones del delivery obtenidas correctamente'
+      });
+    } catch (error) {
+      console.error('Error obteniendo calificaciones del delivery:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Obtener configuración del delivery
+   */
+  getDeliverySettings: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      console.log(`⚙️ Obteniendo configuración del delivery ${userId}`);
+      
+      // Datos mock para desarrollo
+      const mockSettings = {
+        schedule: {
+          isAutoSchedule: false,
+          workDays: [
+            { day: 'monday', label: 'Lunes', isWorking: true, startTime: '08:00', endTime: '17:00' },
+            { day: 'tuesday', label: 'Martes', isWorking: true, startTime: '08:00', endTime: '17:00' },
+            { day: 'wednesday', label: 'Miércoles', isWorking: true, startTime: '08:00', endTime: '17:00' },
+            { day: 'thursday', label: 'Jueves', isWorking: true, startTime: '08:00', endTime: '17:00' },
+            { day: 'friday', label: 'Viernes', isWorking: true, startTime: '08:00', endTime: '17:00' },
+            { day: 'saturday', label: 'Sábado', isWorking: false, startTime: '09:00', endTime: '15:00' },
+            { day: 'sunday', label: 'Domingo', isWorking: false, startTime: '09:00', endTime: '15:00' },
+          ],
+          maxHoursPerDay: 8,
+          maxHoursPerWeek: 40,
+          timeZone: 'America/Caracas',
+          notifications: {
+            shiftReminder: true,
+            breakReminder: true,
+            endShiftReminder: true,
+          }
+        },
+        deliveryZone: {
+          center: [-66.98422315655894, 10.462530926442378],
+          radius: 10
+        },
+        autoStatusMode: false,
+        notifications: {
+          newOrder: true,
+          orderUpdate: true,
+          ratingReceived: true,
+          earningsUpdate: true
+        }
+      };
+      
+      res.json({
+        success: true,
+        data: mockSettings,
+        message: 'Configuración del delivery obtenida correctamente'
+      });
+    } catch (error) {
+      console.error('Error obteniendo configuración del delivery:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Actualizar configuración del delivery
+   */
+  updateDeliverySettings: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      const settings = req.body;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      console.log(`⚙️ Actualizando configuración del delivery ${userId}:`, settings);
+      
+      // En una implementación real, actualizarías la configuración en la base de datos
+      // Por ahora, solo logueamos los cambios
+      
+      res.json({
+        success: true,
+        data: settings,
+        message: 'Configuración del delivery actualizada correctamente'
+      });
+    } catch (error) {
+      console.error('Error actualizando configuración del delivery:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Obtener ganancias del delivery
+   */
+  getDeliveryEarnings: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      const { dateFrom, dateTo } = req.query;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      console.log(`💰 Obteniendo ganancias del delivery ${userId} desde ${dateFrom} hasta ${dateTo}`);
+      
+      // Datos mock para desarrollo
+      const mockData = {
+        earnings: {
+          totalEarnings: 2840.50,
+          baseEarnings: 2200.00,
+          tips: 340.50,
+          bonuses: 300.00,
+          deductions: 0,
+          netEarnings: 2840.50,
+          totalDeliveries: 156,
+          averagePerDelivery: 18.21,
+          thisWeek: 420.75,
+          lastWeek: 380.25,
+          thisMonth: 1680.50,
+          lastMonth: 1160.00,
+        },
+        payments: [
+          {
+            id: '1',
+            date: '2024-01-15',
+            amount: 420.75,
+            type: 'weekly',
+            description: 'Pago semanal - Semana del 8-14 Enero',
+            status: 'completed',
+            method: 'bank_transfer',
+            reference: 'TRF-2024-001',
+          },
+          {
+            id: '2',
+            date: '2024-01-08',
+            amount: 380.25,
+            type: 'weekly',
+            description: 'Pago semanal - Semana del 1-7 Enero',
+            status: 'completed',
+            method: 'bank_transfer',
+            reference: 'TRF-2024-002',
+          }
+        ],
+        commissions: [
+          {
+            orderId: '1',
+            orderNumber: 'ORD-001',
+            date: '2024-01-15',
+            baseAmount: 12.50,
+            tipAmount: 5.00,
+            bonusAmount: 0,
+            totalAmount: 17.50,
+            status: 'paid',
+          },
+          {
+            orderId: '2',
+            orderNumber: 'ORD-002',
+            date: '2024-01-14',
+            baseAmount: 15.00,
+            tipAmount: 3.00,
+            bonusAmount: 2.00,
+            totalAmount: 20.00,
+            status: 'paid',
+          }
+        ]
+      };
+      
+      res.json({
+        success: true,
+        data: mockData,
+        message: 'Ganancias del delivery obtenidas correctamente'
+      });
+    } catch (error) {
+      console.error('Error obteniendo ganancias del delivery:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Guardar firma del cliente para entrega
+   */
+  saveDeliverySignature: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      const { orderId } = req.params;
+      const { signature, customerName, deliveryNotes } = req.body;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      if (!signature) {
+        res.status(400).json({
+          success: false,
+          message: 'La firma es requerida'
+        });
+        return;
+      }
+
+      console.log(`✍️ Guardando firma del cliente para orden ${orderId} por delivery ${userId}`);
+      console.log(`Cliente: ${customerName}, Firma: ${signature.substring(0, 20)}...`);
+      
+      // En una implementación real, guardarías la firma en la base de datos
+      // Por ahora, solo logueamos los datos
+      
+      res.json({
+        success: true,
+        data: {
+          orderId,
+          signature,
+          customerName,
+          deliveryNotes,
+          deliveredAt: new Date().toISOString(),
+          deliveredBy: userId
+        },
+        message: 'Firma del cliente guardada exitosamente'
+      });
+    } catch (error) {
+      console.error('Error guardando firma del cliente:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Eliminar foto de tienda
+   */
+  deleteStorePhoto: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      console.log('🗑️ Eliminando foto de tienda:', id);
+      
+      // En una implementación real, eliminarías la foto de la base de datos y Cloudinary
+      // Por ahora simulamos la eliminación
+      
+      console.log('🗑️ Foto eliminada exitosamente');
+      res.json({
+        success: true,
+        message: 'Foto eliminada exitosamente'
+      });
+    } catch (error) {
+      console.error('Error eliminando foto de tienda:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

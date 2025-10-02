@@ -86,17 +86,27 @@ const StorePhotosListScreen: React.FC = () => {
 
   const loadPhotos = async () => {
     try {
+      console.log('📸 Cargando fotos de locales...');
       const { getBaseURL } = await import('../../config/api');
       const baseUrl = await getBaseURL();
+      const url = `${baseUrl}/admin/store-photos`;
+      console.log('🌐 URL de fotos:', url);
       
-      const response = await fetch(`${baseUrl}/admin/store-photos`, {
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${user?.token}`,
           'Content-Type': 'application/json'
         }
       });
 
+      console.log('📡 Respuesta del servidor:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
+      console.log('📊 Datos recibidos:', result);
       
       if (result.success && result.data) {
         // Transformar los datos del backend al formato esperado
@@ -107,7 +117,9 @@ const StorePhotosListScreen: React.FC = () => {
           imageUrl: photo.imageUrl,
           lat: photo.location.latitude,
           lng: photo.location.longitude,
-          status: photo.status === 'pending_processing' ? 'processing' : 'enriched',
+          status: photo.status === 'pending_processing' ? 'processing' : 
+                 photo.status === 'enriched' ? 'enriched' : 
+                 photo.status === 'error' ? 'error' : 'pending',
           uploadedBy: {
             _id: photo.uploadedBy || '1',
             name: 'Admin',
@@ -115,7 +127,9 @@ const StorePhotosListScreen: React.FC = () => {
           },
           createdAt: photo.uploadedAt,
           updatedAt: photo.uploadedAt,
-          metrics: {
+          ocrText: photo.ocrText || null,
+          errorMessage: photo.errorMessage || null,
+          metrics: photo.metrics || {
             mercadoLibre: {
               found: false,
               results: [],
@@ -137,78 +151,74 @@ const StorePhotosListScreen: React.FC = () => {
           }
         }));
         
+        console.log(`✅ Cargadas ${transformedPhotos.length} fotos`);
         setPhotos(transformedPhotos);
       } else {
-        throw new Error(result.message || 'Error cargando fotos');
+        console.warn('⚠️ No se pudieron cargar las fotos:', result.message);
+        setPhotos([]);
       }
     } catch (error) {
-      console.error('Error loading photos:', error);
+      console.error('❌ Error loading photos:', error);
       showToast('Error cargando fotos', 'error');
-      
-      // Fallback a datos mock en caso de error
-      const mockPhotos: StorePhoto[] = [
-        {
-          _id: '1',
-          name: 'Repuestos El Motor',
-          phone: '+584121234567',
-          imageUrl: 'https://via.placeholder.com/300x200',
-          lat: 10.4806,
-          lng: -66.9036,
-          ocrText: 'REPUESTOS EL MOTOR - Especialistas en repuestos para motores',
-          metrics: {
-            mercadoLibre: {
-              found: true,
-              results: [
-                { title: 'Repuestos Motor', price: 25.99, currency_id: 'USD' }
-              ],
-              searchTerm: 'repuestos motor',
-              lastUpdated: '2024-01-20T15:30:00Z'
-            },
-            duckduckgo: {
-              found: true,
-              results: { title: 'Repuestos El Motor - Caracas' },
-              searchTerm: 'repuestos el motor caracas',
-              lastUpdated: '2024-01-20T15:30:00Z'
-            },
-            instagram: {
-              found: true,
-              followers: 1250,
-              username: 'repuestoselmotor',
-              lastUpdated: '2024-01-20T15:30:00Z'
-            }
-          },
-          status: 'enriched',
-          uploadedBy: {
-            _id: '1',
-            name: 'Juan Pérez',
-            email: 'juan@example.com'
-          },
-          createdAt: '2024-01-20T10:00:00Z',
-          updatedAt: '2024-01-20T15:30:00Z'
-        }
-      ];
-      
-      setPhotos(mockPhotos);
+      setPhotos([]);
     }
   };
 
   const loadStats = async () => {
     try {
-      // Simular carga de estadísticas
-      const mockStats: EnrichmentStats = {
-        total: 3,
-        byStatus: {
-          pending: 1,
-          processing: 1,
-          enriched: 1,
-          error: 0
-        },
-        isRunning: false
-      };
+      console.log('📊 Cargando estadísticas de enriquecimiento...');
+      const { getBaseURL } = await import('../../config/api');
+      const baseUrl = await getBaseURL();
+      const url = `${baseUrl}/admin/store-photos/stats`;
+      console.log('🌐 URL de estadísticas:', url);
       
-      setStats(mockStats);
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('📡 Respuesta del servidor:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('📊 Estadísticas recibidas:', result);
+      
+      if (result.success && result.data) {
+        const statsData: EnrichmentStats = {
+          total: result.data.total || 0,
+          byStatus: {
+            pending: result.data.byStatus?.pending || 0,
+            processing: result.data.byStatus?.processing || 0,
+            enriched: result.data.byStatus?.enriched || 0,
+            error: result.data.byStatus?.error || 0
+          },
+          isRunning: result.data.isRunning || false
+        };
+        
+        console.log('✅ Estadísticas cargadas:', statsData);
+        setStats(statsData);
+      } else {
+        console.warn('⚠️ No se pudieron cargar las estadísticas:', result.message);
+        // Usar estadísticas por defecto
+        setStats({
+          total: 0,
+          byStatus: { pending: 0, processing: 0, enriched: 0, error: 0 },
+          isRunning: false
+        });
+      }
     } catch (error) {
-      console.error('Error loading stats:', error);
+      console.error('❌ Error loading stats:', error);
+      // Usar estadísticas por defecto en caso de error
+      setStats({
+        total: 0,
+        byStatus: { pending: 0, processing: 0, enriched: 0, error: 0 },
+        isRunning: false
+      });
     }
   };
 
@@ -221,20 +231,56 @@ const StorePhotosListScreen: React.FC = () => {
   const runEnrichment = async () => {
     try {
       setIsRunningEnrichment(true);
+      console.log('🔄 Iniciando proceso de enriquecimiento...');
       
-      // Simular ejecución de enriquecimiento
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const { getBaseURL } = await import('../../config/api');
+      const baseUrl = await getBaseURL();
+      const url = `${baseUrl}/admin/run-enrichment`;
+      console.log('🌐 URL de enriquecimiento:', url);
       
-      showToast('Proceso de enriquecimiento iniciado', 'success');
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('📡 Respuesta del servidor:', response.status);
       
-      // Recargar datos después de un breve delay
-      setTimeout(() => {
-        refreshData();
-      }, 1000);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('📊 Resultado del enriquecimiento:', result);
+      
+      if (result.success) {
+        showToast('Proceso de enriquecimiento iniciado', 'success');
+        
+        // Recargar datos después de un breve delay
+        setTimeout(() => {
+          refreshData();
+        }, 1000);
+      } else {
+        throw new Error(result.message || 'Error iniciando enriquecimiento');
+      }
       
     } catch (error) {
-      console.error('Error running enrichment:', error);
-      showToast('Error iniciando enriquecimiento', 'error');
+      console.error('❌ Error running enrichment:', error);
+      let errorMessage = 'Error iniciando enriquecimiento';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Network request failed')) {
+          errorMessage = 'Error de conexión. Verifica tu internet.';
+        } else if (error.message.includes('HTTP error')) {
+          errorMessage = 'Error del servidor. Intenta nuevamente.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      showToast(errorMessage, 'error');
     } finally {
       setIsRunningEnrichment(false);
     }
@@ -251,11 +297,50 @@ const StorePhotosListScreen: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              setPhotos(prevPhotos => prevPhotos.filter(photo => photo._id !== photoId));
-              showToast('Foto eliminada exitosamente', 'success');
+              console.log('🗑️ Eliminando foto:', photoId);
+              const { getBaseURL } = await import('../../config/api');
+              const baseUrl = await getBaseURL();
+              const url = `${baseUrl}/admin/store-photos/${photoId}`;
+              console.log('🌐 URL de eliminación:', url);
+              
+              const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${user?.token}`,
+                  'Content-Type': 'application/json'
+                }
+              });
+
+              console.log('📡 Respuesta del servidor:', response.status);
+              
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+
+              const result = await response.json();
+              console.log('📊 Resultado de eliminación:', result);
+              
+              if (result.success) {
+                setPhotos(prevPhotos => prevPhotos.filter(photo => photo._id !== photoId));
+                showToast('Foto eliminada exitosamente', 'success');
+              } else {
+                throw new Error(result.message || 'Error eliminando foto');
+              }
             } catch (error) {
-              console.error('Error deleting photo:', error);
-              showToast('Error eliminando foto', 'error');
+              console.error('❌ Error deleting photo:', error);
+              let errorMessage = 'Error eliminando foto';
+              
+              if (error instanceof Error) {
+                if (error.message.includes('Network request failed')) {
+                  errorMessage = 'Error de conexión. Verifica tu internet.';
+                } else if (error.message.includes('HTTP error')) {
+                  errorMessage = 'Error del servidor. Intenta nuevamente.';
+                } else {
+                  errorMessage = error.message;
+                }
+              }
+              
+              showToast(errorMessage, 'error');
             }
           },
         },

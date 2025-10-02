@@ -2,6 +2,7 @@ import express from 'express';
 import { Request, Response } from 'express';
 import AdminController from '../controllers/AdminController';
 import { authMiddleware as authenticateToken, adminMiddleware as requireAdmin } from '../middleware/authMiddleware';
+import { storePhotoUpload } from '../config/cloudinary';
 import Store from '../models/Store';
 import Product from '../models/Product';
 
@@ -56,6 +57,9 @@ router.get('/subscription-stats', AdminController.getSubscriptionStats);
 router.get('/stores-needing-renewal', AdminController.getStoresNeedingRenewal);
 
 // ===== GESTIÓN DE PRODUCTOS =====
+
+// Obtener todos los productos para admin
+router.get('/products/all', AdminController.getAllProducts);
 
 // Generar productos de prueba
 router.post('/products/generate', AdminController.generateProducts);
@@ -174,10 +178,19 @@ router.put('/settings', AdminController.updateSystemSettings);
 // ===== SISTEMA DE ENRIQUECIMIENTO =====
 
 // Subir foto de tienda con GPS
-router.post('/upload-store-photo', AdminController.uploadStorePhoto);
+router.post('/upload-store-photo', storePhotoUpload.single('image'), AdminController.uploadStorePhoto);
 
 // Obtener fotos de tiendas
 router.get('/store-photos', AdminController.getStorePhotos);
+
+// Obtener estadísticas de fotos de tiendas
+router.get('/store-photos/stats', AdminController.getStorePhotosStats);
+
+// Ejecutar proceso de enriquecimiento
+router.post('/run-enrichment', AdminController.runEnrichment);
+
+// Eliminar foto de tienda
+router.delete('/store-photos/:id', AdminController.deleteStorePhoto);
 
 // ===== GESTIÓN DE TIENDAS =====
 
@@ -235,6 +248,54 @@ router.put('/delivery/orders/:orderId/status', AdminController.updateDeliveryOrd
 
 // Obtener configuración de búsqueda
 router.get('/search-config', AdminController.getSearchConfig);
+
+// ===== GESTIÓN DE VENDEDORES =====
+
+// Obtener estadísticas del vendedor
+router.get('/seller/stats', AdminController.getSellerStats);
+
+// ===== GESTIÓN DE CARRITO =====
+
+// Obtener carrito del usuario
+router.get('/cart', AdminController.getCart);
+
+// Agregar producto al carrito
+router.post('/cart/add', AdminController.addToCart);
+
+// Actualizar cantidad de producto en el carrito
+router.put('/cart/items/:itemId', AdminController.updateCartItem);
+
+// Eliminar producto del carrito
+router.delete('/cart/items/:itemId', AdminController.removeFromCart);
+
+// Vaciar carrito
+router.delete('/cart/clear', AdminController.clearCart);
+
+// ===== GESTIÓN DE DELIVERY (PARA REPARTIDORES) =====
+
+// Cambiar estado del repartidor (para el propio repartidor)
+router.put('/delivery/status', AdminController.updateDeliveryStatus);
+
+// Obtener órdenes asignadas al repartidor
+router.get('/delivery/orders', AdminController.getAssignedOrders);
+
+// Obtener reportes del delivery
+router.get('/delivery/reports', AdminController.getDeliveryReports);
+
+// Obtener calificaciones del delivery
+router.get('/delivery/ratings', AdminController.getDeliveryRatings);
+
+// Obtener configuración del delivery
+router.get('/delivery/settings', AdminController.getDeliverySettings);
+
+// Actualizar configuración del delivery
+router.put('/delivery/settings', AdminController.updateDeliverySettings);
+
+// Obtener ganancias del delivery
+router.get('/delivery/earnings', AdminController.getDeliveryEarnings);
+
+// Guardar firma del cliente para entrega
+router.post('/delivery/orders/:orderId/signature', AdminController.saveDeliverySignature);
 
 // Actualizar configuración de búsqueda
 router.put('/search-config', AdminController.updateSearchConfig);
