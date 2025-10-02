@@ -882,7 +882,7 @@ export class AuthController {
         });
       }
       // Generar token JWT
-      const token = AuthController.generateToken(user._id);
+      const token = AuthController.generateToken((user._id as any).toString());
       res.json({
         success: true,
         message: 'Inicio de sesión con Google exitoso',
