@@ -1,7 +1,7 @@
-import axios from 'axios';
-import { ENV } from './environment';
+import axios from 'axios'; 
+import { API_URL } from './constants';
 
-export const API_BASE_URL = ENV.backendUrl;
+export const API_BASE_URL = API_URL; 
 export const api = axios.create({ 
   baseURL: API_BASE_URL, 
   timeout: 10000, 

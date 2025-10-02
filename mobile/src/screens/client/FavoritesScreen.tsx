@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 interface FavoriteProduct {
   _id: string;
@@ -31,6 +32,7 @@ interface FavoriteProduct {
 
 const FavoritesScreen: React.FC = () => {
   const { colors } = useTheme();
+  const navigation = useNavigation();
   const [favorites, setFavorites] = useState<FavoriteProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -234,7 +236,7 @@ const FavoritesScreen: React.FC = () => {
               style={[styles.shopButton, { backgroundColor: colors.primary }]}
               onPress={() => {
                 // Navegar a productos
-                // navigation.navigate('Products');
+                (navigation as any).navigate('ClientTabs', { screen: 'Products' });
               }}
             >
               <Text style={[styles.shopButtonText, { color: '#000000' }]}>

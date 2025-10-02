@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import apiService from '../services/api';
 
 interface PinLoginModalProps {
   visible: boolean;
@@ -81,81 +82,28 @@ const PinLoginModal: React.FC<PinLoginModalProps> = ({
 
     setLoading(true);
     try {
-      // Verificar PIN
-      const savedPin = await AsyncStorage.getItem('userPin');
+      // Obtener credenciales guardadas
+      const savedCredentials = await AsyncStorage.getItem('savedCredentials');
       
-      if (pin === savedPin) {
-        // PIN correcto - hacer login
-        const savedCredentials = await AsyncStorage.getItem('savedCredentials');
-        
-        if (savedCredentials) {
-          const { email, password } = JSON.parse(savedCredentials);
-          
-          // Simular login exitoso
-          const mockUser = {
-            id: 'pin-user-123',
-            name: 'Usuario PIN',
-            email: email,
-            role: 'client',
-            emailVerified: true,
-            phone: '+1234567890',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          };
-          
-          showToast('Login exitoso con PIN', 'success');
-          onSuccess(mockUser);
-          onClose();
-        } else {
-          // Si no hay credenciales guardadas, pedir email
-          Alert.prompt(
-            'Login con PIN',
-            'Ingresa tu email para continuar:',
-            [
-              { text: 'Cancelar', style: 'cancel' },
-              {
-                text: 'Continuar',
-                onPress: (email) => {
-                  if (email) {
-                    const mockUser = {
-                      id: 'pin-user-123',
-                      name: 'Usuario PIN',
-                      email: email,
-                      role: 'client',
-                      emailVerified: true,
-                      phone: '+1234567890',
-                      createdAt: new Date().toISOString(),
-                      updatedAt: new Date().toISOString()
-                    };
-                    
-                    showToast('Login exitoso con PIN', 'success');
-                    onSuccess(mockUser);
-                    onClose();
-                  }
-                }
-              }
-            ],
-            'plain-text',
-            ''
-          );
-        }
-      } else {
-        // PIN incorrecto
-        const newAttempts = attempts + 1;
-        setAttempts(newAttempts);
-        setPin('');
-        
-        if (newAttempts >= 3) {
-          // Bloquear por 30 segundos después de 3 intentos fallidos
-          setIsLocked(true);
-          setLockTime(30);
-          showToast('Demasiados intentos fallidos. Bloqueado por 30 segundos', 'error');
-        } else {
-          showToast(`PIN incorrecto. Intentos restantes: ${3 - newAttempts}`, 'error');
-        }
+      if (!savedCredentials) {
+        showToast('No hay credenciales guardadas', 'error');
+        return;
       }
-    } catch (error) {
-      console.error('Error verifying PIN:', error);
+
+      const { email, password } = JSON.parse(savedCredentials);
+      
+      // Usar el servicio de API real para login con PIN
+      const response = await apiService.loginWithPin({ email, pin });
+      
+      if (response.success && response.data) {
+        showToast('Login exitoso con PIN', 'success');
+        onSuccess(response.data.user);
+        onClose();
+      } else {
+        showToast(response.message || 'PIN incorrecto', 'error');
+      }
+    } catch (error: any) {
+      console.error('Error en login con PIN:', error);
       showToast('Error al verificar PIN', 'error');
     } finally {
       setLoading(false);

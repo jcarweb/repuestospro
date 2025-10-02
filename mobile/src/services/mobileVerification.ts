@@ -11,26 +11,16 @@ interface MobileVerificationUser {
 class MobileVerificationService {
   /**
    * Verifica el email en la app móvil sin interferir con la lógica web
+   * NOTA: Este método ya no se usa, la verificación se maneja directamente desde el backend
    */
   async verifyEmailInMobile(token: string, email: string): Promise<boolean> {
     try {
       console.log('🔐 Verificando email en app móvil:', { token, email });
       
-      // Simular verificación exitosa para la app móvil
-      const verifiedUser: MobileVerificationUser = {
-        id: '1',
-        name: 'Usuario',
-        email: email,
-        emailVerified: true,
-        role: 'client'
-      };
-      
-      // Guardar el usuario verificado en AsyncStorage (solo para móvil)
-      await AsyncStorage.setItem('user', JSON.stringify(verifiedUser));
-      await AsyncStorage.setItem('mobileEmailVerified', 'true');
-      
-      console.log('✅ Email verificado exitosamente en app móvil');
-      return true;
+      // Este método ya no debería usarse, la verificación se maneja desde el backend
+      // Mantener solo para compatibilidad pero no hacer nada
+      console.log('⚠️ verifyEmailInMobile está deprecado, usar verificación del backend');
+      return false;
       
     } catch (error) {
       console.error('❌ Error verificando email en app móvil:', error);

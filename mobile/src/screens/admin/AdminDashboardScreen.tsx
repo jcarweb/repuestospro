@@ -8,6 +8,8 @@ import {
   ActivityIndicator,
   StatusBar,
   Platform,
+  Alert,
+  Image,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -58,6 +60,8 @@ type AdminStackParamList = {
   AdminOrders: undefined;
   AdminReports: undefined;
   AdminSettings: undefined;
+  AdminDelivery: undefined;
+  AdminSearchConfig: undefined;
   StorePhotoCapture: undefined;
   StorePhotosList: undefined;
   OrderDetails: { orderId: string };
@@ -67,16 +71,36 @@ type AdminDashboardNavigationProp = StackNavigationProp<AdminStackParamList, 'Ad
 
 const AdminDashboardScreen: React.FC = () => {
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { showToast } = useToast();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<AdminDashboardNavigationProp>();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userImage, setUserImage] = useState<string | null>(null);
 
   useEffect(() => {
     loadDashboardStats();
+    loadUserImage();
   }, []);
+
+  const loadUserImage = async () => {
+    try {
+      if (user?.avatar) {
+        // Si es una ruta relativa, construir la URL completa
+        if (!user.avatar.startsWith('http')) {
+          const { getBaseURL } = await import('../../config/api');
+          const baseUrl = await getBaseURL();
+          const fullImageUrl = `${baseUrl.replace('/api', '')}${user.avatar}`;
+          setUserImage(fullImageUrl);
+        } else {
+          setUserImage(user.avatar);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user image:', error);
+    }
+  };
 
   const loadDashboardStats = async () => {
     try {
@@ -185,12 +209,26 @@ const AdminDashboardScreen: React.FC = () => {
       >
         {/* Header */}
         <View style={[styles.header, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>
-            Panel de Administración
-          </Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Bienvenido al centro de control de PiezasYA
-          </Text>
+          <View style={styles.headerContent}>
+            <View style={styles.headerText}>
+              <Text style={[styles.title, { color: colors.textPrimary }]}>
+                Panel de Administración
+              </Text>
+              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                Bienvenido al centro de control de PiezasYA
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.profileButton, { backgroundColor: colors.primary }]}
+              onPress={() => navigation.navigate('AdminProfile')}
+            >
+              {userImage ? (
+                <Image source={{ uri: userImage }} style={styles.profileImage} />
+              ) : (
+                <Ionicons name="person" size={20} color="white" />
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Estadísticas */}
@@ -369,8 +407,7 @@ const AdminDashboardScreen: React.FC = () => {
             'Gestión de Delivery',
             'Administrar sistema de entregas',
             () => {
-              // Navegar a gestión de delivery
-              // navigation.navigate('DeliveryManagement');
+              navigation.navigate('AdminDelivery');
             }
           )}
           
@@ -397,8 +434,7 @@ const AdminDashboardScreen: React.FC = () => {
             'Configuración de Búsqueda',
             'Configurar búsqueda y filtros',
             () => {
-              // Navegar a configuración de búsqueda
-              // navigation.navigate('SearchConfig');
+              navigation.navigate('AdminSearchConfig');
             }
           )}
         </View>
@@ -425,13 +461,48 @@ const AdminDashboardScreen: React.FC = () => {
             <TouchableOpacity
               style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => {
-                // Crear nueva tienda
-                // navigation.navigate('CreateStore');
+                navigation.navigate('AdminStores');
               }}
             >
               <Ionicons name="business-outline" size={32} color={colors.primary} />
               <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
                 Nueva Tienda
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              onPress={() => {
+                navigation.navigate('AdminUsers');
+              }}
+            >
+              <Ionicons name="people-outline" size={32} color={colors.primary} />
+              <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
+                Usuarios
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              onPress={() => {
+                navigation.navigate('AdminOrders');
+              }}
+            >
+              <Ionicons name="receipt-outline" size={32} color={colors.primary} />
+              <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
+                Pedidos
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.quickActionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              onPress={() => {
+                navigation.navigate('AdminDelivery');
+              }}
+            >
+              <Ionicons name="car-outline" size={32} color={colors.primary} />
+              <Text style={[styles.quickActionText, { color: colors.textPrimary }]}>
+                Delivery
               </Text>
             </TouchableOpacity>
             
@@ -458,6 +529,31 @@ const AdminDashboardScreen: React.FC = () => {
                 Configuración
               </Text>
             </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.quickActionCard, { backgroundColor: colors.error + '10', borderColor: colors.error }]}
+              onPress={() => {
+                Alert.alert(
+                  'Cerrar sesión',
+                  '¿Estás seguro de que quieres cerrar sesión?',
+                  [
+                    { text: 'Cancelar', style: 'cancel' },
+                    {
+                      text: 'Cerrar sesión',
+                      style: 'destructive',
+                      onPress: () => {
+                        logout();
+                      },
+                    },
+                  ]
+                );
+              }}
+            >
+              <Ionicons name="log-out-outline" size={32} color={colors.error} />
+              <Text style={[styles.quickActionText, { color: colors.error }]}>
+                Cerrar Sesión
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -479,6 +575,14 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 16,
   },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerText: {
+    flex: 1,
+  },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
@@ -486,6 +590,20 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
+  },
+  profileButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 16,
+    overflow: 'hidden',
+  },
+  profileImage: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
   },
   statsSection: {
     marginBottom: 24,

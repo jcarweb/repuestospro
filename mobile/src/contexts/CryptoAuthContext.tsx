@@ -119,8 +119,8 @@ export const CryptoAuthProvider: React.FC<CryptoAuthProviderProps> = ({ children
       setError(null);
       
       const response = await cryptoAuthService.register({
-        ...userData,
-        role: 'client'
+        ...userData
+        // El rol se asigna por defecto en el backend, no lo forzamos aquí
       });
       
       if (response.success && response.data) {

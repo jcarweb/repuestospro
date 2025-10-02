@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import Category from '../models/Category';
 import { config } from '../config/env';
-
 // Categorías principales de repuestos automotrices
 const mainCategories = [
   {
@@ -71,7 +70,6 @@ const mainCategories = [
     image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop'
   }
 ];
-
 // Subcategorías para cada categoría principal
 const subcategories = {
   'Motor': [
@@ -147,20 +145,16 @@ const subcategories = {
     { name: 'Cargadores', description: 'Cargadores y adaptadores', order: 4 }
   ]
 };
-
 async function seedCategories() {
   try {
     // Conectar a MongoDB
     await mongoose.connect(config.MONGODB_URI);
     console.log('Conectado a MongoDB');
-
     // Limpiar categorías existentes
     await Category.deleteMany({});
     console.log('Categorías existentes eliminadas');
-
     // Crear categorías principales
     const createdCategories: any = {};
-    
     for (const categoryData of mainCategories) {
       const category = await Category.create({
         ...categoryData,
@@ -169,11 +163,9 @@ async function seedCategories() {
       createdCategories[categoryData.name] = category;
       console.log(`Categoría creada: ${category.name}`);
     }
-
     // Crear subcategorías
     for (const [parentName, subcats] of Object.entries(subcategories)) {
       const parentCategory = createdCategories[parentName];
-      
       if (parentCategory) {
         for (const subcatData of subcats) {
           const subcategory = await Category.create({
@@ -185,19 +177,14 @@ async function seedCategories() {
         }
       }
     }
-
-    console.log('✅ Categorías sembradas exitosamente');
-    
     // Mostrar estadísticas
     const totalCategories = await Category.countDocuments();
     const rootCategories = await Category.countDocuments({ parentCategory: { $exists: false } });
     const subCategories = await Category.countDocuments({ parentCategory: { $exists: true } });
-    
     console.log(`📊 Estadísticas:`);
     console.log(`   - Total de categorías: ${totalCategories}`);
     console.log(`   - Categorías principales: ${rootCategories}`);
     console.log(`   - Subcategorías: ${subCategories}`);
-
   } catch (error) {
     console.error('Error sembrando categorías:', error);
   } finally {
@@ -205,10 +192,8 @@ async function seedCategories() {
     console.log('Desconectado de MongoDB');
   }
 }
-
 // Ejecutar si se llama directamente
 if (require.main === module) {
   seedCategories();
 }
-
 export default seedCategories;

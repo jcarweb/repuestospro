@@ -95,7 +95,7 @@ export const ActiveStoreProvider: React.FC<ActiveStoreProviderProps> = ({ childr
       setLoading(true);
       console.log('ActiveStoreContext: Haciendo petición a /api/user/stores/complete...');
       
-      const response = await fetch('API_BASE_URL/user/stores/complete', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""/api/user/stores/complete', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

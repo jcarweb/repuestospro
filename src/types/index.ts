@@ -39,7 +39,7 @@ export interface CartItem {
 }
 
 // Tipos de usuario actualizados
-export type UserRole = 'admin' | 'client' | 'delivery' | 'store_manager';
+export type UserRole = 'admin' | 'client' | 'delivery' | 'store_manager' | 'seller';
 
 export interface User {
   id: string;
@@ -134,6 +134,31 @@ export interface User {
     analyticsAccess: boolean;
     codeGeneration: boolean;
     globalSettings: boolean;
+  };
+  
+  // Campos específicos para Seller (Vendedor)
+  sellerInfo?: {
+    storeId: string;
+    storeName: string;
+    branchId?: string;
+    branchName?: string;
+    isActive: boolean;
+    canViewPrices: boolean;
+    canChat: boolean;
+    canCreateQuotes: boolean;
+    maxDiscountPercentage: number;
+    assignedCategories: string[];
+    workSchedule?: {
+      startTime: string;
+      endTime: string;
+      daysOfWeek: number[];
+    };
+    performanceMetrics?: {
+      totalQueries: number;
+      successfulSales: number;
+      averageResponseTime: number;
+      customerRating: number;
+    };
   };
 }
 

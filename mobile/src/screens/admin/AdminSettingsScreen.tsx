@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getBaseURL } from '../../config/api';
 import {
   View,
   Text,
@@ -89,7 +90,7 @@ const AdminSettingsScreen: React.FC = () => {
   const loadSettings = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/admin/settings', {
+      const response = await fetch(`${await getBaseURL()}/admin/settings`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -117,7 +118,7 @@ const AdminSettingsScreen: React.FC = () => {
   const updateSetting = async (category: string, key: string, value: any) => {
     try {
       setSaving(true);
-      const response = await fetch('http://localhost:5000/api/admin/settings', {
+      const response = await fetch(`${await getBaseURL()}/admin/settings`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

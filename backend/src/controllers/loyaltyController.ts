@@ -316,7 +316,7 @@ export class LoyaltyController {
     try {
       const { referralCode } = req.params;
 
-      await LoyaltyService.trackReferralClick(referralCode);
+      await LoyaltyService.trackReferralClick(referralCode || '');
 
       res.json({
         success: true,

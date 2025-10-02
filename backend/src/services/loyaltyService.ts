@@ -230,13 +230,15 @@ export class LoyaltyService {
     const rewards = await Reward.find({
       isActive: true,
       stock: { $gt: 0 },
-      $or: [
-        { startDate: { $exists: false } },
-        { startDate: { $lte: now } }
-      ],
-      $or: [
-        { endDate: { $exists: false } },
-        { endDate: { $gte: now } }
+      $and: [
+        { $or: [
+          { startDate: { $exists: false } },
+          { startDate: { $lte: now } }
+        ]},
+        { $or: [
+          { endDate: { $exists: false } },
+          { endDate: { $gte: now } }
+        ]}
       ]
     }).sort({ pointsRequired: 1 });
 

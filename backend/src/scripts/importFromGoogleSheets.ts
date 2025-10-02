@@ -4,52 +4,41 @@ import Category from '../models/Category';
 import Brand from '../models/Brand';
 import Subcategory from '../models/Subcategory';
 import config from '../config/env';
-
 // Configuración de Google Sheets API
 const auth = new google.auth.GoogleAuth({
   keyFile: './google-credentials.json', // Necesitarás crear este archivo
   scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
 });
-
 const sheets = google.sheets({ version: 'v4', auth });
-
 interface GoogleSheetData {
   categories: any[];
   brands: any[];
   subcategories: any[];
 }
-
 async function readGoogleSheet(spreadsheetId: string): Promise<GoogleSheetData> {
   try {
     console.log('📖 Leyendo datos del Google Sheet...');
-    
     // Leer la pestaña "maestros"
     const maestrosResponse = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range: 'maestros!A:B', // Solo columnas A y B
     });
-
     // Leer la pestaña de subcategorías
     const subcategoriesResponse = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range: 'subcategorias!A:B', // Solo columnas A y B
     });
-
     const maestrosData = maestrosResponse.data.values || [];
     const subcategoriesData = subcategoriesResponse.data.values || [];
-
     // Procesar datos de maestros (categorías y marcas)
     const categories: any[] = [];
     const brands: any[] = [];
-
     // Saltar la primera fila (encabezados)
     for (let i = 1; i < maestrosData.length; i++) {
       const row = maestrosData[i];
-      
-      if (row.length >= 2) {
-        const categoria = row[0]?.trim();
-        const marca = row[1]?.trim();
-        
+      if (row && row.length >= 2) {
+        const categoria = row[0]?.trim() || '';
+        const marca = row[1]?.trim() || '';
         // Agregar categoría si existe y no está duplicada
         if (categoria && categoria !== '') {
           const existingCategory = categories.find(cat => cat.name === categoria);
@@ -64,7 +53,6 @@ async function readGoogleSheet(spreadsheetId: string): Promise<GoogleSheetData> 
             });
           }
         }
-        
         // Agregar marca si existe y no está duplicada
         if (marca && marca !== '') {
           const existingBrand = brands.find(brand => brand.name === marca);
@@ -83,16 +71,13 @@ async function readGoogleSheet(spreadsheetId: string): Promise<GoogleSheetData> 
         }
       }
     }
-
     // Procesar subcategorías
     const subcategories: any[] = [];
     for (let i = 1; i < subcategoriesData.length; i++) {
       const row = subcategoriesData[i];
-      
-      if (row.length >= 2) {
-        const categoryName = row[0]?.trim();
-        const subcategoryName = row[1]?.trim();
-        
+      if (row && row.length >= 2) {
+        const categoryName = row[0]?.trim() || '';
+        const subcategoryName = row[1]?.trim() || '';
         if (categoryName && subcategoryName && categoryName !== '' && subcategoryName !== '') {
           subcategories.push({
             name: subcategoryName,
@@ -107,14 +92,12 @@ async function readGoogleSheet(spreadsheetId: string): Promise<GoogleSheetData> 
         }
       }
     }
-
     return { categories, brands, subcategories };
   } catch (error) {
     console.error('❌ Error leyendo Google Sheet:', error);
     throw error;
   }
 }
-
 // Función para asignar iconos según la categoría
 function getIconForCategory(categoryName: string): string {
   const iconMap: { [key: string]: string } = {
@@ -152,10 +135,8 @@ function getIconForCategory(categoryName: string): string {
     'Arboles de transmisión y diferenciales': 'driveshaft',
     'Remolque / Piezas adicionales': 'trailer'
   };
-  
   return iconMap[categoryName] || 'default';
 }
-
 // Función para asignar iconos según la subcategoría
 function getIconForSubcategory(subcategoryName: string): string {
   const iconMap: { [key: string]: string } = {
@@ -168,10 +149,8 @@ function getIconForSubcategory(subcategoryName: string): string {
     'KIT DE CORREA POLY V': 'poly-v-kit',
     'POLEA TENSORA,CORREA DENTADA': 'tensioner'
   };
-  
   return iconMap[subcategoryName] || 'default';
 }
-
 // Función para asignar países según la marca
 function getCountryForBrand(brandName: string): string {
   const countryMap: { [key: string]: string } = {
@@ -230,80 +209,60 @@ function getCountryForBrand(brandName: string): string {
     'JAC': 'China',
     'Chery': 'China'
   };
-  
   return countryMap[brandName] || '';
 }
-
 async function importToMongoDB(data: GoogleSheetData): Promise<void> {
   try {
     console.log('🗄️ Importando datos a MongoDB...');
-
     // Limpiar colecciones existentes
     await Category.deleteMany({});
     await Brand.deleteMany({});
     await Subcategory.deleteMany({});
     console.log('🧹 Colecciones limpiadas');
-
     // Insertar categorías
     if (data.categories.length > 0) {
       const createdCategories = await Category.insertMany(data.categories);
-      console.log(`✅ ${createdCategories.length} categorías insertadas`);
     }
-
     // Insertar marcas
     if (data.brands.length > 0) {
       const createdBrands = await Brand.insertMany(data.brands);
-      console.log(`✅ ${createdBrands.length} marcas insertadas`);
     }
-
     // Insertar subcategorías (necesitamos mapear categoryName a categoryId)
     if (data.subcategories.length > 0) {
       const categories = await Category.find({});
       const categoryMap = new Map(categories.map(cat => [cat.name, cat._id]));
-
       const subcategoriesWithIds = data.subcategories.map(sub => ({
         ...sub,
         categoryId: categoryMap.get(sub.categoryName),
       })).filter(sub => sub.categoryId); // Solo incluir si se encontró la categoría
-
       if (subcategoriesWithIds.length > 0) {
         await Subcategory.insertMany(subcategoriesWithIds);
-        console.log(`✅ ${subcategoriesWithIds.length} subcategorías insertadas`);
       }
-
       // Mostrar subcategorías que no se pudieron mapear
-      const unmappedSubcategories = data.subcategories.filter(sub => 
+      const unmappedSubcategories = data.subcategories.filter(sub =>
         !categoryMap.has(sub.categoryName)
       );
       if (unmappedSubcategories.length > 0) {
-        console.log(`⚠️ ${unmappedSubcategories.length} subcategorías no se pudieron mapear:`);
         unmappedSubcategories.forEach(sub => {
           console.log(`   - ${sub.name} (categoría: ${sub.categoryName})`);
         });
       }
     }
-
     console.log('🎉 Importación completada exitosamente');
   } catch (error) {
     console.error('❌ Error importando a MongoDB:', error);
     throw error;
   }
 }
-
 async function importFromGoogleSheets(spreadsheetId: string): Promise<void> {
   try {
     console.log('🚀 Iniciando importación desde Google Sheets...');
-
     // Conectar a la base de datos
     await mongoose.connect(config.MONGODB_URI);
-    console.log('✅ Conectado a la base de datos');
-
     // Leer datos del Google Sheet
     const data = await readGoogleSheet(spreadsheetId);
-
     // Importar a MongoDB
     await importToMongoDB(data);
-
   } catch (error) {
     console.error('❌ Error en la importación:', error);
   } finally {
@@ -311,7 +270,6 @@ async function importFromGoogleSheets(spreadsheetId: string): Promise<void> {
     console.log('🔌 Desconectado de la base de datos');
   }
 }
-
 // Ejecutar el script si se llama directamente
 if (require.main === module) {
   const spreadsheetId = process.argv[2];
@@ -322,5 +280,4 @@ if (require.main === module) {
   }
   importFromGoogleSheets(spreadsheetId);
 }
-
-export default importFromGoogleSheets; 
+export default importFromGoogleSheets;

@@ -1,7 +1,7 @@
 {
   "name": "piezasyaya-ecommerce",
-  "version": "1.0.0",
-  "description": "Ecommerce multiplataforma para repuestos de vehículos - PiezasYA",
+  "version": "1.4.0",
+  "description": "Ecommerce multiplataforma para repuestos de vehículos - PiezasYA v1.4.0",
   "scripts": {
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend:network\"",
     "dev:frontend": "vite --port 3000",
@@ -24,10 +24,14 @@
     "express",
     "mongodb"
   ],
-  "author": "PiezasYA Team",
+  "author": "Juan Hernandez <jcarweb.designer@gmail.com> (LDJ Digital Solutions)",
+  "contributors": [
+    "PiezasYA Development Team"
+  ],
   "license": "MIT",
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",
+    "@heroicons/react": "^2.2.0",
     "@tailwindcss/forms": "^0.5.10",
     "@types/google.maps": "^3.58.1",
     "@types/leaflet": "^1.9.8",
@@ -54,6 +58,7 @@
     "postcss": "^8.4.24",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.0.2",
-    "vite": "^4.3.9"
+    "vite": "^4.3.9",
+    "vite-plugin-node-polyfills": "^0.24.0"
   }
 }

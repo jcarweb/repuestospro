@@ -1,7 +1,13 @@
-# 🚀 Guía de Despliegue - PiezasYA
+# 🚀 Guía de Despliegue - PiezasYA v1.4.0
+
+**Versión**: 1.4.0  
+**Desarrollador**: Juan Hernandez  
+**Empresa**: LDJ Digital Solutions  
+**Equipo de Desarrollo**: PiezasYA  
+**Última actualización**: Octubre 2025
 
 ## 📋 Resumen
-Esta guía te ayudará a desplegar la aplicación PiezasYA en servidores gratuitos:
+Esta guía te ayudará a desplegar la aplicación PiezasYA v1.4.0 en servidores gratuitos:
 - **Frontend**: Vercel (React + Vite)
 - **Backend**: Render (Node.js + Express)
 - **Base de datos**: MongoDB Atlas (gratuito)

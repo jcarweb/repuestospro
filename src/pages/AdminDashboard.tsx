@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useLanguageChange } from '../hooks/useLanguageChange';
-import { Users, Package, TrendingUp, DollarSign, Settings, BarChart3, Camera, MapPin } from 'lucide-react';
+import { Users, Package, TrendingUp, DollarSign, Settings, BarChart3, Camera, MapPin, Store } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -143,21 +143,40 @@ const AdminDashboard: React.FC = () => {
         <div className="bg-white dark:bg-[#333333] rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-[#333333] dark:text-[#FFC300] mb-4">{t('adminDashboard.quickActions.title')}</h3>
           <div className="space-y-3">
-            <button className="w-full flex items-center justify-between p-3 text-left hover:bg-[#FFC300] hover:bg-opacity-10 rounded-lg transition-colors">
+            <button 
+              onClick={() => window.location.href = '/admin/users'}
+              className="w-full flex items-center justify-between p-3 text-left hover:bg-[#FFC300] hover:bg-opacity-10 rounded-lg transition-colors"
+            >
               <div className="flex items-center">
                 <Users className="w-5 h-5 text-[#FFC300] mr-3" />
                 <span className="text-[#333333] dark:text-white">{t('adminDashboard.quickActions.manageUsers')}</span>
               </div>
               <span className="text-[#FFC300]">→</span>
             </button>
-            <button className="w-full flex items-center justify-between p-3 text-left hover:bg-[#FFC300] hover:bg-opacity-10 rounded-lg transition-colors">
+            <button 
+              onClick={() => window.location.href = '/admin/products'}
+              className="w-full flex items-center justify-between p-3 text-left hover:bg-[#FFC300] hover:bg-opacity-10 rounded-lg transition-colors"
+            >
               <div className="flex items-center">
                 <Package className="w-5 h-5 text-[#E63946] mr-3" />
                 <span className="text-[#333333] dark:text-white">{t('adminDashboard.quickActions.manageProducts')}</span>
               </div>
               <span className="text-[#E63946]">→</span>
             </button>
-            <button className="w-full flex items-center justify-between p-3 text-left hover:bg-[#FFC300] hover:bg-opacity-10 rounded-lg transition-colors">
+            <button 
+              onClick={() => window.location.href = '/admin/stores'}
+              className="w-full flex items-center justify-between p-3 text-left hover:bg-[#FFC300] hover:bg-opacity-10 rounded-lg transition-colors"
+            >
+              <div className="flex items-center">
+                <Store className="w-5 h-5 text-[#10B981] mr-3" />
+                <span className="text-[#333333] dark:text-white">Gestionar Tiendas</span>
+              </div>
+              <span className="text-[#10B981]">→</span>
+            </button>
+            <button 
+              onClick={() => window.location.href = '/admin/settings'}
+              className="w-full flex items-center justify-between p-3 text-left hover:bg-[#FFC300] hover:bg-opacity-10 rounded-lg transition-colors"
+            >
               <div className="flex items-center">
                 <Settings className="w-5 h-5 text-[#333333] dark:text-white mr-3" />
                 <span className="text-[#333333] dark:text-white">{t('adminDashboard.quickActions.settings')}</span>

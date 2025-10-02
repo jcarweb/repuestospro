@@ -45,7 +45,7 @@ const EmailVerification: React.FC = () => {
 
   const verifyEmail = async (token: string) => {
     try {
-      const response = await fetch(`API_BASE_URL/auth/verify-email/${token}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""/api/auth/verify-email/${token}`, {
         method: 'GET'
       });
 
@@ -70,7 +70,7 @@ const EmailVerification: React.FC = () => {
     setMessage('Reenviando email de verificación...');
     
     try {
-      const response = await fetch('API_BASE_URL/auth/resend-verification', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/auth/resend-verification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

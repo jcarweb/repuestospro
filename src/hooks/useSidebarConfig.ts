@@ -148,13 +148,22 @@ const defaultConfig: SidebarConfig = {
       description: 'Gestión de publicidad'
     },
     {
-      id: 'settings',
-      title: 'Configuración',
-      path: '/store-manager/settings',
+      id: 'store-configuration',
+      title: 'Configuración de Tienda',
+      path: '/store-manager/store-configuration',
       icon: 'Settings',
       visible: true,
       order: 13,
-      description: 'Configuración de la tienda'
+      description: 'Configuración básica de la tienda'
+    },
+    {
+      id: 'settings',
+      title: 'Configuración del Sidebar',
+      path: '/store-manager/settings',
+      icon: 'Settings',
+      visible: true,
+      order: 14,
+      description: 'Configuración del sidebar'
     }
   ],
   quickActions: [

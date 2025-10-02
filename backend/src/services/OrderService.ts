@@ -382,7 +382,7 @@ export class OrderService {
     order.orderStatus = 'cancelled';
     order.paymentStatus = 'cancelled';
     order.fulfillmentStatus = 'unfulfilled';
-    order.internalNotes = reason ? `${order.internalNotes || ''}\nCancelada: ${reason}`.trim() : order.internalNotes;
+    order.internalNotes = reason ? `${order.internalNotes || ''}\nCancelada: ${reason}`.trim() : (order.internalNotes || '');
     order.cancelledAt = new Date();
 
     return await order.save();

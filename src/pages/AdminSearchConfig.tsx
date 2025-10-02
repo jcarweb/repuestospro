@@ -56,7 +56,7 @@ const AdminSearchConfig: React.FC = () => {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch('API_BASE_URL/search/config', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""/api/search/config', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -79,7 +79,7 @@ const AdminSearchConfig: React.FC = () => {
 
     setSaving(true);
     try {
-      const response = await fetch('API_BASE_URL/search/config', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/search/config', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

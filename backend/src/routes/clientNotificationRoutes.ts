@@ -28,7 +28,6 @@ router.patch('/mark-all-read', clientNotificationController.markAllAsRead);
 // Archivar notificación
 router.patch('/:notificationId/archive', clientNotificationController.archiveNotification);
 
-// Crear notificación de prueba (solo para desarrollo)
-router.post('/test', clientNotificationController.createTestNotification);
+// Endpoint de debug removido por seguridad
 
 export default router;

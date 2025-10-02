@@ -95,7 +95,7 @@ const AuthDiagnostic: React.FC = () => {
 
     // 5. Verificar API
     try {
-      const response = await fetch('http://localhost:5000/api/health');
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""/api/health');
       results.push({
         name: 'API Backend',
         status: response.ok ? 'success' : 'error',

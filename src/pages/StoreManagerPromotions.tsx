@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -111,6 +111,7 @@ const StoreManagerPromotions: React.FC = () => {
   const { theme } = useTheme();
   const { user, token } = useAuth();
   const { activeStore } = useActiveStore();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   // Estados principales
   const [promotions, setPromotions] = useState<Promotion[]>([]);
@@ -149,6 +150,16 @@ const StoreManagerPromotions: React.FC = () => {
     subscription?: any;
     requiresUpgrade?: boolean;
   } | null>(null);
+
+  // Detectar acción desde URL
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'create') {
+      setShowCreateModal(true);
+      // Limpiar el parámetro de la URL
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
 
     // Cargar promociones
   const loadPromotions = async () => {

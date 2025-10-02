@@ -92,9 +92,9 @@ export function getRandomImages(category: string, count: number = 4): string[] {
 export function getRandomImage(category: string): string {
   const categoryImages = repuestoImages[category as keyof typeof repuestoImages];
   if (!categoryImages || categoryImages.length === 0) {
-    return repuestoImages['Accesorios'][0];
+    return repuestoImages['Accesorios'][0] || '';
   }
-  return categoryImages[Math.floor(Math.random() * categoryImages.length)];
+  return categoryImages[Math.floor(Math.random() * categoryImages.length)] || '';
 }
 
 // Función para obtener imágenes de fallback si las principales fallan

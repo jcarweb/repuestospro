@@ -21,7 +21,7 @@ const VerifyEmail: React.FC = () => {
     hasVerified.current = true;
     
     try {
-      const response = await fetch(`API_BASE_URL/auth/verify-email/${token}`);
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""/api/auth/verify-email/${token}`);
       console.log('VerifyEmail - Response status:', response.status);
       console.log('VerifyEmail - Response ok:', response.ok);
       
@@ -72,7 +72,7 @@ const VerifyEmail: React.FC = () => {
 
   const handleResendVerification = async () => {
     try {
-      const response = await fetch('API_BASE_URL/auth/resend-verification', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/auth/resend-verification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -14,30 +14,47 @@ import api from '../../config/api';
 interface ExchangeRate {
   _id?: string;
   rate: number;
+  currency: string;
   source: string;
   sourceUrl: string;
   lastUpdated: Date;
   isActive: boolean;
 }
 
+interface ExchangeRates {
+  USD: ExchangeRate | null;
+  EUR: ExchangeRate | null;
+}
+
 const ExchangeRateTab: React.FC = () => {
   const { t } = useLanguage();
-  const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
+  const [exchangeRates, setExchangeRates] = useState<ExchangeRates>({ USD: null, EUR: null });
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [configUrl, setConfigUrl] = useState('https://www.bcv.org.ve/');
+  const [autoUpdateStatus, setAutoUpdateStatus] = useState<{ isRunning: boolean; nextUpdate?: Date } | null>(null);
+  const [history, setHistory] = useState<{ USD: ExchangeRate[]; EUR: ExchangeRate[] }>({ USD: [], EUR: [] });
 
   useEffect(() => {
-    fetchExchangeRate();
+    fetchExchangeRates();
+    fetchAutoUpdateStatus();
+    fetchHistory();
+    
+    // Configurar actualización automática cada 30 minutos (ya que la actualización del servidor es diaria)
+    const interval = setInterval(() => {
+      fetchExchangeRates();
+    }, 30 * 60 * 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchExchangeRate = async () => {
+  const fetchExchangeRates = async () => {
     setIsLoading(true);
     try {
       const response = await api.get('/monetization/exchange-rate/current');
-      setExchangeRate(response.data.exchangeRate);
+      setExchangeRates(response.data.exchangeRates);
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -45,16 +62,55 @@ const ExchangeRateTab: React.FC = () => {
     }
   };
 
-  const updateExchangeRate = async () => {
+  const fetchAutoUpdateStatus = async () => {
+    try {
+      const response = await api.get('/monetization/exchange-rate/auto-update/status');
+      setAutoUpdateStatus(response.data.status);
+    } catch (error) {
+      console.error('Error obteniendo estado de actualización automática:', error);
+    }
+  };
+
+  const fetchHistory = async () => {
+    try {
+      const response = await api.get('/monetization/exchange-rate/history');
+      setHistory(response.data.history);
+    } catch (error) {
+      console.error('Error obteniendo historial:', error);
+    }
+  };
+
+  const updateExchangeRates = async () => {
     setIsUpdating(true);
     try {
-             const response = await api.post('/monetization/exchange-rate/update', { sourceUrl: configUrl });
-      setExchangeRate(response.data.exchangeRate);
-      setMessage({ type: 'success', text: 'Tasa de cambio actualizada exitosamente' });
+      const response = await api.post('/monetization/exchange-rate/update', { sourceUrl: configUrl });
+      setExchangeRates(response.data.exchangeRates);
+      setMessage({ type: 'success', text: 'Tasas de cambio actualizadas exitosamente' });
+      fetchHistory(); // Actualizar historial
     } catch (error) {
       setMessage({ type: 'error', text: 'Error de conexión' });
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const startAutoUpdate = async () => {
+    try {
+      await api.post('/monetization/exchange-rate/auto-update/start');
+      setMessage({ type: 'success', text: 'Actualización automática iniciada' });
+      fetchAutoUpdateStatus();
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Error iniciando actualización automática' });
+    }
+  };
+
+  const stopAutoUpdate = async () => {
+    try {
+      await api.post('/monetization/exchange-rate/auto-update/stop');
+      setMessage({ type: 'success', text: 'Actualización automática detenida' });
+      fetchAutoUpdateStatus();
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Error deteniendo actualización automática' });
     }
   };
 
@@ -87,7 +143,7 @@ const ExchangeRateTab: React.FC = () => {
             {t('monetization.exchangeRate.title')}
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mt-1">
-            Gestión de la tasa de cambio USD/VES
+            Gestión de las tasas de cambio USD/VES y EUR/VES
           </p>
         </div>
         <div className="flex space-x-3">
@@ -98,8 +154,23 @@ const ExchangeRateTab: React.FC = () => {
             <Settings className="w-4 h-4" />
             <span>Configurar</span>
           </button>
+          {autoUpdateStatus?.isRunning ? (
+            <button
+              onClick={stopAutoUpdate}
+              className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            >
+              <span>Detener Auto</span>
+            </button>
+          ) : (
+            <button
+              onClick={startAutoUpdate}
+              className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              <span>Iniciar Auto</span>
+            </button>
+          )}
           <button
-            onClick={updateExchangeRate}
+            onClick={updateExchangeRates}
             disabled={isUpdating}
             className="flex items-center space-x-2 px-4 py-2 bg-[#FFC300] text-[#333333] rounded-lg hover:bg-[#FFB800] disabled:opacity-50 transition-colors"
           >
@@ -109,56 +180,186 @@ const ExchangeRateTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Current Rate Display */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg p-6 mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-[#333333] dark:text-white mb-2">
-              Tasa Actual USD/VES
-            </h3>
-            {isLoading ? (
-              <div className="flex items-center space-x-2">
-                <RefreshCw className="w-5 h-5 animate-spin text-[#FFC300]" />
-                <span className="text-gray-600 dark:text-gray-300">Cargando...</span>
-              </div>
-            ) : exchangeRate ? (
-              <div className="space-y-2">
-                <div className="text-3xl font-bold text-[#FFC300]">
-                  ${exchangeRate.rate.toFixed(2)} VES
+      {/* Current Rates Display */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* USD Rate */}
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-[#333333] dark:text-white mb-2">
+                Tasa Actual USD/VES
+              </h3>
+              {isLoading ? (
+                <div className="flex items-center space-x-2">
+                  <RefreshCw className="w-5 h-5 animate-spin text-[#FFC300]" />
+                  <span className="text-gray-600 dark:text-gray-300">Cargando...</span>
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-300">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4" />
-                    <span>Actualizado: {formatDate(exchangeRate.lastUpdated)}</span>
+              ) : exchangeRates.USD ? (
+                <div className="space-y-2">
+                  <div className="text-3xl font-bold text-[#FFC300]">
+                    ${exchangeRates.USD.rate.toFixed(2)} VES
                   </div>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <TrendingUp className="w-4 h-4" />
-                    <span>Fuente: {exchangeRate.source}</span>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>Actualizado: {formatDate(exchangeRates.USD.lastUpdated)}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <TrendingUp className="w-4 h-4" />
+                      <span>Fuente: {exchangeRates.USD.source}</span>
+                    </div>
                   </div>
                 </div>
+              ) : (
+                <div className="text-gray-500 dark:text-gray-400">
+                  No hay tasa USD configurada
+                </div>
+              )}
+            </div>
+            <div className="text-right">
+              <div className="w-16 h-16 bg-[#FFC300] rounded-full flex items-center justify-center">
+                <DollarSign className="w-8 h-8 text-[#333333]" />
               </div>
-            ) : (
-              <div className="text-gray-500 dark:text-gray-400">
-                No hay tasa de cambio configurada
-              </div>
-            )}
+            </div>
           </div>
-          <div className="text-right">
-            <div className="w-16 h-16 bg-[#FFC300] rounded-full flex items-center justify-center">
-              <DollarSign className="w-8 h-8 text-[#333333]" />
+        </div>
+
+        {/* EUR Rate */}
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-[#333333] dark:text-white mb-2">
+                Tasa Actual EUR/VES
+              </h3>
+              {isLoading ? (
+                <div className="flex items-center space-x-2">
+                  <RefreshCw className="w-5 h-5 animate-spin text-blue-500" />
+                  <span className="text-gray-600 dark:text-gray-300">Cargando...</span>
+                </div>
+              ) : exchangeRates.EUR ? (
+                <div className="space-y-2">
+                  <div className="text-3xl font-bold text-blue-500">
+                    €{exchangeRates.EUR.rate.toFixed(2)} VES
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>Actualizado: {formatDate(exchangeRates.EUR.lastUpdated)}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <TrendingUp className="w-4 h-4" />
+                      <span>Fuente: {exchangeRates.EUR.source}</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-gray-500 dark:text-gray-400">
+                  No hay tasa EUR configurada
+                </div>
+              )}
+            </div>
+            <div className="text-right">
+              <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xl">€</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Auto Update Status */}
+      {autoUpdateStatus && (
+        <div className="bg-white dark:bg-[#444444] rounded-lg border border-gray-200 dark:border-[#555555] p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className={`w-3 h-3 rounded-full ${autoUpdateStatus.isRunning ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                Actualización automática: {autoUpdateStatus.isRunning ? 'Activa (diaria 9:20 AM)' : 'Inactiva'}
+              </span>
+            </div>
+            {autoUpdateStatus.nextUpdate && (
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                Próxima actualización: {formatDate(autoUpdateStatus.nextUpdate)}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Rate History */}
       <div className="bg-white dark:bg-[#444444] rounded-lg border border-gray-200 dark:border-[#555555] p-6">
         <h3 className="text-lg font-semibold text-[#333333] dark:text-white mb-4">
           Historial de Tasas
         </h3>
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
-          <p>Historial de tasas próximamente</p>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* USD History */}
+          <div>
+            <h4 className="text-md font-medium text-[#333333] dark:text-white mb-3 flex items-center">
+              <DollarSign className="w-4 h-4 mr-2 text-[#FFC300]" />
+              Historial USD/VES
+            </h4>
+            {history.USD.length > 0 ? (
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {history.USD.map((rate, index) => (
+                  <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-[#555555] rounded-lg">
+                    <div>
+                      <div className="font-semibold text-[#FFC300]">
+                        ${rate.rate.toFixed(2)} VES
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {formatDate(rate.lastUpdated)}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {rate.source}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                <TrendingUp className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No hay historial USD disponible</p>
+              </div>
+            )}
+          </div>
+
+          {/* EUR History */}
+          <div>
+            <h4 className="text-md font-medium text-[#333333] dark:text-white mb-3 flex items-center">
+              <span className="w-4 h-4 mr-2 text-blue-500 font-bold">€</span>
+              Historial EUR/VES
+            </h4>
+            {history.EUR.length > 0 ? (
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {history.EUR.map((rate, index) => (
+                  <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-[#555555] rounded-lg">
+                    <div>
+                      <div className="font-semibold text-blue-500">
+                        €{rate.rate.toFixed(2)} VES
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {formatDate(rate.lastUpdated)}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {rate.source}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                <TrendingUp className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No hay historial EUR disponible</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

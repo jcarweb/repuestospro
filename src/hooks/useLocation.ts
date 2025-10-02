@@ -72,7 +72,7 @@ export const useLocation = (): UseLocationReturn => {
       // Enviar al servidor si hay token
       if (token) {
         try {
-          const response = await fetch('API_BASE_URL/location/update', {
+          const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""/api/location/update', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ export const useLocation = (): UseLocationReturn => {
     localStorage.removeItem('location');
     // También limpiar en el servidor si hay token
     if (token) {
-      fetch('API_BASE_URL/location/toggle', {
+      fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/location/toggle', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

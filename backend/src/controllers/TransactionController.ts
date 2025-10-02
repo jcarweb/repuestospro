@@ -1,14 +1,18 @@
 import { Request, Response } from 'express';
 import { TransactionService, TransactionCreationData } from '../services/TransactionService';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 export class TransactionController {
 
   /**
    * Crear una nueva transacción (checkout)
    */
-  public createTransaction = async (req: Request, res: Response) => {
+  public createTransaction = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userId = (req as any).user.id;
+      const userId = req.user?._id || req.user?.id;
       const {
         storeId,
         items,
@@ -21,7 +25,7 @@ export class TransactionController {
 
       // Validar datos requeridos
       if (!storeId || !items || !shippingAddress || !paymentMethod) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Datos requeridos faltantes'
         });
@@ -69,11 +73,11 @@ export class TransactionController {
   /**
    * Obtener transacciones del usuario
    */
-  public getUserTransactions = async (req: Request, res: Response) => {
+  public getUserTransactions = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = (req as any).user.id;
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const userId = req.user?._id || req.user?.id;
+      const page = parseInt((req.query['page'] as string) || '1');
+      const limit = parseInt((req.query['limit'] as string) || '10');
 
       const result = await TransactionService.getUserTransactions(userId, page, limit);
 
@@ -94,14 +98,14 @@ export class TransactionController {
   /**
    * Obtener transacciones de la tienda (para store managers)
    */
-  public getStoreTransactions = async (req: Request, res: Response) => {
+  public getStoreTransactions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const storeId = (req as any).user.storeId;
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const storeId = req.user?.storeId;
+      const page = parseInt((req.query['page'] as string) || '1');
+      const limit = parseInt((req.query['limit'] as string) || '10');
 
       if (!storeId) {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'Acceso denegado: no tienes una tienda asignada'
         });
@@ -126,16 +130,16 @@ export class TransactionController {
   /**
    * Obtener transacción por ID
    */
-  public getTransactionById = async (req: Request, res: Response) => {
+  public getTransactionById = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { transactionId } = req.params;
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id || req.user?.id;
+      const userRole = req.user?.role;
 
-      const transaction = await TransactionService.getTransactionById(transactionId);
+      const transaction = await TransactionService.getTransactionById(transactionId || '');
 
       if (!transaction) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Transacción no encontrada'
         });
@@ -143,9 +147,9 @@ export class TransactionController {
 
       // Verificar permisos
       if (userRole !== 'admin' && 
-          transaction.userId.toString() !== userId && 
-          transaction.storeId.toString() !== (req as any).user.storeId) {
-        return res.status(403).json({
+          transaction?.userId.toString() !== userId &&
+          transaction?.storeId.toString() !== req.user?.storeId) {
+        res.status(403).json({
           success: false,
           message: 'Acceso denegado'
         });
@@ -168,26 +172,26 @@ export class TransactionController {
   /**
    * Actualizar estado de transacción
    */
-  public updateTransactionStatus = async (req: Request, res: Response) => {
+  public updateTransactionStatus = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { transactionId } = req.params;
       const { status, paymentStatus } = req.body;
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id || req.user?.id;
+      const userRole = req.user?.role;
 
       // Validar estado
       const validStatuses = ['pending', 'processing', 'completed', 'failed', 'cancelled', 'refunded'];
       if (!validStatuses.includes(status)) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Estado de transacción inválido'
         });
       }
 
       // Obtener transacción para verificar permisos
-      const transaction = await TransactionService.getTransactionById(transactionId);
+      const transaction = await TransactionService.getTransactionById(transactionId || '');
       if (!transaction) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Transacción no encontrada'
         });
@@ -195,9 +199,9 @@ export class TransactionController {
 
       // Verificar permisos (solo admin, usuario propietario o store manager de la tienda)
       if (userRole !== 'admin' && 
-          transaction.userId.toString() !== userId && 
-          transaction.storeId.toString() !== (req as any).user.storeId) {
-        return res.status(403).json({
+          transaction?.userId.toString() !== userId &&
+          transaction?.storeId.toString() !== req.user?.storeId) {
+        res.status(403).json({
           success: false,
           message: 'Acceso denegado'
         });
@@ -205,14 +209,14 @@ export class TransactionController {
 
       // Solo admin y store managers pueden cambiar estado a 'completed'
       if (status === 'completed' && userRole === 'client') {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para completar transacciones'
         });
       }
 
       const updatedTransaction = await TransactionService.updateTransactionStatus(
-        transactionId, 
+        transactionId || '', 
         status, 
         paymentStatus
       );
@@ -235,11 +239,11 @@ export class TransactionController {
   /**
    * Obtener estadísticas de transacciones
    */
-  public getTransactionStats = async (req: Request, res: Response) => {
+  public getTransactionStats = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
-      const storeId = (req as any).user.storeId;
+      const userId = req.user?._id || req.user?.id;
+      const userRole = req.user?.role;
+      const storeId = req.user?.storeId;
 
       let stats;
       if (userRole === 'admin') {
@@ -270,7 +274,7 @@ export class TransactionController {
   /**
    * Calcular resumen de checkout (preview)
    */
-  public calculateCheckoutSummary = async (req: Request, res: Response) => {
+  public calculateCheckoutSummary = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const {
         items,
@@ -279,7 +283,7 @@ export class TransactionController {
       } = req.body;
 
       if (!items || items.length === 0) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Se requieren productos para calcular el resumen'
         });
@@ -343,16 +347,16 @@ export class TransactionController {
   /**
    * Cancelar transacción
    */
-  public cancelTransaction = async (req: Request, res: Response) => {
+  public cancelTransaction = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { transactionId } = req.params;
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id || req.user?.id;
+      const userRole = req.user?.role;
 
       // Obtener transacción para verificar permisos
-      const transaction = await TransactionService.getTransactionById(transactionId);
+      const transaction = await TransactionService.getTransactionById(transactionId || '');
       if (!transaction) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Transacción no encontrada'
         });
@@ -360,24 +364,24 @@ export class TransactionController {
 
       // Verificar permisos
       if (userRole !== 'admin' && 
-          transaction.userId.toString() !== userId && 
-          transaction.storeId.toString() !== (req as any).user.storeId) {
-        return res.status(403).json({
+          transaction?.userId.toString() !== userId &&
+          transaction?.storeId.toString() !== req.user?.storeId) {
+        res.status(403).json({
           success: false,
           message: 'Acceso denegado'
         });
       }
 
       // Verificar si se puede cancelar
-      if (!transaction.canBeCancelled()) {
-        return res.status(400).json({
+      if (!(transaction as any).canBeCancelled()) {
+        res.status(400).json({
           success: false,
           message: 'La transacción no puede ser cancelada en su estado actual'
         });
       }
 
       const updatedTransaction = await TransactionService.updateTransactionStatus(
-        transactionId, 
+        transactionId || '', 
         'cancelled'
       );
 

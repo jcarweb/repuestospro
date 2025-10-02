@@ -172,7 +172,7 @@ const CategoryProducts: React.FC = () => {
     const fetchBrands = async () => {
       if (filters.vehicleType && filters.vehicleType.trim() !== '') {
         try {
-          const response = await fetch(`API_BASE_URL/products/brands/vehicle-type/${filters.vehicleType}`);
+          const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/api/products/brands/vehicle-type/${filters.vehicleType}`);
           const data = await response.json();
           
           if (data.success) {
@@ -199,7 +199,7 @@ const CategoryProducts: React.FC = () => {
       } else {
         // Si no hay tipo de vehículo seleccionado, obtener todas las marcas de la base de datos
         try {
-          const response = await fetch('API_BASE_URL/products/brands');
+          const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/api/products/brands`);
           const data = await response.json();
           
           if (data.success) {
@@ -256,7 +256,7 @@ const CategoryProducts: React.FC = () => {
       console.log('🔍 Filtros actuales:', filters);
       console.log('🔍 Parámetros construidos:', params.toString());
 
-      const url = `API_BASE_URL/products/category/${category}?${params}`;
+      const url = `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/api/products/category/${category}?${params}`;
       console.log('🔍 Cargando productos desde:', url);
       console.log('📋 Categoría:', category);
       console.log('📋 Parámetros:', params.toString());
@@ -298,7 +298,7 @@ const CategoryProducts: React.FC = () => {
       if (error.name === 'AbortError') {
         setError('Tiempo de espera agotado. Verifica que el servidor esté ejecutándose.');
       } else if (error.message.includes('Failed to fetch')) {
-        setError('No se pudo conectar al servidor. Verifica que el backend esté ejecutándose en el puerto 5000.');
+        setError('No se pudo conectar al servidor. Verifica que el backend esté ejecutándose en el puerto 3001.');
       } else {
         setError(`Error de conexión: ${error.message}`);
       }

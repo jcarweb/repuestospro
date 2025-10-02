@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 interface OrderItem {
   _id: string;
@@ -43,6 +44,7 @@ interface Order {
 
 const OrdersScreen: React.FC = () => {
   const { colors } = useTheme();
+  const navigation = useNavigation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -202,7 +204,7 @@ const OrdersScreen: React.FC = () => {
         style={[styles.orderCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
         onPress={() => {
           // Navegar al detalle del pedido
-          // navigation.navigate('OrderDetail', { orderId: item._id });
+          Alert.alert('Detalle del Pedido', `Ver detalles de ${item.orderNumber}`);
         }}
       >
         {/* Header del pedido */}
@@ -258,7 +260,7 @@ const OrdersScreen: React.FC = () => {
               style={[styles.actionButton, { backgroundColor: colors.surfaceSecondary }]}
               onPress={() => {
                 // Ver detalles del pedido
-                // navigation.navigate('OrderDetail', { orderId: item._id });
+                Alert.alert('Detalle del Pedido', `Ver detalles de ${item.orderNumber}`);
               }}
             >
               <Ionicons name="eye-outline" size={16} color={colors.textPrimary} />
@@ -272,7 +274,7 @@ const OrdersScreen: React.FC = () => {
                 style={[styles.actionButton, { backgroundColor: colors.primary }]}
                 onPress={() => {
                   // Navegar a reseñas
-                  // navigation.navigate('Review', { orderId: item._id });
+                  (navigation as any).navigate('Reviews');
                 }}
               >
                 <Ionicons name="star-outline" size={16} color="#000000" />
@@ -370,7 +372,7 @@ const OrdersScreen: React.FC = () => {
                 style={[styles.shopButton, { backgroundColor: colors.primary }]}
                 onPress={() => {
                   // Navegar a productos
-                  // navigation.navigate('Products');
+                  (navigation as any).navigate('ClientTabs', { screen: 'Products' });
                 }}
               >
                 <Text style={[styles.shopButtonText, { color: '#000000' }]}>

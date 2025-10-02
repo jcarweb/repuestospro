@@ -114,7 +114,7 @@ const AdminDataEnrichmentUpload: React.FC = () => {
       submitData.append('lng', formData.lng);
       submitData.append('image', formData.image);
 
-      const response = await fetch('API_BASE_URL/store-photos', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""/api/store-photos', {
         method: 'POST',
         body: submitData,
       });

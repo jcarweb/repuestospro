@@ -86,7 +86,66 @@ const StorePhotosListScreen: React.FC = () => {
 
   const loadPhotos = async () => {
     try {
-      // Simular carga de fotos desde API
+      const { getBaseURL } = await import('../../config/api');
+      const baseUrl = await getBaseURL();
+      
+      const response = await fetch(`${baseUrl}/admin/store-photos`, {
+        headers: {
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        // Transformar los datos del backend al formato esperado
+        const transformedPhotos: StorePhoto[] = result.data.photos.map((photo: any) => ({
+          _id: photo.id,
+          name: photo.name,
+          phone: photo.phone,
+          imageUrl: photo.imageUrl,
+          lat: photo.location.latitude,
+          lng: photo.location.longitude,
+          status: photo.status === 'pending_processing' ? 'processing' : 'enriched',
+          uploadedBy: {
+            _id: photo.uploadedBy || '1',
+            name: 'Admin',
+            email: 'admin@example.com'
+          },
+          createdAt: photo.uploadedAt,
+          updatedAt: photo.uploadedAt,
+          metrics: {
+            mercadoLibre: {
+              found: false,
+              results: [],
+              searchTerm: photo.name,
+              lastUpdated: photo.uploadedAt
+            },
+            duckduckgo: {
+              found: false,
+              results: null,
+              searchTerm: photo.name,
+              lastUpdated: photo.uploadedAt
+            },
+            instagram: {
+              found: false,
+              followers: 0,
+              username: null,
+              lastUpdated: photo.uploadedAt
+            }
+          }
+        }));
+        
+        setPhotos(transformedPhotos);
+      } else {
+        throw new Error(result.message || 'Error cargando fotos');
+      }
+    } catch (error) {
+      console.error('Error loading photos:', error);
+      showToast('Error cargando fotos', 'error');
+      
+      // Fallback a datos mock en caso de error
       const mockPhotos: StorePhoto[] = [
         {
           _id: '1',
@@ -126,46 +185,10 @@ const StorePhotosListScreen: React.FC = () => {
           },
           createdAt: '2024-01-20T10:00:00Z',
           updatedAt: '2024-01-20T15:30:00Z'
-        },
-        {
-          _id: '2',
-          name: 'Auto Parts Center',
-          phone: '+584141234567',
-          imageUrl: 'https://via.placeholder.com/300x200',
-          lat: 10.1621,
-          lng: -68.0077,
-          status: 'processing',
-          uploadedBy: {
-            _id: '2',
-            name: 'María García',
-            email: 'maria@example.com'
-          },
-          createdAt: '2024-01-20T14:00:00Z',
-          updatedAt: '2024-01-20T14:00:00Z',
-          metrics: {}
-        },
-        {
-          _id: '3',
-          name: 'Lubricantes Pro',
-          imageUrl: 'https://via.placeholder.com/300x200',
-          lat: 10.2353,
-          lng: -67.5911,
-          status: 'pending',
-          uploadedBy: {
-            _id: '3',
-            name: 'Carlos López',
-            email: 'carlos@example.com'
-          },
-          createdAt: '2024-01-20T16:00:00Z',
-          updatedAt: '2024-01-20T16:00:00Z',
-          metrics: {}
         }
       ];
       
       setPhotos(mockPhotos);
-    } catch (error) {
-      console.error('Error loading photos:', error);
-      showToast('Error cargando fotos', 'error');
     }
   };
 

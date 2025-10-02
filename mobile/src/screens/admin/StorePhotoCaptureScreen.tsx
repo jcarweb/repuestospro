@@ -156,11 +156,24 @@ const StorePhotoCaptureScreen: React.FC = () => {
         name: 'store_photo.jpg',
       } as any);
 
-      // Aquí harías la llamada a la API para subir la foto
-      // const response = await apiService.uploadStorePhoto(formData);
+      // Llamada real a la API para subir la foto
+      const { getBaseURL } = await import('../../config/api');
+      const baseUrl = await getBaseURL();
       
-      // Simular subida exitosa
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await fetch(`${baseUrl}/admin/upload-store-photo`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Error subiendo la foto');
+      }
       
       showToast('Foto subida exitosamente', 'success');
       

@@ -5,11 +5,15 @@ import State from '../models/State';
 import Municipality from '../models/Municipality';
 import Parish from '../models/Parish';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 class LocationController {
   // Actualizar ubicación del usuario
-  static async updateLocation(req: Request, res: Response): Promise<void> {
+  static async updateLocation(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
       const { latitude, longitude, enabled } = req.body;
 
       if (typeof latitude !== 'number' || typeof longitude !== 'number') {
@@ -88,9 +92,9 @@ class LocationController {
   }
 
   // Obtener ubicación actual del usuario
-  static async getLocation(req: Request, res: Response): Promise<void> {
+  static async getLocation(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
 
       const user = await User.findById(userId).select('location locationEnabled lastLocationUpdate');
       if (!user) {
@@ -119,9 +123,9 @@ class LocationController {
   }
 
   // Habilitar/deshabilitar ubicación
-  static async toggleLocation(req: Request, res: Response): Promise<void> {
+  static async toggleLocation(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
       const { enabled } = req.body;
 
       if (typeof enabled !== 'boolean') {
@@ -144,8 +148,8 @@ class LocationController {
       user.locationEnabled = enabled;
       if (!enabled) {
         // Limpiar ubicación si se deshabilita
-        user.location = undefined;
-        user.lastLocationUpdate = undefined;
+        user.location = undefined as any;
+        user.lastLocationUpdate = undefined as any;
       }
       await user.save();
 
@@ -179,9 +183,9 @@ class LocationController {
   }
 
   // Verificar si el usuario tiene ubicación habilitada
-  static async checkLocationStatus(req: Request, res: Response): Promise<void> {
+  static async checkLocationStatus(req: AuthenticatedRequest, res: Response) {
     try {
-      const userId = (req as any).user._id;
+      const userId = req.user?._id;
 
       const user = await User.findById(userId).select('locationEnabled location lastLocationUpdate');
       if (!user) {
@@ -210,7 +214,7 @@ class LocationController {
   }
 
   // Obtener todos los estados
-  async getStates(req: Request, res: Response) {
+  async getStates(req: AuthenticatedRequest, res: Response) {
     try {
       const states = await State.find({ isActive: true })
         .select('name code capital region')
@@ -230,12 +234,12 @@ class LocationController {
   }
 
   // Obtener municipios por estado
-  async getMunicipalitiesByState(req: Request, res: Response) {
+  async getMunicipalitiesByState(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { stateId } = req.params;
 
       if (!stateId) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'ID del estado es requerido'
         });
@@ -262,12 +266,12 @@ class LocationController {
   }
 
   // Obtener parroquias por municipio
-  async getParishesByMunicipality(req: Request, res: Response) {
+  async getParishesByMunicipality(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { municipalityId } = req.params;
 
       if (!municipalityId) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'ID del municipio es requerido'
         });
@@ -294,7 +298,7 @@ class LocationController {
   }
 
   // Obtener ubicación completa (Estado, Municipio, Parroquia)
-  async getLocationHierarchy(req: Request, res: Response) {
+  async getLocationHierarchy(req: AuthenticatedRequest, res: Response) {
     try {
       const { stateId, municipalityId, parishId } = req.params;
 
@@ -305,13 +309,13 @@ class LocationController {
       };
 
       if (stateId) {
-        location.state = await State.findById(stateId).select('name code capital region');
+        location.state = await State.findById(stateId).select('name code capital region') as any;
       }
 
       if (municipalityId) {
         location.municipality = await Municipality.findById(municipalityId)
           .populate('state', 'name code')
-          .select('name code capital state');
+          .select('name code capital state') as any;
       }
 
       if (parishId) {
@@ -324,7 +328,7 @@ class LocationController {
               select: 'name code'
             }
           })
-          .select('name code municipality');
+          .select('name code municipality') as any;
       }
 
       res.json({
@@ -341,12 +345,12 @@ class LocationController {
   }
 
   // Buscar ubicaciones por texto
-  async searchLocations(req: Request, res: Response) {
+  async searchLocations(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { query, type } = req.query;
 
       if (!query || typeof query !== 'string') {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Query de búsqueda es requerido'
         });
@@ -357,7 +361,7 @@ class LocationController {
       switch (type) {
         case 'state':
           results = await State.find({
-            $text: { $search: query },
+            $text: { $search: query as string },
             isActive: true
           })
             .select('name code capital region')
@@ -366,7 +370,7 @@ class LocationController {
 
         case 'municipality':
           results = await Municipality.find({
-            $text: { $search: query },
+            $text: { $search: query as string },
             isActive: true
           })
             .populate('state', 'name code')
@@ -376,7 +380,7 @@ class LocationController {
 
         case 'parish':
           results = await Parish.find({
-            $text: { $search: query },
+            $text: { $search: query as string },
             isActive: true
           })
             .populate({
@@ -395,20 +399,20 @@ class LocationController {
           // Búsqueda general
           const [states, municipalities, parishes] = await Promise.all([
             State.find({
-              $text: { $search: query },
+              $text: { $search: query as string },
               isActive: true
             })
               .select('name code capital region')
               .limit(5),
             Municipality.find({
-              $text: { $search: query },
+              $text: { $search: query as string },
               isActive: true
             })
               .populate('state', 'name code')
               .select('name code capital state')
               .limit(5),
             Parish.find({
-              $text: { $search: query },
+              $text: { $search: query as string },
               isActive: true
             })
               .populate({

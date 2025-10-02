@@ -1,16 +1,19 @@
 import { Request, Response } from 'express';
 import Notification from '../models/Notification';
-import { AuthenticatedRequest } from '../middleware/authMiddleware';
+
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
 
 class ClientNotificationController {
   // Obtener notificaciones del usuario
-  async getNotifications(req: AuthenticatedRequest, res: Response) {
+  async getNotifications(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?._id;
       const { page = 1, limit = 20, category, isRead } = req.query;
       
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
@@ -72,20 +75,20 @@ class ClientNotificationController {
   }
 
   // Obtener notificaciones no leídas (para el header)
-  async getUnreadNotifications(req: AuthenticatedRequest, res: Response) {
+  async getUnreadNotifications(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?._id;
       const { limit = 10 } = req.query;
       
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
       }
 
-      const notifications = await Notification.getUnread(userId.toString(), Number(limit));
-      const unreadCount = await Notification.countUnread(userId.toString());
+      const notifications = await (Notification as any).getUnread(userId.toString(), Number(limit));
+      const unreadCount = await (Notification as any).countUnread(userId.toString());
 
       res.json({
         success: true,
@@ -104,29 +107,29 @@ class ClientNotificationController {
   }
 
   // Marcar notificación como leída
-  async markAsRead(req: AuthenticatedRequest, res: Response) {
+  async markAsRead(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?._id;
       const { notificationId } = req.params;
       
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
       }
 
-      const notification = await Notification.markAsRead(notificationId, userId.toString());
+      const notification = await (Notification as any).markAsRead(notificationId, userId.toString());
       
       if (!notification) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Notificación no encontrada'
         });
       }
 
       // Obtener nuevo conteo de no leídas
-      const unreadCount = await Notification.countUnread(userId.toString());
+      const unreadCount = await (Notification as any).countUnread(userId.toString());
 
       res.json({
         success: true,
@@ -146,29 +149,29 @@ class ClientNotificationController {
   }
 
   // Marcar múltiples notificaciones como leídas
-  async markMultipleAsRead(req: AuthenticatedRequest, res: Response) {
+  async markMultipleAsRead(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?._id;
       const { notificationIds } = req.body;
       
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
       }
 
       if (!notificationIds || !Array.isArray(notificationIds)) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'IDs de notificaciones requeridos'
         });
       }
 
-      await Notification.markMultipleAsRead(notificationIds, userId.toString());
+      await (Notification as any).markMultipleAsRead(notificationIds, userId.toString());
       
       // Obtener nuevo conteo de no leídas
-      const unreadCount = await Notification.countUnread(userId.toString());
+      const unreadCount = await (Notification as any).countUnread(userId.toString());
 
       res.json({
         success: true,
@@ -187,18 +190,18 @@ class ClientNotificationController {
   }
 
   // Marcar todas las notificaciones como leídas
-  async markAllAsRead(req: AuthenticatedRequest, res: Response) {
+  async markAllAsRead(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?._id;
       
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
       }
 
-      await Notification.markAllAsRead(userId.toString());
+      await (Notification as any).markAllAsRead(userId.toString());
 
       res.json({
         success: true,
@@ -217,22 +220,22 @@ class ClientNotificationController {
   }
 
   // Archivar notificación
-  async archiveNotification(req: AuthenticatedRequest, res: Response) {
+  async archiveNotification(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?._id;
       const { notificationId } = req.params;
       
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
       }
 
-      const notification = await Notification.archive(notificationId, userId.toString());
+      const notification = await (Notification as any).archive(notificationId, userId.toString());
       
       if (!notification) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Notificación no encontrada'
         });
@@ -255,12 +258,12 @@ class ClientNotificationController {
   }
 
   // Obtener estadísticas de notificaciones
-  async getNotificationStats(req: AuthenticatedRequest, res: Response) {
+  async getNotificationStats(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?._id;
       
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
@@ -335,7 +338,7 @@ class ClientNotificationController {
         isArchived: false
       });
 
-      const unreadCount = await Notification.countUnread(userId.toString());
+      const unreadCount = await (Notification as any).countUnread(userId.toString());
 
       res.json({
         success: true,
@@ -358,19 +361,19 @@ class ClientNotificationController {
   }
 
   // Crear notificación de prueba (para desarrollo)
-  async createTestNotification(req: AuthenticatedRequest, res: Response) {
+  async createTestNotification(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?._id;
       const { type = 'info', category = 'system', priority = 'medium' } = req.body;
       
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
       }
 
-      const notification = await Notification.createForUser(userId.toString(), {
+      const notification = await (Notification as any).createForUser(userId.toString(), {
         title: 'Notificación de Prueba',
         message: 'Esta es una notificación de prueba para verificar el sistema.',
         type,

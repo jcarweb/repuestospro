@@ -1,0 +1,10 @@
+{
+  "selectedBackend": "render",
+  "backend": {
+    "id": "render",
+    "name": "Render Production",
+    "baseUrl": "https://piezasya-back.onrender.com/api",
+    "description": "Backend en producción (Render)"
+  },
+  "timestamp": "2025-09-22T23:55:33.589Z"
+}

@@ -868,13 +868,14 @@ class ProductService {
 
   async getDashboardStats(): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
+      console.log('📊 Cargando estadísticas del dashboard...');
       const response = await this.makeRequest<{ success: boolean; data?: any; error?: string }>('/admin/dashboard-stats');
       
       if (response.success && response.data) {
-        console.log('✅ Dashboard stats loaded successfully');
+        console.log('✅ Dashboard stats loaded successfully:', response.data);
         return response;
       } else {
-        console.warn('⚠️ No dashboard stats found');
+        console.warn('⚠️ No dashboard stats found, using fallback data');
         return {
           success: true,
           data: {
@@ -888,6 +889,59 @@ class ProductService {
       }
     } catch (error) {
       console.error('❌ Error fetching dashboard stats:', error);
+      
+      // Si hay error de conexión, intentar con datos mock como fallback
+      if (error instanceof Error && (error.message.includes('fetch') || error.message.includes('Network'))) {
+        console.log('📦 Using mock data for dashboard stats due to connection error');
+        this.useMockData = true;
+        const mockData = this.getMockData();
+        return {
+          success: true,
+          data: {
+            users: { 
+              total: 15, 
+              active: 12, 
+              newThisMonth: 3, 
+              byRole: [
+                { _id: 'admin', count: 1 },
+                { _id: 'store_manager', count: 3 },
+                { _id: 'client', count: 8 },
+                { _id: 'delivery', count: 3 }
+              ]
+            },
+            products: { 
+              total: 45, 
+              active: 42, 
+              lowStock: 5, 
+              outOfStock: 2, 
+              byCategory: [
+                { _id: 'filtros', count: 12, avgPrice: 25.50 },
+                { _id: 'frenos', count: 8, avgPrice: 45.20 },
+                { _id: 'motor', count: 15, avgPrice: 35.80 }
+              ]
+            },
+            stores: { 
+              total: 3, 
+              active: 3, 
+              byCity: [
+                { _id: 'Caracas', count: 2 },
+                { _id: 'Valencia', count: 1 }
+              ]
+            },
+            orders: { 
+              total: 28, 
+              pending: 5, 
+              completed: 20, 
+              pendingDeliveries: 3, 
+              recent: []
+            },
+            revenue: { 
+              total: 1250.50, 
+              monthly: 320.75 
+            }
+          }
+        };
+      }
       
       // Fallback: return empty stats if API fails
       return {

@@ -25,6 +25,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 import FreeStoreLocationMap from '../components/FreeStoreLocationMap';
+import { fetchUsers, createUser, updateUser, deleteUser } from '../services/userService';
+import type { User } from '../types';
 import { API_BASE_URL } from '../config/api';
 import { userService, User } from '../services/userService';
 
@@ -397,7 +399,37 @@ const AdminStores: React.FC = () => {
     }
   };
 
-  // Desactivar tienda
+  // Toggle estado de tienda (activar/desactivar)
+  const handleToggleStoreStatus = async (storeId: string) => {
+    const store = stores.find(s => s._id === storeId);
+    const action = store?.isActive ? 'desactivar' : 'activar';
+    const confirmed = window.confirm(`¿Estás seguro de que quieres ${action} esta tienda?`);
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/stores/${storeId}/toggle-status`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchStores();
+        fetchStats();
+        alert(data.message || `Tienda ${action}da exitosamente`);
+      } else {
+        alert(data.message || `Error al ${action} la tienda`);
+      }
+    } catch (error) {
+      console.error(`Error ${action}ando tienda:`, error);
+      alert('Error de conexión');
+    }
+  };
+
+  // Desactivar tienda (método anterior mantenido por compatibilidad)
   const handleDeactivateStore = async (storeId: string) => {
     const confirmed = window.confirm(t('adminStores.confirmations.deactivate'));
     if (!confirmed) return;
@@ -794,6 +826,21 @@ const AdminStores: React.FC = () => {
                           title={t('adminStores.actions.manageManagers')}
                         >
                           <Users className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleToggleStoreStatus(store._id)}
+                          className={`p-1 rounded ${
+                            store.isActive 
+                              ? 'text-orange-600 hover:text-orange-900' 
+                              : 'text-green-600 hover:text-green-900'
+                          }`}
+                          title={store.isActive ? 'Desactivar tienda' : 'Activar tienda'}
+                        >
+                          {store.isActive ? (
+                            <XCircle className="w-4 h-4" />
+                          ) : (
+                            <CheckCircle className="w-4 h-4" />
+                          )}
                         </button>
                         <button 
                           onClick={() => handleDeactivateStore(store._id)}

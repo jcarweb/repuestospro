@@ -151,7 +151,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           }
         }
       } else if (mode === 'register') {
-        const response = await fetch('http://localhost:5000/api/auth/register', {
+        const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+        const response = await fetch(`${baseUrl}/api/auth/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -181,7 +182,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           setError(result.message || 'Error en el registro');
         }
       } else if (mode === 'pin-login') {
-        const response = await fetch('http://localhost:5000/api/auth/login/pin', {
+        const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+        const response = await fetch(`${baseUrl}/api/auth/login/pin`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -203,7 +205,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           setError(result.message || 'Error en la autenticación');
         }
       } else if (mode === 'forgot-password') {
-        const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+        const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+        const response = await fetch(`${baseUrl}/api/auth/forgot-password`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -260,7 +263,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setError('');
     
     // Redirigir a Google OAuth
-    window.location.href = 'http://localhost:5000/api/auth/google';
+    const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+    window.location.href = `${baseUrl}/api/auth/google`;
   };
 
   const handleFingerprintLogin = async () => {
@@ -295,7 +299,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
       if (credential) {
         // Enviar al servidor para verificar
-        const response = await fetch('http://localhost:5000/api/auth/login/fingerprint', {
+        const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+        const response = await fetch(`${baseUrl}/api/auth/login/fingerprint`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

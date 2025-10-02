@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getBaseURL } from '../../config/api';
 import {
   View,
   Text,
@@ -124,7 +125,8 @@ const AdminOrdersScreen: React.FC = () => {
         ...(storeFilter !== 'all' && { storeId: storeFilter })
       });
 
-      const response = await fetch(`http://localhost:5000/api/admin/orders?${params}`, {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/admin/orders?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -147,7 +149,7 @@ const AdminOrdersScreen: React.FC = () => {
 
   const loadStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/admin/orders/stats', {
+      const response = await fetch(`${await getBaseURL()}/admin/orders/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -172,7 +174,8 @@ const AdminOrdersScreen: React.FC = () => {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/orders/${orderId}/status`, {
+      const baseURL = await getBaseURL();
+      const response = await fetch(`${baseURL}/admin/orders/${orderId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

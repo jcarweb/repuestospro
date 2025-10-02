@@ -5,15 +5,16 @@ import Product from '../models/Product';
 import Category from '../models/Category';
 import Store from '../models/Store';
 import Promotion from '../models/Promotion';
-
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
 export class PromotionController {
   // Crear nueva promoción
-  static async createPromotion(req: Request, res: Response): Promise<void> {
+  static async createPromotion(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id || req.user?.id;
+      const userRole = req.user?.role;
       const promotionData = req.body;
-
       // Validar datos requeridos
       if (!promotionData.name || !promotionData.description || !promotionData.type) {
         res.status(400).json({
@@ -22,7 +23,6 @@ export class PromotionController {
         });
         return;
       }
-
       // Validar fechas
       if (!promotionData.startDate || !promotionData.endDate) {
         res.status(400).json({
@@ -31,7 +31,6 @@ export class PromotionController {
         });
         return;
       }
-
       // Validar productos
       if (!promotionData.products || promotionData.products.length === 0) {
         res.status(400).json({
@@ -40,7 +39,6 @@ export class PromotionController {
         });
         return;
       }
-
       // Obtener la tienda del usuario
       let userStore;
       if (userRole === 'store_manager') {
@@ -51,7 +49,6 @@ export class PromotionController {
           userStore = await Store.findById(promotionData.store);
         }
       }
-
       if (!userStore) {
         res.status(403).json({
           success: false,
@@ -59,10 +56,8 @@ export class PromotionController {
         });
         return;
       }
-
       // Verificar acceso a promociones según el plan de suscripción
       const accessCheck = await SubscriptionService.hasPromotionsAccess(userStore._id.toString());
-      
       if (!accessCheck.hasAccess) {
         res.status(403).json({
           success: false,
@@ -72,7 +67,6 @@ export class PromotionController {
         });
         return;
       }
-
       // Lógica de tienda según el rol
       if (userRole === 'admin') {
         // Admin debe especificar la tienda
@@ -83,7 +77,6 @@ export class PromotionController {
           });
           return;
         }
-        
         // Verificar que la tienda existe
         const store = await Store.findById(promotionData.store);
         if (!store) {
@@ -93,7 +86,6 @@ export class PromotionController {
           });
           return;
         }
-        
         // Configurar alcance según el tipo de tienda
         if (store.isMainStore) {
           promotionData.isMainStorePromotion = true;
@@ -112,10 +104,8 @@ export class PromotionController {
           });
           return;
         }
-        
         // Asignar automáticamente la tienda del manager
         promotionData.store = userStore._id;
-        
         // Configurar alcance según el tipo de tienda
         if (userStore.isMainStore) {
           promotionData.isMainStorePromotion = true;
@@ -123,7 +113,6 @@ export class PromotionController {
           if (!promotionData.scope) {
             promotionData.scope = 'store';
           }
-          
           // Validar que si es scope 'specific_branches', se especifiquen las sucursales
           if (promotionData.scope === 'specific_branches' && (!promotionData.targetBranches || promotionData.targetBranches.length === 0)) {
             res.status(400).json({
@@ -144,9 +133,7 @@ export class PromotionController {
         });
         return;
       }
-
       const promotion = await PromotionService.createPromotion(promotionData, userId);
-
       res.status(201).json({
         success: true,
         message: 'Promoción creada exitosamente',
@@ -156,21 +143,18 @@ export class PromotionController {
       console.error('Error creando promoción:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   }
-
   // Obtener todas las promociones
-  static async getAllPromotions(req: Request, res: Response): Promise<void> {
+  static async getAllPromotions(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id || req.user?.id;
+      const userRole = req.user?.role;
       const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', search, type, status, store } = req.query;
-
       // Construir filtros base
       let filters: any = {};
-
       // Filtros de búsqueda
       if (search) {
         filters.$or = [
@@ -178,12 +162,10 @@ export class PromotionController {
           { description: { $regex: search, $options: 'i' } }
         ];
       }
-
       // Filtro por tipo
       if (type && type !== 'all') {
         filters.type = type;
       }
-
       // Filtro por estado
       if (status && status !== 'all') {
         if (status === 'active') {
@@ -192,10 +174,8 @@ export class PromotionController {
           filters.isActive = false;
         }
       }
-
       // Filtro por tienda según el rol y permisos
       let userStore: any = null;
-      
       if (userRole === 'admin') {
         // Admin puede ver todas las promociones o filtrar por tienda específica
         if (store) {
@@ -211,7 +191,6 @@ export class PromotionController {
           });
           return;
         }
-
         // Simplificar: store_manager ve solo las promociones de sus tiendas asignadas
         filters.store = userStore._id;
       } else {
@@ -221,19 +200,12 @@ export class PromotionController {
         });
         return;
       }
-
       // Calcular paginación
       const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
       const sort = { [sortBy as string]: sortOrder === 'desc' ? -1 : 1 };
-
       // Obtener promociones con consulta directa a MongoDB
       let promotions;
       try {
-        console.log('🔍 Consultando promociones con filtros:', JSON.stringify(filters, null, 2));
-        console.log('🔍 userStore._id:', userStore?._id);
-        console.log('🔍 userRole:', userRole);
-        console.log('🔍 userId:', userId);
-         
          // Usar consulta directa a MongoDB con populate
          promotions = await Promotion.find(filters)
            .populate('store', 'name isMainStore')
@@ -241,17 +213,9 @@ export class PromotionController {
            .populate('categories', 'name')
            .populate('createdBy', 'name email')
            .populate('targetBranches', 'name')
-           .sort(sort)
+            .sort(sort as any)
            .skip(skip)
            .limit(parseInt(limit as string));
-           
-         console.log('🔍 Promociones encontradas:', promotions.length);
-         console.log('🔍 Primera promoción:', promotions[0] ? {
-           id: promotions[0]._id,
-           name: promotions[0].name,
-           store: promotions[0].store
-         } : 'No hay promociones');
-         
        } catch (dbError) {
          console.error('Error en consulta de promociones:', dbError);
          // Si hay error, intentar con consulta simple
@@ -262,16 +226,14 @@ export class PromotionController {
            .populate('categories', 'name')
            .populate('createdBy', 'name email')
            .populate('targetBranches', 'name')
-           .sort(sort)
+            .sort(sort as any)
            .skip(skip)
            .limit(parseInt(limit as string));
        }
-
              // Contar total con consulta directa
        let total;
        try {
          total = await Promotion.countDocuments(filters);
-         console.log('🔍 Total de promociones en BD:', total);
        } catch (countError) {
          console.error('Error contando promociones:', countError);
          // Si hay error, intentar con consulta simple
@@ -279,7 +241,6 @@ export class PromotionController {
          total = await Promotion.countDocuments(simpleFilters);
        }
       const totalPages = Math.ceil(total / parseInt(limit as string));
-
       res.json({
         success: true,
         promotions,
@@ -295,14 +256,12 @@ export class PromotionController {
       });
     }
   }
-
   // Verificar acceso a promociones
-  static async checkPromotionsAccess(req: Request, res: Response): Promise<void> {
+  static async checkPromotionsAccess(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id || req.user?.id;
+      const userRole = req.user?.role;
       const { storeId } = req.query;
-
       if (!storeId) {
         res.status(400).json({
           success: false,
@@ -310,10 +269,8 @@ export class PromotionController {
         });
         return;
       }
-
       // Verificar acceso a promociones según el plan de suscripción
       const accessCheck = await SubscriptionService.hasPromotionsAccess(storeId as string);
-      
       res.json({
         success: true,
         hasAccess: accessCheck.hasAccess,
@@ -329,13 +286,11 @@ export class PromotionController {
       });
     }
   }
-
   // Obtener promoción por ID
-  static async getPromotionById(req: Request, res: Response): Promise<void> {
+  static async getPromotionById(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const promotion = await PromotionService.getPromotionById(id);
-
+      const promotion = await PromotionService.getPromotionById(id || '');
       if (!promotion) {
         res.status(404).json({
           success: false,
@@ -343,7 +298,6 @@ export class PromotionController {
         });
         return;
       }
-
       res.json({
         success: true,
         data: promotion
@@ -352,19 +306,16 @@ export class PromotionController {
       console.error('Error obteniendo promoción:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   }
-
   // Actualizar promoción
-  static async updatePromotion(req: Request, res: Response): Promise<void> {
+  static async updatePromotion(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const updateData = req.body;
-
-      const promotion = await PromotionService.updatePromotion(id, updateData);
-
+      const promotion = await PromotionService.updatePromotion(id || '', updateData);
       if (!promotion) {
         res.status(404).json({
           success: false,
@@ -372,7 +323,6 @@ export class PromotionController {
         });
         return;
       }
-
       res.json({
         success: true,
         message: 'Promoción actualizada exitosamente',
@@ -382,17 +332,15 @@ export class PromotionController {
       console.error('Error actualizando promoción:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   }
-
   // Eliminar promoción
-  static async deletePromotion(req: Request, res: Response): Promise<void> {
+  static async deletePromotion(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const deleted = await PromotionService.deletePromotion(id);
-
+      const deleted = await PromotionService.deletePromotion(id || '');
       if (!deleted) {
         res.status(404).json({
           success: false,
@@ -400,7 +348,6 @@ export class PromotionController {
         });
         return;
       }
-
       res.json({
         success: true,
         message: 'Promoción eliminada exitosamente'
@@ -409,17 +356,15 @@ export class PromotionController {
       console.error('Error eliminando promoción:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   }
-
   // Activar/Desactivar promoción
-  static async togglePromotionStatus(req: Request, res: Response): Promise<void> {
+  static async togglePromotionStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const promotion = await PromotionService.togglePromotionStatus(id);
-
+      const promotion = await PromotionService.togglePromotionStatus(id || '');
       if (!promotion) {
         res.status(404).json({
           success: false,
@@ -427,7 +372,6 @@ export class PromotionController {
         });
         return;
       }
-
       res.json({
         success: true,
         message: `Promoción ${promotion.isActive ? 'activada' : 'desactivada'} exitosamente`,
@@ -437,16 +381,14 @@ export class PromotionController {
       console.error('Error cambiando estado de promoción:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   }
-
   // Obtener estadísticas de promociones
-  static async getPromotionStats(req: Request, res: Response): Promise<void> {
+  static async getPromotionStats(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const stats = await PromotionService.getPromotionStats();
-
       res.json({
         success: true,
         data: stats
@@ -455,20 +397,17 @@ export class PromotionController {
       console.error('Error obteniendo estadísticas:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   }
-
   // Obtener productos disponibles para promociones
-  static async getAvailableProducts(req: Request, res: Response): Promise<void> {
+  static async getAvailableProducts(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id || req.user?.id;
+      const userRole = req.user?.role;
       const { storeId } = req.query; // Para admin que puede especificar tienda
-
       let productFilter: any = { isActive: true };
-
       if (userRole === 'admin') {
         // Admin puede ver productos de todas las tiendas o filtrar por tienda específica
         if (storeId) {
@@ -492,13 +431,11 @@ export class PromotionController {
         });
         return;
       }
-
       const products = await Product.find(productFilter)
         .select('name price image description category store')
         .populate('category', 'name')
         .populate('store', 'name')
         .sort({ name: 1 });
-
       res.json({
         success: true,
         data: products
@@ -507,16 +444,14 @@ export class PromotionController {
       console.error('Error obteniendo productos:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   }
-
   // Obtener tiendas disponibles para promociones (solo admin)
-  static async getAvailableStores(req: Request, res: Response): Promise<void> {
+  static async getAvailableStores(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userRole = (req as any).user.role;
-
+      const userRole = req.user?.role;
       if (userRole !== 'admin') {
         res.status(403).json({
           success: false,
@@ -524,11 +459,9 @@ export class PromotionController {
         });
         return;
       }
-
       const stores = await Store.find({ isActive: true })
         .select('name description address city state')
         .sort({ name: 1 });
-
       res.json({
         success: true,
         data: stores
@@ -537,18 +470,16 @@ export class PromotionController {
       console.error('Error obteniendo tiendas:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   }
-
   // Obtener categorías disponibles para promociones
-  static async getAvailableCategories(req: Request, res: Response): Promise<void> {
+  static async getAvailableCategories(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const categories = await Category.find({ isActive: true })
         .select('name description')
         .sort({ name: 1 });
-
       res.json({
         success: true,
         data: categories
@@ -557,17 +488,15 @@ export class PromotionController {
       console.error('Error obteniendo categorías:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   }
-
   // Calcular precio con promociones para un producto
-  static async calculateProductPrice(req: Request, res: Response): Promise<void> {
+  static async calculateProductPrice(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { productId } = req.params;
       const { originalPrice } = req.body;
-
       if (!originalPrice) {
         res.status(400).json({
           success: false,
@@ -575,12 +504,10 @@ export class PromotionController {
         });
         return;
       }
-
       const priceInfo = await PromotionService.calculateProductPriceWithPromotions(
-        productId,
+        productId || '',
         originalPrice
       );
-
       res.json({
         success: true,
         data: priceInfo
@@ -589,17 +516,15 @@ export class PromotionController {
       console.error('Error calculando precio:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   }
-
   // Obtener promociones próximas a expirar
-  static async getExpiringPromotions(req: Request, res: Response): Promise<void> {
+  static async getExpiringPromotions(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { days = 7 } = req.query;
       const promotions = await PromotionService.getExpiringPromotions(Number(days));
-
       res.json({
         success: true,
         data: promotions
@@ -608,17 +533,15 @@ export class PromotionController {
       console.error('Error obteniendo promociones próximas a expirar:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   }
-
   // Validar promoción para un producto
-  static async validatePromotion(req: Request, res: Response): Promise<void> {
+  static async validatePromotion(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { promotionId, productId } = req.params;
-      const isValid = await PromotionService.validatePromotionForProduct(promotionId, productId);
-
+      const isValid = await PromotionService.validatePromotionForProduct(promotionId || '', productId || '');
       res.json({
         success: true,
         data: { isValid }
@@ -627,17 +550,15 @@ export class PromotionController {
       console.error('Error validando promoción:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   }
-
   // Incrementar uso de promoción
-  static async incrementPromotionUsage(req: Request, res: Response): Promise<void> {
+  static async incrementPromotionUsage(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      await PromotionService.incrementPromotionUsage(id);
-
+      await PromotionService.incrementPromotionUsage(id || '');
       res.json({
         success: true,
         message: 'Uso de promoción incrementado exitosamente'
@@ -646,8 +567,8 @@ export class PromotionController {
       console.error('Error incrementando uso de promoción:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   }
-} 
+}

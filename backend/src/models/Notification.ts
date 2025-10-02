@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface INotification extends Document {
-  userId: mongoose.Types.ObjectId;
+  userId: mongoose.Schema.Types.ObjectId;
   title: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error' | 'promotion' | 'order' | 'delivery' | 'system';
@@ -295,16 +295,16 @@ notificationSchema.statics = {
 notificationSchema.methods = {
   // Marcar como leída
   async markAsRead() {
-    this.isRead = true;
-    this.readAt = new Date();
-    return await this.save();
+    this['isRead'] = true;
+    this['readAt'] = new Date();
+    return await this['save']();
   },
   
   // Archivar
   async archive() {
-    this.isArchived = true;
-    this.archivedAt = new Date();
-    return await this.save();
+    this['isArchived'] = true;
+    this['archivedAt'] = new Date();
+    return await this['save']();
   }
 };
 

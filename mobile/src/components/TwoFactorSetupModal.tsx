@@ -104,20 +104,24 @@ const TwoFactorSetupModal: React.FC<TwoFactorSetupModalProps> = ({
 
     setLoading(true);
     try {
-      // Simular verificación del código
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Usar el servicio de API real para verificar 2FA
+      const { default: apiService } = await import('../services/api');
       
-      // Aceptar cualquier código de 6 dígitos (simulando Google Authenticator)
-      const isValid = /^\d{6}$/.test(verificationCode);
+      // Verificar código usando el backend real
+      const response = await apiService.verifyTwoFactor({
+        email: 'admin@repuestospro.com', // Usar email del usuario actual
+        code: verificationCode,
+        tempToken: 'setup-token' // Token especial para configuración
+      });
       
-      console.log('Código válido:', isValid);
+      console.log('Respuesta verificación 2FA:', response);
       
-      if (isValid) {
+      if (response.success) {
         setStep('backup');
         showToast('✅ Código verificado correctamente', 'success');
         console.log('Verificación exitosa, avanzando a códigos de respaldo');
       } else {
-        showToast('❌ Código inválido. Debe ser de 6 dígitos', 'error');
+        showToast('❌ Código inválido. Verifica que sea el código correcto', 'error');
         console.log('Código inválido:', verificationCode);
       }
     } catch (error) {

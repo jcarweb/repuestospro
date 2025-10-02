@@ -5,9 +5,13 @@ import User from '../models/User';
 import Store from '../models/Store';
 import emailService from '../services/emailService';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 export class AdvertisementRequestController {
   // Crear nueva solicitud de publicidad
-  static async createRequest(req: Request, res: Response) {
+  static async createRequest(req: AuthenticatedRequest, res: Response) {
     try {
       const {
         campaignName,
@@ -64,7 +68,7 @@ export class AdvertisementRequestController {
       });
 
       // Calcular estimaciones
-      const estimates = request.calculateEstimates();
+      const estimates = (request as any).calculateEstimates();
       request.estimatedReach = estimates.estimatedReach;
       request.estimatedClicks = estimates.estimatedClicks;
       request.estimatedCost = estimates.estimatedCost;
@@ -82,7 +86,7 @@ export class AdvertisementRequestController {
         console.error('Error enviando email de confirmación:', emailError);
       }
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: 'Solicitud de publicidad creada exitosamente',
         data: {
@@ -98,7 +102,7 @@ export class AdvertisementRequestController {
       });
     } catch (error) {
       console.error('Error creando solicitud de publicidad:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
@@ -106,7 +110,7 @@ export class AdvertisementRequestController {
   }
 
   // Obtener solicitudes del gestor de tienda
-  static async getStoreManagerRequests(req: Request, res: Response) {
+  static async getStoreManagerRequests(req: AuthenticatedRequest, res: Response) {
     try {
       const requests = await AdvertisementRequest.find({ storeManager: req.user?._id })
         .populate('store', 'name city')
@@ -114,13 +118,13 @@ export class AdvertisementRequestController {
         .populate('createdAdvertisement', 'title status')
         .sort({ createdAt: -1 });
 
-      res.json({
+      return res.json({
         success: true,
         data: { requests }
       });
     } catch (error) {
       console.error('Error obteniendo solicitudes:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
@@ -128,7 +132,7 @@ export class AdvertisementRequestController {
   }
 
   // Obtener una solicitud específica
-  static async getRequestById(req: Request, res: Response) {
+  static async getRequestById(req: AuthenticatedRequest, res: Response) {
     try {
       const { id } = req.params;
       const request = await AdvertisementRequest.findById(id)
@@ -152,13 +156,13 @@ export class AdvertisementRequestController {
         });
       }
 
-      res.json({
+      return res.json({
         success: true,
         data: { request }
       });
     } catch (error) {
       console.error('Error obteniendo solicitud:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
@@ -166,7 +170,7 @@ export class AdvertisementRequestController {
   }
 
   // Actualizar solicitud (solo borrador)
-  static async updateRequest(req: Request, res: Response) {
+  static async updateRequest(req: AuthenticatedRequest, res: Response) {
     try {
       const { id } = req.params;
       const updateData = req.body;
@@ -196,7 +200,7 @@ export class AdvertisementRequestController {
 
       // Recalcular estimaciones si cambió el presupuesto
       if (updateData.budget) {
-        const estimates = request.calculateEstimates();
+        const estimates = (request as any).calculateEstimates();
         updateData.estimatedReach = estimates.estimatedReach;
         updateData.estimatedClicks = estimates.estimatedClicks;
         updateData.estimatedCost = estimates.estimatedCost;
@@ -208,14 +212,14 @@ export class AdvertisementRequestController {
         { new: true, runValidators: true }
       ).populate('store', 'name city');
 
-      res.json({
+      return res.json({
         success: true,
         message: 'Solicitud actualizada exitosamente',
         data: { request: updatedRequest }
       });
     } catch (error) {
       console.error('Error actualizando solicitud:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
@@ -223,7 +227,7 @@ export class AdvertisementRequestController {
   }
 
   // Enviar solicitud para revisión
-  static async submitRequest(req: Request, res: Response) {
+  static async submitRequest(req: AuthenticatedRequest, res: Response) {
     try {
       const { id } = req.params;
 
@@ -250,7 +254,7 @@ export class AdvertisementRequestController {
       }
 
       // Validar que la solicitud esté completa
-      if (!request.validateSchedule()) {
+      if (!(request as any).validateSchedule()) {
         return res.status(400).json({
           success: false,
           message: 'Las fechas de la campaña no son válidas'
@@ -274,14 +278,14 @@ export class AdvertisementRequestController {
         console.error('Error enviando notificación a administradores:', emailError);
       }
 
-      res.json({
+      return res.json({
         success: true,
         message: 'Solicitud enviada para revisión exitosamente',
         data: { request }
       });
     } catch (error) {
       console.error('Error enviando solicitud:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
@@ -289,7 +293,7 @@ export class AdvertisementRequestController {
   }
 
   // ADMIN: Obtener todas las solicitudes
-  static async getAllRequests(req: Request, res: Response) {
+  static async getAllRequests(req: AuthenticatedRequest, res: Response) {
     try {
       const { status, page = 1, limit = 10 } = req.query;
       
@@ -306,7 +310,7 @@ export class AdvertisementRequestController {
 
       const total = await AdvertisementRequest.countDocuments(filter);
 
-      res.json({
+      return res.json({
         success: true,
         data: {
           requests,
@@ -320,7 +324,7 @@ export class AdvertisementRequestController {
       });
     } catch (error) {
       console.error('Error obteniendo solicitudes:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
@@ -328,7 +332,7 @@ export class AdvertisementRequestController {
   }
 
   // ADMIN: Aprobar solicitud
-  static async approveRequest(req: Request, res: Response) {
+  static async approveRequest(req: AuthenticatedRequest, res: Response) {
     try {
       const { id } = req.params;
       const { adminNotes } = req.body;
@@ -388,7 +392,7 @@ export class AdvertisementRequestController {
       // Enviar email de aprobación al gestor
       try {
         await emailService.sendAdvertisementApproval(
-          request.storeManager.email,
+          (request.storeManager as any).email,
           request.campaignName,
           advertisement._id.toString(),
           adminNotes
@@ -397,7 +401,7 @@ export class AdvertisementRequestController {
         console.error('Error enviando email de aprobación:', emailError);
       }
 
-      res.json({
+      return res.json({
         success: true,
         message: 'Solicitud aprobada y publicidad creada exitosamente',
         data: {
@@ -411,7 +415,7 @@ export class AdvertisementRequestController {
       });
     } catch (error) {
       console.error('Error aprobando solicitud:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
@@ -419,7 +423,7 @@ export class AdvertisementRequestController {
   }
 
   // ADMIN: Rechazar solicitud
-  static async rejectRequest(req: Request, res: Response) {
+  static async rejectRequest(req: AuthenticatedRequest, res: Response) {
     try {
       const { id } = req.params;
       const { rejectionReason } = req.body;
@@ -450,7 +454,7 @@ export class AdvertisementRequestController {
       // Enviar email de rechazo al gestor
       try {
         await emailService.sendAdvertisementRejection(
-          request.storeManager.email,
+          (request.storeManager as any).email,
           request.campaignName,
           rejectionReason
         );
@@ -458,14 +462,14 @@ export class AdvertisementRequestController {
         console.error('Error enviando email de rechazo:', emailError);
       }
 
-      res.json({
+      return res.json({
         success: true,
         message: 'Solicitud rechazada exitosamente',
         data: { request }
       });
     } catch (error) {
       console.error('Error rechazando solicitud:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
@@ -473,7 +477,7 @@ export class AdvertisementRequestController {
   }
 
   // ADMIN: Cambiar estado de revisión
-  static async changeReviewStatus(req: Request, res: Response) {
+  static async changeReviewStatus(req: AuthenticatedRequest, res: Response) {
     try {
       const { id } = req.params;
       const { status } = req.body;
@@ -496,14 +500,14 @@ export class AdvertisementRequestController {
       request.status = status;
       await request.save();
 
-      res.json({
+      return res.json({
         success: true,
         message: 'Estado de revisión actualizado exitosamente',
         data: { request }
       });
     } catch (error) {
       console.error('Error cambiando estado de revisión:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });
@@ -511,7 +515,7 @@ export class AdvertisementRequestController {
   }
 
   // Cancelar solicitud (gestor de tienda)
-  static async cancelRequest(req: Request, res: Response) {
+  static async cancelRequest(req: AuthenticatedRequest, res: Response) {
     try {
       const { id } = req.params;
 
@@ -540,14 +544,14 @@ export class AdvertisementRequestController {
       request.status = 'cancelled';
       await request.save();
 
-      res.json({
+      return res.json({
         success: true,
         message: 'Solicitud cancelada exitosamente',
         data: { request }
       });
     } catch (error) {
       console.error('Error cancelando solicitud:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
       });

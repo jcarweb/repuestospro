@@ -17,7 +17,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { API_BASE_URL } from '../../config/api';
+import EnrichmentDiagnostic from '../components/EnrichmentDiagnostic';
 
 interface StorePhoto {
   _id: string;
@@ -57,12 +57,30 @@ const AdminDataEnrichment: React.FC = () => {
   const fetchStorePhotos = async () => {
     try {
       setLoading(true);
-      const response = await fetch('API_BASE_URL/store-photos');
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""/api/store-photos', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      setStorePhotos(data.data || []);
+      console.log('Datos recibidos del backend:', data);
+      
+      // Asegurar que data.data es un array
+      if (data.success && Array.isArray(data.data)) {
+        setStorePhotos(data.data);
+      } else {
+        console.warn('Formato de datos inesperado:', data);
+        setStorePhotos([]);
+      }
     } catch (error) {
       console.error('Error fetching store photos:', error);
       toast.error('Error al cargar las fotos de locales');
+      setStorePhotos([]);
     } finally {
       setLoading(false);
     }
@@ -71,7 +89,7 @@ const AdminDataEnrichment: React.FC = () => {
   const runEnrichment = async () => {
     try {
       setEnriching(true);
-      const response = await fetch('API_BASE_URL/admin/enrichment/run', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/admin/enrichment/run', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -170,6 +188,11 @@ const AdminDataEnrichment: React.FC = () => {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Diagnóstico del Sistema */}
+        <div className="mb-8">
+          <EnrichmentDiagnostic />
         </div>
 
         {/* Stats */}

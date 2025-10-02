@@ -4,32 +4,26 @@ import Activity from '../models/Activity';
 import * as argon2 from 'argon2';
 import { generateTwoFactorSecret, verifyTwoFactorCode, generateGoogleAuthenticatorUrl } from '../utils/twoFactorUtils';
 import { profileUpload, deleteImage } from '../config/cloudinary';
-
 // Extend Request interface to include user
 interface AuthenticatedRequest extends Request {
   user?: {
-    _id: string;
-    id: string;
-    email: string;
-    role: string;
+    _id?: string;
+    id?: string;
+    email?: string;
+    role?: string;
   };
 }
-
-class ProfileController {
-  // Obtener perfil del usuario
-  async getProfile(req: AuthenticatedRequest, res: Response) {
+// Obtener perfil del usuario
+const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userId = req.user?._id;
-      
+      const userId = req.user?._id || req.user?.id;
       const user = await User.findById(userId).select('-password -twoFactorSecret -backupCodes');
-      
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
       }
-
       res.json({
         success: true,
         data: user
@@ -41,53 +35,47 @@ class ProfileController {
         message: 'Error interno del servidor'
       });
     }
-  }
-
-  // Actualizar información del perfil
-  async updateProfile(req: AuthenticatedRequest, res: Response) {
+  };
+// Actualizar información del perfil
+const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userId = req.user?._id;
+      const userId = req.user?._id || req.user?.id;
       const { name, email, phone } = req.body;
-
       const user = await User.findById(userId);
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
       }
-
       // Verificar si el email ya existe (si se está cambiando)
-      if (email && email !== user.email) {
+      if (email && email !== user!.email) {
         const existingUser = await User.findOne({ email, _id: { $ne: userId } });
         if (existingUser) {
-          return res.status(400).json({
+          res.status(400).json({
             success: false,
             message: 'El email ya está en uso'
           });
         }
       }
-
       // Actualizar campos
       const updatedFields: string[] = [];
-      if (name && name !== user.name) {
-        user.name = name;
+      if (name && name !== user!.name) {
+        user!.name = name;
         updatedFields.push('name');
       }
-      if (email && email !== user.email) {
-        user.email = email;
+      if (email && email !== user!.email) {
+        user!.email = email;
         updatedFields.push('email');
       }
-      if (phone !== undefined && phone !== user.phone) {
-        user.phone = phone;
+      if (phone !== undefined && phone !== user!.phone) {
+        user!.phone = phone;
         updatedFields.push('phone');
       }
-
-      await user.save();
-
+      await user!.save();
       // Registrar actividad
       if (updatedFields.length > 0) {
-        await Activity.createActivity(
+        await (Activity as any).createActivity(
           userId,
           'profile_update',
           `Usuario actualizó su perfil: ${updatedFields.join(', ')}`,
@@ -95,15 +83,14 @@ class ProfileController {
           true
         );
       }
-
       res.json({
         success: true,
         message: 'Perfil actualizado correctamente',
         data: {
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          avatar: user.avatar
+          name: user!.name,
+          email: user!.email,
+          phone: user!.phone,
+          avatar: user!.avatar
         }
       });
     } catch (error) {
@@ -113,53 +100,41 @@ class ProfileController {
         message: 'Error interno del servidor'
       });
     }
-  }
-
-  // Cambiar contraseña
-  async changePassword(req: AuthenticatedRequest, res: Response) {
+  };
+// Cambiar contraseña
+const changePassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      console.log('🔍 Iniciando cambio de contraseña...');
-      const userId = req.user?._id;
+      const userId = req.user?._id || req.user?.id;
       const { currentPassword, newPassword } = req.body;
-
-      console.log('📋 Datos recibidos:', { userId, hasCurrentPassword: !!currentPassword, hasNewPassword: !!newPassword });
-
+      // Datos de cambio de contraseña recibidos - logs removidos por seguridad
       if (!currentPassword || !newPassword) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Contraseña actual y nueva contraseña son requeridas'
         });
       }
-
-      console.log('🔍 Buscando usuario...');
       const user = await User.findById(userId).select('+password');
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
       }
-
-      console.log('✅ Usuario encontrado, verificando contraseña...');
       // Verificar contraseña actual
-      const isPasswordValid = await user.comparePassword(currentPassword);
-      console.log('🔍 Resultado verificación:', isPasswordValid);
+      const isPasswordValid = await user!.comparePassword(currentPassword);
+      // Verificación de contraseña completada - resultado no loggeado por seguridad
       if (!isPasswordValid) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Contraseña actual incorrecta'
         });
       }
-
-      console.log('✅ Contraseña válida, cambiando...');
       // Cambiar contraseña
-      user.password = newPassword;
-      console.log('🔍 Guardando usuario...');
-      await user.save();
-
+      user!.password = newPassword;
+      await user!.save();
       // Registrar actividad
       try {
-        await Activity.createActivity(
+        await (Activity as any).createActivity(
           userId,
           'password_changed',
           'Usuario cambió su contraseña',
@@ -170,7 +145,6 @@ class ProfileController {
         console.error('Error creating activity:', activityError);
         // No fallar el cambio de contraseña si la actividad falla
       }
-
       res.json({
         success: true,
         message: 'Contraseña cambiada correctamente'
@@ -183,50 +157,43 @@ class ProfileController {
       });
     }
   }
-
-  // Configurar PIN
-  async setPin(req: AuthenticatedRequest, res: Response) {
+// Configurar PIN
+const setPin = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userId = req.user?._id;
+      const userId = req.user?._id || req.user?.id;
       const { pin, currentPassword } = req.body;
-
       if (!pin || !currentPassword) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'PIN y contraseña actual son requeridos'
         });
       }
-
       const user = await User.findById(userId).select('+password');
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
       }
-
       // Verificar contraseña actual
-      const isPasswordValid = await user.comparePassword(currentPassword);
+      const isPasswordValid = await user!.comparePassword(currentPassword);
       if (!isPasswordValid) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Contraseña actual incorrecta'
         });
       }
-
       // Configurar PIN
-      user.pin = pin;
-      await user.save();
-
+      user!.pin = pin;
+      await user!.save();
       // Registrar actividad
-      await Activity.createActivity(
+      await (Activity as any).createActivity(
         userId,
         'pin_setup',
         'Usuario configuró PIN de acceso',
         {},
         true
       );
-
       res.json({
         success: true,
         message: 'PIN configurado correctamente'
@@ -239,43 +206,37 @@ class ProfileController {
       });
     }
   }
-
-  // Configurar huella digital
-  async setFingerprint(req: AuthenticatedRequest, res: Response) {
+// Configurar huella digital
+const setFingerprint = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userId = req.user?._id;
+      const userId = req.user?._id || req.user?.id;
       const { fingerprintData, enabled } = req.body;
-
       const user = await User.findById(userId);
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
       }
-
       if (enabled && !fingerprintData) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Datos de huella digital son requeridos'
         });
       }
-
-      user.fingerprintEnabled = enabled;
+      user!.fingerprintEnabled = enabled;
       if (fingerprintData) {
-        user.fingerprintData = fingerprintData;
+        user!.fingerprintData = fingerprintData;
       }
-      await user.save();
-
+      await user!.save();
       // Registrar actividad
-      await Activity.createActivity(
+      await (Activity as any).createActivity(
         userId,
         'fingerprint_setup',
         `Usuario ${enabled ? 'configuró' : 'deshabilitó'} acceso por huella digital`,
         { enabled },
         true
       );
-
       res.json({
         success: true,
         message: `Huella digital ${enabled ? 'configurada' : 'deshabilitada'} correctamente`
@@ -287,81 +248,59 @@ class ProfileController {
         message: 'Error interno del servidor'
       });
     }
-  }
-
-  // Configurar autenticación de dos factores
-  async setTwoFactor(req: AuthenticatedRequest, res: Response) {
+  };
+// Configurar autenticación de dos factores
+const setTwoFactor = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      console.log('🔍 Iniciando configuración de 2FA...');
-      const userId = req.user?._id;
+      const userId = req.user?._id || req.user?.id;
       const { enabled, code } = req.body;
-
-      console.log('📋 Datos recibidos:', { userId, enabled, hasCode: !!code });
-
+      // Información de código no loggeada por seguridad;
       const user = await User.findById(userId).select('+twoFactorSecret');
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
       }
-
-      console.log('✅ Usuario encontrado');
-
       if (enabled) {
-        console.log('🔍 Habilitando 2FA...');
-        if (!user.twoFactorSecret) {
-          console.log('🔍 Generando nuevo secreto...');
-          // Generar nuevo secreto
+        if (!user!.twoFactorSecret) {
+          // Generando nuevo secreto 2FA - logs removidos por seguridad
           const secret = generateTwoFactorSecret();
-          user.twoFactorSecret = secret;
-          user.backupCodes = user.generateBackupCodes();
-          console.log('✅ Secreto y códigos de respaldo generados');
+          user!.twoFactorSecret = secret;
+          user!.backupCodes = user!.generateBackupCodes();
         }
-
         if (code) {
-          console.log('🔍 Verificando código...');
           // Verificar código
-          const isValid = verifyTwoFactorCode(user.twoFactorSecret, code);
+          const isValid = verifyTwoFactorCode(user!.twoFactorSecret, code);
           if (!isValid) {
-            return res.status(400).json({
+            res.status(400).json({
               success: false,
               message: 'Código de verificación incorrecto'
             });
           }
-          console.log('✅ Código verificado');
         }
-
-        user.twoFactorEnabled = true;
-        console.log('✅ 2FA habilitado');
+        user!.twoFactorEnabled = true;
       } else {
-        console.log('🔍 Deshabilitando 2FA...');
-        user.twoFactorEnabled = false;
-        user.twoFactorSecret = undefined;
-        user.backupCodes = undefined;
-        console.log('✅ 2FA deshabilitado');
+        user!.twoFactorEnabled = false;
+        user!.twoFactorSecret = undefined as any;
+        user!.backupCodes = undefined as any;
       }
-
-      console.log('🔍 Guardando usuario...');
-      await user.save();
-      console.log('✅ Usuario guardado');
-
+      await user!.save();
       // Registrar actividad
-      await Activity.createActivity(
+      await (Activity as any).createActivity(
         userId,
         enabled ? 'two_factor_enabled' : 'two_factor_disabled',
         `Usuario ${enabled ? 'habilitó' : 'deshabilitó'} autenticación de dos factores`,
         { enabled },
         true
       );
-
       res.json({
         success: true,
         message: `Autenticación de dos factores ${enabled ? 'habilitada' : 'deshabilitada'} correctamente`,
         data: enabled ? {
-          secret: user.twoFactorSecret,
-          backupCodes: user.backupCodes,
-          googleAuthUrl: generateGoogleAuthenticatorUrl(user.twoFactorSecret, user.email)
+          secret: user!.twoFactorSecret,
+          backupCodes: user!.backupCodes,
+          googleAuthUrl: generateGoogleAuthenticatorUrl(user!.twoFactorSecret || '', user!.email || '')
         } : undefined
       });
     } catch (error) {
@@ -371,42 +310,36 @@ class ProfileController {
         message: 'Error interno del servidor'
       });
     }
-  }
-
-  // Actualizar configuraciones de notificaciones
-  async updateNotifications(req: AuthenticatedRequest, res: Response) {
+  };
+// Actualizar configuraciones de notificaciones
+const updateNotifications = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      console.log('🔍 updateNotifications - Request body:', req.body);
-      const userId = req.user?._id;
+      const userId = req.user?._id || req.user?.id;
       const { emailNotifications, pushNotifications, marketingEmails } = req.body;
-
       const user = await User.findById(userId);
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
       }
-
       const updatedFields: string[] = [];
-      if (emailNotifications !== undefined && emailNotifications !== user.emailNotifications) {
-        user.emailNotifications = emailNotifications;
+      if (emailNotifications !== undefined && emailNotifications !== user!.emailNotifications) {
+        user!.emailNotifications = emailNotifications;
         updatedFields.push('emailNotifications');
       }
-      if (pushNotifications !== undefined && pushNotifications !== user.pushNotifications) {
-        user.pushNotifications = pushNotifications;
+      if (pushNotifications !== undefined && pushNotifications !== user!.pushNotifications) {
+        user!.pushNotifications = pushNotifications;
         updatedFields.push('pushNotifications');
       }
-      if (marketingEmails !== undefined && marketingEmails !== user.marketingEmails) {
-        user.marketingEmails = marketingEmails;
+      if (marketingEmails !== undefined && marketingEmails !== user!.marketingEmails) {
+        user!.marketingEmails = marketingEmails;
         updatedFields.push('marketingEmails');
       }
-
-      await user.save();
-
+      await user!.save();
       // Registrar actividad
       if (updatedFields.length > 0) {
-        await Activity.createActivity(
+        await (Activity as any).createActivity(
           userId,
           'notifications_update',
           `Usuario actualizó configuraciones de notificaciones: ${updatedFields.join(', ')}`,
@@ -414,7 +347,6 @@ class ProfileController {
           true
         );
       }
-
       res.json({
         success: true,
         message: 'Configuraciones de notificaciones actualizadas correctamente'
@@ -426,42 +358,37 @@ class ProfileController {
         message: 'Error interno del servidor'
       });
     }
-  }
-
-  // Actualizar configuraciones de privacidad
-  async updatePrivacy(req: AuthenticatedRequest, res: Response) {
+  };
+// Actualizar configuraciones de privacidad
+const updatePrivacy = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userId = req.user?._id;
+      const userId = req.user?._id || req.user?.id;
       const { profileVisibility, showEmail, showPhone } = req.body;
-
       const user = await User.findById(userId);
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
       }
-
       // Actualizar campos de privacidad
       const updatedFields: string[] = [];
-      if (profileVisibility && profileVisibility !== user.profileVisibility) {
-        user.profileVisibility = profileVisibility;
+      if (profileVisibility && profileVisibility !== user!.profileVisibility) {
+        user!.profileVisibility = profileVisibility;
         updatedFields.push('profileVisibility');
       }
-      if (showEmail !== undefined && showEmail !== user.showEmail) {
-        user.showEmail = showEmail;
+      if (showEmail !== undefined && showEmail !== user!.showEmail) {
+        user!.showEmail = showEmail;
         updatedFields.push('showEmail');
       }
-      if (showPhone !== undefined && showPhone !== user.showPhone) {
-        user.showPhone = showPhone;
+      if (showPhone !== undefined && showPhone !== user!.showPhone) {
+        user!.showPhone = showPhone;
         updatedFields.push('showPhone');
       }
-
-      await user.save();
-
+      await user!.save();
       // Registrar actividad
       if (updatedFields.length > 0) {
-        await Activity.createActivity(
+        await (Activity as any).createActivity(
           userId,
           'privacy_update',
           'Usuario actualizó configuraciones de privacidad',
@@ -469,7 +396,6 @@ class ProfileController {
           true
         );
       }
-
       res.json({
         success: true,
         message: 'Configuraciones de privacidad actualizadas correctamente'
@@ -482,37 +408,32 @@ class ProfileController {
       });
     }
   }
-
-  // Actualizar configuración de tema e idioma
-  async updatePreferences(req: AuthenticatedRequest, res: Response) {
+// Actualizar configuración de tema e idioma
+const updatePreferences = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userId = req.user?._id;
+      const userId = req.user?._id || req.user?.id;
       const { theme, language } = req.body;
-
       const user = await User.findById(userId);
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
       }
-
       // Actualizar campos de preferencias
       const updatedFields: string[] = [];
-      if (theme && theme !== user.theme) {
-        user.theme = theme;
+      if (theme && theme !== user!.theme) {
+        user!.theme = theme;
         updatedFields.push('theme');
       }
-      if (language && language !== user.language) {
-        user.language = language;
+      if (language && language !== user!.language) {
+        user!.language = language;
         updatedFields.push('language');
       }
-
-      await user.save();
-
+      await user!.save();
       // Registrar actividad
       if (updatedFields.length > 0) {
-        await Activity.createActivity(
+        await (Activity as any).createActivity(
           userId,
           'preferences_update',
           'Usuario actualizó preferencias de tema e idioma',
@@ -520,7 +441,6 @@ class ProfileController {
           true
         );
       }
-
       res.json({
         success: true,
         message: 'Preferencias actualizadas correctamente'
@@ -532,38 +452,33 @@ class ProfileController {
         message: 'Error interno del servidor'
       });
     }
-  }
-
-  // Actualizar configuraciones de notificaciones push
-  async updatePushNotifications(req: AuthenticatedRequest, res: Response) {
+  };
+// Actualizar configuraciones de notificaciones push
+const updatePushNotifications = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userId = req.user?._id;
+      const userId = req.user?._id || req.user?.id;
       const { pushEnabled, pushToken } = req.body;
-
       const user = await User.findById(userId);
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
       }
-
       // Actualizar campos de notificaciones push
       const updatedFields: string[] = [];
-      if (pushEnabled !== undefined && pushEnabled !== user.pushEnabled) {
-        user.pushEnabled = pushEnabled;
+      if (pushEnabled !== undefined && pushEnabled !== user!.pushEnabled) {
+        user!.pushEnabled = pushEnabled;
         updatedFields.push('pushEnabled');
       }
-      if (pushToken && pushToken !== user.pushToken) {
-        user.pushToken = pushToken;
+      if (pushToken && pushToken !== user!.pushToken) {
+        user!.pushToken = pushToken;
         updatedFields.push('pushToken');
       }
-
-      await user.save();
-
+      await user!.save();
       // Registrar actividad
       if (updatedFields.length > 0) {
-        await Activity.createActivity(
+        await (Activity as any).createActivity(
           userId,
           'push_notifications_update',
           'Usuario actualizó configuraciones de notificaciones push',
@@ -571,7 +486,6 @@ class ProfileController {
           true
         );
       }
-
       res.json({
         success: true,
         message: 'Configuraciones de notificaciones push actualizadas correctamente'
@@ -584,38 +498,33 @@ class ProfileController {
       });
     }
   }
-
-  // Subir foto de perfil
-  async uploadAvatar(req: AuthenticatedRequest, res: Response) {
+// Subir foto de perfil
+const uploadAvatar = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userId = req.user?._id;
-      
+      const userId = req.user?._id || req.user?.id;
       if (!req.file) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'No se ha proporcionado ninguna imagen'
         });
       }
-
       const user = await User.findById(userId);
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
       }
-
       // Eliminar imagen anterior de Cloudinary si existe y no es el avatar por defecto
-      if (user.avatar && 
-          user.avatar !== '/uploads/perfil/default-avatar.svg' && 
-          user.avatar.includes('cloudinary.com')) {
+      if (user!.avatar &&
+          user!.avatar !== '/uploads/perfil/default-avatar.svg' &&
+          user!.avatar.includes('cloudinary.com')) {
         try {
           // Extraer el public_id de la URL de Cloudinary
-          const urlParts = user.avatar.split('/');
-          const publicId = urlParts[urlParts.length - 1].split('.')[0];
+          const urlParts = user!.avatar.split('/');
+          const publicId = urlParts[urlParts.length - 1]?.split('.')[0];
           const folder = 'piezasya/profiles/';
           const fullPublicId = folder + publicId;
-          
           await deleteImage(fullPublicId);
           console.log('Avatar anterior eliminado de Cloudinary:', fullPublicId);
         } catch (deleteError) {
@@ -623,21 +532,24 @@ class ProfileController {
           // Continuar aunque falle la eliminación
         }
       }
-
       // Actualizar avatar del usuario con la URL de Cloudinary
-      const avatarUrl = req.file.path; // Cloudinary devuelve la URL completa
-      user.avatar = avatarUrl;
-      await user.save();
-
+      const avatarUrl = req.file?.path; // Cloudinary devuelve la URL completa
+      if (!avatarUrl) {
+        res.status(400).json({
+          success: false,
+          message: 'No se pudo procesar la imagen'
+        });
+      }
+      user!.avatar = avatarUrl!;
+      await user!.save();
       // Registrar actividad
-      await Activity.createActivity(
+      await (Activity as any).createActivity(
         userId,
         'avatar_upload',
         'Usuario subió nueva foto de perfil',
         { avatarUrl },
         true
       );
-
       res.json({
         success: true,
         message: 'Foto de perfil actualizada correctamente',
@@ -653,31 +565,27 @@ class ProfileController {
       });
     }
   }
-
-  // Eliminar foto de perfil
-  async deleteAvatar(req: AuthenticatedRequest, res: Response) {
+// Eliminar foto de perfil
+const deleteAvatar = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userId = req.user?._id;
-
+      const userId = req.user?._id || req.user?.id;
       const user = await User.findById(userId);
       if (!user) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
       }
-
       // Eliminar imagen anterior de Cloudinary si existe y no es el avatar por defecto
-      if (user.avatar && 
-          user.avatar !== '/uploads/perfil/default-avatar.svg' && 
-          user.avatar.includes('cloudinary.com')) {
+      if (user!.avatar &&
+          user!.avatar !== '/uploads/perfil/default-avatar.svg' &&
+          user!.avatar.includes('cloudinary.com')) {
         try {
           // Extraer el public_id de la URL de Cloudinary
-          const urlParts = user.avatar.split('/');
-          const publicId = urlParts[urlParts.length - 1].split('.')[0];
+          const urlParts = user!.avatar.split('/');
+          const publicId = urlParts[urlParts.length - 1]?.split('.')[0];
           const folder = 'piezasya/profiles/';
           const fullPublicId = folder + publicId;
-          
           await deleteImage(fullPublicId);
           console.log('Avatar eliminado de Cloudinary:', fullPublicId);
         } catch (deleteError) {
@@ -685,14 +593,12 @@ class ProfileController {
           // Continuar aunque falle la eliminación
         }
       }
-
       // Restablecer al avatar por defecto
-      user.avatar = '/uploads/perfil/default-avatar.svg';
-      await user.save();
-
+      user!.avatar = '/uploads/perfil/default-avatar.svg';
+      await user!.save();
       // Registrar actividad
       try {
-        await Activity.createActivity(
+        await (Activity as any).createActivity(
           userId,
           'avatar_deleted',
           'Usuario eliminó su foto de perfil',
@@ -703,12 +609,11 @@ class ProfileController {
         console.warn('Error registrando actividad:', activityError);
         // Continuar aunque falle el registro de actividad
       }
-
       res.json({
         success: true,
         message: 'Foto de perfil eliminada correctamente',
         data: {
-          avatar: user.avatar
+          avatar: user!.avatar
         }
       });
     } catch (error) {
@@ -719,16 +624,13 @@ class ProfileController {
       });
     }
   }
-
-  // Obtener historial de actividades
-  async getActivities(req: AuthenticatedRequest, res: Response) {
+// Obtener historial de actividades
+const getActivities = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userId = req.user?._id;
-      const limit = parseInt(req.query.limit as string) || 20;
-      const skip = parseInt(req.query.skip as string) || 0;
-
-      const activities = await Activity.getUserActivities(userId, limit, skip);
-
+      const userId = req.user?._id || req.user?.id;
+      const limit = parseInt(req.query['limit'] as string) || 20;
+      const skip = parseInt(req.query['skip'] as string) || 0;
+      const activities = await (Activity as any).getUserActivities(userId, limit, skip);
       res.json({
         success: true,
         data: activities
@@ -740,7 +642,19 @@ class ProfileController {
         message: 'Error interno del servidor'
       });
     }
-  }
-}
-
-export default new ProfileController();
+  };
+export default {
+  getProfile,
+  updateProfile,
+  changePassword,
+  setPin,
+  setFingerprint,
+  setTwoFactor,
+  updateNotifications,
+  updatePrivacy,
+  updatePreferences,
+  updatePushNotifications,
+  uploadAvatar,
+  deleteAvatar,
+  getActivities
+};

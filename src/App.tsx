@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
@@ -78,6 +78,7 @@ import StoreManagerAnalytics from './pages/StoreManagerAnalytics';
 import StoreManagerMessages from './pages/StoreManagerMessages';
 import StoreManagerReviews from './pages/StoreManagerReviews';
 import StoreManagerSettings from './pages/StoreManagerSettings';
+import StoreManagerStoreConfiguration from './pages/StoreManagerStoreConfiguration';
 import StoreManagerInventory from './pages/StoreManagerInventory';
 import StoreManagerInventoryAlerts from './pages/StoreManagerInventoryAlerts';
 import StoreManagerNotifications from './pages/StoreManagerNotifications';
@@ -86,6 +87,8 @@ import StoreSetup from './pages/StoreSetup';
 import InventoryManagementPage from './pages/InventoryManagementPage';
 import InventoryReportsPage from './pages/InventoryReportsPage';
 import InventoryTransfersPage from './pages/InventoryTransfersPage';
+import Quotations from './pages/Quotations';
+import QuotationConfig from './pages/QuotationConfig';
 
 // Páginas de delivery
 import DeliveryDashboard from './pages/DeliveryDashboard';
@@ -97,11 +100,23 @@ import DeliverySchedule from './pages/DeliverySchedule';
 import DeliveryAvailabilityStatus from './pages/DeliveryAvailabilityStatus';
 import DeliveryProfile from './pages/DeliveryProfile';
 
+// Páginas de vendedor
+import SellerDashboard from './pages/SellerDashboard';
+import SellerPrices from './pages/SellerPrices';
+import SellerChat from './pages/SellerChat';
+import SellerQuotes from './pages/SellerQuotes';
+import SellerProducts from './pages/SellerProducts';
+import SellerCustomers from './pages/SellerCustomers';
+import SellerPerformance from './pages/SellerPerformance';
+import SellerProfile from './pages/SellerProfile';
+
 // Componentes de rutas protegidas
 import AdminRoute from './components/AdminRoute';
 import StoreManagerRoute from './components/StoreManagerRoute';
 import DeliveryRoute from './components/DeliveryRoute';
 import DeliveryLayout from './components/DeliveryLayout';
+import SellerRoute from './components/SellerRoute';
+import SellerLayout from './components/SellerLayout';
 import ClientRoute from './components/ClientRoute';
 import ClientLayout from './components/ClientLayout';
 import AdminLayout from './components/AdminLayout';
@@ -113,9 +128,54 @@ import QuickStoreCheck from './components/QuickStoreCheck';
 
 
 
+// Componente para manejar redirección automática
+function AutoRedirect() {
+  const { isAuthenticated, user, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated && user && !isLoading) {
+      console.log('🔍 AutoRedirect - Verificando redirección automática...');
+      console.log('🔍 AutoRedirect - User role:', user.role);
+      console.log('🔍 AutoRedirect - Current pathname:', window.location.pathname);
+      
+      // Solo redirigir si estamos en la raíz y el usuario tiene un rol específico
+      if (window.location.pathname === '/' && user.role) {
+        console.log('🔍 AutoRedirect - Usuario autenticado en raíz, verificando redirección...');
+        
+        if (user.role === 'admin') {
+          console.log('🔄 AutoRedirect - Redirigiendo admin a dashboard');
+          navigate('/admin/dashboard', { replace: true });
+        } else if (user.role === 'seller') {
+          console.log('🔄 AutoRedirect - Redirigiendo seller a dashboard');
+          navigate('/seller/dashboard', { replace: true });
+        } else if (user.role === 'store_manager') {
+          console.log('🔄 AutoRedirect - Redirigiendo store manager');
+          navigate('/store-manager', { replace: true });
+        } else if (user.role === 'delivery') {
+          console.log('🔄 AutoRedirect - Redirigiendo delivery');
+          navigate('/delivery/dashboard', { replace: true });
+        } else {
+          console.log('🔄 AutoRedirect - Redirigiendo cliente a profile');
+          navigate('/profile', { replace: true });
+        }
+      }
+    }
+  }, [isAuthenticated, user, isLoading, navigate]);
+
+  return null; // Este componente no renderiza nada
+}
+
 function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isAuthenticated, hasRole, user, isLoading } = useAuth();
+
+  console.log('🔍 AppContent - isAuthenticated:', isAuthenticated);
+  console.log('🔍 AppContent - user:', user);
+  console.log('🔍 AppContent - user role:', user?.role);
+  console.log('🔍 AppContent - Current URL:', window.location.href);
+  console.log('🔍 AppContent - Current pathname:', window.location.pathname);
+  console.log('🔍 AppContent - isLoading:', isLoading);
 
   // Mostrar loading mientras se inicializa la autenticación
   if (isLoading) {
@@ -131,6 +191,7 @@ function AppContent() {
 
   return (
     <Router>
+      <AutoRedirect />
       {/* Temporalmente deshabilitado para debugging */}
       {/* <InactivityProvider timeoutMinutes={60} warningMinutes={10}> */}
         <Routes>
@@ -342,6 +403,96 @@ function AppContent() {
             } />
           </Routes>
         } />
+
+                    {/* Rutas de vendedor - SIN Header ni Sidebar principal */}
+           <Route path="/seller/*" element={
+             <Routes>
+               <Route path="/" element={
+                 <SellerRoute>
+                   <Navigate to="/seller/dashboard" replace />
+                 </SellerRoute>
+               } />
+               <Route path="/dashboard" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerDashboard />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/prices" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerPrices />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/chat" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerChat />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/quotes" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerQuotes />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/products" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerProducts />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/customers" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerCustomers />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/performance" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerPerformance />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/profile" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <SellerProfile />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               
+               {/* Rutas de perfil para vendedor */}
+               <Route path="/user-profile" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <Profile />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/security" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <Security />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+               <Route path="/configuration" element={
+                 <SellerRoute>
+                   <SellerLayout>
+                     <Configuration />
+                   </SellerLayout>
+                 </SellerRoute>
+               } />
+             </Routes>
+           } />
 
                           {/* Rutas normales con Header y Sidebar */}
          <Route path="/*" element={
@@ -559,6 +710,13 @@ function AppContent() {
                  </StoreManagerLayout>
                </StoreManagerRoute>
              } />
+             <Route path="/store-configuration" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <StoreManagerStoreConfiguration />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
              <Route path="/profile" element={
                <StoreManagerRoute>
                  <StoreManagerLayout>
@@ -598,6 +756,20 @@ function AppContent() {
                <StoreManagerRoute>
                  <StoreManagerLayout>
                    <InventoryTransfersPage />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/quotations" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <Quotations />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/quotation-config" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <QuotationConfig />
                  </StoreManagerLayout>
                </StoreManagerRoute>
              } />
@@ -700,6 +872,7 @@ function AppContent() {
                } />
              </Routes>
            } />
+
         </Routes>
       {/* </InactivityProvider> */}
     </Router>

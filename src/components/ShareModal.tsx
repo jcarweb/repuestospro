@@ -117,7 +117,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
     
     // Registrar el compartir en el backend
     try {
-      await fetch('http://localhost:5000/api/loyalty/track-share', {
+      await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""/api/loyalty/track-share', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

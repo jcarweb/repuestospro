@@ -1,6 +1,8 @@
 import crypto from 'crypto';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-for-development';
+import { secureConfig } from '../config/secureConfig';
+
+const JWT_SECRET = secureConfig.get('jwt').secret;
 const SALT_ROUNDS = 16;
 
 export interface TokenPayload {
@@ -81,7 +83,7 @@ export class CryptoAuth {
       }
 
       // Decodificar el payload
-      const payload = JSON.parse(this.base64UrlDecode(encodedPayload)) as TokenPayload;
+      const payload = JSON.parse(this.base64UrlDecode(encodedPayload || '')) as TokenPayload;
 
       // Verificar expiración
       if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {

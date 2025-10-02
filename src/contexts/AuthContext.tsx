@@ -107,32 +107,46 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const checkAuthStatus = async (): Promise<boolean> => {
     try {
       const storedToken = localStorage.getItem('token');
-      if (!storedToken) {
+      const storedUser = localStorage.getItem('user');
+      
+      if (!storedToken || !storedUser) {
+        console.log('🔍 No hay token o usuario almacenado');
         return false;
       }
 
-      // Verificar token con el backend
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${apiUrl}/auth/verify`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${storedToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Intentar verificar token con el backend
+      const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+      
+      try {
+        const response = await fetch(`${baseUrl}/api/auth/verify`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${storedToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Token verificado con backend:', data.user);
+          setUser(data.user);
+          setToken(storedToken);
+          return true;
+        } else {
+          console.log('⚠️ Token inválido según backend, usando datos locales');
+          // Usar datos locales como fallback
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          setToken(storedToken);
+          return true;
+        }
+      } catch (backendError) {
+        console.log('⚠️ Backend no disponible, usando datos locales:', backendError);
+        // Backend no disponible, usar datos locales
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
         setToken(storedToken);
         return true;
-      } else {
-        // Token inválido, limpiar datos
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        setToken(null);
-        return false;
       }
     } catch (error) {
       console.error('Error checking auth status:', error);
@@ -141,19 +155,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const login = (userData: User, authToken: string) => {
+    console.log('🔐 AuthContext.login - userData:', userData);
+    console.log('🔐 AuthContext.login - userData.role:', userData.role);
     setUser(userData);
     setToken(authToken);
     localStorage.setItem('token', authToken);
     localStorage.setItem('user', JSON.stringify(userData));
+    console.log('🔐 AuthContext.login - User and token set in context');
   };
 
   const loginAsync = async (email: string, password: string) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      console.log('🌐 Enviando request a:', `${apiUrl}/auth/login`);
+      const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+      console.log('🌐 Enviando request a:', `${baseUrl}/api/auth/login`);
       
       // Verificar si el servidor está disponible antes de hacer la petición
-      const serverCheck = await fetch(`${apiUrl}/health`, {
+      const serverCheck = await fetch(`${baseUrl}/health`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -164,7 +181,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error('El servidor backend no está disponible. Por favor, asegúrate de que el servidor esté ejecutándose en el puerto 5000.');
       }
 
-      const response = await fetch(`${apiUrl}/auth/login`, {
+      const response = await fetch(`${baseUrl}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

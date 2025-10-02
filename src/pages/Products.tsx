@@ -90,7 +90,7 @@ const Products: React.FC = () => {
         ...(priceRange.max && { maxPrice: priceRange.max })
       });
 
-      const response = await fetch(`API_BASE_URL/products?${params}`);
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""""""/api/products?${params}`);
       const data = await response.json();
       
       if (data.success) {
@@ -113,7 +113,7 @@ const Products: React.FC = () => {
   // Cargar categorías
   const fetchCategories = async () => {
     try {
-      const response = await fetch('API_BASE_URL/categories');
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/categories');
       const data = await response.json();
       
       if (data.success) {
@@ -127,7 +127,7 @@ const Products: React.FC = () => {
   // Cargar marcas únicas
   const fetchBrands = async () => {
     try {
-      const response = await fetch('API_BASE_URL/products/brands');
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/products/brands');
       const data = await response.json();
       
       if (data.success) {
@@ -200,11 +200,11 @@ const Products: React.FC = () => {
     
     // Si es una URL relativa, construir la URL completa
     if (imageUrl.startsWith('/')) {
-      return `API_BASE_URL${imageUrl}`;
+      return `process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"${imageUrl}`;
     }
     
     // Si no tiene protocolo, asumir que es relativa al backend
-    return `API_BASE_URL/${imageUrl}`;
+    return `process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/${imageUrl}`;
   };
 
   // Renderizado de productos usando ProductCard

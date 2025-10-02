@@ -33,13 +33,50 @@ const Login: React.FC = () => {
       console.log('✅ Login exitoso, navegando...');
       // Redirigir según el rol del usuario
       const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      console.log('🔍 User data from localStorage:', userData);
+      console.log('🔍 User role:', userData.role);
+      
       if (userData.role === 'admin') {
+        console.log('🔄 Redirigiendo a admin dashboard');
         navigate('/admin/dashboard');
       } else if (userData.role === 'store_manager') {
+        console.log('🔄 Redirigiendo a store manager');
         navigate('/store-manager');
+      } else if (userData.role === 'seller') {
+        console.log('🔄 Redirigiendo a seller dashboard');
+        console.log('🔍 URL actual antes de redirección:', window.location.href);
+        console.log('🔍 UserData completo:', userData);
+        console.log('🔍 UserData.role exacto:', JSON.stringify(userData.role));
+        console.log('🔍 UserData.role tipo:', typeof userData.role);
+        console.log('🔍 Comparación userData.role === "seller":', userData.role === 'seller');
+        console.log('🔍 Comparación userData.role === "seller" (strict):', userData.role === 'seller');
+        
+        // Verificar que el rol sea exactamente 'seller'
+        if (userData.role === 'seller') {
+          console.log('✅ Rol confirmado como seller, redirigiendo...');
+          console.log('🔍 Ejecutando navigate("/seller/dashboard")...');
+          
+          // Usar setTimeout para asegurar que el contexto se haya actualizado
+          setTimeout(() => {
+            console.log('🔍 Redirigiendo después de delay...');
+            navigate('/seller/dashboard', { replace: true });
+            console.log('🔍 Navigate ejecutado');
+          }, 100);
+          
+          // Verificar después de un pequeño delay
+          setTimeout(() => {
+            console.log('🔍 URL después de redirección (delayed):', window.location.href);
+            console.log('🔍 Pathname después de redirección (delayed):', window.location.pathname);
+          }, 200);
+        } else {
+          console.log('❌ Rol no es seller:', userData.role);
+          console.log('❌ Tipo del rol:', typeof userData.role);
+        }
       } else if (userData.role === 'delivery') {
+        console.log('🔄 Redirigiendo a delivery dashboard');
         navigate('/delivery/dashboard');
       } else {
+        console.log('🔄 Redirigiendo a profile (cliente)');
         // Para clientes, navegar a una ruta específica del cliente
         navigate('/profile');
       }
@@ -80,16 +117,25 @@ const Login: React.FC = () => {
   };
 
   const handleTwoFactorSuccess = (user: any, token: string) => {
+    console.log('🔐 2FA Success - User data:', user);
+    console.log('🔐 2FA Success - User role:', user.role);
     login(user, token);
     setShowTwoFactor(false);
     // Redirigir según el rol del usuario
     if (user.role === 'admin') {
+      console.log('🔄 2FA - Redirigiendo a admin dashboard');
       navigate('/admin/dashboard');
     } else if (user.role === 'store_manager') {
+      console.log('🔄 2FA - Redirigiendo a store manager');
       navigate('/store-manager');
+    } else if (user.role === 'seller') {
+      console.log('🔄 2FA - Redirigiendo a seller dashboard');
+      navigate('/seller/dashboard');
     } else if (user.role === 'delivery') {
+      console.log('🔄 2FA - Redirigiendo a delivery dashboard');
       navigate('/delivery/dashboard');
     } else {
+      console.log('🔄 2FA - Redirigiendo a profile (cliente)');
       // Para clientes, navegar a una ruta específica del cliente
       navigate('/profile');
     }

@@ -3,9 +3,13 @@ import Category, { ICategory } from '../models/Category';
 import Activity from '../models/Activity';
 import Product from '../models/Product';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 export class CategoryController {
   // Obtener todas las categorías
-  static async getAllCategories(req: Request, res: Response): Promise<void> {
+  static async getAllCategories(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { search, isActive } = req.query;
       
@@ -48,7 +52,7 @@ export class CategoryController {
   }
 
   // Obtener una categoría por ID
-  static async getCategoryById(req: Request, res: Response): Promise<void> {
+  static async getCategoryById(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       
@@ -84,7 +88,7 @@ export class CategoryController {
   }
 
   // Crear una nueva categoría
-  static async createCategory(req: Request, res: Response): Promise<void> {
+  static async createCategory(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { name, description, image, parentCategory, order } = req.body;
 
@@ -99,7 +103,7 @@ export class CategoryController {
 
       // Verificar si ya existe una categoría con el mismo nombre
       const existingCategory = await Category.findOne({ 
-        name: name.trim()
+        name: name?.trim()
       });
 
       if (existingCategory) {
@@ -111,12 +115,12 @@ export class CategoryController {
       }
 
       const categoryData: any = {
-        name: name.trim(),
-        description: description.trim(),
+        name: name?.trim(),
+        description: description?.trim(),
         isActive: true
       };
 
-      if (image) categoryData.image = image.trim();
+      if (image) categoryData.image = image?.trim();
       if (parentCategory) categoryData.parentCategory = parentCategory;
       if (order !== undefined) categoryData.order = order;
 
@@ -124,7 +128,7 @@ export class CategoryController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as any).user._id,
+        userId: req.user?._id,
         type: 'category_created',
         description: `Categoría "${category.name}" creada`,
         metadata: { categoryId: category._id }
@@ -145,7 +149,7 @@ export class CategoryController {
   }
 
   // Actualizar una categoría
-  static async updateCategory(req: Request, res: Response): Promise<void> {
+  static async updateCategory(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { name, description, image, parentCategory, isActive, order } = req.body;
@@ -161,9 +165,9 @@ export class CategoryController {
       }
 
       // Si se está cambiando el nombre, verificar que no exista duplicado
-      if (name && name.trim() !== category.name) {
+      if (name && name?.trim() !== category.name) {
         const existingCategory = await Category.findOne({ 
-          name: name.trim(),
+          name: name?.trim(),
           _id: { $ne: id }
         });
 
@@ -186,18 +190,15 @@ export class CategoryController {
       }
 
       // Actualizar campos
-      if (name !== undefined) category.name = name.trim();
-      if (description !== undefined) category.description = description.trim();
-      if (image !== undefined) category.image = image.trim();
-      if (parentCategory !== undefined) category.parentCategory = parentCategory || undefined;
+      if (name !== undefined) category.name = name?.trim();
+      if (description !== undefined) category.description = description?.trim();
       if (isActive !== undefined) category.isActive = isActive;
-      if (order !== undefined) category.order = order;
 
       await category.save();
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as any).user._id,
+        userId: req.user?._id,
         type: 'category_updated',
         description: `Categoría "${category.name}" actualizada`,
         metadata: { categoryId: category._id }
@@ -218,7 +219,7 @@ export class CategoryController {
   }
 
   // Eliminar una categoría
-  static async deleteCategory(req: Request, res: Response): Promise<void> {
+  static async deleteCategory(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -258,7 +259,7 @@ export class CategoryController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as any).user._id,
+        userId: req.user?._id,
         type: 'category_deleted',
         description: `Categoría "${category.name}" eliminada`,
         metadata: { categoryId: category._id }
@@ -278,7 +279,7 @@ export class CategoryController {
   }
 
   // Cambiar estado de una categoría
-  static async toggleCategoryStatus(req: Request, res: Response): Promise<void> {
+  static async toggleCategoryStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -297,7 +298,7 @@ export class CategoryController {
 
       // Registrar actividad
       await Activity.create({
-        userId: (req as any).user._id,
+        userId: req.user?._id,
         type: 'category_status_changed',
         description: `Categoría "${category.name}" ${category.isActive ? 'activada' : 'desactivada'}`,
         metadata: { categoryId: category._id }
@@ -318,7 +319,7 @@ export class CategoryController {
   }
 
   // Obtener estadísticas de categorías
-  static async getCategoryStats(req: Request, res: Response): Promise<void> {
+  static async getCategoryStats(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const totalCategories = await Category.countDocuments();
       const activeCategories = await Category.countDocuments({ isActive: true });

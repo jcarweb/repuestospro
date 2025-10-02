@@ -97,7 +97,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
 
   const fetchSuggestions = async (searchQuery: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/search/autocomplete?query=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""/api/search/autocomplete?query=${encodeURIComponent(searchQuery)}`);
       const data: SearchResponse = await response.json();
       
       if (data.success) {
@@ -114,7 +114,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
 
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/search/products', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/search/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

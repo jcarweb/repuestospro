@@ -3,20 +3,17 @@ import VehicleType from '../models/VehicleType';
 import Brand from '../models/Brand';
 import Category from '../models/Category';
 import Subcategory from '../models/Subcategory';
-
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
 export default {
   // ===== VEHICLE TYPES =====
-  async getVehicleTypes(req: Request, res: Response) {
+  async getVehicleTypes(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      console.log('🔍 MasterController - getVehicleTypes iniciado');
-      
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const page = parseInt(req.query['page'] as string) || 1;
+      const limit = parseInt(req.query['limit'] as string) || 10;
       const skip = (page - 1) * limit;
-      const search = req.query.search as string;
-
-      console.log('🔍 MasterController - Parámetros:', { page, limit, skip, search });
-
+      const search = req.query['search'] as string;
       let filter: any = {};
       if (search) {
         filter.$or = [
@@ -24,22 +21,13 @@ export default {
           { description: { $regex: search, $options: 'i' } }
         ];
       }
-
-      console.log('🔍 MasterController - Filtro aplicado:', filter);
-
       const total = await VehicleType.countDocuments(filter);
-      console.log('🔍 MasterController - Total de tipos encontrados:', total);
-
       const vehicleTypes = await VehicleType.find(filter)
         .sort({ name: 1 })
         .populate('createdBy', 'name email')
         .populate('updatedBy', 'name email')
         .skip(skip)
         .limit(limit);
-
-      console.log('🔍 MasterController - Tipos devueltos:', vehicleTypes.length);
-      console.log('🔍 MasterController - Datos de tipos:', vehicleTypes.map(vt => ({ name: vt.name, id: vt._id })));
-
       res.json({
         success: true,
         data: vehicleTypes,
@@ -58,12 +46,10 @@ export default {
       });
     }
   },
-
-  async createVehicleType(req: Request, res: Response) {
+  async createVehicleType(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { name, description, deliveryType, icon } = req.body;
-      const userId = (req as any).user?.id;
-
+      const userId = req.user?.id;
       const vehicleType = new VehicleType({
         name: name.toLowerCase(),
         description,
@@ -71,9 +57,7 @@ export default {
         icon,
         createdBy: userId
       });
-
       await vehicleType.save();
-
       res.status(201).json({
         success: true,
         data: vehicleType,
@@ -94,13 +78,11 @@ export default {
       }
     }
   },
-
-  async updateVehicleType(req: Request, res: Response) {
+  async updateVehicleType(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { name, description, deliveryType, icon, isActive } = req.body;
-      const userId = (req as any).user?.id;
-
+      const userId = req.user?.id;
       const vehicleType = await VehicleType.findByIdAndUpdate(
         id,
         {
@@ -113,14 +95,12 @@ export default {
         },
         { new: true, runValidators: true }
       );
-
       if (!vehicleType) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Tipo de vehículo no encontrado'
         });
       }
-
       res.json({
         success: true,
         data: vehicleType,
@@ -141,31 +121,25 @@ export default {
       }
     }
   },
-
-  async deleteVehicleType(req: Request, res: Response) {
+  async deleteVehicleType(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-
       // Verificar si hay productos usando este tipo de vehículo
       const Product = require('../models/Product').default;
       const productsCount = await Product.countDocuments({ vehicleType: id });
-
       if (productsCount > 0) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: `No se puede eliminar. Hay ${productsCount} productos usando este tipo de vehículo`
         });
       }
-
       const vehicleType = await VehicleType.findByIdAndDelete(id);
-
       if (!vehicleType) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Tipo de vehículo no encontrado'
         });
       }
-
       res.json({
         success: true,
         message: 'Tipo de vehículo eliminado exitosamente'
@@ -178,16 +152,14 @@ export default {
       });
     }
   },
-
   // ===== BRANDS =====
-  async getBrands(req: Request, res: Response) {
+  async getBrands(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const page = parseInt(req.query['page'] as string) || 1;
+      const limit = parseInt(req.query['limit'] as string) || 10;
       const skip = (page - 1) * limit;
-      const search = req.query.search as string;
-      const vehicleType = req.query.vehicleType as string;
-
+      const search = req.query['search'] as string;
+      const vehicleType = req.query['vehicleType'] as string;
       let filter: any = {};
       if (search) {
         filter.$or = [
@@ -196,28 +168,19 @@ export default {
           { country: { $regex: search, $options: 'i' } }
         ];
       }
-
       // Filtro por tipo de vehículo
       if (vehicleType) {
-        console.log('🔍 MasterController - Filtro por tipo de vehículo:', vehicleType);
         // Convertir string a ObjectId si es necesario
         const mongoose = require('mongoose');
         try {
           const objectId = new mongoose.Types.ObjectId(vehicleType);
           filter.vehicleTypes = objectId;
-          console.log('🔍 MasterController - Convertido a ObjectId:', objectId);
         } catch (error) {
           // Si no es un ObjectId válido, usar como string
           filter.vehicleTypes = vehicleType;
-          console.log('🔍 MasterController - Usando como string:', vehicleType);
         }
       }
-
-      console.log('🔍 MasterController - Filtro final:', JSON.stringify(filter, null, 2));
-      
       const total = await Brand.countDocuments(filter);
-      console.log('🔍 MasterController - Total de marcas encontradas:', total);
-      
       const brands = await Brand.find(filter)
         .populate('vehicleTypes', 'name')
         .populate('createdBy', 'name email')
@@ -225,9 +188,6 @@ export default {
         .sort({ name: 1 })
         .skip(skip)
         .limit(limit);
-        
-      console.log('🔍 MasterController - Marcas devueltas:', brands.length);
-
       res.json({
         success: true,
         data: brands,
@@ -246,12 +206,10 @@ export default {
       });
     }
   },
-
-  async createBrand(req: Request, res: Response) {
+  async createBrand(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { name, description, vehicleTypes, country, website, logo, history } = req.body;
-      const userId = (req as any).user?.id;
-
+      const userId = req.user?.id;
       const brand = new Brand({
         name,
         description,
@@ -262,10 +220,8 @@ export default {
         history,
         createdBy: userId
       });
-
       await brand.save();
       await brand.populate('vehicleTypes', 'name');
-
       res.status(201).json({
         success: true,
         data: brand,
@@ -286,13 +242,11 @@ export default {
       }
     }
   },
-
-  async updateBrand(req: Request, res: Response) {
+  async updateBrand(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { name, description, vehicleTypes, country, website, logo, history, isActive } = req.body;
-      const userId = (req as any).user?.id;
-
+      const userId = req.user?.id;
       const brand = await Brand.findByIdAndUpdate(
         id,
         {
@@ -308,14 +262,12 @@ export default {
         },
         { new: true, runValidators: true }
       ).populate('vehicleTypes', 'name');
-
       if (!brand) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Marca no encontrada'
         });
       }
-
       res.json({
         success: true,
         data: brand,
@@ -336,31 +288,25 @@ export default {
       }
     }
   },
-
-  async deleteBrand(req: Request, res: Response) {
+  async deleteBrand(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-
       // Verificar si hay productos usando esta marca
       const Product = require('../models/Product').default;
       const productsCount = await Product.countDocuments({ brand: id });
-
       if (productsCount > 0) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: `No se puede eliminar. Hay ${productsCount} productos usando esta marca`
         });
       }
-
       const brand = await Brand.findByIdAndDelete(id);
-
       if (!brand) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Marca no encontrada'
         });
       }
-
       res.json({
         success: true,
         message: 'Marca eliminada exitosamente'
@@ -373,15 +319,13 @@ export default {
       });
     }
   },
-
   // ===== CATEGORIES =====
-  async getCategories(req: Request, res: Response) {
+  async getCategories(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const page = parseInt(req.query['page'] as string) || 1;
+      const limit = parseInt(req.query['limit'] as string) || 10;
       const skip = (page - 1) * limit;
-      const search = req.query.search as string;
-
+      const search = req.query['search'] as string;
       let filter: any = {};
       if (search) {
         filter.$or = [
@@ -389,7 +333,6 @@ export default {
           { description: { $regex: search, $options: 'i' } }
         ];
       }
-
       const total = await Category.countDocuments(filter);
       const categories = await Category.find(filter)
         .populate('createdBy', 'name email')
@@ -397,7 +340,6 @@ export default {
         .sort({ sortOrder: 1, name: 1 })
         .skip(skip)
         .limit(limit);
-
       res.json({
         success: true,
         data: categories,
@@ -416,12 +358,10 @@ export default {
       });
     }
   },
-
-  async createCategory(req: Request, res: Response) {
+  async createCategory(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { name, description, icon, color, sortOrder } = req.body;
-      const userId = (req as any).user?.id;
-
+      const userId = req.user?.id;
       const category = new Category({
         name: name.toLowerCase(),
         description,
@@ -430,9 +370,7 @@ export default {
         sortOrder,
         createdBy: userId
       });
-
       await category.save();
-
       res.status(201).json({
         success: true,
         data: category,
@@ -453,13 +391,11 @@ export default {
       }
     }
   },
-
-  async updateCategory(req: Request, res: Response) {
+  async updateCategory(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { name, description, icon, color, sortOrder, isActive } = req.body;
-      const userId = (req as any).user?.id;
-
+      const userId = req.user?.id;
       const category = await Category.findByIdAndUpdate(
         id,
         {
@@ -473,14 +409,12 @@ export default {
         },
         { new: true, runValidators: true }
       );
-
       if (!category) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Categoría no encontrada'
         });
       }
-
       res.json({
         success: true,
         data: category,
@@ -501,41 +435,33 @@ export default {
       }
     }
   },
-
-  async deleteCategory(req: Request, res: Response) {
+  async deleteCategory(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-
       // Verificar si hay productos usando esta categoría
       const Product = require('../models/Product').default;
       const productsCount = await Product.countDocuments({ category: id });
-
       if (productsCount > 0) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: `No se puede eliminar. Hay ${productsCount} productos usando esta categoría`
         });
       }
-
       // Verificar si hay subcategorías usando esta categoría
       const subcategoriesCount = await Subcategory.countDocuments({ category: id });
-
       if (subcategoriesCount > 0) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: `No se puede eliminar. Hay ${subcategoriesCount} subcategorías usando esta categoría`
         });
       }
-
       const category = await Category.findByIdAndDelete(id);
-
       if (!category) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Categoría no encontrada'
         });
       }
-
       res.json({
         success: true,
         message: 'Categoría eliminada exitosamente'
@@ -548,29 +474,24 @@ export default {
       });
     }
   },
-
   // ===== SUBCATEGORIES =====
-  async getSubcategories(req: Request, res: Response) {
+  async getSubcategories(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const page = parseInt(req.query['page'] as string) || 1;
+      const limit = parseInt(req.query['limit'] as string) || 10;
       const skip = (page - 1) * limit;
-      const search = req.query.search as string;
+      const search = req.query['search'] as string;
       const { categoryId } = req.query;
-      
       let filter: any = {};
-
       if (categoryId) {
         filter.category = categoryId;
       }
-
       if (search) {
         filter.$or = [
           { name: { $regex: search, $options: 'i' } },
           { description: { $regex: search, $options: 'i' } }
         ];
       }
-
       const total = await Subcategory.countDocuments(filter);
       const subcategories = await Subcategory.find(filter)
         .populate('category', 'name')
@@ -579,7 +500,6 @@ export default {
         .sort({ sortOrder: 1, name: 1 })
         .skip(skip)
         .limit(limit);
-
       res.json({
         success: true,
         data: subcategories,
@@ -598,12 +518,10 @@ export default {
       });
     }
   },
-
-  async createSubcategory(req: Request, res: Response) {
+  async createSubcategory(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { name, description, category, sortOrder } = req.body;
-      const userId = (req as any).user?.id;
-
+      const userId = req.user?.id;
       const subcategory = new Subcategory({
         name: name.toLowerCase(),
         description,
@@ -611,10 +529,8 @@ export default {
         sortOrder,
         createdBy: userId
       });
-
       await subcategory.save();
       await subcategory.populate('category', 'name');
-
       res.status(201).json({
         success: true,
         data: subcategory,
@@ -635,13 +551,11 @@ export default {
       }
     }
   },
-
-  async updateSubcategory(req: Request, res: Response) {
+  async updateSubcategory(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { name, description, category, sortOrder, isActive } = req.body;
-      const userId = (req as any).user?.id;
-
+      const userId = req.user?.id;
       const subcategory = await Subcategory.findByIdAndUpdate(
         id,
         {
@@ -654,14 +568,12 @@ export default {
         },
         { new: true, runValidators: true }
       ).populate('category', 'name');
-
       if (!subcategory) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Subcategoría no encontrada'
         });
       }
-
       res.json({
         success: true,
         data: subcategory,
@@ -682,31 +594,25 @@ export default {
       }
     }
   },
-
-  async deleteSubcategory(req: Request, res: Response) {
+  async deleteSubcategory(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-
       // Verificar si hay productos usando esta subcategoría
       const Product = require('../models/Product').default;
       const productsCount = await Product.countDocuments({ subcategory: id });
-
       if (productsCount > 0) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: `No se puede eliminar. Hay ${productsCount} productos usando esta subcategoría`
         });
       }
-
       const subcategory = await Subcategory.findByIdAndDelete(id);
-
       if (!subcategory) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Subcategoría no encontrada'
         });
       }
-
       res.json({
         success: true,
         message: 'Subcategoría eliminada exitosamente'

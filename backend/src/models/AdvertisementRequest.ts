@@ -2,8 +2,8 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IAdvertisementRequest extends Document {
   // Información del solicitante
-  storeManager: mongoose.Types.ObjectId;
-  store: mongoose.Types.ObjectId;
+  storeManager: mongoose.Schema.Types.ObjectId;
+  store: mongoose.Schema.Types.ObjectId;
   
   // Información de la campaña
   campaignName: string;
@@ -70,7 +70,7 @@ export interface IAdvertisementRequest extends Document {
   status: 'draft' | 'submitted' | 'under_review' | 'approved' | 'rejected' | 'active' | 'completed' | 'cancelled';
   adminNotes?: string;
   rejectionReason?: string;
-  approvedBy?: mongoose.Types.ObjectId;
+  approvedBy?: mongoose.Schema.Types.ObjectId;
   approvedAt?: Date;
   
   // Estimaciones y precios
@@ -80,7 +80,7 @@ export interface IAdvertisementRequest extends Document {
   actualCost: number;
   
   // Publicidad creada (si es aprobada)
-  createdAdvertisement?: mongoose.Types.ObjectId;
+  createdAdvertisement?: mongoose.Schema.Types.ObjectId;
   
   // Timestamps
   createdAt: Date;
@@ -348,7 +348,7 @@ advertisementRequestSchema.index({ 'schedule.startDate': 1, 'schedule.endDate': 
 advertisementRequestSchema.index({ createdAt: 1 });
 
 // Método para calcular estimaciones
-advertisementRequestSchema.methods.calculateEstimates = function(): {
+advertisementRequestSchema.methods['calculateEstimates'] = function(): {
   estimatedReach: number;
   estimatedClicks: number;
   estimatedCost: number;
@@ -357,9 +357,9 @@ advertisementRequestSchema.methods.calculateEstimates = function(): {
   const baseCPM = 5; // $5 por 1000 impresiones
   const baseCTR = 0.02; // 2% click-through rate
   
-  const estimatedImpressions = (this.budget.total * 1000) / baseCPM;
+  const estimatedImpressions = (this['budget'].total * 1000) / baseCPM;
   const estimatedClicks = estimatedImpressions * baseCTR;
-  const estimatedCost = this.budget.total;
+  const estimatedCost = this['budget'].total;
   
   return {
     estimatedReach: Math.round(estimatedImpressions),
@@ -369,9 +369,9 @@ advertisementRequestSchema.methods.calculateEstimates = function(): {
 };
 
 // Método para validar fechas
-advertisementRequestSchema.methods.validateSchedule = function(): boolean {
+advertisementRequestSchema.methods['validateSchedule'] = function(): boolean {
   const now = new Date();
-  return this.schedule.startDate > now && this.schedule.endDate > this.schedule.startDate;
+  return this['schedule'].startDate > now && this['schedule'].endDate > this['schedule'].startDate;
 };
 
 const AdvertisementRequest = mongoose.model<IAdvertisementRequest>('AdvertisementRequest', advertisementRequestSchema);

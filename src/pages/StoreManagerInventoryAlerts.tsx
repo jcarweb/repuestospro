@@ -84,7 +84,7 @@ const StoreManagerInventoryAlerts: React.FC = () => {
   const fetchUserStores = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('API_BASE_URL/stores/user-stores', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""""""""/api/stores/user-stores', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -111,7 +111,7 @@ const StoreManagerInventoryAlerts: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`API_BASE_URL/inventory-alerts/store/${selectedStore}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory-alerts/store/${selectedStore}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -130,7 +130,7 @@ const StoreManagerInventoryAlerts: React.FC = () => {
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`API_BASE_URL/inventory/store-manager/inventory?storeId=${selectedStore}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory/store-manager/inventory?storeId=${selectedStore}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -156,7 +156,7 @@ const StoreManagerInventoryAlerts: React.FC = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`API_BASE_URL/inventory-alerts/store/${selectedStore}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory-alerts/store/${selectedStore}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -193,7 +193,7 @@ const StoreManagerInventoryAlerts: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`API_BASE_URL/inventory-alerts/${editingAlert._id}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory-alerts/${editingAlert._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +220,7 @@ const StoreManagerInventoryAlerts: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`API_BASE_URL/inventory-alerts/${alertId}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory-alerts/${alertId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -241,7 +241,7 @@ const StoreManagerInventoryAlerts: React.FC = () => {
   const handleToggleAlert = async (alertId: string, isActive: boolean) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`API_BASE_URL/inventory-alerts/${alertId}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/inventory-alerts/${alertId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

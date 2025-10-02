@@ -3,7 +3,6 @@ import Transaction from '../models/Transaction';
 import Product from '../models/Product';
 import User from '../models/User';
 import mongoose from 'mongoose';
-
 export interface SalesReportFilters {
   storeId?: mongoose.Types.ObjectId;
   userId?: mongoose.Types.ObjectId;
@@ -16,7 +15,6 @@ export interface SalesReportFilters {
   customerId?: mongoose.Types.ObjectId;
   search?: string;
 }
-
 export interface SalesOverview {
   totalSales: number;
   totalOrders: number;
@@ -29,7 +27,6 @@ export interface SalesOverview {
   averageItemsPerOrder: number;
   totalItemsSold: number;
 }
-
 export interface SalesTrends {
   daily: Array<{
     date: string;
@@ -50,7 +47,6 @@ export interface SalesTrends {
     customers: number;
   }>;
 }
-
 export interface TopProducts {
   productId: mongoose.Types.ObjectId;
   productName: string;
@@ -61,7 +57,6 @@ export interface TopProducts {
   averagePrice: number;
   profitMargin: number;
 }
-
 export interface TopCategories {
   categoryId: mongoose.Types.ObjectId;
   categoryName: string;
@@ -70,7 +65,6 @@ export interface TopCategories {
   averageOrderValue: number;
   orderCount: number;
 }
-
 export interface CustomerAnalytics {
   topCustomers: Array<{
     customerId: mongoose.Types.ObjectId;
@@ -93,7 +87,6 @@ export interface CustomerAnalytics {
     repeatPurchaseRate: number;
   };
 }
-
 export interface PaymentAnalytics {
   paymentMethods: Array<{
     method: string;
@@ -107,7 +100,6 @@ export interface PaymentAnalytics {
     amount: number;
   }>;
 }
-
 export interface SalesReport {
   overview: SalesOverview;
   trends: SalesTrends;
@@ -121,7 +113,6 @@ export interface SalesReport {
     days: number;
   };
 }
-
 export class SalesReportService {
   /**
    * Generar reporte completo de ventas
@@ -131,7 +122,6 @@ export class SalesReportService {
     const dateFrom = filters.dateFrom || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 días por defecto
     const dateTo = filters.dateTo || new Date();
     const days = Math.ceil((dateTo.getTime() - dateFrom.getTime()) / (1000 * 60 * 60 * 24));
-
     const [
       overview,
       trends,
@@ -147,7 +137,6 @@ export class SalesReportService {
       this.getCustomerAnalytics(query, dateFrom, dateTo),
       this.getPaymentAnalytics(query, dateFrom, dateTo)
     ]);
-
     return {
       overview,
       trends,
@@ -158,14 +147,12 @@ export class SalesReportService {
       period: { from: dateFrom, to: dateTo, days }
     };
   }
-
   /**
    * Obtener vista general de ventas
    */
   private static async getSalesOverview(query: any, dateFrom: Date, dateTo: Date): Promise<SalesOverview> {
     const previousPeriodFrom = new Date(dateFrom.getTime() - (dateTo.getTime() - dateFrom.getTime()));
     const previousPeriodTo = new Date(dateFrom.getTime());
-
     const [
       currentStats,
       previousStats,
@@ -197,12 +184,12 @@ export class SalesReportService {
         }
       ]),
       Order.distinct('userId', { ...query, createdAt: { $gte: dateFrom, $lte: dateTo } }),
-      Order.distinct('userId', { 
-        ...query, 
+      Order.distinct('userId', {
+        ...query,
         createdAt: { $gte: dateFrom, $lte: dateTo },
-        userId: { $nin: await Order.distinct('userId', { 
-          ...query, 
-          createdAt: { $lt: dateFrom } 
+        userId: { $nin: await Order.distinct('userId', {
+          ...query,
+          createdAt: { $lt: dateFrom }
         })}
       }),
       Order.aggregate([
@@ -237,18 +224,15 @@ export class SalesReportService {
         }
       ])
     ]);
-
     // Manejar casos donde no hay datos
     const current = currentStats[0] || { totalSales: 0, totalOrders: 0, totalItems: 0 };
     const previous = previousStats[0] || { totalSales: 0, totalOrders: 0 };
     const totalItems = totalItemsSold[0]?.totalItems || 0;
     const refund = refundStats[0] || { refundAmount: 0, refundCount: 0 };
-
     const averageOrderValue = current.totalOrders > 0 ? current.totalSales / current.totalOrders : 0;
     const conversionRate = totalCustomers.length > 0 ? (current.totalOrders / totalCustomers.length) * 100 : 0;
     const refundRate = current.totalOrders > 0 ? (refund.refundCount / current.totalOrders) * 100 : 0;
     const averageItemsPerOrder = current.totalOrders > 0 ? totalItems / current.totalOrders : 0;
-
     return {
       totalSales: current.totalSales,
       totalOrders: current.totalOrders,
@@ -262,7 +246,6 @@ export class SalesReportService {
       totalItemsSold: totalItems
     };
   }
-
   /**
    * Obtener tendencias de ventas
    */
@@ -329,10 +312,8 @@ export class SalesReportService {
         { $sort: { month: 1 } }
       ])
     ]);
-
     return { daily, weekly, monthly };
   }
-
   /**
    * Obtener productos más vendidos
    */
@@ -353,16 +334,13 @@ export class SalesReportService {
       { $sort: { quantitySold: -1 } },
       { $limit: 20 }
     ]);
-
     // Obtener información de categorías y márgenes de ganancia
     const productIds = topProducts.map(p => p._id);
     const products = await Product.find({ _id: { $in: productIds } }).select('category costPrice');
-
     return topProducts.map(product => {
       const productInfo = products.find(p => p._id.toString() === product._id.toString());
-      const costPrice = productInfo?.costPrice || 0;
+      const costPrice = (productInfo as any)?.costPrice || 0;
       const profitMargin = product.averagePrice > 0 ? ((product.averagePrice - costPrice) / product.averagePrice) * 100 : 0;
-
       return {
         productId: product._id,
         productName: product.productName,
@@ -375,7 +353,6 @@ export class SalesReportService {
       };
     });
   }
-
   /**
    * Obtener categorías más vendidas
    */
@@ -412,7 +389,6 @@ export class SalesReportService {
       { $sort: { totalRevenue: -1 } },
       { $limit: 10 }
     ]);
-
     return topCategories.map(category => ({
       categoryId: category.categoryId,
       categoryName: category.categoryName,
@@ -422,7 +398,6 @@ export class SalesReportService {
       orderCount: category.orderCount
     }));
   }
-
   /**
    * Obtener análisis de clientes
    */
@@ -444,11 +419,9 @@ export class SalesReportService {
       this.getCustomerSegments(query, dateFrom, dateTo),
       this.getCustomerRetention(query, dateFrom, dateTo)
     ]);
-
     // Obtener información de usuarios
     const userIds = topCustomers.map(c => c._id);
     const users = await User.find({ _id: { $in: userIds } }).select('name email');
-
     const topCustomersWithInfo = topCustomers.map(customer => {
       const user = users.find(u => u._id.toString() === customer._id.toString());
       return {
@@ -461,14 +434,12 @@ export class SalesReportService {
         lastOrderDate: customer.lastOrderDate
       };
     });
-
     return {
       topCustomers: topCustomersWithInfo,
       customerSegments,
       customerRetention: retentionData
     };
   }
-
   /**
    * Obtener segmentos de clientes
    */
@@ -485,14 +456,12 @@ export class SalesReportService {
         }
       }
     ]);
-
     const segments = {
       new: 0,
       returning: 0,
       loyal: 0,
       inactive: 0
     };
-
     customerStats.forEach(customer => {
       if (customer.orderCount === 1) {
         segments.new++;
@@ -502,10 +471,8 @@ export class SalesReportService {
         segments.loyal++;
       }
     });
-
     return segments;
   }
-
   /**
    * Obtener métricas de retención de clientes
    */
@@ -523,16 +490,13 @@ export class SalesReportService {
       { $match: { orderCount: { $gt: 1 } } },
       { $count: 'count' }
     ]);
-
     const retentionRate = totalCustomers.length > 0 ? (repeatCustomers[0]?.count || 0) / totalCustomers.length * 100 : 0;
-
     return {
       rate: retentionRate,
       averageLifetime: 0, // Requeriría análisis más complejo
       repeatPurchaseRate: retentionRate
     };
   }
-
   /**
    * Obtener análisis de métodos de pago
    */
@@ -577,56 +541,44 @@ export class SalesReportService {
         { $sort: { date: 1 } }
       ])
     ]);
-
     const totalAmount = paymentMethods.reduce((sum, method) => sum + method.totalAmount, 0);
-
     const paymentMethodsWithPercentage = paymentMethods.map(method => ({
       ...method,
       percentage: totalAmount > 0 ? (method.totalAmount / totalAmount) * 100 : 0
     }));
-
     return {
       paymentMethods: paymentMethodsWithPercentage,
       paymentTrends
     };
   }
-
   /**
    * Construir query base
    */
   private static async buildQuery(filters: SalesReportFilters): Promise<any> {
     const query: any = {};
-
     if (filters.storeId) {
       query.storeId = filters.storeId;
     }
-
     if (filters.userId) {
       query.userId = filters.userId;
     }
-
     if (filters.categoryId) {
       query['items.productId'] = {
         $in: await Product.find({ category: filters.categoryId }).distinct('_id')
       };
     }
-
     if (filters.productId) {
       query['items.productId'] = filters.productId;
     }
-
     if (filters.paymentMethod) {
       query.paymentMethod = filters.paymentMethod;
     }
-
     if (filters.orderStatus && filters.orderStatus.length > 0) {
       query.orderStatus = { $in: filters.orderStatus };
     }
-
     if (filters.customerId) {
       query.userId = filters.customerId;
     }
-
     // Filtro de búsqueda por texto
     if (filters.search) {
       const searchRegex = new RegExp(filters.search, 'i');
@@ -637,30 +589,23 @@ export class SalesReportService {
         { 'customerInfo.email': searchRegex }
       ];
     }
-
     return query;
   }
-
   /**
    * Exportar reporte a CSV
    */
   static async exportSalesReport(filters: SalesReportFilters, format: 'csv' | 'json' = 'csv'): Promise<string> {
     const report = await this.generateSalesReport(filters);
-    
     if (format === 'json') {
       return JSON.stringify(report, null, 2);
     }
-
     // Generar CSV
     let csv = 'Fecha,Total Ventas,Total Órdenes,Clientes Únicos,Valor Promedio\n';
-    
     report.trends.daily.forEach(day => {
       csv += `${day.date},${day.sales},${day.orders},${day.customers},${day.orders > 0 ? day.sales / day.orders : 0}\n`;
     });
-
     return csv;
   }
-
   /**
    * Generar datos de prueba para el reporte
    */
@@ -672,44 +617,37 @@ export class SalesReportService {
         console.log('Ya existen datos en la base de datos');
         return;
       }
-
       console.log('Generando datos de prueba para reportes de ventas...');
-
       // Obtener algunos usuarios y productos existentes
       const users = await User.find().limit(5);
       const products = await Product.find().limit(10);
       const stores = await mongoose.model('Store').find().limit(3);
-
       if (users.length === 0 || products.length === 0 || stores.length === 0) {
         console.log('No hay suficientes datos base para generar órdenes de prueba');
         return;
       }
-
       const testOrders = [];
       const now = new Date();
       const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
       // Generar 50 órdenes de prueba en los últimos 30 días
       for (let i = 0; i < 50; i++) {
         const randomDate = new Date(thirtyDaysAgo.getTime() + Math.random() * (now.getTime() - thirtyDaysAgo.getTime()));
         const randomUser = users[Math.floor(Math.random() * users.length)];
         const randomStore = stores[Math.floor(Math.random() * stores.length)];
         const randomProduct = products[Math.floor(Math.random() * products.length)];
-        
         const quantity = Math.floor(Math.random() * 3) + 1;
         const unitPrice = Math.random() * 100 + 10;
         const totalPrice = quantity * unitPrice;
         const taxAmount = totalPrice * 0.12;
         const totalAmount = totalPrice + taxAmount;
-
         const order = {
           orderNumber: `ORD-${Date.now()}-${i}`,
           transactionId: new mongoose.Types.ObjectId(),
-          userId: randomUser._id,
+          userId: randomUser?._id,
           storeId: randomStore._id,
           customerInfo: {
-            name: randomUser.name || 'Cliente Test',
-            email: randomUser.email || 'test@example.com',
+            name: randomUser?.name || 'Cliente Test',
+            email: randomUser?.email || 'test@example.com',
             phone: '+1234567890',
             address: {
               street: 'Calle Test 123',
@@ -720,9 +658,9 @@ export class SalesReportService {
             }
           },
           items: [{
-            productId: randomProduct._id,
-            productName: randomProduct.name || 'Producto Test',
-            sku: randomProduct.sku || 'SKU-TEST',
+            productId: randomProduct?._id,
+            productName: randomProduct?.name || 'Producto Test',
+            sku: randomProduct?.sku || 'SKU-TEST',
             quantity,
             unitPrice,
             totalPrice
@@ -753,58 +691,46 @@ export class SalesReportService {
           createdAt: randomDate,
           updatedAt: randomDate
         };
-
         testOrders.push(order);
       }
-
       await Order.insertMany(testOrders);
       console.log(`Generados ${testOrders.length} órdenes de prueba`);
     } catch (error) {
       console.error('Error generando datos de prueba:', error);
     }
   }
-
   /**
    * Generar datos de prueba específicos para gestores de tienda
    */
   static async generateStoreManagerTestData(userEmail: string): Promise<void> {
     try {
-      console.log(`Generando datos de prueba para gestor de tienda: ${userEmail}`);
-
       // Buscar el usuario gestor de tienda
       const user = await User.findOne({ email: userEmail, role: 'store_manager' });
       if (!user) {
         console.log('Usuario gestor de tienda no encontrado');
         return;
       }
-
-      console.log(`Usuario encontrado: ${user.name} (${user.email})`);
-
+      // Información de email no loggeada por seguridad`);
       // Obtener las tiendas asociadas al usuario
-      const userStores = await mongoose.model('Store').find({ 
+      const userStores = await mongoose.model('Store').find({
         $or: [
           { managers: user._id },
           { _id: { $in: user.stores || [] } }
         ]
       });
-
       if (userStores.length === 0) {
         console.log('No se encontraron tiendas asociadas al usuario');
         return;
       }
-
-      console.log(`Tiendas asociadas: ${userStores.length}`);
       userStores.forEach(store => {
         console.log(`  - ${store.name} (${store.city})`);
       });
-
       // Obtener productos existentes
       const products = await Product.find().limit(20);
       if (products.length === 0) {
         console.log('No hay productos disponibles para generar órdenes');
         return;
       }
-
       // Obtener algunos usuarios clientes
       const customers = await User.find({ role: 'client' }).limit(10);
       if (customers.length === 0) {
@@ -825,57 +751,49 @@ export class SalesReportService {
         await User.insertMany(testCustomers);
         customers.push(...testCustomers);
       }
-
       const testOrders = [];
       const now = new Date();
       const twoMonthsAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000); // 60 días = 2 meses
-
       // Generar más órdenes para mejor visualización de gráficos (80 órdenes en 2 meses)
       for (let i = 0; i < 80; i++) {
         const randomDate = new Date(twoMonthsAgo.getTime() + Math.random() * (now.getTime() - twoMonthsAgo.getTime()));
         const randomStore = userStores[Math.floor(Math.random() * userStores.length)];
         const randomCustomer = customers[Math.floor(Math.random() * customers.length)];
-        
         // Generar 1-4 productos por orden
         const numItems = Math.floor(Math.random() * 4) + 1;
         const items = [];
         let subtotal = 0;
-
         for (let j = 0; j < numItems; j++) {
           const randomProduct = products[Math.floor(Math.random() * products.length)];
           const quantity = Math.floor(Math.random() * 5) + 1; // 1-5 unidades
           const unitPrice = Math.random() * 300 + 25; // Precios entre $25 y $325
           const totalPrice = quantity * unitPrice;
           subtotal += totalPrice;
-
           items.push({
-            productId: randomProduct._id,
-            productName: randomProduct.name || 'Producto Test',
-            sku: randomProduct.sku || 'SKU-TEST',
+            productId: randomProduct?._id,
+            productName: randomProduct?.name || 'Producto Test',
+            sku: randomProduct?.sku || 'SKU-TEST',
             quantity,
             unitPrice,
             totalPrice
           });
         }
-
         const taxAmount = subtotal * 0.12;
         const shippingCost = subtotal > 150 ? 0 : 8; // Envío gratis sobre $150
         const discountAmount = Math.random() > 0.75 ? subtotal * 0.15 : 0; // 15% de descuento ocasional
         const totalAmount = subtotal + taxAmount + shippingCost - discountAmount;
-
         const orderStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
         const paymentStatuses = ['pending', 'paid', 'failed'];
         const fulfillmentStatuses = ['pending', 'processing', 'shipped', 'delivered'];
         const paymentMethods = ['credit_card', 'debit_card', 'cash', 'transfer'];
-
         const order = {
           orderNumber: `ORD-${randomStore.name.substring(0, 3).toUpperCase()}-${Date.now()}-${i}`,
           transactionId: new mongoose.Types.ObjectId(),
-          userId: randomCustomer._id,
+          userId: randomCustomer?._id,
           storeId: randomStore._id,
           customerInfo: {
-            name: randomCustomer.name || 'Cliente Test',
-            email: randomCustomer.email || 'test@example.com',
+            name: randomCustomer?.name || 'Cliente Test',
+            email: randomCustomer?.email || 'test@example.com',
             phone: `+58${Math.floor(Math.random() * 900000000) + 100000000}`,
             address: {
               street: `Calle ${Math.floor(Math.random() * 100) + 1} #${Math.floor(Math.random() * 50) + 1}`,
@@ -912,20 +830,15 @@ export class SalesReportService {
           createdAt: randomDate,
           updatedAt: randomDate
         };
-
         testOrders.push(order);
       }
-
       await Order.insertMany(testOrders);
-      console.log(`✅ Generados ${testOrders.length} órdenes de prueba para las tiendas del gestor ${userEmail}`);
       console.log(`📊 Resumen:`);
-      console.log(`   - Tiendas: ${userStores.length}`);
       console.log(`   - Órdenes generadas: ${testOrders.length}`);
       console.log(`   - Período: ${twoMonthsAgo.toLocaleDateString()} - ${now.toLocaleDateString()}`);
       console.log(`   - Duración: 2 meses (60 días)`);
-      
       // Mostrar estadísticas por tienda
-      const statsByStore = {};
+      const statsByStore: Record<string, { orders: number; total: number }> = {};
       testOrders.forEach(order => {
         const storeName = userStores.find(s => s._id.toString() === order.storeId.toString())?.name || 'Tienda Desconocida';
         if (!statsByStore[storeName]) {
@@ -934,13 +847,11 @@ export class SalesReportService {
         statsByStore[storeName].orders++;
         statsByStore[storeName].total += order.totalAmount;
       });
-
       Object.entries(statsByStore).forEach(([storeName, stats]) => {
         console.log(`   - ${storeName}: ${stats.orders} órdenes, $${stats.total.toFixed(2)}`);
       });
-
       // Mostrar distribución temporal
-      const weeklyStats = {};
+      const weeklyStats: Record<string, { orders: number; total: number }> = {};
       testOrders.forEach(order => {
         const week = new Date(order.createdAt).toISOString().slice(0, 10).split('-').slice(0, 2).join('-W');
         if (!weeklyStats[week]) {
@@ -949,12 +860,10 @@ export class SalesReportService {
         weeklyStats[week].orders++;
         weeklyStats[week].total += order.totalAmount;
       });
-
       console.log(`📈 Distribución semanal:`);
       Object.entries(weeklyStats).sort().forEach(([week, stats]) => {
         console.log(`   - Semana ${week}: ${stats.orders} órdenes, $${stats.total.toFixed(2)}`);
       });
-
     } catch (error) {
       console.error('Error generando datos de prueba para gestor de tienda:', error);
       throw error;

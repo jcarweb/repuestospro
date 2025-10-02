@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Plus, Search, Filter, Edit, Trash2, Eye, Upload, Download, MoreVertical, RotateCcw } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import ImageUpload from '../components/ImageUpload';
 import ProductForm from '../components/ProductForm';
 import ImportCSVModal from '../components/ImportCSVModal';
+import StoreManagerActionButtons from '../components/StoreManagerActionButtons';
 
 interface Product {
   _id: string;
@@ -43,6 +45,7 @@ interface ProductStats {
 const StoreManagerProducts: React.FC = () => {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   // Estados principales
   const [products, setProducts] = useState<Product[]>([]);
@@ -172,6 +175,16 @@ const StoreManagerProducts: React.FC = () => {
     }
     loadStats();
   }, [activeTab, currentPage, searchTerm, selectedCategory, selectedStatus, selectedStore, sortBy, sortOrder]);
+
+  // Detectar acción desde URL
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'create') {
+      setShowCreateModal(true);
+      // Limpiar el parámetro de la URL
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
 
   // Cargar productos eliminados cuando se cambia a la pestaña
   useEffect(() => {
@@ -403,22 +416,15 @@ const StoreManagerProducts: React.FC = () => {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold text-gray-900">Gestión de Productos</h1>
           {activeTab === 'products' && (
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setShowImportModal(true)}
-                className="flex items-center px-4 py-2 bg-racing-500 text-white rounded-lg hover:bg-racing-600"
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Importar CSV
-              </button>
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="flex items-center px-4 py-2 bg-racing-500 text-white rounded-lg hover:bg-racing-600"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Crear Producto
-              </button>
-            </div>
+            <StoreManagerActionButtons 
+              context="products"
+              onCreate={() => setShowCreateModal(true)}
+              onImport={() => setShowImportModal(true)}
+              onRefresh={() => {
+                loadProducts();
+                loadStats();
+              }}
+            />
           )}
         </div>
 

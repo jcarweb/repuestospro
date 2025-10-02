@@ -1,6 +1,21 @@
-# PiezasYA - Ecommerce Multiplataforma
+# PiezasYA v1.4.0 - Ecommerce Multiplataforma
 
 Un ecommerce completo para repuestos de vehículos (autos, motos y camiones) construido con **React** y **programación reactiva** en el backend.
+
+**Versión**: 1.4.0  
+**Desarrollador**: Juan Hernandez  
+**Empresa**: LDJ Digital Solutions  
+**Equipo de Desarrollo**: PiezasYA  
+**Última actualización**: Octubre 2025
+
+## 🔒 Seguridad
+
+**IMPORTANTE**: Este proyecto implementa estrictas medidas de seguridad. Por favor, lee [SECURITY_GUIDELINES.md](./SECURITY_GUIDELINES.md) antes de comenzar.
+
+- ✅ Variables de entorno protegidas
+- ✅ Credenciales nunca expuestas en código
+- ✅ Documentación sin información sensible
+- ✅ Scripts de limpieza automática
 
 ## 🚀 Características Principales
 
@@ -325,9 +340,12 @@ Este proyecto está bajo la Licencia MIT.
 
 ## 📞 Contacto
 
+- **Desarrollador**: Juan Hernandez
+- **Empresa**: LDJ Digital Solutions
 - **Email**: jcarweb.designer@gmail.com
 - **Teléfono**: +58 (412) 012-3044
 - **Dirección**: Caracas - Venezuela
+- **Equipo**: PiezasYA Development Team
 
 ## 🙏 Agradecimientos
 
@@ -335,9 +353,14 @@ Este proyecto está bajo la Licencia MIT.
 - **Tailwind CSS** - Por el sistema de diseño
 - **MongoDB Atlas** - Por la base de datos en la nube
 - **RxJS Team** - Por la programación reactiva
+- **n8n Community** - Por las herramientas de automatización
+- **OpenAI** - Por las capacidades de IA y procesamiento de lenguaje natural
 
 ---
 
 Desarrollado con ❤️ para la comunidad automotriz
 
-**PiezasYA** - Tu tienda de confianza para repuestos de vehículos
+**PiezasYA v1.4.0** - Tu tienda de confianza para repuestos de vehículos  
+**Desarrollado por**: Juan Hernandez  
+**Empresa**: LDJ Digital Solutions  
+**Equipo de Desarrollo**: PiezasYA

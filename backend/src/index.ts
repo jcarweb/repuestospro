@@ -20,7 +20,6 @@ import { createSalesReportRoutes } from './routes/salesReportRoutes';
 import deliveryRoutes from './routes/deliveryRoutes';
 import riderRoutes from './routes/riderRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
-
 // Importar rutas
 import productRoutes from './routes/productRoutes';
 import authRoutes from './routes/authRoutes';
@@ -49,10 +48,17 @@ import reviewRoutes from './routes/reviewRoutes';
 import cryptoAuthRoutes from './routes/cryptoAuthRoutes';
 import storePhotoRoutes from './routes/storePhotoRoutes';
 import masterRoutes from './routes/masterRoutes';
+import quotationRoutes from './routes/quotationRoutes';
+import quotationConfigRoutes from './routes/quotationConfigRoutes';
+import advancedSearchRoutes from './routes/advancedSearchRoutes';
+import userManagementRoutes from './routes/userManagementRoutes';
+import userManagementTestRoutes from './routes/userManagementTestRoutes';
+import diagnosticRoutes from './routes/diagnosticRoutes';
+// import whatsappTestRoutes from './routes/whatsappTestRoutes';
 import { enrichmentWorker } from './services/enrichmentWorker';
-
+import autoUpdateService from './services/autoUpdateService';
+// import { initializeWhatsAppForVenezuela } from './scripts/initWhatsApp';
 const app = express();
-
 // Configurar rate limiting
 const limiter = rateLimit({
   windowMs: config.RATE_LIMIT_WINDOW_MS,
@@ -62,7 +68,6 @@ const limiter = rateLimit({
     message: 'Demasiadas solicitudes desde esta IP, intenta de nuevo más tarde.'
   }
 });
-
 // Rate limiter específico para rutas de perfil (más permisivo)
 const profileLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
@@ -72,7 +77,6 @@ const profileLimiter = rateLimit({
     message: 'Demasiadas solicitudes de perfil desde esta IP, intenta de nuevo más tarde.'
   }
 });
-
 // Configurar sesiones para Passport
 app.use(session({
   secret: config.JWT_SECRET,
@@ -83,14 +87,11 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));
-
 // Inicializar Passport
 app.use(passport.initialize());
 app.use(passport.session());
-
 // Middleware de seguridad
 app.use(helmet());
-
 // Configurar CORS
 app.use(cors({
   origin: true, // Permitir todos los orígenes en desarrollo
@@ -98,10 +99,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
-
 // Middleware de logging
 app.use(morgan('combined'));
-
 // Configurar archivos estáticos para uploads (ANTES del rate limiter)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
   setHeaders: (res, filePath) => {
@@ -117,14 +116,11 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
     }
   }
 }));
-
 // Aplicar rate limiting (DESPUÉS de archivos estáticos)
 app.use(limiter);
-
 // Middleware para parsear JSON
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
 // Ruta raíz
 app.get('/', (req, res) => {
   res.json({
@@ -134,7 +130,6 @@ app.get('/', (req, res) => {
     environment: config.NODE_ENV
   });
 });
-
 // Ruta de salud
 app.get('/health', (req, res) => {
   res.json({
@@ -144,7 +139,6 @@ app.get('/health', (req, res) => {
     uptime: process.uptime()
   });
 });
-
 // Ruta de salud para la API
 app.get('/api/health', (req, res) => {
   res.json({
@@ -156,13 +150,11 @@ app.get('/api/health', (req, res) => {
     version: '1.0.0'
   });
 });
-
 // Ruta temporal para verificar y crear tipos de vehículos sin autenticación
 app.get('/api/debug/vehicle-types', async (req, res) => {
   try {
     const VehicleType = require('./models/VehicleType').default;
     const vehicleTypes = await VehicleType.find().sort({ name: 1 });
-    
     res.json({
       success: true,
       data: vehicleTypes,
@@ -176,7 +168,6 @@ app.get('/api/debug/vehicle-types', async (req, res) => {
     });
   }
 });
-
 // Ruta temporal para obtener tiendas sin autenticación
 app.get('/api/debug/stores', async (req, res) => {
   try {
@@ -184,7 +175,6 @@ app.get('/api/debug/stores', async (req, res) => {
     const stores = await Store.find({ isActive: true })
       .select('name city state coordinates')
       .sort({ name: 1 });
-    
     res.json({
       success: true,
       data: stores,
@@ -198,26 +188,22 @@ app.get('/api/debug/stores', async (req, res) => {
     });
   }
 });
-
 // Ruta temporal para obtener usuarios sin autenticación
 app.get('/api/debug/users', async (req, res) => {
   try {
     const User = require('./models/User').default;
-    
     // Obtener parámetros de filtro
-    const { 
-      page = 1, 
-      limit = 20, 
-      search, 
-      role, 
-      status, 
-      sortBy = 'name', 
-      sortOrder = 'asc' 
+    const {
+      page = 1,
+      limit = 20,
+      search,
+      role,
+      status,
+      sortBy = 'name',
+      sortOrder = 'asc'
     } = req.query;
-    
     // Construir filtros
     const filters: any = {};
-    
     if (search) {
       filters.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -225,11 +211,9 @@ app.get('/api/debug/users', async (req, res) => {
         { phone: { $regex: search, $options: 'i' } }
       ];
     }
-    
     if (role && role !== 'all') {
       filters.role = role;
     }
-    
     if (status && status !== 'all') {
       if (status === 'active') {
         filters.isActive = true;
@@ -237,7 +221,6 @@ app.get('/api/debug/users', async (req, res) => {
         filters.isActive = false;
       }
     }
-    
     // Construir ordenamiento
     const sortOptions: any = {};
     if (sortBy === 'name') {
@@ -249,23 +232,19 @@ app.get('/api/debug/users', async (req, res) => {
     } else if (sortBy === 'lastLogin') {
       sortOptions.lastLogin = sortOrder === 'desc' ? -1 : 1;
     }
-    
     // Calcular paginación
     const pageNum = parseInt(page as string);
     const limitNum = parseInt(limit as string);
     const skip = (pageNum - 1) * limitNum;
-    
     // Ejecutar consulta
     const users = await User.find(filters)
       .select('name email phone role isActive isEmailVerified createdAt lastLogin')
       .sort(sortOptions)
       .skip(skip)
       .limit(limitNum);
-    
     // Contar total para paginación
     const total = await User.countDocuments(filters);
     const totalPages = Math.ceil(total / limitNum);
-    
     res.json({
       success: true,
       data: {
@@ -289,13 +268,11 @@ app.get('/api/debug/users', async (req, res) => {
     });
   }
 });
-
 // Ruta de prueba de base de datos
 app.get('/api/db-status', async (req, res) => {
   try {
     const dbService = DatabaseService.getInstance();
     const healthCheck = await dbService.healthCheck();
-    
     res.json({
       success: true,
       connected: dbService.isConnectedToDatabase(),
@@ -310,9 +287,6 @@ app.get('/api/db-status', async (req, res) => {
     });
   }
 });
-
-
-
 // Rutas de la API
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
@@ -337,7 +311,6 @@ app.get('/api/profile/admin', async (req, res) => {
     // Buscar usuario admin por defecto o crear uno si no existe
     const User = require('./models/User').default;
     let user = await User.findOne({ role: 'admin' });
-    
     if (!user) {
       // Crear usuario admin por defecto
       user = new User({
@@ -351,9 +324,7 @@ app.get('/api/profile/admin', async (req, res) => {
         language: 'es'
       });
       await user.save();
-      console.log('✅ Usuario admin creado por defecto');
     }
-    
     res.json({
       data: {
         _id: user._id,
@@ -391,7 +362,6 @@ app.get('/api/profile/admin', async (req, res) => {
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
-
 app.use('/api/profile', profileLimiter, profileRoutes); // Rate limiter específico para perfil
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/client/notifications', clientNotificationRoutes);
@@ -410,11 +380,16 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/crypto-auth', cryptoAuthRoutes);
 app.use('/api/store-photos', storePhotoRoutes);
 app.use('/api/masters', masterRoutes);
-
+app.use('/api/quotations', quotationRoutes);
+app.use('/api/quotation-config', quotationConfigRoutes);
+app.use('/api/advanced-search', advancedSearchRoutes);
+app.use('/api/admin/users', userManagementRoutes);
+app.use('/api/test/users', userManagementTestRoutes);
+app.use('/api/diagnostic', diagnosticRoutes);
+// app.use('/api/whatsapp', whatsappTestRoutes);
 // Variables globales para chat
 let chatService: ChatService;
 let chatController: ChatController;
-
 // Middleware para manejar rutas no encontradas
 app.use('*', (req, res) => {
   res.status(404).json({
@@ -422,37 +397,31 @@ app.use('*', (req, res) => {
     message: 'Ruta no encontrada'
   });
 });
-
 // Middleware para manejar errores
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error del servidor:', error);
-  
   res.status(500).json({
     success: false,
     message: 'Error interno del servidor',
     error: config.NODE_ENV === 'development' ? error.message : 'Error interno'
   });
 });
-
 // Función para verificar si un puerto está disponible
 const isPortAvailable = (port: number): Promise<boolean> => {
   return new Promise((resolve) => {
     const net = require('net');
     const server = net.createServer();
-    
     server.listen(port, () => {
       server.once('close', () => {
         resolve(true);
       });
       server.close();
     });
-    
     server.on('error', () => {
       resolve(false);
     });
   });
 };
-
 // Función para encontrar un puerto disponible
 const findAvailablePort = async (startPort: number): Promise<number> => {
   let port = startPort;
@@ -464,91 +433,82 @@ const findAvailablePort = async (startPort: number): Promise<number> => {
   }
   return port;
 };
-
 // Función para iniciar el servidor
 const startServer = async () => {
   try {
     // Verificar si el puerto configurado está disponible
     const availablePort = await findAvailablePort(Number(config.PORT));
-    
     // Crear servidor HTTP
     const server = createServer(app);
-    
     // Inicializar servicio de chat con WebSocket
     chatService = new ChatService(server);
     chatController = new ChatController(chatService);
-    
     // Agregar rutas de chat
     app.use('/api/chat', createChatRoutes(chatController));
-    
     server.listen(availablePort, '0.0.0.0', () => {
       console.log(`🚀 Servidor iniciado en puerto ${availablePort}`);
       console.log(`📊 Ambiente: ${config.NODE_ENV}`);
       console.log(`🔗 URL: http://localhost:${availablePort}`);
       console.log(`🌐 Red: http://192.168.31.122:${availablePort}`);
       console.log(`💬 WebSocket Chat habilitado`);
-      console.log('✅ Server listening');
-      
       // Si el puerto cambió, mostrar advertencia
       if (availablePort !== Number(config.PORT)) {
-        console.log(`⚠️  Puerto ${config.PORT} estaba ocupado, usando puerto ${availablePort}`);
       }
     });
-
     return server;
   } catch (error) {
     console.error('❌ Error iniciando servidor:', error);
     throw error;
   }
 };
-
 // Función para inicializar la aplicación con base de datos
 const initializeApp = async () => {
   try {
     console.log('🚀 Iniciando aplicación con base de datos...');
-    
     // Conectar a la base de datos
     const dbService = DatabaseService.getInstance();
     await dbService.connectToDatabase();
-    
     // Iniciar servidor
     const server = await startServer();
-    
     // Iniciar worker de enriquecimiento
     await enrichmentWorker.startWorker();
-    console.log('🔍 Worker de enriquecimiento iniciado');
-
+    
+    // Iniciar actualización automática de tasas de cambio
+    console.log('💱 Iniciando actualización automática de tasas de cambio...');
+    autoUpdateService.startAutoUpdate();
+    
+    // Inicializar WhatsApp para Venezuela (COMENTADO TEMPORALMENTE)
+    // console.log('🇻🇪 Inicializando WhatsApp para Venezuela...');
+    // try {
+    //   await initializeWhatsAppForVenezuela();
+    // } catch (error) {
+    //   console.log('⚠️ WhatsApp no se pudo inicializar, pero el sistema funcionará con email');
+    //   console.log('💡 Para configurar WhatsApp, revisa la documentación en WHATSAPP_SETUP.md');
+    // }
+    console.log('📧 WhatsApp deshabilitado temporalmente - Solo email disponible');
     // Manejo de señales de terminación
     const gracefulShutdown = async (signal: string) => {
       console.log(`\n🛑 Recibida señal ${signal}. Cerrando aplicación...`);
-      
       server.close(async () => {
-        console.log('✅ Servidor HTTP cerrado');
-        
         try {
           // Detener worker de enriquecimiento
           enrichmentWorker.stopWorker();
-          console.log('✅ Worker de enriquecimiento detenido');
-          
+          // Detener actualización automática
+          autoUpdateService.stopAutoUpdate();
           await dbService.disconnectFromDatabase();
-          console.log('✅ Base de datos desconectada');
         } catch (error) {
           console.error('❌ Error desconectando base de datos:', error);
         }
-        
         process.exit(0);
       });
     };
-
     // Escuchar señales de terminación
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-    
   } catch (error) {
     console.error('❌ Error inicializando la aplicación:', error);
     process.exit(1);
   }
 };
-
 // Inicializar la aplicación
-initializeApp(); 
+initializeApp();

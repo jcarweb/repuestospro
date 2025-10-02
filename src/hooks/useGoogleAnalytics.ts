@@ -38,7 +38,7 @@ export const useGoogleAnalytics = () => {
     // TODO: Implementar carga de configuración cuando sea necesario
     // const loadAnalyticsConfig = async () => {
     //   try {
-    //     const response = await fetch('API_BASE_URL/analytics/custom-config');
+    //     const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""/api/analytics/custom-config');
     //     const result = await response.json();
     //     if (result.success && result.data) {
     //       setConfig(result.data);

@@ -148,7 +148,7 @@ const PromotionSchema = new Schema<IPromotion>({
     type: String,
     default: '00:00',
     validate: {
-      validator: function(value: string) {
+      validator: function(value: any) {
         if (!value) return true;
         const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
         return timeRegex.test(value);
@@ -170,7 +170,7 @@ const PromotionSchema = new Schema<IPromotion>({
     type: String,
     default: '23:59',
     validate: {
-      validator: function(value: string) {
+      validator: function(value: any) {
         if (!value) return true;
         const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
         return timeRegex.test(value);
@@ -227,50 +227,50 @@ PromotionSchema.index({ store: 1 }); // Índice para consultas por tienda
 PromotionSchema.index({ store: 1, isActive: 1 }); // Índice compuesto para tienda y estado
 
 // Método para verificar si la promoción está vigente
-PromotionSchema.methods.isValid = function(): boolean {
+PromotionSchema.methods['isValid'] = function(): boolean {
   const now = new Date();
-  const startDateTime = new Date(this.startDate);
-  const endDateTime = new Date(this.endDate);
+  const startDateTime = new Date(this['startDate']);
+  const endDateTime = new Date(this['endDate']);
   
   // Configurar las horas si están definidas
-  if (this.startTime) {
-    const [startHour, startMinute] = this.startTime.split(':').map(Number);
+  if (this['startTime']) {
+    const [startHour, startMinute] = this['startTime'].split(':').map(Number);
     startDateTime.setHours(startHour, startMinute, 0, 0);
   }
   
-  if (this.endTime) {
-    const [endHour, endMinute] = this.endTime.split(':').map(Number);
+  if (this['endTime']) {
+    const [endHour, endMinute] = this['endTime'].split(':').map(Number);
     endDateTime.setHours(endHour, endMinute, 59, 999);
   }
   
-  return this.isActive && 
-         now >= startDateTime && 
+  return this['isActive'] &&
+         now >= startDateTime &&
          now <= endDateTime &&
-         (!this.maxUses || this.currentUses < this.maxUses);
+         (!this['maxUses'] || this['currentUses'] < this['maxUses']);
 };
 
 // Método para calcular el precio con descuento
-PromotionSchema.methods.calculateDiscountedPrice = function(originalPrice: number): number {
-  if (this.type === 'percentage' && this.discountPercentage) {
-    return originalPrice * (1 - this.discountPercentage / 100);
-  } else if (this.type === 'fixed' && this.discountAmount) {
-    return Math.max(0, originalPrice - this.discountAmount);
+PromotionSchema.methods['calculateDiscountedPrice'] = function(originalPrice: number): number {
+  if (this['type'] === 'percentage' && this['discountPercentage']) {
+    return originalPrice * (1 - this['discountPercentage'] / 100);        
+  } else if (this['type'] === 'fixed' && this['discountAmount']) {
+    return Math.max(0, originalPrice - this['discountAmount']);
   }
   return originalPrice;
 };
 
 // Método para obtener el texto de descuento
-PromotionSchema.methods.getDiscountText = function(originalPrice: number): string {
-  if (this.type === 'percentage' && this.discountPercentage) {
-    return `-${this.discountPercentage}%`;
-  } else if (this.type === 'fixed' && this.discountAmount) {
-    return `-$${this.discountAmount.toFixed(2)}`;
-  } else if (this.type === 'buy_x_get_y' && this.buyQuantity && this.getQuantity) {
-    return `${this.buyQuantity}x${this.getQuantity}`;
-  } else if (this.type === 'custom' && this.customText) {
-    return this.customText;
+PromotionSchema.methods['getDiscountText'] = function(originalPrice: number): string {
+  if (this['type'] === 'percentage' && this['discountPercentage']) {
+    return `-${this['discountPercentage']}%`;
+  } else if (this['type'] === 'fixed' && this['discountAmount']) {
+    return `-$${this['discountAmount'].toFixed(2)}`;
+  } else if (this['type'] === 'buy_x_get_y' && this['buyQuantity'] && this['getQuantity']) {
+    return `${this['buyQuantity']}x${this['getQuantity']}`;
+  } else if (this['type'] === 'custom' && this['customText']) {
+    return this['customText'];
   }
-  return this.ribbonText;
+  return this['ribbonText'];
 };
 
 export default mongoose.model<IPromotion>('Promotion', PromotionSchema); 

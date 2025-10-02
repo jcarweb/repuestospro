@@ -2,22 +2,17 @@ const { getDefaultConfig } = require('expo/metro-config');
 
 const config = getDefaultConfig(__dirname);
 
-// Configuración optimizada para desarrollo con tunneling
+// Configuración optimizada para desarrollo y assets
 module.exports = {
   ...config,
-  
-  // Configuración de servidor
-  server: {
-    port: 8081,
-    // Usar 0.0.0.0 para permitir conexiones externas
-    host: '0.0.0.0',
-  },
   
   // Configuración de resolver
   resolver: {
     ...config.resolver,
     // Resolver módulos de manera más eficiente
     resolverMainFields: ['react-native', 'browser', 'main'],
+    // Asegurar que los assets se resuelvan correctamente
+    assetExts: [...config.resolver.assetExts, 'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'],
   },
   
   // Configuración de transformer

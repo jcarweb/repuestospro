@@ -18,6 +18,12 @@ router.post('/exchange-rate/update', monetizationController.updateExchangeRateFr
 // Obtener historial de tasas (público)
 router.get('/exchange-rate/history', monetizationController.getExchangeRateHistory);
 
+// Rutas para actualización automática (público)
+router.post('/exchange-rate/auto-update/start', monetizationController.startAutoUpdate);
+router.post('/exchange-rate/auto-update/stop', monetizationController.stopAutoUpdate);
+router.get('/exchange-rate/auto-update/status', monetizationController.getAutoUpdateStatus);
+router.post('/exchange-rate/force-update', monetizationController.forceUpdate);
+
 // ===== COMISIONES =====
 
 // Obtener todas las comisiones (público)
@@ -68,6 +74,20 @@ router.put('/taxes/:id', monetizationController.updateTax);
 
 // Eliminar impuesto
 router.delete('/taxes/:id', monetizationController.deleteTax);
+
+// ===== CONFIGURACIÓN DE TASA POR TIENDA =====
+
+// Rutas protegidas para gestores de tienda
+router.use('/store/:storeId/exchange-rate', authenticateToken);
+
+// Obtener preferencia de tasa de una tienda
+router.get('/store/:storeId/exchange-rate/preference', monetizationController.getStoreExchangeRatePreference);
+
+// Actualizar preferencia de tasa de una tienda
+router.put('/store/:storeId/exchange-rate/preference', monetizationController.updateStoreExchangeRatePreference);
+
+// Obtener tasa de cambio según preferencia de la tienda
+router.get('/store/:storeId/exchange-rate/current', monetizationController.getStoreExchangeRate);
 
 // ===== CÁLCULOS =====
 

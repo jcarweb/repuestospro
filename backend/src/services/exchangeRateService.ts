@@ -28,7 +28,7 @@ export class ExchangeRateService {
   /**
    * Obtiene la tasa de cambio del BCV mediante web scraping
    */
-  async getBcvRate(url?: string): Promise<ExchangeRateResult> {
+  async getBcvRate(url?: string, currency: 'USD' | 'EUR' = 'USD'): Promise<ExchangeRateResult> {
     const targetUrl = url || this.defaultUrl;
     
     for (let attempt = 1; attempt <= this.retryAttempts; attempt++) {
@@ -50,10 +50,17 @@ export class ExchangeRateService {
         }
 
         const $ = cheerio.load(response.data);
-        const rateElement = $('#dolar strong');
         
-        if (!rateElement.length) {
-          throw new Error('No se encontró el elemento de tasa en la página');
+        // Seleccionar el elemento según la moneda
+        let rateElement;
+        if (currency === 'USD') {
+          rateElement = $('#dolar strong');
+        } else if (currency === 'EUR') {
+          rateElement = $('#euro strong');
+        }
+        
+        if (!rateElement || !rateElement.length) {
+          throw new Error(`No se encontró el elemento de tasa ${currency} en la página`);
         }
 
         const rateText = rateElement.text().trim();
@@ -69,10 +76,10 @@ export class ExchangeRateService {
           throw new Error(`Tasa inválida: ${rateText}`);
         }
 
-        console.log(`Tasa BCV obtenida exitosamente: ${rate}`);
+        console.log(`Tasa BCV ${currency} obtenida exitosamente: ${rate}`);
 
         // Guardar en la base de datos
-        await this.saveExchangeRate(rate, 'BCV', targetUrl);
+        await this.saveExchangeRate(rate, currency, 'BCV', targetUrl);
 
         return {
           success: true,
@@ -90,7 +97,7 @@ export class ExchangeRateService {
           
           return {
             success: false,
-            message: `Error al obtener tasa BCV después de ${this.retryAttempts} intentos: ${error.message}`
+            message: `Error al obtener tasa BCV después de ${this.retryAttempts} intentos: ${(error as Error).message}`
           };
         }
 
@@ -108,17 +115,17 @@ export class ExchangeRateService {
   /**
    * Guarda la tasa de cambio en la base de datos
    */
-  private async saveExchangeRate(rate: number, source: string, sourceUrl: string): Promise<void> {
+  private async saveExchangeRate(rate: number, currency: 'USD' | 'EUR', source: string, sourceUrl: string): Promise<void> {
     try {
-      // Desactivar tasas anteriores
+      // Desactivar tasas anteriores de la misma moneda
       await ExchangeRate.updateMany(
-        { currency: 'USD', isActive: true },
+        { currency, isActive: true },
         { isActive: false }
       );
 
       // Crear nueva tasa
       await ExchangeRate.create({
-        currency: 'USD',
+        currency,
         rate,
         source,
         sourceUrl,
@@ -139,14 +146,9 @@ export class ExchangeRateService {
    */
   private async notifyAdminOfFailure(url: string, error: any): Promise<void> {
     try {
-      const message = `⚠️ Error al obtener tasa BCV\n\nURL: ${url}\nError: ${error.message}\nFecha: ${new Date().toLocaleString()}\n\nPor favor, configure la tasa manualmente en el panel de administración.`;
+      const message = `⚠️ Error al obtener tasa BCV\n\nURL: ${url}\nError: ${(error as Error).message}\nFecha: ${new Date().toLocaleString()}\n\nPor favor, configure la tasa manualmente en el panel de administración.`;
       
-      await sendNotificationToAdmin({
-        title: 'Error en Tasa de Cambio BCV',
-        message,
-        type: 'error',
-        priority: 'high'
-      });
+      await sendNotificationToAdmin('Error en Tasa de Cambio BCV', message, 'error', 'high');
 
       console.log('Notificación enviada al administrador');
     } catch (notificationError) {
@@ -157,17 +159,17 @@ export class ExchangeRateService {
   /**
    * Obtiene la tasa actual desde la base de datos
    */
-  async getCurrentRate(): Promise<ExchangeRateResult> {
+  async getCurrentRate(currency: 'USD' | 'EUR' = 'USD'): Promise<ExchangeRateResult> {
     try {
       const rate = await ExchangeRate.findOne({ 
-        currency: 'USD', 
+        currency, 
         isActive: true 
       }).sort({ lastUpdated: -1 });
 
       if (!rate) {
         return {
           success: false,
-          message: 'No hay tasa de cambio configurada'
+          message: `No hay tasa de cambio configurada para ${currency}`
         };
       }
 

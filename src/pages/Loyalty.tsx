@@ -53,7 +53,7 @@ const Loyalty: React.FC = () => {
 
   const fetchLoyaltyStats = async () => {
     try {
-      const response = await fetch('API_BASE_URL/loyalty/stats', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""""/api/loyalty/stats', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -72,7 +72,7 @@ const Loyalty: React.FC = () => {
 
   const fetchTrackingStats = async () => {
     try {
-      const response = await fetch('API_BASE_URL/loyalty/tracking-stats', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/loyalty/tracking-stats', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -90,7 +90,7 @@ const Loyalty: React.FC = () => {
   const fetchAvailableRewards = async () => {
     setLoadingRewards(true);
     try {
-      const response = await fetch('API_BASE_URL/loyalty/available-rewards', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/loyalty/available-rewards', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -113,7 +113,7 @@ const Loyalty: React.FC = () => {
     }
 
     try {
-      const response = await fetch('API_BASE_URL/loyalty/redeem', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/loyalty/redeem', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

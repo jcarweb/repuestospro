@@ -21,7 +21,7 @@ const StoreRegistration: React.FC = () => {
         throw new Error('No hay sesión activa');
       }
 
-      const response = await fetch('API_BASE_URL/stores', {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""/api/stores', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

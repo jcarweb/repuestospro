@@ -1,12 +1,12 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IDelivery extends Document {
-  orderId: mongoose.Types.ObjectId;
-  storeId: mongoose.Types.ObjectId;
-  customerId: mongoose.Types.ObjectId;
+  orderId: mongoose.Schema.Types.ObjectId;
+  storeId: mongoose.Schema.Types.ObjectId;
+  customerId: mongoose.Schema.Types.ObjectId;
   
   // Información del rider
-  riderId?: mongoose.Types.ObjectId; // Para riders internos
+  riderId?: mongoose.Schema.Types.ObjectId; // Para riders internos
   externalRiderId?: string; // Para riders externos
   riderType: 'internal' | 'external';
   riderName: string;
@@ -292,14 +292,14 @@ DeliverySchema.index({ riderId: 1, status: 1 });
 DeliverySchema.index({ trackingCode: 1 });
 
 // Método para generar código de tracking único
-DeliverySchema.methods.generateTrackingCode = function(): string {
+DeliverySchema.methods['generateTrackingCode'] = function(): string {
   const timestamp = Date.now().toString(36);
   const random = Math.random().toString(36).substr(2, 5);
   return `DEL-${timestamp}-${random}`.toUpperCase();
 };
 
 // Método para calcular distancia entre dos puntos
-DeliverySchema.methods.calculateDistance = function(lat1: number, lng1: number, lat2: number, lng2: number): number {
+DeliverySchema.methods['calculateDistance'] = function(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371; // Radio de la Tierra en km
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLng = (lng2 - lng1) * Math.PI / 180;
@@ -311,15 +311,15 @@ DeliverySchema.methods.calculateDistance = function(lat1: number, lng1: number, 
 };
 
 // Método para actualizar estado
-DeliverySchema.methods.updateStatus = function(newStatus: string, notes?: string, updatedBy?: string) {
-  this.status = newStatus;
-  this.statusHistory.push({
+DeliverySchema.methods['updateStatus'] = function(newStatus: string, notes?: string, updatedBy?: string) {
+  this['status'] = newStatus;
+  this['statusHistory'].push({
     status: newStatus,
     timestamp: new Date(),
     notes,
     updatedBy
   });
-  return this.save();
+  return this['save']();
 };
 
 export default mongoose.model<IDelivery>('Delivery', DeliverySchema);

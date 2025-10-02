@@ -209,6 +209,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       description: t('sidebar.storeManager.sales.description')
     },
     {
+      title: 'Cotizaciones',
+      path: '/store-manager/quotations',
+      icon: FileText,
+      description: 'Gestión de cotizaciones y presupuestos'
+    },
+    {
+      title: 'Configuración de Cotizaciones',
+      path: '/store-manager/quotation-config',
+      icon: Settings,
+      description: 'Configurar parámetros de cotizaciones'
+    },
+    {
       title: t('sidebar.storeManager.orders'),
       path: '/store-manager/orders',
       icon: ShoppingBag,

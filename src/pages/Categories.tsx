@@ -111,9 +111,9 @@ const Categories: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      console.log('🔍 Cargando categorías desde:', 'API_BASE_URL/products/categories');
+      console.log('🔍 Cargando categorías desde:', 'process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""/api/products/categories');
       
-      const response = await fetch('API_BASE_URL/products/categories');
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/products/categories');
       const data = await response.json();
       
       console.log('📊 Respuesta del servidor:', data);

@@ -114,7 +114,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
   const loadStates = async () => {
     setLoading(prev => ({ ...prev, states: true }));
     try {
-      const response = await fetch('http://localhost:5000/api/locations/states');
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""""/api/locations/states');
       const data = await response.json();
       if (data.success) {
         setStates(data.data);
@@ -129,7 +129,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
   const loadMunicipalities = async (stateId: string) => {
     setLoading(prev => ({ ...prev, municipalities: true }));
     try {
-      const response = await fetch(`http://localhost:5000/api/locations/states/${stateId}/municipalities`);
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/locations/states/${stateId}/municipalities`);
       const data = await response.json();
       if (data.success) {
         setMunicipalities(data.data);
@@ -144,7 +144,7 @@ const AdministrativeDivisionSelector: React.FC<AdministrativeDivisionSelectorPro
   const loadParishes = async (municipalityId: string) => {
     setLoading(prev => ({ ...prev, parishes: true }));
     try {
-      const response = await fetch(`http://localhost:5000/api/locations/municipalities/${municipalityId}/parishes`);
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/locations/municipalities/${municipalityId}/parishes`);
       const data = await response.json();
       if (data.success) {
         setParishes(data.data);

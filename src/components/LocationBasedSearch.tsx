@@ -86,7 +86,7 @@ const LocationBasedSearch: React.FC = () => {
       if (selectedCategory) params.append('category', selectedCategory);
       if (selectedBrand) params.append('brand', selectedBrand);
 
-      const response = await fetch(`http://localhost:5000/api/products/nearby?${params}`);
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""/api/products/nearby?${params}`);
       const result = await response.json();
 
       if (result.success) {

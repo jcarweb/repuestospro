@@ -177,7 +177,7 @@ const MasterConfiguration: React.FC = () => {
       console.log('🔍 MasterConfiguration - Cargando tipos de vehículo...');
       console.log('🔍 MasterConfiguration - Token:', token ? 'present' : 'missing');
       
-      const response = await fetch(`${API_BASE_URL}/masters/vehicle-types?limit=100`, {
+      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""""""/api/masters/vehicle-types?limit=100', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -246,7 +246,7 @@ const MasterConfiguration: React.FC = () => {
         console.log('🔍 MasterConfiguration - Agregando vehicleType al filtro:', vehicleType);
       }
 
-      const url = `${API_BASE_URL}/masters/${activeTab}?${params}`;
+      const url = `process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/masters/${activeTab}?${params}`;
       console.log('🔍 MasterConfiguration - URL:', url);
       console.log('🔍 MasterConfiguration - Parámetros completos:', Object.fromEntries(params));
 
@@ -360,7 +360,7 @@ const MasterConfiguration: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/masters/${activeTab}/${id}`, {
+      const response = await fetch(`process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/masters/${activeTab}/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -507,9 +507,9 @@ const MasterConfiguration: React.FC = () => {
     setError(null);
 
     try {
-        const url = editingItem 
-          ? `${API_BASE_URL}/masters/${activeTab}/${editingItem._id}`
-          : `${API_BASE_URL}/masters/${activeTab}`;
+      const url = editingItem 
+        ? `process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/masters/${activeTab}/${editingItem._id}`
+        : `process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/masters/${activeTab}`;
       
       const method = editingItem ? 'PUT' : 'POST';
 

@@ -3,18 +3,22 @@ import { WarrantyService, WarrantyCreationData } from '../services/WarrantyServi
 import Warranty from '../models/Warranty';
 import SecureTransaction from '../models/SecureTransaction';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 export class WarrantyController {
 
   /**
    * Obtener todas las garantías del usuario
    */
-  public getUserWarranties = async (req: Request, res: Response) => {
+  public getUserWarranties = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
       const { status, type, page = 1, limit = 10 } = req.query;
 
       if (!userId) {
-        return res.status(401).json({ 
+        res.status(401).json({ 
           success: false, 
           message: 'Usuario no autenticado' 
         });
@@ -65,13 +69,13 @@ export class WarrantyController {
   /**
    * Obtener garantías de una tienda (para store managers)
    */
-  public getStoreWarranties = async (req: Request, res: Response) => {
+  public getStoreWarranties = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const storeId = req.params.storeId || req.user?.storeId;
+      const storeId = req.params['storeId'] || req.user?.storeId;
       const { status, type, page = 1, limit = 10 } = req.query;
 
       if (!storeId) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'ID de tienda requerido'
         });
@@ -122,13 +126,13 @@ export class WarrantyController {
   /**
    * Obtener detalles de una garantía específica
    */
-  public getWarrantyDetails = async (req: Request, res: Response) => {
+  public getWarrantyDetails = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { warrantyId } = req.params;
       const userId = req.user?.id;
 
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
@@ -140,16 +144,16 @@ export class WarrantyController {
         .populate('userId', 'name email');
 
       if (!warranty) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Garantía no encontrada'
         });
       }
 
       // Verificar que el usuario tenga acceso a esta garantía
-      if (warranty.userId.toString() !== userId && 
-          warranty.storeId.toString() !== req.user?.storeId) {
-        return res.status(403).json({
+      if (warranty?.userId.toString() !== userId &&
+          warranty?.storeId.toString() !== req.user?.storeId) {
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para ver esta garantía'
         });
@@ -157,9 +161,9 @@ export class WarrantyController {
 
       // Obtener transacción segura asociada si existe
       let secureTransaction = null;
-      if (warranty.transactionId) {
+      if (warranty?.transactionId) {
         secureTransaction = await SecureTransaction.findOne({
-          transactionId: warranty.transactionId
+          transactionId: warranty?.transactionId
         });
       }
 
@@ -168,9 +172,9 @@ export class WarrantyController {
         data: {
           warranty,
           secureTransaction,
-          isActive: warranty.isActive(),
-          daysRemaining: warranty.getDaysRemaining(),
-          availableCoverage: warranty.getAvailableCoverage()
+          isActive: (warranty as any).isActive(),
+          daysRemaining: (warranty as any).getDaysRemaining(),
+          availableCoverage: (warranty as any).getAvailableCoverage()
         }
       });
 
@@ -186,7 +190,7 @@ export class WarrantyController {
   /**
    * Crear una nueva garantía
    */
-  public createWarranty = async (req: Request, res: Response) => {
+  public createWarranty = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
       const {
@@ -201,7 +205,7 @@ export class WarrantyController {
       } = req.body;
 
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
@@ -224,7 +228,7 @@ export class WarrantyController {
       const validation = await WarrantyService.validateWarrantyCreation(warrantyData);
       
       if (!validation.isValid) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Datos de garantía inválidos',
           errors: validation.errors,
@@ -252,7 +256,7 @@ export class WarrantyController {
       console.error('Error al crear garantía:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   };
@@ -260,13 +264,13 @@ export class WarrantyController {
   /**
    * Activar una garantía pendiente
    */
-  public activateWarranty = async (req: Request, res: Response) => {
+  public activateWarranty = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { warrantyId } = req.params;
       const userId = req.user?.id;
 
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
@@ -275,20 +279,20 @@ export class WarrantyController {
       // Verificar que la garantía pertenece al usuario
       const warranty = await Warranty.findById(warrantyId);
       if (!warranty) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Garantía no encontrada'
         });
       }
 
-      if (warranty.userId.toString() !== userId) {
-        return res.status(403).json({
+      if (warranty?.userId.toString() !== userId) {
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para activar esta garantía'
         });
       }
 
-      const activatedWarranty = await WarrantyService.activateWarranty(warrantyId);
+      const activatedWarranty = await WarrantyService.activateWarranty(warrantyId!);
 
       res.json({
         success: true,
@@ -300,7 +304,7 @@ export class WarrantyController {
       console.error('Error al activar garantía:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   };
@@ -308,21 +312,21 @@ export class WarrantyController {
   /**
    * Extender una garantía activa
    */
-  public extendWarranty = async (req: Request, res: Response) => {
+  public extendWarranty = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { warrantyId } = req.params;
       const { extensionDays } = req.body;
       const userId = req.user?.id;
 
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
       }
 
       if (!extensionDays || extensionDays <= 0) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Días de extensión deben ser mayores a 0'
         });
@@ -331,20 +335,20 @@ export class WarrantyController {
       // Verificar que la garantía pertenece al usuario
       const warranty = await Warranty.findById(warrantyId);
       if (!warranty) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Garantía no encontrada'
         });
       }
 
-      if (warranty.userId.toString() !== userId) {
-        return res.status(403).json({
+      if (warranty?.userId.toString() !== userId) {
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para extender esta garantía'
         });
       }
 
-      const extendedWarranty = await WarrantyService.extendWarranty(warrantyId, extensionDays);
+      const extendedWarranty = await WarrantyService.extendWarranty(warrantyId!, extensionDays);
 
       res.json({
         success: true,
@@ -356,7 +360,7 @@ export class WarrantyController {
       console.error('Error al extender garantía:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Error interno del servidor'
+        message: (error as Error).message || 'Error interno del servidor'
       });
     }
   };
@@ -364,21 +368,21 @@ export class WarrantyController {
   /**
    * Validar elegibilidad para reclamo
    */
-  public checkClaimEligibility = async (req: Request, res: Response) => {
+  public checkClaimEligibility = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { warrantyId } = req.params;
       const { claimType } = req.query;
       const userId = req.user?.id;
 
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
       }
 
       if (!claimType) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Tipo de reclamo requerido'
         });
@@ -387,21 +391,21 @@ export class WarrantyController {
       // Verificar que la garantía pertenece al usuario
       const warranty = await Warranty.findById(warrantyId);
       if (!warranty) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Garantía no encontrada'
         });
       }
 
-      if (warranty.userId.toString() !== userId) {
-        return res.status(403).json({
+      if (warranty?.userId.toString() !== userId) {
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para verificar esta garantía'
         });
       }
 
       const isEligible = await WarrantyService.checkClaimEligibility(
-        warrantyId, 
+        warrantyId!, 
         claimType as string
       );
 
@@ -410,13 +414,13 @@ export class WarrantyController {
         data: {
           isEligible,
           warranty: {
-            id: warranty._id,
-            type: warranty.type,
-            status: warranty.status,
-            coverageAmount: warranty.coverageAmount,
-            terms: warranty.terms,
-            expirationDate: warranty.expirationDate,
-            daysRemaining: warranty.getDaysRemaining()
+            id: warranty?._id,
+            type: warranty?.type,
+            status: warranty?.status,
+            coverageAmount: warranty?.coverageAmount,
+            terms: warranty?.terms,
+            expirationDate: warranty?.expirationDate,
+            daysRemaining: (warranty as any).getDaysRemaining()
           }
         }
       });
@@ -433,7 +437,7 @@ export class WarrantyController {
   /**
    * Obtener estadísticas de garantías
    */
-  public getWarrantyStats = async (req: Request, res: Response) => {
+  public getWarrantyStats = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
       const storeId = req.user?.storeId;
@@ -457,13 +461,13 @@ export class WarrantyController {
   /**
    * Cancelar una garantía
    */
-  public cancelWarranty = async (req: Request, res: Response) => {
+  public cancelWarranty = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { warrantyId } = req.params;
       const userId = req.user?.id;
 
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
@@ -472,28 +476,28 @@ export class WarrantyController {
       // Verificar que la garantía pertenece al usuario
       const warranty = await Warranty.findById(warrantyId);
       if (!warranty) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Garantía no encontrada'
         });
       }
 
-      if (warranty.userId.toString() !== userId) {
-        return res.status(403).json({
+      if (warranty?.userId.toString() !== userId) {
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para cancelar esta garantía'
         });
       }
 
-      if (warranty.status === 'cancelled') {
-        return res.status(400).json({
+      if (warranty?.status === 'cancelled') {
+        res.status(400).json({
           success: false,
           message: 'La garantía ya está cancelada'
         });
       }
 
-      warranty.status = 'cancelled';
-      await warranty.save();
+      warranty!.status = 'cancelled';
+      await warranty!.save();
 
       res.json({
         success: true,

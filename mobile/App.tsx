@@ -7,6 +7,7 @@ import { ToastProvider } from './src/contexts/ToastContext';
 import { NetworkProvider } from './src/contexts/NetworkContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import SplashScreen from './src/components/SplashScreen';
+// import { BackendSelector } from './src/components/BackendSelector';
 
 // Componente de carga simple
 const LoadingScreen = () => (

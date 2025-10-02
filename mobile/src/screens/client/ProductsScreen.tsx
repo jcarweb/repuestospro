@@ -14,6 +14,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import apiService from '../../services/api';
 
 interface Product {
   _id: string;
@@ -37,6 +39,7 @@ interface Category {
 
 const ProductsScreen: React.FC = () => {
   const { colors } = useTheme();
+  const navigation = useNavigation();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -58,21 +61,20 @@ const ProductsScreen: React.FC = () => {
     try {
       setLoading(true);
       
-      // Cargar productos y categorías en paralelo
+      // Cargar productos y categorías usando el servicio de API
       const [productsResponse, categoriesResponse] = await Promise.all([
-        fetch('http://192.168.0.110:5000/api/products'),
-        fetch('http://192.168.0.110:5000/api/categories')
+        apiService.getProducts(),
+        apiService.getCategories()
       ]);
 
-      const productsResult = await productsResponse.json();
-      const categoriesResult = await categoriesResponse.json();
-
-      if (productsResult.success) {
-        setProducts(productsResult.data);
+      if (productsResponse.success && productsResponse.data) {
+        setProducts(productsResponse.data);
+        console.log('✅ Productos cargados:', productsResponse.data.length);
       }
 
-      if (categoriesResult.success) {
-        setCategories(categoriesResult.data);
+      if (categoriesResponse.success && categoriesResponse.data) {
+        setCategories(categoriesResponse.data);
+        console.log('✅ Categorías cargadas:', categoriesResponse.data.length);
       }
     } catch (error) {
       console.error('Error cargando datos:', error);
@@ -141,7 +143,10 @@ const ProductsScreen: React.FC = () => {
       style={[styles.productCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
       onPress={() => {
         // Navegar al detalle del producto
-        // navigation.navigate('ProductDetail', { productId: item._id });
+        (navigation as any).navigate('ProductDetail', { 
+          productId: item._id,
+          product: item 
+        });
       }}
     >
       <Image

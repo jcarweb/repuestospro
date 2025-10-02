@@ -3,6 +3,10 @@ import Claim, { IClaim } from '../models/Claim';
 import Warranty from '../models/Warranty';
 import { WarrantyService } from '../services/WarrantyService';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 export interface ClaimCreationData {
   warrantyId: string;
   claimType: 'defective_product' | 'non_delivery' | 'not_as_described' | 'late_delivery' | 'damaged_package';
@@ -31,7 +35,7 @@ export class ClaimController {
   /**
    * Crear un nuevo reclamo
    */
-  public createClaim = async (req: Request, res: Response) => {
+  public createClaim = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
       const {
@@ -45,7 +49,7 @@ export class ClaimController {
       }: ClaimCreationData = req.body;
 
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
@@ -53,7 +57,7 @@ export class ClaimController {
 
       // Validar datos requeridos
       if (!warrantyId || !claimType || !title || !description || !claimedAmount || !problemDetails) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Todos los campos son requeridos'
         });
@@ -62,22 +66,22 @@ export class ClaimController {
       // Verificar que la garantía existe y pertenece al usuario
       const warranty = await Warranty.findById(warrantyId);
       if (!warranty) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Garantía no encontrada'
         });
       }
 
-      if (warranty.userId.toString() !== userId) {
-        return res.status(403).json({
+      if (warranty?.userId.toString() !== userId) {
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para crear reclamos en esta garantía'
         });
       }
 
       // Verificar que la garantía está activa
-      if (!warranty.isActive()) {
-        return res.status(400).json({
+      if (!(warranty as any).isActive()) {
+        res.status(400).json({
           success: false,
           message: 'La garantía no está activa'
         });
@@ -86,15 +90,15 @@ export class ClaimController {
       // Verificar elegibilidad para el tipo de reclamo
       const isEligible = await WarrantyService.checkClaimEligibility(warrantyId, claimType);
       if (!isEligible) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Este tipo de reclamo no está cubierto por la garantía'
         });
       }
 
       // Verificar que el monto reclamado no exceda la cobertura
-      if (claimedAmount > warranty.getAvailableCoverage()) {
-        return res.status(400).json({
+      if (claimedAmount > (warranty as any).getAvailableCoverage()) {
+        res.status(400).json({
           success: false,
           message: 'El monto reclamado excede la cobertura disponible'
         });
@@ -104,8 +108,8 @@ export class ClaimController {
       const claim = new Claim({
         warrantyId,
         userId,
-        storeId: warranty.storeId,
-        transactionId: warranty.transactionId,
+        storeId: warranty?.storeId,
+        transactionId: warranty?.transactionId,
         claimType,
         title,
         description,
@@ -121,7 +125,7 @@ export class ClaimController {
       const savedClaim = await claim.save();
 
       // Agregar comunicación inicial
-      await savedClaim.addCommunication(
+      await (savedClaim as any).addCommunication(
         'user',
         `Reclamo creado: ${title}`,
         [],
@@ -134,10 +138,10 @@ export class ClaimController {
         data: {
           claim: savedClaim,
           warranty: {
-            id: warranty._id,
-            type: warranty.type,
-            coverageAmount: warranty.coverageAmount,
-            availableCoverage: warranty.getAvailableCoverage()
+            id: warranty?._id,
+            type: warranty?.type,
+            coverageAmount: warranty?.coverageAmount,
+            availableCoverage: (warranty as any).getAvailableCoverage()
           }
         }
       });
@@ -154,13 +158,13 @@ export class ClaimController {
   /**
    * Obtener reclamos del usuario
    */
-  public getUserClaims = async (req: Request, res: Response) => {
+  public getUserClaims = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id;
       const { status, claimType, page = 1, limit = 10 } = req.query;
 
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
@@ -206,13 +210,13 @@ export class ClaimController {
   /**
    * Obtener reclamos de una tienda
    */
-  public getStoreClaims = async (req: Request, res: Response) => {
+  public getStoreClaims = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const storeId = req.params.storeId || req.user?.storeId;
+      const storeId = req.params['storeId'] || req.user?.storeId;
       const { status, claimType, page = 1, limit = 10 } = req.query;
 
       if (!storeId) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'ID de tienda requerido'
         });
@@ -258,13 +262,13 @@ export class ClaimController {
   /**
    * Obtener detalles de un reclamo específico
    */
-  public getClaimDetails = async (req: Request, res: Response) => {
+  public getClaimDetails = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { claimId } = req.params;
       const userId = req.user?.id;
 
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
@@ -278,16 +282,16 @@ export class ClaimController {
         .populate('assignedAgent', 'name email');
 
       if (!claim) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Reclamo no encontrado'
         });
       }
 
       // Verificar permisos
-      if (claim.userId.toString() !== userId && 
-          claim.storeId.toString() !== req.user?.storeId) {
-        return res.status(403).json({
+      if (claim?.userId.toString() !== userId &&
+          claim?.storeId.toString() !== req.user?.storeId) {
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para ver este reclamo'
         });
@@ -297,8 +301,8 @@ export class ClaimController {
         success: true,
         data: {
           claim,
-          timeElapsed: claim.getTimeElapsed(),
-          isWithinDeadline: claim.isWithinDeadline()
+          timeElapsed: (claim as any).getTimeElapsed(),
+          isWithinDeadline: (claim as any).isWithinDeadline()
         }
       });
 
@@ -314,14 +318,14 @@ export class ClaimController {
   /**
    * Actualizar un reclamo
    */
-  public updateClaim = async (req: Request, res: Response) => {
+  public updateClaim = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { claimId } = req.params;
       const userId = req.user?.id;
       const { title, description, claimedAmount, problemDetails } = req.body;
 
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
@@ -329,39 +333,39 @@ export class ClaimController {
 
       const claim = await Claim.findById(claimId);
       if (!claim) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Reclamo no encontrado'
         });
       }
 
       // Verificar permisos
-      if (claim.userId.toString() !== userId) {
-        return res.status(403).json({
+      if (claim?.userId.toString() !== userId) {
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para actualizar este reclamo'
         });
       }
 
       // Solo permitir actualización si está pendiente
-      if (claim.status !== 'pending') {
-        return res.status(400).json({
+      if (claim?.status !== 'pending') {
+        res.status(400).json({
           success: false,
           message: 'Solo se pueden actualizar reclamos pendientes'
         });
       }
 
       // Actualizar campos
-      if (title) claim.title = title;
-      if (description) claim.description = description;
-      if (claimedAmount) claim.claimedAmount = claimedAmount;
-      if (problemDetails) claim.problemDetails = problemDetails;
-
-      claim.lastUpdated = new Date();
-      await claim.save();
+      if (title) claim!.title = title;
+      if (description) claim!.description = description;
+      if (claimedAmount) claim!.claimedAmount = claimedAmount;
+      if (problemDetails) claim!.problemDetails = problemDetails;
+      
+      claim!.lastUpdated = new Date();
+      await claim!.save();
 
       // Agregar comunicación
-      await claim.addCommunication(
+      await (claim as any).addCommunication(
         'user',
         'Reclamo actualizado por el usuario',
         [],
@@ -386,21 +390,21 @@ export class ClaimController {
   /**
    * Agregar evidencia a un reclamo
    */
-  public addEvidence = async (req: Request, res: Response) => {
+  public addEvidence = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { claimId } = req.params;
       const userId = req.user?.id;
       const { evidence } = req.body;
 
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
       }
 
       if (!evidence || !Array.isArray(evidence)) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Evidencia requerida'
         });
@@ -408,15 +412,15 @@ export class ClaimController {
 
       const claim = await Claim.findById(claimId);
       if (!claim) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Reclamo no encontrado'
         });
       }
 
       // Verificar permisos
-      if (claim.userId.toString() !== userId) {
-        return res.status(403).json({
+      if (claim?.userId.toString() !== userId) {
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para agregar evidencia a este reclamo'
         });
@@ -424,14 +428,14 @@ export class ClaimController {
 
       // Agregar evidencia
       for (const evidenceItem of evidence) {
-        await claim.addEvidence(evidenceItem);
+        await (claim as any).addEvidence(evidenceItem);
       }
 
       // Agregar comunicación
-      await claim.addCommunication(
+      await (claim as any).addCommunication(
         'user',
         `Evidencia agregada: ${evidence.length} archivo(s)`,
-        evidence.map(e => e.filename),
+        evidence.map((e: any) => e.filename),
         false
       );
 
@@ -440,7 +444,7 @@ export class ClaimController {
         message: 'Evidencia agregada exitosamente',
         data: {
           claim,
-          evidenceCount: claim.evidence.length
+          evidenceCount: claim?.evidence.length
         }
       });
 
@@ -456,21 +460,21 @@ export class ClaimController {
   /**
    * Agregar comunicación a un reclamo
    */
-  public addCommunication = async (req: Request, res: Response) => {
+  public addCommunication = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { claimId } = req.params;
       const userId = req.user?.id;
       const { message, attachments = [] } = req.body;
 
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
       }
 
       if (!message) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Mensaje requerido'
         });
@@ -478,33 +482,33 @@ export class ClaimController {
 
       const claim = await Claim.findById(claimId);
       if (!claim) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Reclamo no encontrado'
         });
       }
 
       // Verificar permisos
-      if (claim.userId.toString() !== userId && 
-          claim.storeId.toString() !== req.user?.storeId) {
-        return res.status(403).json({
+      if (claim?.userId.toString() !== userId &&
+          claim?.storeId.toString() !== req.user?.storeId) {
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para agregar comunicación a este reclamo'
         });
       }
 
       // Determinar el remitente
-      const from = claim.userId.toString() === userId ? 'user' : 'store';
+      const from = claim?.userId.toString() === userId ? 'user' : 'store';
 
       // Agregar comunicación
-      await claim.addCommunication(from, message, attachments, false);
+      await (claim as any).addCommunication(from, message, attachments, false);
 
       res.json({
         success: true,
         message: 'Comunicación agregada exitosamente',
         data: {
           claim,
-          communicationCount: claim.communications.length
+          communicationCount: claim?.communications.length
         }
       });
 
@@ -520,13 +524,13 @@ export class ClaimController {
   /**
    * Cancelar un reclamo
    */
-  public cancelClaim = async (req: Request, res: Response) => {
+  public cancelClaim = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { claimId } = req.params;
       const userId = req.user?.id;
 
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
@@ -534,34 +538,34 @@ export class ClaimController {
 
       const claim = await Claim.findById(claimId);
       if (!claim) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Reclamo no encontrado'
         });
       }
 
       // Verificar permisos
-      if (claim.userId.toString() !== userId) {
-        return res.status(403).json({
+      if (claim?.userId.toString() !== userId) {
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para cancelar este reclamo'
         });
       }
 
       // Solo permitir cancelación si está pendiente
-      if (claim.status !== 'pending') {
-        return res.status(400).json({
+      if (claim?.status !== 'pending') {
+        res.status(400).json({
           success: false,
           message: 'Solo se pueden cancelar reclamos pendientes'
         });
       }
 
-      claim.status = 'cancelled';
-      claim.lastUpdated = new Date();
-      await claim.save();
+      claim!.status = 'cancelled';
+      claim!.lastUpdated = new Date();
+      await claim!.save();
 
       // Agregar comunicación
-      await claim.addCommunication(
+      await (claim as any).addCommunication(
         'user',
         'Reclamo cancelado por el usuario',
         [],
@@ -586,7 +590,7 @@ export class ClaimController {
   /**
    * Obtener estadísticas de reclamos
    */
-  public getClaimStats = async (req: Request, res: Response) => {
+  public getClaimStats = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user?.id;
       const storeId = req.user?.storeId;

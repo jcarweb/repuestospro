@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useActiveStore } from '../contexts/ActiveStoreContext';
 import ActiveStoreIndicator from '../components/ActiveStoreIndicator';
 import StoreSelector from '../components/StoreSelector';
+import StoreManagerActionButtons from '../components/StoreManagerActionButtons';
 
 import { 
   Package, 
@@ -20,6 +22,7 @@ const StoreManagerDashboard: React.FC = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { activeStore } = useActiveStore();
+  const navigate = useNavigate();
 
   // Datos de ejemplo - en una implementación real vendrían de la API
   const stats = {
@@ -40,10 +43,26 @@ const StoreManagerDashboard: React.FC = () => {
   ];
 
   const quickActions = [
-    { title: t('storeManagerDashboard.quickActions.addProduct'), icon: Package, action: () => console.log('Agregar producto') },
-    { title: t('storeManagerDashboard.quickActions.createPromotion'), icon: TrendingUp, action: () => console.log('Crear promoción') },
-    { title: t('storeManagerDashboard.quickActions.viewOrders'), icon: ShoppingCart, action: () => console.log('Ver pedidos') },
-    { title: t('storeManagerDashboard.quickActions.messages'), icon: MessageSquare, action: () => console.log('Ver mensajes') },
+    { 
+      title: t('storeManagerDashboard.quickActions.addProduct'), 
+      icon: Package, 
+      action: () => navigate('/store-manager/products?action=create') 
+    },
+    { 
+      title: t('storeManagerDashboard.quickActions.createPromotion'), 
+      icon: TrendingUp, 
+      action: () => navigate('/store-manager/promotions?action=create') 
+    },
+    { 
+      title: t('storeManagerDashboard.quickActions.viewOrders'), 
+      icon: ShoppingCart, 
+      action: () => navigate('/store-manager/orders') 
+    },
+    { 
+      title: t('storeManagerDashboard.quickActions.messages'), 
+      icon: MessageSquare, 
+      action: () => navigate('/store-manager/messages') 
+    },
   ];
 
   return (
@@ -58,15 +77,20 @@ const StoreManagerDashboard: React.FC = () => {
       
       
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          {t('storeManagerDashboard.title')}
-        </h1>
-        <p className="text-gray-600 mt-2">
-          {t('storeManagerDashboard.welcome')}, {user?.name || 'Gestor de Tienda'}
-          {activeStore && (
-            <span className="text-[#FFC300] font-medium"> - {activeStore.name}</span>
-          )}
-        </p>
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {t('storeManagerDashboard.title')}
+            </h1>
+            <p className="text-gray-600 mt-2">
+              {t('storeManagerDashboard.welcome')}, {user?.name || 'Gestor de Tienda'}
+              {activeStore && (
+                <span className="text-[#FFC300] font-medium"> - {activeStore.name}</span>
+              )}
+            </p>
+          </div>
+          <StoreManagerActionButtons context="dashboard" />
+        </div>
       </div>
 
       {/* Estadísticas principales */}
@@ -157,7 +181,7 @@ const StoreManagerDashboard: React.FC = () => {
                 </thead>
                 <tbody>
                   {recentOrders.map((order) => (
-                    <tr key={order.id} className="border-b hover:bg-gray-50">
+                    <tr key={order.id} className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => navigate(`/store-manager/orders?orderId=${order.id}`)}>
                       <td className="py-2 text-sm text-gray-900">#{order.id}</td>
                       <td className="py-2 text-sm text-gray-700">{order.customer}</td>
                       <td className="py-2 text-sm text-gray-900">${order.amount}</td>

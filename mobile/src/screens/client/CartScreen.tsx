@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 interface CartItem {
   _id: string;
@@ -26,6 +27,7 @@ interface CartItem {
 
 const CartScreen: React.FC = () => {
   const { colors } = useTheme();
+  const navigation = useNavigation();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -128,6 +130,7 @@ const CartScreen: React.FC = () => {
         { text: 'Continuar', onPress: () => {
           // Navegar al checkout
           // navigation.navigate('Checkout');
+          Alert.alert('Checkout', 'Funcionalidad de checkout próximamente');
         }},
       ]
     );
@@ -227,7 +230,7 @@ const CartScreen: React.FC = () => {
               style={[styles.shopButton, { backgroundColor: colors.primary }]}
               onPress={() => {
                 // Navegar a productos
-                // navigation.navigate('Products');
+                (navigation as any).navigate('ClientTabs', { screen: 'Products' });
               }}
             >
               <Text style={[styles.shopButtonText, { color: '#000000' }]}>

@@ -7,10 +7,36 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
 dist
 dist-ssr
 *.local
+
+# Environment variables and credentials
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.test
+*.env
+config/secrets.json
+credentials.json
+secrets/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+database/
+
+# Build outputs
+build/
+out/
+.next/
+.nuxt/
+.cache/
 
 # Editor directories and files
 .vscode/*
@@ -22,4 +48,349 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.env 
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Test files and coverage
+coverage/
+.nyc_output/
+test-results/
+*.test.js
+*.spec.js
+__tests__/
+tests/
+
+# Documentation with sensitive information
+*SECRET*.md
+*CREDENTIALS*.md
+*PASSWORD*.md
+*API_KEY*.md
+*TOKEN*.md
+*PRIVATE*.md
+*CONFIDENTIAL*.md
+SECURITY_*.md
+*SECURITY*.md
+*IMPROVEMENTS*.md
+*CORRECTION*.md
+*SUMMARY*.md
+*EJECUTIVO*.md
+*PROFESIONAL*.md
+*IMPLEMENTACION*.md
+*GUIDELINES*.md
+*CONTEXTO*.md
+*ROLES*.md
+*SISTEMA*.md
+*TAREAS*.md
+*PLAN*.md
+*INTEGRACION*.md
+*INTERNACIONALIZACION*.md
+*BACKEND*.md
+*TUNNEL*.md
+*GUIA*.md
+*INSTRUCCIONES*.md
+*DIAGNOSTICO*.md
+*TROUBLESHOOTING*.md
+
+# Debug and testing scripts (should not be in production)
+backend/src/scripts/debug*.js
+backend/src/scripts/test*.js
+backend/src/scripts/fix*.js
+backend/src/scripts/force*.js
+backend/src/scripts/simple*.js
+backend/src/scripts/check*.js
+backend/src/scripts/reset*.js
+backend/src/scripts/diagnose*.js
+backend/test-*.js
+backend/verify-*.js
+backend/check-*.js
+backend/debug-*.js
+backend/create-*.js
+backend/search-*.js
+backend/start-with-specific-ip.js
+backend/setup-env.js
+fix-env-vars.js
+
+# Data files with real information
+backend/real-*.csv
+backend/productos-ejemplo.csv
+backend/profile-data.json
+backend/*-data.json
+backend/*-example.csv
+backend/*-sample.csv
+
+# Temporary and backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.swp
+*.swo
+*~
+
+# Development scripts and batch files
+*.bat
+*.cmd
+*.sh
+*.ps1
+
+# WhatsApp and communication services
+backend/src/services/*whatsapp*.ts
+backend/src/services/*WhatsApp*.ts
+backend/src/services/*unified*.ts
+backend/src/services/*baileys*.ts
+backend/src/services/*twilio*.ts
+backend/src/services/*simple*.ts
+backend/src/services/*web*.ts
+backend/WHATSAPP_*.md
+backend/setup-whatsapp-*.bat
+backend/setup-whatsapp-*.sh
+
+# Quotation system files (temporary implementation)
+backend/src/models/Quotation.ts
+backend/src/models/QuotationConfig.ts
+backend/src/controllers/quotation*.ts
+backend/src/routes/quotation*.ts
+backend/src/services/advancedProductSearchService.ts
+backend/src/controllers/advancedSearchController.ts
+backend/src/routes/advancedSearchRoutes.ts
+src/pages/Quotations.tsx
+src/pages/QuotationConfig.tsx
+src/components/CreateQuotationModal.tsx
+src/components/QuotationDetailsModal.tsx
+src/components/ReviewStats.tsx
+mobile/src/screens/QuotationsScreen.tsx
+mobile/src/screens/CreateQuotationScreen.tsx
+mobile/src/screens/QuotationDetailsScreen.tsx
+mobile/src/screens/QuotationConfigScreen.tsx
+
+# User management test files
+backend/src/services/userManagementService.ts
+backend/src/controllers/userManagementController.ts
+backend/src/routes/userManagementRoutes.ts
+backend/src/routes/userManagementTestRoutes.ts
+backend/src/controllers/diagnosticController.ts
+backend/src/routes/diagnosticRoutes.ts
+backend/src/middleware/testAuthMiddleware.ts
+src/services/userService.ts
+
+# PDF and document services
+backend/src/services/pdfService.ts
+
+# WhatsApp initialization scripts
+backend/src/scripts/initWhatsApp.ts
+backend/src/routes/whatsappTestRoutes.ts
+
+# Enrichment worker
+backend/src/services/enrichmentWorker.ts
+
+# Duplicate component versions
+src/pages/AdminUsersFinal.tsx
+src/pages/AdminUsersNew.tsx
+src/pages/AdminUsersFixed.tsx
+
+# Cleanup scripts
+cleanup-sensitive-files.bat
+
+# Production deployment files
+Dockerfile
+docker-compose.yml
+docker-compose.prod.yml
+.dockerignore
+
+# IDE and editor files
+*.sublime-project
+*.sublime-workspace
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Bower dependency directory
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons
+build/Release
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+.env.production
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Directory for instrumented libs generated by jscoverage/JSCover
+lib-cov
+
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Bower dependency directory
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons
+build/Release
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+.env.production
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/

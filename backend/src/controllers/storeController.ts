@@ -4,22 +4,22 @@ import User from '../models/User';
 import State from '../models/State';
 import Municipality from '../models/Municipality';
 import Parish from '../models/Parish';
-
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
 class StoreController {
   // Obtener usuarios store_manager para asignación de tiendas
-  async getStoreManagers(req: Request, res: Response) {
+  async getStoreManagers(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const users = await User.find({ 
-        role: 'store_manager', 
-        isActive: true 
+      const users = await User.find({
+        role: 'store_manager',
+        isActive: true
       }).select('name email role isActive').sort({ name: 1 });
-      
       // Mapear los usuarios para incluir el campo 'id' además de '_id'
       const mappedUsers = users.map(user => ({
         ...user.toObject(),
         id: (user as any)._id.toString()
       }));
-      
       res.json({
         success: true,
         data: mappedUsers
@@ -32,9 +32,8 @@ class StoreController {
       });
     }
   }
-
   // Obtener todas las tiendas (para admin)
-  async getAllStores(req: Request, res: Response) {
+  async getAllStores(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const {
         page = 1,
@@ -44,9 +43,7 @@ class StoreController {
         state,
         isActive
       } = req.query;
-
       const filter: any = {};
-
       // Filtros
       if (search) {
         filter.$or = [
@@ -55,13 +52,10 @@ class StoreController {
           { city: { $regex: search, $options: 'i' } }
         ];
       }
-
       if (city) filter.city = city;
       if (state) filter.state = state;
       if (isActive !== undefined) filter.isActive = isActive === 'true';
-
       const skip = (Number(page) - 1) * Number(limit);
-
       const stores = await Store.find(filter)
         .populate('owner', 'name email')
         .populate('managers', 'name email')
@@ -72,9 +66,7 @@ class StoreController {
         .limit(Number(limit))
         .skip(skip)
         .select('-__v');
-
       const total = await Store.countDocuments(filter);
-
       res.json({
         success: true,
         data: {
@@ -95,12 +87,10 @@ class StoreController {
       });
     }
   }
-
   // Obtener tienda por ID
-  async getStoreById(req: Request, res: Response) {
+  async getStoreById(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-
       const store = await Store.findById(id)
         .populate('owner', 'name email')
         .populate('managers', 'name email')
@@ -108,14 +98,12 @@ class StoreController {
         .populate('municipalityRef', 'name')
         .populate('parishRef', 'name')
         .select('-__v');
-
       if (!store) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Tienda no encontrada'
         });
       }
-
       res.json({
         success: true,
         data: store
@@ -128,13 +116,10 @@ class StoreController {
       });
     }
   }
-
   // Obtener tiendas del usuario (para gestores de tienda)
-  async getUserStores(req: Request, res: Response) {
+  async getUserStores(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = (req as any).user._id;
-      console.log('getUserStores: Usuario ID:', userId);
-
       const stores = await Store.find({
         $or: [
           { owner: userId },
@@ -149,8 +134,6 @@ class StoreController {
         .populate('parishRef', 'name')
         .sort({ createdAt: -1 })
         .select('-__v');
-
-      console.log('getUserStores: Tiendas encontradas:', stores.length);
       res.json({
         success: true,
         data: stores
@@ -163,13 +146,9 @@ class StoreController {
       });
     }
   }
-
-  // Debug: Obtener información detallada de tiendas del usuario
-  async getUserStoresDebug(req: Request, res: Response) {
+  async getUserStoresDebug(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = (req as any).user._id;
-      console.log('getUserStoresDebug: Usuario ID:', userId);
-
       // Buscar todas las tiendas (sin filtro de isActive)
       const allStores = await Store.find({
         $or: [
@@ -177,7 +156,6 @@ class StoreController {
           { managers: userId }
         ]
       }).select('name isActive owner managers');
-
       // Buscar tiendas activas
       const activeStores = await Store.find({
         $or: [
@@ -186,7 +164,6 @@ class StoreController {
         ],
         isActive: true
       }).select('name isActive owner managers');
-
       res.json({
         success: true,
         data: {
@@ -194,7 +171,7 @@ class StoreController {
           totalStores: allStores.length,
           activeStores: activeStores.length,
           allStores,
-          activeStores
+          activeStoresList: activeStores
         }
       });
     } catch (error) {
@@ -205,13 +182,9 @@ class StoreController {
       });
     }
   }
-
-  // Debug: Obtener tiendas completas del usuario
-  async getUserStoresComplete(req: Request, res: Response) {
+  async getUserStoresComplete(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = (req as any).user._id;
-      console.log('getUserStoresComplete: Usuario ID:', userId);
-
       const stores = await Store.find({
         $or: [
           { owner: userId },
@@ -226,8 +199,6 @@ class StoreController {
         .populate('parishRef', 'name')
         .sort({ createdAt: -1 })
         .select('-__v');
-
-      console.log('getUserStoresComplete: Tiendas encontradas:', stores.length);
       res.json({
         success: true,
         data: stores
@@ -240,24 +211,16 @@ class StoreController {
       });
     }
   }
-
-  // Debug: Endpoint simple para probar
-  async testUserStores(req: Request, res: Response) {
+  async testUserStores(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      console.log('testUserStores: Iniciando...');
-      console.log('testUserStores: Headers:', req.headers);
-      console.log('testUserStores: User:', (req as any).user);
-      
+      // Información de usuario no loggeada por seguridad.user);
       const userId = (req as any).user?._id;
-      console.log('testUserStores: Usuario ID:', userId);
-
       if (!userId) {
-        return res.status(401).json({
+        res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
         });
       }
-
       // Buscar tiendas simples sin populate
       const stores = await Store.find({
         $or: [
@@ -266,9 +229,6 @@ class StoreController {
         ],
         isActive: true
       }).select('name isActive owner managers');
-
-      console.log('testUserStores: Tiendas encontradas:', stores.length);
-      
       res.json({
         success: true,
         data: stores,
@@ -282,17 +242,14 @@ class StoreController {
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
-        error: error.message
+        error: (error as Error).message
       });
     }
   }
-
   // Crear nueva tienda
-  async createStore(req: Request, res: Response) {
+  async createStore(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      console.log('Datos recibidos para crear tienda:', req.body);
       console.log('Usuario autenticado:', (req as any).user);
-      
       const {
         name,
         description,
@@ -313,66 +270,57 @@ class StoreController {
         businessHours,
         settings
       } = req.body;
-
       // Validaciones básicas
       if (!name || !address || !city || !zipCode || !phone || !email) {
-        console.log('Campos faltantes:', { name, address, city, zipCode, phone, email });
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Los campos nombre, dirección, ciudad, código postal, teléfono y email son obligatorios'
         });
       }
-
       // Validar que se haya seleccionado una división administrativa
       if (!stateRef || !municipalityRef || !parishRef) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Debe seleccionar estado, municipio y parroquia'
         });
       }
-
       // Validar que las referencias de divisiones administrativas existan
       if (stateRef) {
         const stateExists = await State.findById(stateRef);
         if (!stateExists) {
-          return res.status(400).json({
+          res.status(400).json({
             success: false,
             message: 'El estado seleccionado no existe'
           });
         }
       }
-
       if (municipalityRef) {
         const municipalityExists = await Municipality.findById(municipalityRef);
         if (!municipalityExists) {
-          return res.status(400).json({
+          res.status(400).json({
             success: false,
             message: 'El municipio seleccionado no existe'
           });
         }
       }
-
       if (parishRef) {
         const parishExists = await Parish.findById(parishRef);
         if (!parishExists) {
-          return res.status(400).json({
+          res.status(400).json({
             success: false,
             message: 'La parroquia seleccionada no existe'
           });
         }
       }
-
       // Verificar si el email ya está registrado
       const existingStore = await Store.findOne({ email });
       if (existingStore) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Ya existe una tienda con este email'
         });
       }
-
       const userId = (req as any).user._id;
-
       const store = new Store({
         name,
         description,
@@ -394,18 +342,15 @@ class StoreController {
         owner: userId,
         managers: [userId] // El creador también es manager
       });
-
       console.log('Guardando tienda en la base de datos...');
-      await store.save();
+      await store?.save();
       console.log('Tienda guardada exitosamente:', store._id);
-
       // Actualizar el usuario para incluir la tienda
       console.log('Actualizando usuario con la nueva tienda...');
       await User.findByIdAndUpdate(userId, {
         $push: { stores: store._id }
       });
       console.log('Usuario actualizado exitosamente');
-
       res.status(201).json({
         success: true,
         message: 'Tienda creada exitosamente',
@@ -413,54 +358,55 @@ class StoreController {
       });
     } catch (error) {
       console.error('Error creando tienda:', error);
-      console.error('Stack trace:', error.stack);
+      console.error('Stack trace:', (error as Error).stack);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        error: process.env['NODE_ENV'] === 'development' ? (error as Error).message : undefined
       });
     }
   }
-
   // Actualizar tienda
-  async updateStore(req: Request, res: Response) {
+  async updateStore(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const updateData = req.body;
-
       const store = await Store.findById(id);
       if (!store) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Tienda no encontrada'
         });
       }
-
       const userId = (req as any).user._id;
-
       // Verificar permisos (solo owner o managers pueden actualizar)
-      if (store.owner.toString() !== userId.toString() && 
+      if (!store) {
+        res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada'
+        });
+        return;
+      }
+      if (store.owner.toString() !== userId.toString() &&
           !store.managers.includes(userId)) {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para actualizar esta tienda'
         });
       }
-
       // Si se está actualizando el email, verificar que no exista
-      if (updateData.email && updateData.email !== store.email) {
-        const emailExists = await Store.findOne({ 
-          email: updateData.email, 
-          _id: { $ne: id } 
+      if (updateData.email && updateData.email !== store?.email) {
+        const emailExists = await Store.findOne({
+          email: updateData.email,
+          _id: { $ne: id }
         });
         if (emailExists) {
-          return res.status(400).json({
+          res.status(400).json({
             success: false,
             message: 'Ya existe una tienda con este email'
           });
         }
       }
-
       const updatedStore = await Store.findByIdAndUpdate(
         id,
         updateData,
@@ -471,7 +417,6 @@ class StoreController {
         .populate('stateRef', 'name code')
         .populate('municipalityRef', 'name')
         .populate('parishRef', 'name');
-
       res.json({
         success: true,
         message: 'Tienda actualizada exitosamente',
@@ -485,57 +430,56 @@ class StoreController {
       });
     }
   }
-
   // Agregar manager a la tienda
-  async addManager(req: Request, res: Response) {
+  async addManager(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { managerEmail } = req.body;
-
       const store = await Store.findById(id);
       if (!store) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Tienda no encontrada'
         });
       }
-
       const userId = (req as any).user._id;
-
       // Solo el owner puede agregar managers
-      if (store.owner.toString() !== userId.toString()) {
-        return res.status(403).json({
+      if (!store) {
+        res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada'
+        });
+        return;
+      }
+      if (store?.owner.toString() !== userId.toString()) {
+        res.status(403).json({
           success: false,
           message: 'Solo el propietario puede agregar managers'
         });
+        return;
       }
-
       // Buscar el usuario por email
       const manager = await User.findOne({ email: managerEmail });
       if (!manager) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
       }
-
       // Verificar que no sea ya manager
-      if (store.managers.includes(manager._id)) {
-        return res.status(400).json({
+      if (store.managers.includes(manager?._id)) {
+        res.status(400).json({
           success: false,
           message: 'El usuario ya es manager de esta tienda'
         });
       }
-
       // Agregar manager
-      store.managers.push(manager._id);
-      await store.save();
-
+      store.managers.push(manager!._id);
+      await store?.save();
       // Actualizar el usuario
-      await User.findByIdAndUpdate(manager._id, {
+      await User.findByIdAndUpdate(manager!._id, {
         $push: { stores: store._id }
       });
-
       res.json({
         success: true,
         message: 'Manager agregado exitosamente'
@@ -548,50 +492,50 @@ class StoreController {
       });
     }
   }
-
   // Remover manager de la tienda
-  async removeManager(req: Request, res: Response) {
+  async removeManager(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { managerId } = req.body;
-
       const store = await Store.findById(id);
       if (!store) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Tienda no encontrada'
         });
       }
-
       const userId = (req as any).user._id;
-
       // Solo el owner puede remover managers
-      if (store.owner.toString() !== userId.toString()) {
-        return res.status(403).json({
+      if (!store) {
+        res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada'
+        });
+      }
+      if (store?.owner.toString() !== userId.toString()) {
+        res.status(403).json({
           success: false,
           message: 'Solo el propietario puede remover managers'
         });
       }
-
       // Verificar que sea manager
-      if (!store.managers.includes(managerId)) {
-        return res.status(400).json({
+      if (!store?.managers.includes(managerId)) {
+        res.status(400).json({
           success: false,
           message: 'El usuario no es manager de esta tienda'
         });
       }
-
       // Remover manager
-      store.managers = store.managers.filter(
-        manager => manager.toString() !== managerId
-      );
-      await store.save();
-
+      if (store) {
+        store.managers = store.managers.filter(
+          manager => manager.toString() !== managerId
+        );
+        await store.save();
+      }
       // Actualizar el usuario
       await User.findByIdAndUpdate(managerId, {
-        $pull: { stores: store._id }
+        $pull: { stores: store?._id }
       });
-
       res.json({
         success: true,
         message: 'Manager removido exitosamente'
@@ -604,33 +548,33 @@ class StoreController {
       });
     }
   }
-
   // Desactivar tienda
-  async deactivateStore(req: Request, res: Response) {
+  async deactivateStore(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-
       const store = await Store.findById(id);
       if (!store) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Tienda no encontrada'
         });
       }
-
       const userId = (req as any).user._id;
-
       // Solo el owner puede desactivar la tienda
-      if (store.owner.toString() !== userId.toString()) {
-        return res.status(403).json({
+      if (!store) {
+        res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada'
+        });
+      }
+      if (store?.owner.toString() !== userId.toString()) {
+        res.status(403).json({
           success: false,
           message: 'Solo el propietario puede desactivar la tienda'
         });
       }
-
-      store.isActive = false;
-      await store.save();
-
+      store!.isActive = false;
+      await store?.save();
       res.json({
         success: true,
         message: 'Tienda desactivada exitosamente'
@@ -643,14 +587,12 @@ class StoreController {
       });
     }
   }
-
   // Obtener estadísticas de tiendas
-  async getStoreStats(req: Request, res: Response) {
+  async getStoreStats(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const totalStores = await Store.countDocuments();
       const activeStores = await Store.countDocuments({ isActive: true });
       const inactiveStores = await Store.countDocuments({ isActive: false });
-
       // Tiendas por ciudad
       const storesByCity = await Store.aggregate([
         {
@@ -662,7 +604,6 @@ class StoreController {
         { $sort: { count: -1 } },
         { $limit: 10 }
       ]);
-
       // Tiendas por estado
       const storesByState = await Store.aggregate([
         {
@@ -673,7 +614,6 @@ class StoreController {
         },
         { $sort: { count: -1 } }
       ]);
-
       res.json({
         success: true,
         data: {
@@ -692,9 +632,8 @@ class StoreController {
       });
     }
   }
-
   // Buscar tiendas por divisiones administrativas
-  async searchByAdministrativeDivision(req: Request, res: Response) {
+  async searchByAdministrativeDivision(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const {
         stateId,
@@ -704,14 +643,11 @@ class StoreController {
         limit = 20,
         search
       } = req.query;
-
       const filter: any = { isActive: true };
-
       // Filtros por división administrativa
       if (stateId) filter.stateRef = stateId;
       if (municipalityId) filter.municipalityRef = municipalityId;
       if (parishId) filter.parishRef = parishId;
-
       // Filtro de búsqueda adicional
       if (search) {
         filter.$or = [
@@ -720,9 +656,7 @@ class StoreController {
           { address: { $regex: search, $options: 'i' } }
         ];
       }
-
       const skip = (Number(page) - 1) * Number(limit);
-
       const stores = await Store.find(filter)
         .populate('owner', 'name email')
         .populate('managers', 'name email')
@@ -733,9 +667,7 @@ class StoreController {
         .limit(Number(limit))
         .skip(skip)
         .select('-__v');
-
       const total = await Store.countDocuments(filter);
-
       res.json({
         success: true,
         data: {
@@ -756,39 +688,54 @@ class StoreController {
       });
     }
   }
-
   // Toggle status de la tienda (activar/desactivar)
-  async toggleStoreStatus(req: Request, res: Response) {
+  async toggleStoreStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-
       const store = await Store.findById(id);
+      
       if (!store) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Tienda no encontrada'
         });
+        return;
       }
 
       const userId = (req as any).user._id;
-
-      // Solo el owner puede cambiar el status de la tienda
-      if (store.owner.toString() !== userId.toString()) {
-        return res.status(403).json({
+      const userRole = (req as any).user.role;
+      
+      // Verificar permisos: admin, owner o store_manager de esta tienda
+      const isAdmin = userRole === 'admin';
+      const isOwner = store.owner.toString() === userId.toString();
+      const isStoreManager = userRole === 'store_manager' && 
+        store.managers.some(managerId => managerId.toString() === userId.toString());
+      
+      if (!isAdmin && !isOwner && !isStoreManager) {
+        res.status(403).json({
           success: false,
-          message: 'Solo el propietario puede cambiar el estado de la tienda'
+          message: 'No tienes permisos para cambiar el estado de esta tienda'
         });
+        return;
       }
 
+      // Cambiar estado
       store.isActive = !store.isActive;
       await store.save();
-
+      
       const action = store.isActive ? 'activada' : 'desactivada';
-
+      const actorType = isAdmin ? 'administrador' : isOwner ? 'propietario' : 'gestor';
+      
       res.json({
         success: true,
-        message: `Tienda ${action} exitosamente`,
-        data: { isActive: store.isActive }
+        message: `Tienda ${action} exitosamente por ${actorType}`,
+        data: { 
+          isActive: store.isActive,
+          changedBy: {
+            role: userRole,
+            type: actorType
+          }
+        }
       });
     } catch (error) {
       console.error('Error cambiando estado de la tienda:', error);
@@ -798,43 +745,42 @@ class StoreController {
       });
     }
   }
-
   // Establecer tienda como principal
-  async setMainStore(req: Request, res: Response) {
+  async setMainStore(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-
       const store = await Store.findById(id);
       if (!store) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Tienda no encontrada'
         });
       }
-
       const userId = (req as any).user._id;
-
       // Solo el owner puede establecer la tienda principal
-      if (store.owner.toString() !== userId.toString()) {
-        return res.status(403).json({
+      if (!store) {
+        res.status(404).json({
+          success: false,
+          message: 'Tienda no encontrada'
+        });
+      }
+      if (store?.owner.toString() !== userId.toString()) {
+        res.status(403).json({
           success: false,
           message: 'Solo el propietario puede establecer la tienda principal'
         });
       }
-
       // Primero, quitar el estado de tienda principal de todas las tiendas del usuario
       await Store.updateMany(
-        { 
+        {
           owner: userId,
           _id: { $ne: id } // Excluir la tienda actual
         },
         { isMainStore: false }
       );
-
       // Luego, establecer la tienda seleccionada como principal
-      store.isMainStore = true;
-      await store.save();
-
+      store!.isMainStore = true;
+      await store?.save();
       res.json({
         success: true,
         message: 'Tienda establecida como principal exitosamente',
@@ -848,20 +794,17 @@ class StoreController {
       });
     }
   }
-
   // Obtener sucursales de la tienda principal
-  async getBranches(req: Request, res: Response) {
+  async getBranches(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = (req as any).user._id;
       const userRole = (req as any).user.role;
-
       let branches;
-
       if (userRole === 'admin') {
         // Admin puede ver todas las sucursales
-        branches = await Store.find({ 
+        branches = await Store.find({
           isMainStore: false,
-          isActive: true 
+          isActive: true
         })
           .populate('owner', 'name email')
           .populate('managers', 'name email')
@@ -872,7 +815,7 @@ class StoreController {
           .select('-__v');
       } else {
         // Store manager solo ve sucursales de su tienda principal
-        const mainStore = await Store.findOne({ 
+        const mainStore = await Store.findOne({
           $or: [
             { owner: userId },
             { managers: userId }
@@ -880,19 +823,17 @@ class StoreController {
           isMainStore: true,
           isActive: true
         });
-
         if (!mainStore) {
-          return res.status(404).json({
+          res.status(404).json({
             success: false,
             message: 'No tienes una tienda principal asignada'
           });
         }
-
         // Obtener todas las sucursales que pertenecen al mismo owner
-        branches = await Store.find({ 
-          owner: mainStore.owner,
+        branches = await Store.find({
+          owner: mainStore?.owner,
           isMainStore: false,
-          isActive: true 
+          isActive: true
         })
           .populate('owner', 'name email')
           .populate('managers', 'name email')
@@ -902,7 +843,6 @@ class StoreController {
           .sort({ name: 1 })
           .select('-__v');
       }
-
       res.json({
         success: true,
         data: branches
@@ -915,40 +855,33 @@ class StoreController {
       });
     }
   }
-
   // Eliminar tienda (solo para admin o propietario con confirmación)
-  async deleteStore(req: Request, res: Response) {
+  async deleteStore(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-
       const store = await Store.findById(id);
       if (!store) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Tienda no encontrada'
         });
       }
-
       const userId = (req as any).user._id;
       const user = (req as any).user;
-
       // Solo el owner o admin pueden eliminar la tienda
-      if (store.owner.toString() !== userId.toString() && user.role !== 'admin') {
-        return res.status(403).json({
+      if (store?.owner.toString() !== userId.toString() && user.role !== 'admin') {
+        res.status(403).json({
           success: false,
           message: 'Solo el propietario o un administrador pueden eliminar la tienda'
         });
       }
-
       // Eliminar la tienda
       await Store.findByIdAndDelete(id);
-
       // Remover la referencia de la tienda de todos los usuarios managers
       await User.updateMany(
         { stores: id },
         { $pull: { stores: id } }
       );
-
       res.json({
         success: true,
         message: 'Tienda eliminada exitosamente'
@@ -962,6 +895,5 @@ class StoreController {
     }
   }
 }
-
 const storeController = new StoreController();
 export default storeController;

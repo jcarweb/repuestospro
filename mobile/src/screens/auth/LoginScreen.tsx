@@ -21,9 +21,11 @@ import biometricAuthService from '../../services/biometricAuth';
 import authVerificationService from '../../services/authVerification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import mobileVerificationService from '../../services/mobileVerification';
-import NetworkDiagnostic from '../../components/NetworkDiagnostic';
 import TwoFactorVerificationModal from '../../components/TwoFactorVerificationModal';
 import PinLoginModal from '../../components/PinLoginModal';
+// import { SimpleBackendSelector } from '../../components/SimpleBackendSelector';
+// import { BackendToggle } from '../../components/BackendToggle';
+import { BackendSwitcher } from '../../components/BackendSwitcher';
 
 interface LoginScreenProps {
   navigation: any;
@@ -36,9 +38,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [isBiometricLoading, setIsBiometricLoading] = useState(false);
   const [userAuthSettings, setUserAuthSettings] = useState<any>(null);
-  const [showNetworkDiagnostic, setShowNetworkDiagnostic] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
-  const { login, loginWithGoogle, verifyTwoFactor, isLoading, error, clearError, requiresTwoFactor } = useAuth();
+  const { login, loginWithGoogle, verifyTwoFactor, isLoading, error, clearError, requiresTwoFactor, pendingUser } = useAuth();
   const { colors, isDark } = useTheme();
 
   // Verificar disponibilidad de autenticación biométrica al cargar
@@ -360,6 +361,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             </Text>
           </View>
 
+          {/* Backend Switcher */}
+          <View style={styles.backendSelectorContainer}>
+            <BackendSwitcher />
+          </View>
+
           {/* Form */}
           <View style={styles.form}>
             {error && (
@@ -516,47 +522,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 >
                   <Text style={[styles.helpLinkText, { color: colors.primary }]}>¿Olvidaste tu contraseña?</Text>
                 </TouchableOpacity>
+                
               </View>
 
-              {/* Botón temporal para limpiar verificación móvil (solo para testing) */}
-              <TouchableOpacity
-                style={styles.clearDataButton}
-                onPress={async () => {
-                  try {
-                    await mobileVerificationService.clearMobileVerification();
-                    Alert.alert('Datos Limpiados', 'La verificación móvil ha sido limpiada. Puedes probar el flujo completo nuevamente.');
-                  } catch (error) {
-                    console.error('Error clearing mobile verification:', error);
-                  }
-                }}
-              >
-                <Text style={[styles.clearDataText, { color: colors.error }]}>
-                  🧹 Limpiar Verificación Móvil (Testing)
-                </Text>
-              </TouchableOpacity>
-
-              {/* Botón de diagnóstico de red */}
-              <TouchableOpacity
-                style={[styles.clearDataButton, { borderColor: colors.primary }]}
-                onPress={() => setShowNetworkDiagnostic(true)}
-              >
-                <Text style={[styles.clearDataText, { color: colors.primary }]}>
-                  🔧 Diagnóstico de Red
-                </Text>
-              </TouchableOpacity>
             </View>
           </View>
         </View>
       </ScrollView>
 
-      {/* Modal de diagnóstico de red */}
-      <Modal
-        visible={showNetworkDiagnostic}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <NetworkDiagnostic onClose={() => setShowNetworkDiagnostic(false)} />
-      </Modal>
 
       {/* Modal de verificación 2FA */}
       <TwoFactorVerificationModal
@@ -566,6 +539,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         }}
         onSuccess={handleTwoFactorVerification}
         onUseBackupCode={handleUseBackupCode}
+        userEmail={pendingUser?.email || email}
       />
 
       {/* Modal de login con PIN */}
@@ -620,6 +594,10 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14, // Reducido de 16 a 14
     textAlign: 'center',
+  },
+  backendSelectorContainer: {
+    marginBottom: 16,
+    alignItems: 'center',
   },
   form: {
     gap: 16, // Reducido de 20 a 16

@@ -2,14 +2,18 @@ import { Request, Response } from 'express';
 import { OrderService, OrderCreationData, OrderUpdateData, OrderFilters } from '../services/OrderService';
 import mongoose from 'mongoose';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 export class OrderController {
 
   /**
    * Crear una nueva orden desde una transacción
    */
-  public createOrder = async (req: Request, res: Response) => {
+  public createOrder = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userId = (req as any).user.id;
+      const userId = req.user?.id;
       const {
         transactionId,
         storeId,
@@ -36,7 +40,7 @@ export class OrderController {
 
       // Validar datos requeridos
       if (!transactionId || !storeId || !customerInfo || !items || !shippingAddress) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Datos requeridos faltantes'
         });
@@ -99,11 +103,11 @@ export class OrderController {
   /**
    * Obtener órdenes del usuario
    */
-  public getUserOrders = async (req: Request, res: Response) => {
+  public getUserOrders = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userId = (req as any).user.id;
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const userId = req.user?.id;
+      const page = parseInt(req.query['page'] as string) || 1;
+      const limit = parseInt(req.query['limit'] as string) || 10;
       const filters = this.parseFilters(req.query);
 
       const result = await OrderService.getUserOrders(
@@ -130,11 +134,11 @@ export class OrderController {
   /**
    * Obtener órdenes de la tienda (para store managers)
    */
-  public getStoreOrders = async (req: Request, res: Response) => {
+  public getStoreOrders = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const storeId = (req as any).user.storeId;
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const storeId = req.user?.storeId;
+      const page = parseInt(req.query['page'] as string) || 1;
+      const limit = parseInt(req.query['limit'] as string) || 10;
       const filters = this.parseFilters(req.query);
 
       const result = await OrderService.getStoreOrders(
@@ -161,10 +165,10 @@ export class OrderController {
   /**
    * Obtener todas las órdenes (admin)
    */
-  public getAllOrders = async (req: Request, res: Response) => {
+  public getAllOrders = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const page = parseInt(req.query['page'] as string) || 1;
+      const limit = parseInt(req.query['limit'] as string) || 10;
       const filters = this.parseFilters(req.query);
 
       const result = await OrderService.getAllOrders(page, limit, filters);
@@ -186,12 +190,27 @@ export class OrderController {
   /**
    * Obtener orden por ID
    */
-  public getOrderById = async (req: Request, res: Response) => {
+  public getOrderById = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { orderId } = req.params;
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
-      const storeId = (req as any).user.storeId;
+      if (!orderId) {
+        res.status(400).json({
+          success: false,
+          message: 'ID de orden requerido'
+        });
+        return;
+      }
+      const userId = req.user?.id;
+      const userRole = req.user?.role;
+      const storeId = req.user?.storeId;
+
+      if (!orderId) {
+        res.status(400).json({
+          success: false,
+          message: 'ID de orden requerido'
+        });
+        return;
+      }
 
       let order;
       
@@ -204,7 +223,7 @@ export class OrderController {
       }
 
       if (!order) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Orden no encontrada'
         });
@@ -227,12 +246,19 @@ export class OrderController {
   /**
    * Actualizar orden
    */
-  public updateOrder = async (req: Request, res: Response) => {
+  public updateOrder = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { orderId } = req.params;
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
-      const storeId = (req as any).user.storeId;
+      if (!orderId) {
+        res.status(400).json({
+          success: false,
+          message: 'ID de orden requerido'
+        });
+        return;
+      }
+      const userId = req.user?.id;
+      const userRole = req.user?.role;
+      const storeId = req.user?.storeId;
       const updateData: OrderUpdateData = req.body;
 
       let order;
@@ -246,7 +272,7 @@ export class OrderController {
       }
 
       if (!order) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Orden no encontrada'
         });
@@ -270,26 +296,32 @@ export class OrderController {
   /**
    * Cancelar orden
    */
-  public cancelOrder = async (req: Request, res: Response) => {
+  public cancelOrder = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { orderId } = req.params;
+      if (!orderId) {
+        res.status(400).json({
+          success: false,
+          message: 'ID de orden requerido'
+        });
+      }
       const { reason } = req.body;
-      const userId = (req as any).user.id;
-      const userRole = (req as any).user.role;
-      const storeId = (req as any).user.storeId;
+      const userId = req.user?.id;
+      const userRole = req.user?.role;
+      const storeId = req.user?.storeId;
 
       let order;
       
       if (userRole === 'admin') {
-        order = await OrderService.cancelOrder(orderId, reason);
+        order = await OrderService.cancelOrder(orderId!, reason!);
       } else if (userRole === 'store_manager') {
-        order = await OrderService.cancelOrder(orderId, reason, undefined, new mongoose.Types.ObjectId(storeId));
+        order = await OrderService.cancelOrder(orderId!, reason!, undefined, new mongoose.Types.ObjectId(storeId));
       } else {
-        order = await OrderService.cancelOrder(orderId, reason, new mongoose.Types.ObjectId(userId));
+        order = await OrderService.cancelOrder(orderId!, reason!, new mongoose.Types.ObjectId(userId));
       }
 
       if (!order) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Orden no encontrada'
         });
@@ -313,15 +345,21 @@ export class OrderController {
   /**
    * Asignar orden a un empleado
    */
-  public assignOrder = async (req: Request, res: Response) => {
+  public assignOrder = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { orderId } = req.params;
+      if (!orderId) {
+        res.status(400).json({
+          success: false,
+          message: 'ID de orden requerido'
+        });
+      }
       const { assignedTo } = req.body;
-      const userRole = (req as any).user.role;
-      const storeId = (req as any).user.storeId;
+      const userRole = req.user?.role;
+      const storeId = req.user?.storeId;
 
       if (userRole !== 'admin' && userRole !== 'store_manager') {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para asignar órdenes'
         });
@@ -330,13 +368,13 @@ export class OrderController {
       let order;
       
       if (userRole === 'admin') {
-        order = await OrderService.assignOrder(orderId, new mongoose.Types.ObjectId(assignedTo));
+        order = await OrderService.assignOrder(orderId!, new mongoose.Types.ObjectId(assignedTo));
       } else {
-        order = await OrderService.assignOrder(orderId, new mongoose.Types.ObjectId(assignedTo), new mongoose.Types.ObjectId(storeId));
+        order = await OrderService.assignOrder(orderId!, new mongoose.Types.ObjectId(assignedTo), new mongoose.Types.ObjectId(storeId));
       }
 
       if (!order) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Orden no encontrada'
         });
@@ -360,15 +398,21 @@ export class OrderController {
   /**
    * Asignar delivery a una orden
    */
-  public assignDelivery = async (req: Request, res: Response) => {
+  public assignDelivery = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { orderId } = req.params;
+      if (!orderId) {
+        res.status(400).json({
+          success: false,
+          message: 'ID de orden requerido'
+        });
+      }
       const { deliveryId } = req.body;
-      const userRole = (req as any).user.role;
-      const storeId = (req as any).user.storeId;
+      const userRole = req.user?.role;
+      const storeId = req.user?.storeId;
 
       if (userRole !== 'admin' && userRole !== 'store_manager') {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para asignar delivery'
         });
@@ -377,13 +421,13 @@ export class OrderController {
       let order;
       
       if (userRole === 'admin') {
-        order = await OrderService.assignDelivery(orderId, new mongoose.Types.ObjectId(deliveryId));
+        order = await OrderService.assignDelivery(orderId!, new mongoose.Types.ObjectId(deliveryId));
       } else {
-        order = await OrderService.assignDelivery(orderId, new mongoose.Types.ObjectId(deliveryId), new mongoose.Types.ObjectId(storeId));
+        order = await OrderService.assignDelivery(orderId!, new mongoose.Types.ObjectId(deliveryId), new mongoose.Types.ObjectId(storeId));
       }
 
       if (!order) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Orden no encontrada'
         });
@@ -407,12 +451,12 @@ export class OrderController {
   /**
    * Obtener estadísticas de órdenes
    */
-  public getOrderStats = async (req: Request, res: Response) => {
+  public getOrderStats = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userRole = (req as any).user.role;
-      const storeId = (req as any).user.storeId;
-      const dateFrom = req.query.dateFrom ? new Date(req.query.dateFrom as string) : undefined;
-      const dateTo = req.query.dateTo ? new Date(req.query.dateTo as string) : undefined;
+      const userRole = req.user?.role;
+      const storeId = req.user?.storeId;
+      const dateFrom = req.query['dateFrom'] ? new Date(req.query['dateFrom'] as string) : undefined;
+      const dateTo = req.query['dateTo'] ? new Date(req.query['dateTo'] as string) : undefined;
 
       let stats;
       
@@ -439,12 +483,12 @@ export class OrderController {
   /**
    * Obtener órdenes por estado
    */
-  public getOrdersByStatus = async (req: Request, res: Response) => {
+  public getOrdersByStatus = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { status } = req.params;
-      const limit = parseInt(req.query.limit as string) || 10;
-      const userRole = (req as any).user.role;
-      const storeId = (req as any).user.storeId;
+      const limit = parseInt(req.query['limit'] as string) || 10;
+      const userRole = req.user?.role;
+      const storeId = req.user?.storeId;
 
       let orders;
       
@@ -471,10 +515,10 @@ export class OrderController {
   /**
    * Obtener órdenes urgentes
    */
-  public getUrgentOrders = async (req: Request, res: Response) => {
+  public getUrgentOrders = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userRole = (req as any).user.role;
-      const storeId = (req as any).user.storeId;
+      const userRole = req.user?.role;
+      const storeId = req.user?.storeId;
 
       let orders;
       
@@ -501,16 +545,16 @@ export class OrderController {
   /**
    * Buscar órdenes
    */
-  public searchOrders = async (req: Request, res: Response) => {
+  public searchOrders = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { searchTerm } = req.query;
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
-      const userRole = (req as any).user.role;
-      const storeId = (req as any).user.storeId;
+      const page = parseInt(req.query['page'] as string) || 1;
+      const limit = parseInt(req.query['limit'] as string) || 10;
+      const userRole = req.user?.role;
+      const storeId = req.user?.storeId;
 
       if (!searchTerm) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Término de búsqueda requerido'
         });
@@ -541,11 +585,11 @@ export class OrderController {
   /**
    * Obtener órdenes asignadas a un delivery
    */
-  public getDeliveryOrders = async (req: Request, res: Response) => {
+  public getDeliveryOrders = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const deliveryId = (req as any).user.id;
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const deliveryId = req.user?.id;
+      const page = parseInt(req.query['page'] as string) || 1;
+      const limit = parseInt(req.query['limit'] as string) || 10;
 
       const result = await OrderService.getDeliveryOrders(
         new mongoose.Types.ObjectId(deliveryId), 
@@ -570,12 +614,12 @@ export class OrderController {
   /**
    * Exportar órdenes
    */
-  public exportOrders = async (req: Request, res: Response) => {
+  public exportOrders = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const format = (req.query.format as 'csv' | 'json') || 'csv';
+      const format = (req.query['format'] as 'csv' | 'json') || 'csv';
       const filters = this.parseFilters(req.query);
-      const userRole = (req as any).user.role;
-      const storeId = (req as any).user.storeId;
+      const userRole = req.user?.role;
+      const storeId = req.user?.storeId;
 
       let data;
       

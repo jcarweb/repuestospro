@@ -6,19 +6,23 @@ import User from '../models/User';
 import Store from '../models/Store';
 import Product from '../models/Product';
 
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
 export class ChatController {
   constructor(private chatService: ChatService) {}
 
   // Iniciar un nuevo chat
-  async createChat(req: Request, res: Response) {
+  async createChat(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { storeId, productId } = req.body;
-      const clientId = (req as any).user._id;
-      const userRole = (req as any).user.role;
+      const clientId = req.user?._id;
+      const userRole = req.user?.role;
 
       // Solo clientes pueden iniciar chats
       if (userRole !== 'client') {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'Solo los clientes pueden iniciar chats'
         });
@@ -27,7 +31,7 @@ export class ChatController {
       // Validar que la tienda existe
       const store = await Store.findById(storeId);
       if (!store) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Tienda no encontrada'
         });
@@ -37,15 +41,15 @@ export class ChatController {
       if (productId) {
         const product = await Product.findById(productId);
         if (!product) {
-          return res.status(404).json({
+          res.status(404).json({
             success: false,
             message: 'Producto no encontrado'
           });
         }
 
         // Verificar que el producto pertenece a la tienda
-        if (!product.store.equals(storeId)) {
-          return res.status(400).json({
+        if (!product || !product.store.equals(storeId)) {
+          res.status(400).json({
             success: false,
             message: 'El producto no pertenece a esta tienda'
           });
@@ -72,12 +76,12 @@ export class ChatController {
   }
 
   // Obtener chats del usuario
-  async getUserChats(req: Request, res: Response) {
+  async getUserChats(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id;
+      const userRole = req.user?.role;
 
-      let chats;
+      let chats: any[] = [];
 
       if (userRole === 'client') {
         chats = await this.chatService.getUserChats(userId, 'client');
@@ -111,7 +115,7 @@ export class ChatController {
         .sort({ lastActivity: -1 })
         .limit(100); // Limitar para admins
       } else {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para acceder a los chats'
         });
@@ -134,15 +138,23 @@ export class ChatController {
   }
 
   // Obtener un chat específico
-  async getChatById(req: Request, res: Response) {
+  async getChatById(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id;
+      const userRole = req.user?.role;
+
+      if (!chatId) {
+        res.status(400).json({
+          success: false,
+          message: 'ID de chat es requerido'
+        });
+        return;
+      }
 
       const chat = await this.chatService.getChatById(chatId);
       if (!chat) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Chat no encontrado'
         });
@@ -152,11 +164,11 @@ export class ChatController {
       let hasAccess = false;
 
       if (userRole === 'client') {
-        hasAccess = chat.participants.client.equals(userId);
+        hasAccess = chat?.participants.client.equals(userId) || false;
       } else if (userRole === 'store_manager') {
         // Verificar que el usuario tiene acceso a la tienda
         const store = await Store.findOne({
-          _id: chat.participants.store,
+          _id: chat?.participants.store,
           $or: [
             { owner: userId },
             { managers: userId }
@@ -169,7 +181,7 @@ export class ChatController {
       }
 
       if (!hasAccess) {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'No tienes acceso a este chat'
         });
@@ -189,17 +201,17 @@ export class ChatController {
   }
 
   // Obtener mensajes de un chat
-  async getChatMessages(req: Request, res: Response) {
+  async getChatMessages(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;
       const { page = 1, limit = 50 } = req.query;
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id;
+      const userRole = req.user?.role;
 
       // Verificar acceso al chat (similar a getChatById)
       const chat = await Chat.findById(chatId);
       if (!chat) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Chat no encontrado'
         });
@@ -207,10 +219,10 @@ export class ChatController {
 
       let hasAccess = false;
       if (userRole === 'client') {
-        hasAccess = chat.participants.client.equals(userId);
+        hasAccess = chat?.participants.client.equals(userId) || false;
       } else if (userRole === 'store_manager') {
         const store = await Store.findOne({
-          _id: chat.participants.store,
+          _id: chat?.participants.store,
           $or: [{ owner: userId }, { managers: userId }],
           isActive: true
         });
@@ -220,7 +232,7 @@ export class ChatController {
       }
 
       if (!hasAccess) {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'No tienes acceso a este chat'
         });
@@ -267,15 +279,15 @@ export class ChatController {
   }
 
   // Cerrar un chat
-  async closeChat(req: Request, res: Response) {
+  async closeChat(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id;
+      const userRole = req.user?.role;
 
       const chat = await Chat.findById(chatId);
       if (!chat) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Chat no encontrado'
         });
@@ -284,10 +296,10 @@ export class ChatController {
       // Verificar permisos (solo participantes o admin pueden cerrar)
       let canClose = false;
       if (userRole === 'client') {
-        canClose = chat.participants.client.equals(userId);
+        canClose = chat?.participants.client.equals(userId) || false;
       } else if (userRole === 'store_manager') {
         const store = await Store.findOne({
-          _id: chat.participants.store,
+          _id: chat?.participants.store,
           $or: [{ owner: userId }, { managers: userId }],
           isActive: true
         });
@@ -297,7 +309,7 @@ export class ChatController {
       }
 
       if (!canClose) {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para cerrar este chat'
         });
@@ -329,7 +341,7 @@ export class ChatController {
       await systemMessage.save();
 
       // Notificar a través de WebSocket
-      this.chatService.getIO().to(chatId).emit('chat_closed', {
+      this.chatService.getIO().to(chatId || '').emit('chat_closed', {
         chatId,
         closedBy: userId,
         message: systemMessage
@@ -349,12 +361,12 @@ export class ChatController {
   }
 
   // Obtener estadísticas de chat (para admins)
-  async getChatStats(req: Request, res: Response) {
+  async getChatStats(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const userRole = (req as any).user.role;
+      const userRole = req.user?.role;
 
       if (userRole !== 'admin') {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'Solo los administradores pueden acceder a las estadísticas'
         });
@@ -400,11 +412,11 @@ export class ChatController {
   }
 
   // Obtener chats de una tienda específica
-  async getStoreChats(req: Request, res: Response) {
+  async getStoreChats(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { storeId } = req.params;
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id;
+      const userRole = req.user?.role;
 
       // Verificar que el usuario tiene acceso a la tienda
       if (userRole === 'store_manager') {
@@ -418,13 +430,13 @@ export class ChatController {
         });
 
         if (!store) {
-          return res.status(403).json({
+          res.status(403).json({
             success: false,
             message: 'No tienes acceso a esta tienda'
           });
         }
       } else if (userRole !== 'admin') {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para acceder a los chats de la tienda'
         });
@@ -482,11 +494,11 @@ export class ChatController {
   }
 
   // Obtener estadísticas de chat de una tienda
-  async getStoreChatStats(req: Request, res: Response) {
+  async getStoreChatStats(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { storeId } = req.params;
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id;
+      const userRole = req.user?.role;
 
       // Verificar que el usuario tiene acceso a la tienda
       if (userRole === 'store_manager') {
@@ -500,13 +512,13 @@ export class ChatController {
         });
 
         if (!store) {
-          return res.status(403).json({
+          res.status(403).json({
             success: false,
             message: 'No tienes acceso a esta tienda'
           });
         }
       } else if (userRole !== 'admin') {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para acceder a las estadísticas de la tienda'
         });
@@ -558,7 +570,7 @@ export class ChatController {
           }).sort({ createdAt: -1 }).limit(1);
 
           if (clientMessages.length > 0) {
-            const responseTime = message.createdAt.getTime() - clientMessages[0].createdAt.getTime();
+            const responseTime = message.createdAt.getTime() - (clientMessages[0]?.createdAt.getTime() || 0);
             totalResponseTime += responseTime;
             responseCount++;
           }
@@ -591,15 +603,15 @@ export class ChatController {
   }
 
   // Bloquear un chat
-  async blockChat(req: Request, res: Response) {
+  async blockChat(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { chatId } = req.params;
-      const userId = (req as any).user._id;
-      const userRole = (req as any).user.role;
+      const userId = req.user?._id;
+      const userRole = req.user?.role;
 
       const chat = await Chat.findById(chatId);
       if (!chat) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: 'Chat no encontrado'
         });
@@ -608,7 +620,7 @@ export class ChatController {
       // Verificar permisos
       if (userRole === 'store_manager') {
         const store = await Store.findOne({
-          _id: chat.participants.store,
+          _id: chat?.participants.store,
           $or: [
             { owner: userId },
             { managers: userId }
@@ -617,21 +629,21 @@ export class ChatController {
         });
 
         if (!store) {
-          return res.status(403).json({
+          res.status(403).json({
             success: false,
             message: 'No tienes acceso a este chat'
           });
         }
       } else if (userRole !== 'admin') {
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: 'No tienes permisos para bloquear chats'
         });
       }
 
       // Bloquear el chat
-      chat.status = 'blocked';
-      await chat.save();
+      chat!.status = 'blocked';
+      await chat!.save();
 
       res.json({
         success: true,

@@ -2,7 +2,6 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import User from '../models/User';
 import config from './env';
-
 // Configurar estrategia de Google solo si las credenciales están disponibles
 if (config.GOOGLE_CLIENT_ID && config.GOOGLE_CLIENT_SECRET) {
   passport.use(
@@ -18,7 +17,6 @@ if (config.GOOGLE_CLIENT_ID && config.GOOGLE_CLIENT_SECRET) {
       try {
         // Buscar usuario existente por Google ID
         let user = await User.findOne({ googleId: profile.id });
-
         if (user) {
           // Usuario ya existe, actualizar información
           user.name = profile.displayName || user.name;
@@ -28,11 +26,9 @@ if (config.GOOGLE_CLIENT_ID && config.GOOGLE_CLIENT_SECRET) {
           await user.save();
           return done(null, user);
         }
-
         // Buscar por email si no existe por Google ID
         if (profile.emails?.[0]?.value) {
           user = await User.findOne({ email: profile.emails[0].value });
-          
           if (user) {
             // Usuario existe pero no tiene Google ID, agregarlo
             user.googleId = profile.id;
@@ -42,7 +38,6 @@ if (config.GOOGLE_CLIENT_ID && config.GOOGLE_CLIENT_SECRET) {
             return done(null, user);
           }
         }
-
         // Crear nuevo usuario
         const newUser = await User.create({
           name: profile.displayName,
@@ -52,7 +47,6 @@ if (config.GOOGLE_CLIENT_ID && config.GOOGLE_CLIENT_SECRET) {
           isActive: true,
           role: 'client'
         });
-
         return done(null, newUser);
       } catch (error) {
         return done(error, null);
@@ -60,14 +54,11 @@ if (config.GOOGLE_CLIENT_ID && config.GOOGLE_CLIENT_SECRET) {
     }
   ));
 } else {
-  console.log('⚠️  Google OAuth no configurado. Las variables GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET no están definidas.');
 }
-
 // Serializar usuario para la sesión
 passport.serializeUser((user: any, done) => {
   done(null, user.id);
 });
-
 // Deserializar usuario de la sesión
 passport.deserializeUser(async (id: string, done) => {
   try {
@@ -77,5 +68,4 @@ passport.deserializeUser(async (id: string, done) => {
     done(error, null);
   }
 });
-
 export default passport;

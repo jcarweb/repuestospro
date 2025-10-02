@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useActiveStore } from '../contexts/ActiveStoreContext';
@@ -84,6 +85,7 @@ const StoreManagerOrdersPage: React.FC = () => {
   const { t } = useLanguage();
   const { activeStore } = useActiveStore();
   const { theme } = useTheme();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Estados
   const [orders, setOrders] = useState<Order[]>([]);
@@ -124,6 +126,21 @@ const StoreManagerOrdersPage: React.FC = () => {
     { value: 'high', label: 'Alta' },
     { value: 'urgent', label: 'Urgente' }
   ];
+
+  // Detectar orderId desde URL
+  useEffect(() => {
+    const orderId = searchParams.get('orderId');
+    if (orderId) {
+      // Buscar la orden específica y abrir el modal
+      const order = orders.find(o => o._id === orderId);
+      if (order) {
+        setSelectedOrder(order);
+        setShowOrderModal(true);
+      }
+      // Limpiar el parámetro de la URL
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams, orders]);
 
   // Cargar órdenes
   const loadOrders = async () => {

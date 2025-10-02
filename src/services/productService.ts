@@ -1,4 +1,6 @@
-import { API_BASE_URL } from '../config/api';
+import { API_URL } from '../config/constants';
+
+const API_BASE_URL = API_URL;
 
 export interface Product {
   _id: string;
