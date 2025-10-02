@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -52,8 +52,7 @@ import quotationRoutes from './routes/quotationRoutes';
 import quotationConfigRoutes from './routes/quotationConfigRoutes';
 import advancedSearchRoutes from './routes/advancedSearchRoutes';
 import userManagementRoutes from './routes/userManagementRoutes';
-import userManagementTestRoutes from './routes/userManagementTestRoutes.js';
-import diagnosticRoutes from './routes/diagnosticRoutes.js';
+// Importaciones problemáticas removidas - se crearán las rutas directamente
 // import whatsappTestRoutes from './routes/whatsappTestRoutes';
 import { enrichmentWorker } from './services/enrichmentWorker';
 import autoUpdateService from './services/autoUpdateService';
@@ -384,6 +383,22 @@ app.use('/api/quotations', quotationRoutes);
 app.use('/api/quotation-config', quotationConfigRoutes);
 app.use('/api/advanced-search', advancedSearchRoutes);
 app.use('/api/admin/users', userManagementRoutes);
+
+// Crear rutas directamente para evitar problemas de importación
+const userManagementTestRoutes = Router();
+userManagementTestRoutes.get('/test', (req, res) => {
+  res.json({ message: 'User management test route working' });
+});
+
+const diagnosticRoutes = Router();
+diagnosticRoutes.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 app.use('/api/test/users', userManagementTestRoutes);
 app.use('/api/diagnostic', diagnosticRoutes);
 // app.use('/api/whatsapp', whatsappTestRoutes);
