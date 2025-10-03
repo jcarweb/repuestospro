@@ -5,7 +5,7 @@ import Store from '../models/Store';
 import Subscription from '../models/Subscription';
 import Category from '../models/Category';
 import Promotion from '../models/Promotion';
-import Quotation from '../models/Quotation';
+import { Quotation } from '../models/Quotation';
 import { SubscriptionService } from '../services/subscriptionService';
 import emailService from '../services/emailService';
 import crypto from 'crypto';
