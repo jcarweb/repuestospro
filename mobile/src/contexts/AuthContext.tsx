@@ -4,6 +4,7 @@ import { User } from '../types';
 import apiService from '../services/api'; // Usar servicio real de API
 // import { forceCorrectNetworkConfig } from '../utils/networkUtils'; // Forzar configuración correcta
 import authVerificationService from '../services/authVerification';
+import { userPersistenceService } from '../services/userPersistenceService';
 // import { useToast } from './ToastContext';
 
 interface AuthContextType {
@@ -12,6 +13,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   requiresTwoFactor: boolean;
   pendingUser: User | null;
+  savedUser: any | null;
   login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: (googleToken: string, userInfo: any) => Promise<void>;
   verifyTwoFactor: (code: string) => Promise<void>;
@@ -29,6 +31,11 @@ interface AuthContextType {
   logout: () => Promise<void>;
   clearError: () => void;
   error: string | null;
+  // Métodos de persistencia
+  getSavedUser: () => Promise<any | null>;
+  saveUser: (user: any) => Promise<void>;
+  clearSavedUser: () => Promise<void>;
+  hasSavedUser: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -68,6 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
   const [requiresTwoFactor, setRequiresTwoFactor] = useState(false);
   const [pendingUser, setPendingUser] = useState<User | null>(null);
+  const [savedUser, setSavedUser] = useState<any | null>(null);
   // const { showToast } = useToast();
   const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
     console.log(`Toast ${type}: ${message}`);
@@ -199,6 +207,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             email: email,
             password: password
           }));
+          
+          // Guardar usuario en persistencia para pantalla simplificada
+          await saveUser({
+            name: response.data.user.name,
+            email: response.data.user.email,
+            avatar: response.data.user.avatar,
+            role: response.data.user.role,
+          });
           
           showToast('Login exitoso', 'success');
         }
@@ -470,12 +486,56 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
   };
 
+  // Métodos de persistencia de usuarios
+  const getSavedUser = async () => {
+    try {
+      const savedUserData = await userPersistenceService.getSavedUser();
+      setSavedUser(savedUserData);
+      return savedUserData;
+    } catch (error) {
+      console.error('Error obteniendo usuario guardado:', error);
+      return null;
+    }
+  };
+
+  const saveUser = async (userData: any) => {
+    try {
+      await userPersistenceService.saveUser(userData);
+      setSavedUser(userData);
+      console.log('✅ Usuario guardado en persistencia');
+    } catch (error) {
+      console.error('Error guardando usuario:', error);
+      throw error;
+    }
+  };
+
+  const clearSavedUser = async () => {
+    try {
+      await userPersistenceService.clearSavedUser();
+      setSavedUser(null);
+      console.log('✅ Usuario guardado eliminado');
+    } catch (error) {
+      console.error('Error eliminando usuario guardado:', error);
+      throw error;
+    }
+  };
+
+  const hasSavedUser = async () => {
+    try {
+      return await userPersistenceService.hasSavedUser();
+    } catch (error) {
+      console.error('Error verificando usuario guardado:', error);
+      return false;
+    }
+  };
+
   const value: AuthContextType = {
     user,
     isLoading,
     isAuthenticated: !!user, // Usar autenticación normal con servicio mock
     requiresTwoFactor,
     pendingUser,
+    savedUser,
     login,
     loginWithGoogle,
     verifyTwoFactor,
@@ -488,6 +548,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     clearError,
     error,
+    // Métodos de persistencia
+    getSavedUser,
+    saveUser,
+    clearSavedUser,
+    hasSavedUser,
   };
 
   return (

@@ -48,6 +48,7 @@ import reviewRoutes from './routes/reviewRoutes';
 import cryptoAuthRoutes from './routes/cryptoAuthRoutes';
 import storePhotoRoutes from './routes/storePhotoRoutes';
 import masterRoutes from './routes/masterRoutes';
+import healthRoutes from './routes/healthRoutes';
 import quotationRoutes from './routes/quotationRoutes';
 import quotationConfigRoutes from './routes/quotationConfigRoutes';
 import advancedSearchRoutes from './routes/advancedSearchRoutes';
@@ -401,6 +402,7 @@ diagnosticRoutes.get('/health', (req, res) => {
 
 app.use('/api/test/users', userManagementTestRoutes);
 app.use('/api/diagnostic', diagnosticRoutes);
+app.use('/api/health', healthRoutes);
 // app.use('/api/whatsapp', whatsappTestRoutes);
 // Variables globales para chat
 let chatService: ChatService;
