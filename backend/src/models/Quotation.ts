@@ -228,7 +228,7 @@ const QuotationSchema = new Schema<IQuotation>({
 });
 
 // Índices para optimizar consultas
-QuotationSchema.index({ quotationNumber: 1 });
+// quotationNumber ya tiene índice único automático por unique: true
 QuotationSchema.index({ createdBy: 1 });
 QuotationSchema.index({ store: 1 });
 QuotationSchema.index({ status: 1 });
