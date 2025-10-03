@@ -143,7 +143,7 @@ ProductSchema.index({ isActive: 1 });
 ProductSchema.index({ isFeatured: 1 });
 ProductSchema.index({ price: 1 });
 ProductSchema.index({ sku: 1 });
-ProductSchema.index({ originalPartCode: 1 });
+// originalPartCode ya tiene índice automático por index: true
 ProductSchema.index({ popularity: -1 });
 ProductSchema.index({ store: 1 }); // Índice para consultas por tienda
 ProductSchema.index({ createdBy: 1 });

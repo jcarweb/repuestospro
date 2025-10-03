@@ -189,7 +189,7 @@ const ClaimSchema = new Schema<IClaim>({
 }, { timestamps: true });
 
 // Índices para optimizar consultas
-ClaimSchema.index({ claimNumber: 1 }, { unique: true });
+// claimNumber ya tiene índice único automático por unique: true
 ClaimSchema.index({ userId: 1, status: 1 });
 ClaimSchema.index({ storeId: 1, status: 1 });
 ClaimSchema.index({ transactionId: 1 });
