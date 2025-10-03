@@ -7,9 +7,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { linking } from '../config/linking';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { connectionMonitorService } from '../services/connectionMonitorService';
 
 // Auth Screens
 import LoginScreen from '../screens/auth/LoginScreen';
+import SimplifiedLoginScreen from '../screens/auth/SimplifiedLoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 import EmailVerificationScreen from '../screens/auth/EmailVerificationScreen';
@@ -187,6 +189,15 @@ const AppNavigator = () => {
   console.log('🔍 AppNavigator - Renderizando con usuario:', user ? `${user.email} (${user.role})` : 'null');
   console.log('🔍 AppNavigator - isLoading:', isLoading);
 
+  // Inicializar monitoreo de conexión
+  useEffect(() => {
+    connectionMonitorService.startMonitoring(30000); // Verificar cada 30 segundos
+    
+    return () => {
+      connectionMonitorService.stopMonitoring();
+    };
+  }, []);
+
   // Log para debug de roles
   useEffect(() => {
     if (user) {
@@ -308,7 +319,7 @@ const AppNavigator = () => {
             {console.log('🔍 AppNavigator - Mostrando Auth Stack (no hay usuario)')}
             <Stack.Screen 
               name="Login" 
-              component={LoginScreen} 
+              component={SimplifiedLoginScreen} 
               options={{ headerShown: false }} 
             />
             <Stack.Screen 
