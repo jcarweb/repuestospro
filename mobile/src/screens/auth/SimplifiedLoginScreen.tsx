@@ -52,13 +52,22 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
     checkBiometricAvailability();
   }, []);
 
+  // Cargar datos del usuario persistente
+  useEffect(() => {
+    if (savedUser) {
+      // El usuario ya está guardado, mostrar pantalla simplificada
+      console.log('👤 Usuario persistente cargado:', savedUser.name);
+    }
+  }, [savedUser]);
+
   const loadSavedUser = async () => {
     try {
-      const savedUserData = await AsyncStorage.getItem('savedUser');
-      if (savedUserData) {
-        const user = JSON.parse(savedUserData);
-        setSavedUser(user);
-        console.log('👤 Usuario guardado cargado:', user.name);
+      // Usar el servicio de persistencia del AuthContext
+      const { getSavedUser } = useAuth();
+      const userData = await getSavedUser();
+      if (userData) {
+        setSavedUser(userData);
+        console.log('👤 Usuario persistente cargado:', userData.name);
       }
     } catch (error) {
       console.error('❌ Error cargando usuario guardado:', error);
@@ -96,6 +105,15 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
           email: savedUser.email, 
           password 
         }));
+        
+        // Guardar usuario en persistencia
+        const { saveUser } = useAuth();
+        await saveUser({
+          name: savedUser.name,
+          email: savedUser.email,
+          avatar: savedUser.avatar,
+          role: savedUser.role,
+        });
       }
       
     } catch (error: any) {
@@ -178,16 +196,29 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
   const handleLogout = async () => {
     Alert.alert(
       'Cambiar Usuario',
-      '¿Deseas cerrar sesión y usar una cuenta diferente?',
+      '¿Deseas iniciar sesión con una cuenta diferente?',
       [
         { text: 'Cancelar', style: 'cancel' },
         { 
-          text: 'Cerrar Sesión', 
+          text: 'Cambiar Usuario', 
           onPress: async () => {
-            await AsyncStorage.removeItem('savedUser');
-            await AsyncStorage.removeItem('savedCredentials');
-            setSavedUser(null);
-            setPassword('');
+            try {
+              // Limpiar datos del usuario actual
+              await AsyncStorage.removeItem('savedUser');
+              await AsyncStorage.removeItem('savedCredentials');
+              setSavedUser(null);
+              setPassword('');
+              
+              // Mostrar mensaje de confirmación
+              Alert.alert(
+                'Usuario Cambiado',
+                'Ahora puedes iniciar sesión con una cuenta diferente',
+                [{ text: 'OK' }]
+              );
+            } catch (error) {
+              console.error('Error cambiando usuario:', error);
+              Alert.alert('Error', 'No se pudo cambiar el usuario');
+            }
           }
         }
       ]
@@ -216,16 +247,15 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={[styles.time, { color: colors.textSecondary }]}>
-              {new Date().toLocaleTimeString('es-VE', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: true 
-              })}
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <Text style={[styles.logoText, { color: colors.primary }]}>
+              PiezasYa
             </Text>
-            <Text style={[styles.logo, { color: colors.primary }]}>PiezasYa</Text>
+          </View>
+          <View style={styles.headerRight}>
+            <ConnectionIndicator size="small" />
             <TouchableOpacity 
               style={styles.chatButton}
               onPress={() => setShowBackendSwitcher(true)}
@@ -233,10 +263,11 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
               <Ionicons name="chatbubble-outline" size={24} color={colors.primary} />
             </TouchableOpacity>
           </View>
+        </View>
 
           {/* Login Form */}
           <View style={styles.loginContainer}>
-            <Text style={[styles.title, { color: colors.text }]}>
+            <Text style={[styles.title, { color: colors.text, fontWeight: 'bold', fontSize: 20 }]}>
               Iniciar Sesión
             </Text>
             
@@ -315,7 +346,7 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
                   <Ionicons name="checkmark" size={16} color={colors.primary} />
                 )}
               </TouchableOpacity>
-              <Text style={[styles.rememberText, { color: colors.text }]}>
+              <Text style={[styles.rememberText, { color: colors.text, fontWeight: '600', fontSize: 16 }]}>
                 Recuérdame
               </Text>
             </View>
@@ -355,14 +386,11 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.time, { color: colors.textSecondary }]}>
-            {new Date().toLocaleTimeString('es-VE', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: true 
-            })}
-          </Text>
-          <Text style={[styles.logo, { color: colors.primary }]}>PiezasYa</Text>
+          <View style={styles.logoContainer}>
+            <Text style={[styles.logoText, { color: colors.primary }]}>
+              PiezasYa
+            </Text>
+          </View>
           <View style={styles.headerRight}>
             <ConnectionIndicator size="small" />
             <TouchableOpacity 
@@ -374,30 +402,60 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
           </View>
         </View>
 
-        {/* User Info */}
-        <View style={styles.userContainer}>
-          <Text style={[styles.greeting, { color: colors.text }]}>
-            {getGreeting()}
-          </Text>
-          
-          <View style={styles.profileContainer}>
-            <Image
-              source={{ 
-                uri: savedUser.avatar || 'https://via.placeholder.com/80/6366f1/ffffff?text=' + savedUser.name.charAt(0)
-              }}
-              style={styles.profileImage}
-            />
-            <Text style={[styles.userName, { color: colors.text }]}>
-              {savedUser.name}
-            </Text>
-            <Text style={[styles.userEmail, { color: colors.textSecondary }]}>
-              {maskEmail(savedUser.email)}
-            </Text>
+        {/* Main Content Container */}
+        <View style={styles.mainContent}>
+          {/* Top Section */}
+          <View style={styles.topSection}>
+            {savedUser ? (
+              /* Usuario Persistente - Mostrar Perfil */
+              <View style={styles.userContainer}>
+                <Text style={[styles.greeting, { color: colors.text }]}>
+                  {getGreeting()}
+                </Text>
+                
+                <View style={styles.profileContainer}>
+                  <Image
+                    source={{ 
+                      uri: savedUser.avatar || 'https://via.placeholder.com/100/6366f1/ffffff?text=' + savedUser.name.charAt(0)
+                    }}
+                    style={styles.profileImageLarge}
+                  />
+                  <Text style={[styles.userName, { color: colors.text }]}>
+                    {savedUser.name}
+                  </Text>
+                  <Text style={[styles.userEmail, { color: colors.textSecondary }]}>
+                    {maskEmail(savedUser.email)}
+                  </Text>
+                  
+                  {/* Quick Change User Button */}
+                  <TouchableOpacity 
+                    style={styles.quickChangeUserButton}
+                    onPress={handleLogout}
+                  >
+                    <Ionicons name="swap-horizontal" size={16} color={colors.primary} />
+                    <Text style={[styles.quickChangeUserText, { color: colors.primary }]}>
+                      Cambiar Usuario
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              /* Sin Usuario - Mostrar Logo */
+              <View style={styles.logoSection}>
+                <Text style={[styles.logoText, { color: colors.primary, fontSize: 32 }]}>
+                  PiezasYa
+                </Text>
+                <Text style={[styles.welcomeText, { color: colors.textSecondary }]}>
+                  Bienvenido
+                </Text>
+              </View>
+            )}
           </View>
-        </View>
 
-        {/* Password Input */}
-        <View style={styles.passwordContainer}>
+          {/* Middle Section - Login Form */}
+          <View style={styles.middleSection}>
+            {/* Password Input */}
+            <View style={styles.passwordContainer}>
           <View style={styles.inputContainer}>
             <TextInput
               style={[styles.input, { 
@@ -488,25 +546,33 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
           </Text>
         </View>
 
-        {/* New Account */}
-        <TouchableOpacity 
-          style={styles.newAccountButton}
-          onPress={handleNewAccount}
-        >
-          <Text style={[styles.newAccountText, { color: colors.primary }]}>
-            ABRIR CUENTA NUEVA
-          </Text>
-        </TouchableOpacity>
+            </View>
 
-        {/* Logout Option */}
-        <TouchableOpacity 
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
-          <Text style={[styles.logoutText, { color: colors.textSecondary }]}>
-            Usar otra cuenta
-          </Text>
-        </TouchableOpacity>
+            {/* Bottom Section */}
+            <View style={styles.bottomSection}>
+              {/* New Account */}
+              <TouchableOpacity 
+                style={styles.newAccountButton}
+                onPress={handleNewAccount}
+              >
+                <Text style={[styles.newAccountText, { color: colors.primary }]}>
+                  ABRIR CUENTA NUEVA
+                </Text>
+              </TouchableOpacity>
+
+              {/* Change User Option */}
+              <TouchableOpacity 
+                style={styles.changeUserButton}
+                onPress={handleLogout}
+              >
+                <Ionicons name="person-add" size={20} color={colors.primary} />
+                <Text style={[styles.changeUserText, { color: colors.primary }]}>
+                  Cambiar Usuario
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </ScrollView>
 
       {/* PIN Modal */}
@@ -539,19 +605,20 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 20,
+    minHeight: '100%',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 50,
-    paddingBottom: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+    marginTop: 20,
   },
-  time: {
-    fontSize: 16,
-    fontWeight: '500',
+  logoContainer: {
+    flex: 1,
   },
-  logo: {
+  logoText: {
     fontSize: 24,
     fontWeight: 'bold',
   },
@@ -559,13 +626,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  mainContent: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  topSection: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  middleSection: {
+    flex: 2,
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  bottomSection: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 20,
+  },
   chatButton: {
     padding: 8,
     marginLeft: 8,
   },
   userContainer: {
     alignItems: 'center',
-    marginVertical: 40,
+    marginVertical: 60,
   },
   greeting: {
     fontSize: 24,
@@ -581,6 +667,36 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     marginBottom: 12,
   },
+  profileImageLarge: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 16,
+  },
+  logoSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  welcomeText: {
+    fontSize: 16,
+    marginTop: 8,
+  },
+  quickChangeUserButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#6366f1',
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+  },
+  quickChangeUserText: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginLeft: 6,
+  },
   userName: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -590,7 +706,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   passwordContainer: {
-    marginBottom: 30,
+    marginBottom: 40,
   },
   inputContainer: {
     position: 'relative',
@@ -619,7 +735,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   loginButton: {
     flex: 1,
@@ -655,7 +771,7 @@ const styles = StyleSheet.create({
   rememberContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 40,
   },
   checkbox: {
     width: 20,
@@ -673,17 +789,28 @@ const styles = StyleSheet.create({
   newAccountButton: {
     alignItems: 'center',
     marginBottom: 20,
+    alignSelf: 'center',
   },
   newAccountText: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  logoutButton: {
+  changeUserButton: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#6366f1',
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
   },
-  logoutText: {
-    fontSize: 14,
+  changeUserText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
   modalOverlay: {
     flex: 1,
