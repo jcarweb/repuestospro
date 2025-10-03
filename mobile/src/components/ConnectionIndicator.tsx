@@ -1,122 +1,259 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  ActivityIndicator,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useConnectionStatus } from '../hooks/useConnectionStatus';
 import { useTheme } from '../contexts/ThemeContext';
+import { connectionMonitorService, ConnectionStatus } from '../services/connectionMonitorService';
 
 interface ConnectionIndicatorProps {
-  showDetails?: boolean;
   onPress?: () => void;
+  showDetails?: boolean;
+  size?: 'small' | 'medium' | 'large';
 }
 
-export const ConnectionIndicator: React.FC<ConnectionIndicatorProps> = ({ 
-  showDetails = false, 
-  onPress 
+const ConnectionIndicator: React.FC<ConnectionIndicatorProps> = ({
+  onPress,
+  showDetails = false,
+  size = 'small',
 }) => {
-  const { isConnected, connectionType, isReconnecting } = useConnectionStatus();
   const { colors } = useTheme();
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>({
+    isConnected: false,
+    lastCheck: '',
+    responseTime: 0,
+    backend: '',
+  });
+  const [isChecking, setIsChecking] = useState(false);
+  const [pulseAnim] = useState(new Animated.Value(1));
 
-  const getConnectionIcon = () => {
-    if (isReconnecting) {
-      return 'sync-outline';
+  useEffect(() => {
+    // Suscribirse a cambios de estado
+    const handleStatusChange = (status: ConnectionStatus) => {
+      setConnectionStatus(status);
+    };
+
+    connectionMonitorService.addListener(handleStatusChange);
+    
+    // Verificar conexión inicial
+    connectionMonitorService.checkConnection();
+
+    return () => {
+      connectionMonitorService.removeListener(handleStatusChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Animación de pulso cuando está conectado
+    if (connectionStatus.isConnected) {
+      const pulse = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.2,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      pulse.start();
+    } else {
+      pulseAnim.setValue(1);
     }
-    if (isConnected) {
-      switch (connectionType) {
-        case 'wifi':
-          return 'wifi-outline';
-        case 'cellular':
-          return 'cellular-outline';
-        case 'ethernet':
-          return 'hardware-chip-outline';
-        default:
-          return 'checkmark-circle-outline';
-      }
+  }, [connectionStatus.isConnected]);
+
+  const handlePress = async () => {
+    if (isChecking) return;
+    
+    setIsChecking(true);
+    try {
+      await connectionMonitorService.forceCheck();
+    } finally {
+      setIsChecking(false);
     }
-    return 'cloud-offline-outline';
+    
+    if (onPress) {
+      onPress();
+    }
   };
 
-  const getConnectionText = () => {
-    if (isReconnecting) {
-      return 'Reconectando...';
+  const getStatusColor = () => {
+    if (connectionStatus.isConnected) {
+      return '#10B981'; // Verde
+    } else if (connectionStatus.error) {
+      return '#EF4444'; // Rojo
+    } else {
+      return '#F59E0B'; // Amarillo
     }
-    if (isConnected) {
-      switch (connectionType) {
-        case 'wifi':
-          return 'WiFi';
-        case 'cellular':
-          return 'Datos móviles';
-        case 'ethernet':
-          return 'Ethernet';
-        default:
-          return 'Conectado';
-      }
-    }
-    return 'Sin conexión';
   };
 
-  const getConnectionColor = () => {
-    if (isReconnecting) {
-      return colors.warning || '#FFA500';
+  const getStatusIcon = () => {
+    if (isChecking) {
+      return 'refresh';
+    } else if (connectionStatus.isConnected) {
+      return 'checkmark-circle';
+    } else if (connectionStatus.error) {
+      return 'close-circle';
+    } else {
+      return 'warning';
     }
-    return isConnected ? colors.success || '#4CAF50' : colors.error || '#F44336';
   };
 
-  const Component = onPress ? TouchableOpacity : View;
+  const getStatusText = () => {
+    if (isChecking) {
+      return 'Verificando...';
+    } else if (connectionStatus.isConnected) {
+      return `Conectado (${connectionStatus.responseTime}ms)`;
+    } else if (connectionStatus.error) {
+      return 'Sin conexión';
+    } else {
+      return 'Verificando...';
+    }
+  };
+
+  const getSizeStyles = () => {
+    switch (size) {
+      case 'small':
+        return {
+          container: styles.smallContainer,
+          icon: 16,
+          text: styles.smallText,
+        };
+      case 'medium':
+        return {
+          container: styles.mediumContainer,
+          icon: 20,
+          text: styles.mediumText,
+        };
+      case 'large':
+        return {
+          container: styles.largeContainer,
+          icon: 24,
+          text: styles.largeText,
+        };
+      default:
+        return {
+          container: styles.smallContainer,
+          icon: 16,
+          text: styles.smallText,
+        };
+    }
+  };
+
+  const sizeStyles = getSizeStyles();
 
   return (
-    <Component
+    <TouchableOpacity
       style={[
-        styles.container,
-        { backgroundColor: colors.surface },
-        onPress && styles.pressable
+        sizeStyles.container,
+        { backgroundColor: colors.surface, borderColor: colors.border },
       ]}
-      onPress={onPress}
+      onPress={handlePress}
+      disabled={isChecking}
     >
       <View style={styles.content}>
-        <Ionicons
-          name={getConnectionIcon()}
-          size={16}
-          color={getConnectionColor()}
-          style={styles.icon}
-        />
-        <Text style={[styles.text, { color: colors.text }]}>
-          {getConnectionText()}
-        </Text>
+        {isChecking ? (
+          <ActivityIndicator size="small" color={colors.primary} />
+        ) : (
+          <Animated.View
+            style={[
+              styles.iconContainer,
+              { transform: [{ scale: pulseAnim }] },
+            ]}
+          >
+            <Ionicons
+              name={getStatusIcon()}
+              size={sizeStyles.icon}
+              color={getStatusColor()}
+            />
+          </Animated.View>
+        )}
+        
         {showDetails && (
-          <Text style={[styles.details, { color: colors.textSecondary }]}>
-            {connectionType || 'Desconocido'}
-          </Text>
+          <View style={styles.details}>
+            <Text style={[sizeStyles.text, { color: colors.text }]}>
+              {getStatusText()}
+            </Text>
+            {connectionStatus.backend && (
+              <Text style={[styles.backendText, { color: colors.textSecondary }]}>
+                {connectionStatus.backend.replace('https://', '').replace('http://', '')}
+              </Text>
+            )}
+            {connectionStatus.error && (
+              <Text style={[styles.errorText, { color: colors.error }]}>
+                {connectionStatus.error}
+              </Text>
+            )}
+          </View>
         )}
       </View>
-    </Component>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    borderRadius: 8,
+  smallContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    marginHorizontal: 4,
+    borderRadius: 12,
+    borderWidth: 1,
   },
-  pressable: {
-    // Estilos adicionales para cuando es presionable
+  mediumContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  largeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  icon: {
+  iconContainer: {
     marginRight: 4,
   },
-  text: {
+  details: {
+    marginLeft: 4,
+  },
+  smallText: {
+    fontSize: 10,
+    fontWeight: '500',
+  },
+  mediumText: {
     fontSize: 12,
     fontWeight: '500',
   },
-  details: {
-    fontSize: 10,
-    marginLeft: 4,
-    opacity: 0.7,
+  largeText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  backendText: {
+    fontSize: 8,
+    marginTop: 1,
+  },
+  errorText: {
+    fontSize: 8,
+    marginTop: 1,
   },
 });
 

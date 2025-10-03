@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ConnectionIndicator from './ConnectionIndicator';
+import ConnectionDiagnosticModal from './ConnectionDiagnosticModal';
 
 export const BackendSwitcher: React.FC = () => {
   const [currentBackend, setCurrentBackend] = useState('local');
+  const [showDiagnostic, setShowDiagnostic] = useState(false);
 
   useEffect(() => {
     loadCurrentBackend();
@@ -63,28 +66,52 @@ export const BackendSwitcher: React.FC = () => {
   const backendInfo = getBackendInfo();
 
   return (
-    <TouchableOpacity 
-      style={[styles.container, { borderColor: backendInfo.color }]}
-      onPress={switchBackend}
-    >
-      <Ionicons 
-        name={backendInfo.icon} 
-        size={16} 
-        color={backendInfo.color} 
+    <View style={styles.wrapper}>
+      <TouchableOpacity 
+        style={[styles.container, { borderColor: backendInfo.color }]}
+        onPress={switchBackend}
+      >
+        <Ionicons 
+          name={backendInfo.icon} 
+          size={16} 
+          color={backendInfo.color} 
+        />
+        <Text style={[styles.text, { color: backendInfo.color }]}>
+          {backendInfo.name}
+        </Text>
+        <Ionicons 
+          name="swap-horizontal-outline" 
+          size={14} 
+          color={backendInfo.color} 
+        />
+      </TouchableOpacity>
+      
+      <View style={styles.connectionRow}>
+        <ConnectionIndicator 
+          onPress={() => setShowDiagnostic(true)}
+          showDetails={true}
+          size="small"
+        />
+        <TouchableOpacity 
+          style={styles.diagnosticButton}
+          onPress={() => setShowDiagnostic(true)}
+        >
+          <Ionicons name="analytics-outline" size={16} color="#6B7280" />
+        </TouchableOpacity>
+      </View>
+
+      <ConnectionDiagnosticModal
+        visible={showDiagnostic}
+        onClose={() => setShowDiagnostic(false)}
       />
-      <Text style={[styles.text, { color: backendInfo.color }]}>
-        {backendInfo.name}
-      </Text>
-      <Ionicons 
-        name="swap-horizontal-outline" 
-        size={14} 
-        color={backendInfo.color} 
-      />
-    </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    marginBottom: 16,
+  },
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -93,12 +120,22 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    marginBottom: 16,
+    marginBottom: 8,
   },
   text: {
     fontSize: 12,
     marginLeft: 6,
     marginRight: 6,
     fontWeight: '600',
+  },
+  connectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  diagnosticButton: {
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: '#F3F4F6',
   },
 });
