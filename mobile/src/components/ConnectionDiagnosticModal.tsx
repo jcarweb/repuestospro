@@ -68,26 +68,26 @@ const ConnectionDiagnosticModal: React.FC<ConnectionDiagnosticModalProps> = ({
         details: `Backend: ${generalCheck.backend}`,
       }]);
 
-      // 2. Verificar endpoint de salud
-      const healthCheck = await connectionMonitorService.checkSpecificEndpoint('/api/health');
+      // 2. Verificar endpoint de productos
+      const productsCheck = await connectionMonitorService.checkSpecificEndpoint('/api/products');
       setDiagnostics(prev => [...prev, {
-        test: 'Endpoint de Salud',
-        status: healthCheck.isConnected ? 'success' : 'error',
-        message: healthCheck.isConnected 
-          ? `OK (${healthCheck.responseTime}ms)` 
-          : healthCheck.error || 'Error',
-        details: '/api/health',
+        test: 'Endpoint de Productos',
+        status: productsCheck.isConnected ? 'success' : 'error',
+        message: productsCheck.isConnected 
+          ? `OK (${productsCheck.responseTime}ms)` 
+          : productsCheck.error || 'Error',
+        details: '/api/products',
       }]);
 
       // 3. Verificar endpoint de autenticación
-      const authCheck = await connectionMonitorService.checkSpecificEndpoint('/api/auth/login');
+      const authCheck = await connectionMonitorService.checkSpecificEndpoint('/api/auth');
       setDiagnostics(prev => [...prev, {
         test: 'Endpoint de Autenticación',
         status: authCheck.isConnected ? 'success' : 'error',
         message: authCheck.isConnected 
           ? `OK (${authCheck.responseTime}ms)` 
           : authCheck.error || 'Error',
-        details: '/api/auth/login',
+        details: '/api/auth',
       }]);
 
       // 4. Verificar conectividad de red
@@ -122,7 +122,6 @@ const ConnectionDiagnosticModal: React.FC<ConnectionDiagnosticModalProps> = ({
       // Intentar conectar a un servicio externo
       const response = await fetch('https://www.google.com', {
         method: 'HEAD',
-        timeout: 5000,
       });
       
       return {
@@ -186,11 +185,11 @@ const ConnectionDiagnosticModal: React.FC<ConnectionDiagnosticModalProps> = ({
         {/* Header */}
         <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color={colors.text} />
+            <Ionicons name="close" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.text }]}>
-            Diagnóstico de Conexión
-          </Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>
+          Diagnóstico de Conexión
+        </Text>
           <TouchableOpacity onPress={handleRetry} style={styles.retryButton}>
             <Ionicons name="refresh" size={20} color={colors.primary} />
           </TouchableOpacity>
@@ -200,7 +199,7 @@ const ConnectionDiagnosticModal: React.FC<ConnectionDiagnosticModalProps> = ({
         <ScrollView style={styles.content}>
           {/* Backend Info */}
           <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
               Configuración Actual
             </Text>
             <Text style={[styles.backendUrl, { color: colors.textSecondary }]}>
@@ -217,7 +216,7 @@ const ConnectionDiagnosticModal: React.FC<ConnectionDiagnosticModalProps> = ({
 
           {/* Connection Status */}
           <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
               Estado de Conexión
             </Text>
             <View style={styles.statusRow}>
@@ -226,7 +225,7 @@ const ConnectionDiagnosticModal: React.FC<ConnectionDiagnosticModalProps> = ({
                 size={20}
                 color={connectionStatus.isConnected ? '#10B981' : '#EF4444'}
               />
-              <Text style={[styles.statusText, { color: colors.text }]}>
+              <Text style={[styles.statusText, { color: colors.textPrimary }]}>
                 {connectionStatus.isConnected ? 'Conectado' : 'Sin conexión'}
               </Text>
             </View>
@@ -244,7 +243,7 @@ const ConnectionDiagnosticModal: React.FC<ConnectionDiagnosticModalProps> = ({
 
           {/* Diagnostics */}
           <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
               Diagnósticos Detallados
             </Text>
             
@@ -265,7 +264,7 @@ const ConnectionDiagnosticModal: React.FC<ConnectionDiagnosticModalProps> = ({
                     size={16}
                     color={getStatusColor(diagnostic.status)}
                   />
-                  <Text style={[styles.diagnosticTest, { color: colors.text }]}>
+                  <Text style={[styles.diagnosticTest, { color: colors.textPrimary }]}>
                     {diagnostic.test}
                   </Text>
                 </View>
@@ -281,7 +280,7 @@ const ConnectionDiagnosticModal: React.FC<ConnectionDiagnosticModalProps> = ({
 
           {/* Recommendations */}
           <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
               Recomendaciones
             </Text>
             <Text style={[styles.recommendation, { color: colors.textSecondary }]}>

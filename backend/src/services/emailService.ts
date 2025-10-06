@@ -7,13 +7,27 @@ class EmailService {
   constructor() {
    /*
     // Información de contraseña no loggeada por seguridad;*/
+    const host = process.env['EMAIL_HOST'];
+    const port = parseInt(process.env['EMAIL_PORT'] || '587');
+    const secure = process.env['EMAIL_SECURE'] === 'true';
+    const user = process.env['EMAIL_USER'];
+    const pass = process.env['EMAIL_PASS'] || process.env['EMAIL_PASSWORD'] || process.env['SMTP_PASS'];
+
+    if (!host || !user || !pass) {
+      console.warn('⚠️ Configuración de email incompleta; activando transporte seguro de no-envío (jsonTransport).');
+      this.transporter = nodemailer.createTransport({
+        jsonTransport: true
+      });
+      return;
+    }
+
     this.transporter = nodemailer.createTransport({
-      host: process.env['EMAIL_HOST'],
-      port: parseInt(process.env['EMAIL_PORT'] || '587'),
-      secure: process.env['EMAIL_SECURE'] === 'true',
+      host,
+      port,
+      secure,
       auth: {
-        user: process.env['EMAIL_USER'],
-        pass: process.env['EMAIL_PASSWORD']
+        user,
+        pass
       }
     });
   }

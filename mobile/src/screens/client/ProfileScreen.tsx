@@ -30,6 +30,9 @@ const ProfileScreen: React.FC = () => {
 
   useEffect(() => {
     console.log('ProfileScreen useEffect ejecutado');
+    console.log('🔍 ProfileScreen - user recibido:', user);
+    console.log('🔍 ProfileScreen - user.profileImage:', user?.profileImage);
+    console.log('🔍 ProfileScreen - user.avatar:', user?.avatar);
     loadProfileData();
     setTimeout(() => {
       console.log('ProfileScreen carga completada');
@@ -43,6 +46,38 @@ const ProfileScreen: React.FC = () => {
       loadProfileData();
     }, [])
   );
+
+  // Recargar imagen cuando cambie el usuario
+  useEffect(() => {
+    if (user) {
+      console.log('🔍 ProfileScreen - Usuario cambió, recargando imagen');
+      console.log('🔍 ProfileScreen - Nuevo user.profileImage:', user.profileImage);
+      console.log('🔍 ProfileScreen - Nuevo user.avatar:', user.avatar);
+      loadProfileData();
+    }
+  }, [user]);
+
+  // Función de test directo para verificar imagen
+  const testImageDirectly = async () => {
+    try {
+      console.log('🧪 TEST DIRECTO DE IMAGEN:');
+      console.log('🧪 user.profileImage:', user?.profileImage);
+      console.log('🧪 user.avatar:', user?.avatar);
+      
+      if (user?.profileImage) {
+        console.log('🧪 Intentando cargar imagen directa:', user.profileImage);
+        setProfileImage(user.profileImage);
+      } else if (user?.avatar) {
+        console.log('🧪 Intentando cargar avatar directo:', user.avatar);
+        setProfileImage(user.avatar);
+      } else {
+        console.log('🧪 No hay imagen disponible');
+        setProfileImage(null);
+      }
+    } catch (error) {
+      console.error('🧪 Error en test directo:', error);
+    }
+  };
 
   const getBaseUrl = async () => {
     try {
@@ -62,6 +97,14 @@ const ProfileScreen: React.FC = () => {
         return;
       }
 
+      // DEBUG: Verificar estado completo del usuario
+      console.log('🔍 DEBUG COMPLETO DEL USUARIO:');
+      console.log('🔍 user completo:', JSON.stringify(user, null, 2));
+      console.log('🔍 user.profileImage:', user.profileImage);
+      console.log('🔍 user.avatar:', user.avatar);
+      console.log('🔍 typeof user.profileImage:', typeof user.profileImage);
+      console.log('🔍 user.profileImage length:', user.profileImage?.length);
+
       // Primero intentar cargar datos reales del backend
       try {
         console.log('Cargando datos reales del usuario desde el backend...');
@@ -78,8 +121,10 @@ const ProfileScreen: React.FC = () => {
         const data = JSON.parse(savedProfileData);
         setProfileData(data);
         // Usar la imagen del usuario actualizado si está disponible, sino usar la guardada localmente
-        const avatarUrl = user.avatar || data.profileImage || null;
+        const avatarUrl = user.profileImage || user.avatar || data.profileImage || null;
         console.log('🖼️ Avatar URL encontrada:', avatarUrl);
+        console.log('🔍 user.profileImage:', user.profileImage);
+        console.log('🔍 user.avatar:', user.avatar);
         if (avatarUrl && !avatarUrl.startsWith('http')) {
           // Si es una ruta relativa, construir la URL completa
           const baseUrl = await getBaseUrl();
@@ -93,8 +138,10 @@ const ProfileScreen: React.FC = () => {
         console.log(`Datos del perfil cargados para usuario ${user.id}:`, data);
       } else {
         // Si no hay datos guardados localmente, usar los datos del usuario actualizado
-        const avatarUrl = user.avatar || null;
+        const avatarUrl = user.profileImage || user.avatar || null;
         console.log('🖼️ Avatar URL del usuario:', avatarUrl);
+        console.log('🔍 user.profileImage:', user.profileImage);
+        console.log('🔍 user.avatar:', user.avatar);
         if (avatarUrl && !avatarUrl.startsWith('http')) {
           // Si es una ruta relativa, construir la URL completa
           const baseUrl = await getBaseUrl();
@@ -190,6 +237,25 @@ const ProfileScreen: React.FC = () => {
             </View>
           )}
         </View>
+        
+        {/* BOTÓN DE DEBUG TEMPORAL */}
+        <TouchableOpacity 
+          style={[styles.editButton, { backgroundColor: '#FF6B6B', marginTop: 10 }]} 
+          onPress={testImageDirectly}
+        >
+          <Text style={[styles.editButtonText, { color: 'white' }]}>🧪 TEST IMAGEN</Text>
+        </TouchableOpacity>
+        
+        {/* BOTÓN DE TEST TOKEN */}
+        <TouchableOpacity 
+          style={[styles.editButton, { backgroundColor: '#4CAF50', marginTop: 5 }]} 
+          onPress={async () => {
+            const { testTokenStatus } = useAuth();
+            await testTokenStatus();
+          }}
+        >
+          <Text style={[styles.editButtonText, { color: 'white' }]}>🔐 TEST TOKEN</Text>
+        </TouchableOpacity>
         
         <Text style={[styles.userName, { color: colors.textPrimary }]}>
           {profileData?.name || user?.name || 'Usuario PiezasYA'}

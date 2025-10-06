@@ -7,23 +7,50 @@ class ApiService {
   private token: string | null = null;
 
   constructor() {
+    console.log('🔧 apiService constructor - Inicializando...');
     this.loadToken();
   }
 
   private async loadToken() {
     try {
       this.token = await AsyncStorage.getItem('authToken');
+      console.log('🔐 Token cargado en apiService:', this.token ? `${this.token.substring(0, 20)}...` : 'null');
     } catch (error) {
       console.error('Error loading token:', error);
     }
   }
 
+  // Método público para recargar el token
+  public async refreshToken() {
+    console.log('🔄 apiService.refreshToken() - Recargando token...');
+    await this.loadToken();
+    console.log('🔄 apiService.refreshToken() - Token recargado:', this.token ? `${this.token.substring(0, 20)}...` : 'null');
+    
+    // Verificar que el token se cargó correctamente
+    if (!this.token) {
+      console.log('⚠️ apiService.refreshToken() - Token sigue siendo null después de recargar');
+      // Intentar cargar directamente desde AsyncStorage
+      try {
+        const directToken = await AsyncStorage.getItem('authToken');
+        console.log('🔍 apiService.refreshToken() - Token directo de AsyncStorage:', directToken ? `${directToken.substring(0, 20)}...` : 'null');
+        if (directToken) {
+          this.token = directToken;
+          console.log('✅ apiService.refreshToken() - Token establecido desde AsyncStorage directo');
+        }
+      } catch (error) {
+        console.error('❌ apiService.refreshToken() - Error cargando token directo:', error);
+      }
+    }
+  }
+
   private async saveToken(token: string) {
     try {
+      console.log('🔐 apiService.saveToken() - Guardando token:', token ? `${token.substring(0, 20)}...` : 'null');
       await AsyncStorage.setItem('authToken', token);
       this.token = token;
+      console.log('✅ apiService.saveToken() - Token guardado exitosamente');
     } catch (error) {
-      console.error('Error saving token:', error);
+      console.error('❌ apiService.saveToken() - Error saving token:', error);
     }
   }
 
@@ -41,8 +68,13 @@ class ApiService {
       'Content-Type': 'application/json',
     };
 
+    console.log('🔐 apiService.getHeaders() - token actual:', this.token ? `${this.token.substring(0, 20)}...` : 'null');
+
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
+      console.log('🔐 apiService.getHeaders() - Authorization header agregado');
+    } else {
+      console.log('⚠️ apiService.getHeaders() - NO HAY TOKEN DISPONIBLE');
     }
 
     return headers;
@@ -52,15 +84,24 @@ class ApiService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
+    // Forzar recarga del token antes de cada llamada
+    await this.refreshToken();
+    
     const baseUrl = await getBaseURL();
     const url = `${baseUrl}${endpoint}`;
+    const headers = this.getHeaders();
     const config: RequestInit = {
       ...options,
       headers: {
-        ...this.getHeaders(),
+        ...headers,
         ...options.headers,
       },
     };
+
+    console.log('🌐 apiService.request() - Endpoint:', endpoint);
+    console.log('🌐 apiService.request() - URL:', url);
+    console.log('🌐 apiService.request() - Headers:', headers);
+    console.log('🌐 apiService.request() - Token disponible:', this.token ? 'SÍ' : 'NO');
 
     return await this.requestWithRetry(url, config, endpoint);
   }
