@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { View } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { linking } from '../config/linking';
@@ -15,6 +16,8 @@ import SimplifiedLoginScreen from '../screens/auth/SimplifiedLoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 import EmailVerificationScreen from '../screens/auth/EmailVerificationScreen';
+import SimpleTwoFactorScreen from '../screens/auth/SimpleTwoFactorScreen';
+import TwoFactorVerificationScreen from '../screens/auth/TwoFactorVerificationScreen';
 import EmailVerificationCallbackScreen from '../screens/auth/EmailVerificationCallbackScreen';
 import EmailVerificationSuccessScreen from '../screens/auth/EmailVerificationSuccessScreen';
 import PINVerificationScreen from '../screens/auth/PINVerificationScreen';
@@ -81,7 +84,7 @@ import DeliveryLocationScreen from '../screens/delivery/DeliveryLocationScreen';
 import DeliveryEarningsScreen from '../screens/delivery/DeliveryEarningsScreen';
 
 // Components
-import { ActivityIndicator, View, Text } from 'react-native';
+import { ActivityIndicator, Text } from 'react-native';
 import Toast from '../components/Toast';
 
 const Stack = createStackNavigator();
@@ -181,7 +184,7 @@ const ClientTabNavigator = () => {
 };
 
 const AppNavigator = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, requiresTwoFactor } = useAuth();
   const { colors } = useTheme();
   const [showPinVerification, setShowPinVerification] = useState(false);
   const [pinEnabled, setPinEnabled] = useState(false);
@@ -191,7 +194,7 @@ const AppNavigator = () => {
 
   // Inicializar monitoreo de conexión
   useEffect(() => {
-    connectionMonitorService.startMonitoring(30000); // Verificar cada 30 segundos
+    connectionMonitorService.startMonitoring(120000); // Verificar cada 2 minutos para evitar rate limiting
     
     return () => {
       connectionMonitorService.stopMonitoring();
@@ -270,6 +273,7 @@ const AppNavigator = () => {
 
   console.log('🔍 AppNavigator - Renderizando navegación con usuario:', user ? `${user.email} (${user.role})` : 'null');
   console.log('🔍 AppNavigator - isLoading en render:', isLoading);
+  console.log('🔍 AppNavigator - requiresTwoFactor:', requiresTwoFactor);
   
   if (isLoading) {
     console.log('🔍 AppNavigator - Mostrando loading...');
@@ -277,6 +281,27 @@ const AppNavigator = () => {
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
         <ActivityIndicator size="large" color={colors.primary} />
         <Text style={{ marginTop: 16, color: colors.textSecondary }}>Cargando...</Text>
+      </View>
+    );
+  }
+
+  // Si requiere 2FA, mostrar pantalla de verificación
+  if (requiresTwoFactor) {
+    console.log('🔍 AppNavigator - Mostrando pantalla de 2FA');
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <TwoFactorVerificationScreen 
+          navigation={{ 
+            navigate: () => {}, 
+            goBack: () => {},
+            reset: () => {},
+            replace: () => {}
+          }} 
+          route={{ 
+            params: {},
+            name: 'TwoFactorVerification'
+          }} 
+        />
       </View>
     );
   }
@@ -316,7 +341,6 @@ const AppNavigator = () => {
         {!user ? (
           // Auth Stack
           <>
-            {console.log('🔍 AppNavigator - Mostrando Auth Stack (no hay usuario)')}
             <Stack.Screen 
               name="Login" 
               component={SimplifiedLoginScreen} 
@@ -356,12 +380,8 @@ const AppNavigator = () => {
         ) : (
           // Role-based navigation
           <>
-            {console.log('🔍 AppNavigator - Mostrando Role-based navigation (hay usuario)')}
-            {console.log('🔍 AppNavigator - Evaluando navegación para rol:', user.role)}
-            {console.log('🔍 AppNavigator - ¿Es cliente?', user.role === 'client')}
             {user.role === 'client' && (
               <>
-                {console.log('🔍 AppNavigator - Renderizando ClientTabs')}
                 <Stack.Screen 
                   name="ClientTabs" 
                   component={ClientTabNavigator} 
@@ -433,11 +453,8 @@ const AppNavigator = () => {
               </>
             )}
             
-            {console.log('🔍 AppNavigator - Verificando si es admin:', user.role === 'admin')}
-            {console.log('🔍 AppNavigator - ¿Es admin?', user.role === 'admin')}
             {user.role === 'admin' && (
               <>
-                {console.log('🔍 AppNavigator - Renderizando AdminDashboard')}
                 <Stack.Screen 
                   name="AdminDashboard" 
                   component={AdminDashboardScreen} 
@@ -581,10 +598,8 @@ const AppNavigator = () => {
               </>
             )}
             
-            {console.log('🔍 AppNavigator - ¿Es store_manager?', user.role === 'store_manager')}
             {user.role === 'store_manager' && (
               <>
-                {console.log('🔍 AppNavigator - Renderizando StoreManagerDashboard')}
                 <Stack.Screen 
                   name="StoreManagerDashboard" 
                   component={StoreManagerDashboardScreen} 
@@ -638,10 +653,8 @@ const AppNavigator = () => {
               </>
             )}
             
-            {console.log('🔍 AppNavigator - ¿Es seller?', user.role === 'seller')}
             {user.role === 'seller' && (
               <>
-                {console.log('🔍 AppNavigator - Renderizando SellerDashboard')}
                 <Stack.Screen 
                   name="SellerDashboard" 
                   component={SellerDashboardScreen} 
@@ -679,10 +692,8 @@ const AppNavigator = () => {
               </>
             )}
             
-            {console.log('🔍 AppNavigator - ¿Es delivery?', user.role === 'delivery')}
             {user.role === 'delivery' && (
               <>
-                {console.log('🔍 AppNavigator - Renderizando DeliveryDashboard')}
                 <Stack.Screen 
                   name="DeliveryDashboard" 
                   component={DeliveryDashboardScreen} 

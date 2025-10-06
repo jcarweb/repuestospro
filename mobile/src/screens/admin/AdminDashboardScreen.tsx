@@ -84,9 +84,24 @@ const AdminDashboardScreen: React.FC = () => {
     loadUserImage();
   }, []);
 
+  // Recargar imagen cuando cambie el usuario
+  useEffect(() => {
+    if (user) {
+      loadUserImage();
+    }
+  }, [user]);
+
   const loadUserImage = async () => {
     try {
-      if (user?.avatar) {
+      console.log('🔍 AdminDashboard - Cargando imagen del usuario:', user);
+      console.log('🔍 AdminDashboard - user.profileImage:', user?.profileImage);
+      console.log('🔍 AdminDashboard - user.avatar:', user?.avatar);
+      
+      if (user?.profileImage) {
+        console.log('✅ AdminDashboard - Usando profileImage:', user.profileImage);
+        setUserImage(user.profileImage);
+      } else if (user?.avatar) {
+        console.log('✅ AdminDashboard - Usando avatar:', user.avatar);
         // Si es una ruta relativa, construir la URL completa
         if (!user.avatar.startsWith('http')) {
           const { getBaseURL } = await import('../../config/api');
@@ -96,9 +111,12 @@ const AdminDashboardScreen: React.FC = () => {
         } else {
           setUserImage(user.avatar);
         }
+      } else {
+        console.log('⚠️ AdminDashboard - No hay imagen de perfil disponible');
+        setUserImage(null);
       }
     } catch (error) {
-      console.error('Error loading user image:', error);
+      console.error('❌ AdminDashboard - Error loading user image:', error);
     }
   };
 
@@ -227,6 +245,31 @@ const AdminDashboardScreen: React.FC = () => {
               ) : (
                 <Ionicons name="person" size={20} color="white" />
               )}
+            </TouchableOpacity>
+          </View>
+          
+          {/* BOTONES DE DEBUG TEMPORALES */}
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
+            <TouchableOpacity 
+              style={[styles.editButton, { backgroundColor: '#FF6B6B', flex: 1 }]} 
+              onPress={async () => {
+                const { testTokenStatus } = useAuth();
+                await testTokenStatus();
+              }}
+            >
+              <Text style={[styles.editButtonText, { color: 'white' }]}>🔐 TEST TOKEN</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.editButton, { backgroundColor: '#4CAF50', flex: 1 }]} 
+              onPress={async () => {
+                console.log('🧪 TEST IMAGEN ADMIN DASHBOARD:');
+                console.log('🧪 user.profileImage:', user?.profileImage);
+                console.log('🧪 user.avatar:', user?.avatar);
+                console.log('🧪 userImage state:', userImage);
+              }}
+            >
+              <Text style={[styles.editButtonText, { color: 'white' }]}>🧪 TEST IMAGEN</Text>
             </TouchableOpacity>
           </View>
         </View>

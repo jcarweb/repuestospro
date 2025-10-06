@@ -30,10 +30,12 @@ interface SavedUser {
   name: string;
   email: string;
   avatar?: string;
+  role?: string;
   lastLogin: string;
 }
 
 const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigation }) => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
@@ -43,7 +45,7 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
   const [rememberMe, setRememberMe] = useState(true);
   const [showBackendSwitcher, setShowBackendSwitcher] = useState(false);
   
-  const { login, isLoading, error, clearError } = useAuth();
+  const { login, isLoading, error, clearError, getSavedUser, saveUser, user } = useAuth();
   const { colors, isDark } = useTheme();
 
   // Cargar usuario guardado al iniciar
@@ -52,22 +54,32 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
     checkBiometricAvailability();
   }, []);
 
-  // Cargar datos del usuario persistente
+  // Sincronizar imagen del AuthContext con usuario persistente
   useEffect(() => {
-    if (savedUser) {
-      // El usuario ya está guardado, mostrar pantalla simplificada
-      console.log('👤 Usuario persistente cargado:', savedUser.name);
+    if (savedUser && user && user.profileImage && !savedUser.avatar) {
+      const userWithImage = {
+        ...savedUser,
+        avatar: user.profileImage
+      };
+      setSavedUser(userWithImage);
+      console.log('✅ Imagen sincronizada desde AuthContext');
     }
-  }, [savedUser]);
+  }, [user, savedUser]);
+
+  // Detectar cuando el usuario se autentica exitosamente
+  useEffect(() => {
+    if (user) {
+      console.log('🎉 Usuario autenticado detectado en SimplifiedLoginScreen:', user.email, user.role);
+      console.log('🎉 El AppNavigator debería navegar al dashboard ahora');
+    }
+  }, [user]);
 
   const loadSavedUser = async () => {
     try {
-      // Usar el servicio de persistencia del AuthContext
-      const { getSavedUser } = useAuth();
       const userData = await getSavedUser();
       if (userData) {
         setSavedUser(userData);
-        console.log('👤 Usuario persistente cargado:', userData.name);
+        console.log('✅ Usuario persistente cargado:', userData.name);
       }
     } catch (error) {
       console.error('❌ Error cargando usuario guardado:', error);
@@ -85,9 +97,13 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
     }
   };
 
+  // Ya no necesitamos esta función porque la imagen se guarda directamente en AuthContext
+
   const handlePasswordLogin = async () => {
-    if (!savedUser) {
-      Alert.alert('Error', 'No hay usuario guardado');
+    const userEmail = savedUser ? savedUser.email : email;
+    
+    if (!userEmail) {
+      Alert.alert('Error', 'Por favor ingresa tu email');
       return;
     }
 
@@ -97,23 +113,26 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
     }
 
     try {
-      await login(savedUser.email, password);
+      console.log('🔄 Iniciando login para:', userEmail);
+      const loginResult = await login(userEmail, password);
+      console.log('✅ Login completado, resultado:', loginResult);
       
       if (rememberMe) {
-        // Guardar credenciales para uso futuro
         await AsyncStorage.setItem('savedCredentials', JSON.stringify({ 
-          email: savedUser.email, 
+          email: userEmail, 
           password 
         }));
         
-        // Guardar usuario en persistencia
-        const { saveUser } = useAuth();
+        // El login ya guardó el usuario con imagen en AuthContext
+        // Solo necesitamos guardar los datos básicos para persistencia
         await saveUser({
-          name: savedUser.name,
-          email: savedUser.email,
-          avatar: savedUser.avatar,
-          role: savedUser.role,
+          name: userEmail.split('@')[0], // Usar parte del email como nombre
+          email: userEmail,
+          avatar: undefined, // Se usará la imagen del AuthContext si está disponible
+          role: 'client', // Rol por defecto
         });
+        
+        console.log('✅ Usuario guardado para persistencia:', userEmail.split('@')[0]);
       }
       
     } catch (error: any) {
@@ -131,7 +150,6 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
     try {
       setIsBiometricLoading(true);
       
-      // Obtener credenciales guardadas
       const savedCredentials = await AsyncStorage.getItem('savedCredentials');
       if (!savedCredentials) {
         Alert.alert('Error', 'No hay credenciales guardadas para autenticación biométrica');
@@ -140,76 +158,87 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
 
       const credentials = JSON.parse(savedCredentials);
       
-      // Autenticar con biometría
       const biometricResult = await biometricAuthService.authenticate();
       
       if (biometricResult.success) {
         await login(credentials.email, credentials.password);
-        console.log('✅ Login biométrico exitoso');
+        
+        // Actualizar usuario guardado (mantener datos existentes)
+        await saveUser({
+          name: savedUser.name,
+          email: credentials.email,
+          avatar: savedUser.avatar,
+          role: savedUser.role,
+        });
+        
+        console.log('✅ Login biométrico exitoso, usuario actualizado:', savedUser.name);
       } else {
         Alert.alert('Error', 'Autenticación biométrica fallida');
       }
-      
     } catch (error: any) {
       console.error('❌ Error en login biométrico:', error);
-      Alert.alert('Error', 'Error en autenticación biométrica');
+      Alert.alert('Error', error.message || 'Error al iniciar sesión con biometría');
     } finally {
       setIsBiometricLoading(false);
     }
   };
 
-  const handlePinLogin = () => {
-    setShowPinModal(true);
-  };
+  const handlePinLogin = async (pin: string) => {
+    if (!savedUser) {
+      Alert.alert('Error', 'No hay usuario guardado');
+      return;
+    }
 
-  const handlePinSuccess = async (credentials: { email: string; password: string }) => {
     try {
+      const savedCredentials = await AsyncStorage.getItem('savedCredentials');
+      if (!savedCredentials) {
+        Alert.alert('Error', 'No hay credenciales guardadas para autenticación con PIN');
+        return;
+      }
+
+      const credentials = JSON.parse(savedCredentials);
+      
       await login(credentials.email, credentials.password);
+      
+      // Actualizar usuario guardado (mantener datos existentes)
+      await saveUser({
+        name: savedUser.name,
+        email: credentials.email,
+        avatar: savedUser.avatar,
+        role: savedUser.role,
+      });
+      
+      console.log('✅ Login con PIN exitoso, usuario actualizado:', savedUser.name);
       setShowPinModal(false);
     } catch (error: any) {
       console.error('❌ Error en login con PIN:', error);
-      Alert.alert('Error', error.message || 'Error al iniciar sesión');
+      Alert.alert('Error', error.message || 'Error al iniciar sesión con PIN');
     }
   };
 
   const handleForgotPassword = () => {
-    Alert.alert(
-      'Recuperar Contraseña',
-      '¿Deseas recuperar tu contraseña?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Recuperar', 
-          onPress: () => {
-            // TODO: Implementar recuperación de contraseña
-            Alert.alert('Próximamente', 'Función de recuperación de contraseña en desarrollo');
-          }
-        }
-      ]
-    );
+    navigation.navigate('ForgotPassword');
   };
 
   const handleNewAccount = () => {
     navigation.navigate('Register');
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     Alert.alert(
       'Cambiar Usuario',
-      '¿Deseas iniciar sesión con una cuenta diferente?',
+      '¿Estás seguro de que quieres cambiar de usuario?',
       [
         { text: 'Cancelar', style: 'cancel' },
         { 
           text: 'Cambiar Usuario', 
           onPress: async () => {
             try {
-              // Limpiar datos del usuario actual
               await AsyncStorage.removeItem('savedUser');
               await AsyncStorage.removeItem('savedCredentials');
               setSavedUser(null);
               setPassword('');
               
-              // Mostrar mensaje de confirmación
               Alert.alert(
                 'Usuario Cambiado',
                 'Ahora puedes iniciar sesión con una cuenta diferente',
@@ -239,145 +268,6 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
     return `${maskedLocal}@${maskedDomain}`;
   };
 
-  if (!savedUser) {
-    // Si no hay usuario guardado, mostrar pantalla de login tradicional
-    return (
-      <KeyboardAvoidingView 
-        style={[styles.container, { backgroundColor: colors.background }]}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Text style={[styles.logoText, { color: colors.primary }]}>
-              PiezasYa
-            </Text>
-          </View>
-          <View style={styles.headerRight}>
-            <ConnectionIndicator size="small" />
-            <TouchableOpacity 
-              style={styles.chatButton}
-              onPress={() => setShowBackendSwitcher(true)}
-            >
-              <Ionicons name="chatbubble-outline" size={24} color={colors.primary} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-          {/* Login Form */}
-          <View style={styles.loginContainer}>
-            <Text style={[styles.title, { color: colors.text, fontWeight: 'bold', fontSize: 20 }]}>
-              Iniciar Sesión
-            </Text>
-            
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={[styles.input, { 
-                  borderBottomColor: colors.border,
-                  color: colors.text 
-                }]}
-                placeholder="Email"
-                placeholderTextColor={colors.textSecondary}
-                value=""
-                onChangeText={() => {}}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={[styles.input, { 
-                  borderBottomColor: colors.border,
-                  color: colors.text 
-                }]}
-                placeholder="Contraseña"
-                placeholderTextColor={colors.textSecondary}
-                value=""
-                onChangeText={() => {}}
-                secureTextEntry={!showPassword}
-              />
-              <TouchableOpacity 
-                style={styles.eyeButton}
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <Ionicons 
-                  name={showPassword ? "eye-off" : "eye"} 
-                  size={20} 
-                  color={colors.textSecondary} 
-                />
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity 
-              style={styles.forgotPassword}
-              onPress={handleForgotPassword}
-            >
-              <Text style={[styles.forgotPasswordText, { color: colors.primary }]}>
-                ¿Olvidaste tu contraseña?
-              </Text>
-            </TouchableOpacity>
-
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity 
-                style={[styles.loginButton, { backgroundColor: colors.primary }]}
-                onPress={() => {}}
-              >
-                <Text style={styles.loginButtonText}>INGRESAR</Text>
-              </TouchableOpacity>
-
-              {biometricAvailable && (
-                <TouchableOpacity 
-                  style={[styles.biometricButton, { backgroundColor: colors.secondary }]}
-                  onPress={() => {}}
-                >
-                  <Ionicons name="finger-print" size={24} color="white" />
-                </TouchableOpacity>
-              )}
-            </View>
-
-            <View style={styles.rememberContainer}>
-              <TouchableOpacity 
-                style={styles.checkbox}
-                onPress={() => setRememberMe(!rememberMe)}
-              >
-                {rememberMe && (
-                  <Ionicons name="checkmark" size={16} color={colors.primary} />
-                )}
-              </TouchableOpacity>
-              <Text style={[styles.rememberText, { color: colors.text, fontWeight: '600', fontSize: 16 }]}>
-                Recuérdame
-              </Text>
-            </View>
-
-            <TouchableOpacity 
-              style={styles.newAccountButton}
-              onPress={handleNewAccount}
-            >
-              <Text style={[styles.newAccountText, { color: colors.primary }]}>
-                ABRIR CUENTA NUEVA
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-
-        {/* Backend Switcher Modal */}
-        <Modal
-          visible={showBackendSwitcher}
-          transparent={true}
-          animationType="slide"
-        >
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
-              <BackendSwitcher onClose={() => setShowBackendSwitcher(false)} />
-            </View>
-          </View>
-        </Modal>
-      </KeyboardAvoidingView>
-    );
-  }
-
   return (
     <KeyboardAvoidingView 
       style={[styles.container, { backgroundColor: colors.background }]}
@@ -387,9 +277,11 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <Text style={[styles.logoText, { color: colors.primary }]}>
-              PiezasYa
-            </Text>
+            <Image
+              source={require('../../../assets/logo-piezasya-light.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
           </View>
           <View style={styles.headerRight}>
             <ConnectionIndicator size="small" />
@@ -409,42 +301,48 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
             {savedUser ? (
               /* Usuario Persistente - Mostrar Perfil */
               <View style={styles.userContainer}>
-                <Text style={[styles.greeting, { color: colors.text }]}>
+                <Text style={[styles.greeting, { color: colors.textPrimary }]}>
                   {getGreeting()}
                 </Text>
                 
                 <View style={styles.profileContainer}>
-                  <Image
-                    source={{ 
-                      uri: savedUser.avatar || 'https://via.placeholder.com/100/6366f1/ffffff?text=' + savedUser.name.charAt(0)
-                    }}
-                    style={styles.profileImageLarge}
-                  />
-                  <Text style={[styles.userName, { color: colors.text }]}>
+                  {savedUser.avatar ? (
+                    <Image
+                      source={{ uri: savedUser.avatar }}
+                      style={styles.profileImageLarge}
+                    />
+                  ) : (
+                    <View style={[styles.profileImageLarge, styles.avatarPlaceholder]}>
+                      <Text style={styles.avatarText}>
+                        {savedUser.name.charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                  )}
+                  <Text style={[styles.userName, { color: colors.textPrimary }]}>
                     {savedUser.name}
                   </Text>
                   <Text style={[styles.userEmail, { color: colors.textSecondary }]}>
                     {maskEmail(savedUser.email)}
                   </Text>
                   
-                  {/* Quick Change User Button */}
                   <TouchableOpacity 
                     style={styles.quickChangeUserButton}
                     onPress={handleLogout}
                   >
-                    <Ionicons name="swap-horizontal" size={16} color={colors.primary} />
-                    <Text style={[styles.quickChangeUserText, { color: colors.primary }]}>
-                      Cambiar Usuario
-                    </Text>
+                    <Text style={styles.quickChangeUserText}>Cambiar Usuario</Text>
                   </TouchableOpacity>
+                  
                 </View>
               </View>
             ) : (
               /* Sin Usuario - Mostrar Logo */
               <View style={styles.logoSection}>
-                <Text style={[styles.logoText, { color: colors.primary, fontSize: 32 }]}>
-                  PiezasYa
-                </Text>
+                {/* Logo central comentado para mostrar al cliente */}
+                {/* <Image
+                  source={require('../../../assets/logo-piezasya-light.png')}
+                  style={styles.logoImageLarge}
+                  resizeMode="contain"
+                /> */}
                 <Text style={[styles.welcomeText, { color: colors.textSecondary }]}>
                   Bienvenido
                 </Text>
@@ -454,146 +352,169 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
 
           {/* Middle Section - Login Form */}
           <View style={styles.middleSection}>
+            {/* Email Input - Solo mostrar si no hay usuario persistente */}
+            {!savedUser && (
+              <View style={styles.emailContainer}>
+                <Text style={[styles.inputLabel, { color: '#FFFFFF' }]}>
+                  Email
+                </Text>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={[styles.emailInput, { 
+                      borderColor: colors.border,
+                      color: '#FFFFFF',
+                      backgroundColor: colors.surface 
+                    }]}
+                    placeholder="Ingresa tu email"
+                    placeholderTextColor="#CCCCCC"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                </View>
+              </View>
+            )}
+
             {/* Password Input */}
             <View style={styles.passwordContainer}>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={[styles.input, { 
-                borderBottomColor: colors.border,
-                color: colors.text 
-              }]}
-              placeholder="Contraseña"
-              placeholderTextColor={colors.textSecondary}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              autoFocus={true}
-            />
-            <TouchableOpacity 
-              style={styles.eyeButton}
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              <Ionicons 
-                name={showPassword ? "eye-off" : "eye"} 
-                size={20} 
-                color={colors.textSecondary} 
-              />
-            </TouchableOpacity>
+              <Text style={[styles.inputLabel, { color: '#FFFFFF' }]}>
+                Contraseña
+              </Text>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={[styles.passwordInput, { 
+                    borderColor: colors.border,
+                    color: '#FFFFFF',
+                    backgroundColor: colors.surface 
+                  }]}
+                  placeholder="Ingresa tu contraseña"
+                  placeholderTextColor="#CCCCCC"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity 
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Ionicons 
+                    name={showPassword ? "eye-off" : "eye"} 
+                    size={24} 
+                    color={colors.textSecondary} 
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity 
+                style={styles.forgotPassword}
+                onPress={handleForgotPassword}
+              >
+                <Text style={[styles.forgotPasswordText, { color: colors.primary }]}>
+                  ¿Olvidaste tu contraseña?
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={styles.buttonContainer}>
+              <View style={styles.loginRow}>
+                <TouchableOpacity 
+                  style={[styles.loginButton, { backgroundColor: colors.primary, flex: 1, marginRight: 8 }]}
+                  onPress={handlePasswordLogin}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Text style={styles.loginButtonText}>INGRESAR</Text>
+                  )}
+                </TouchableOpacity>
+
+                {biometricAvailable && (
+                  <TouchableOpacity 
+                    style={[styles.biometricButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                    onPress={handleBiometricLogin}
+                    disabled={isBiometricLoading}
+                  >
+                    {isBiometricLoading ? (
+                      <ActivityIndicator color={colors.primary} />
+                    ) : (
+                      <Ionicons name="finger-print" size={24} color={colors.primary} />
+                    )}
+                  </TouchableOpacity>
+                )}
+
+                <TouchableOpacity 
+                  style={[styles.pinButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                  onPress={() => setShowPinModal(true)}
+                >
+                  <Ionicons name="keypad" size={24} color={colors.primary} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Remember Me */}
+            <View style={styles.rememberContainer}>
+              <TouchableOpacity 
+                style={styles.checkbox}
+                onPress={() => setRememberMe(!rememberMe)}
+              >
+                {rememberMe && (
+                  <Ionicons name="checkmark" size={18} color={colors.primary} />
+                )}
+              </TouchableOpacity>
+              <Text style={[styles.rememberText, { color: '#FFFFFF' }]}>
+                Recuérdame
+              </Text>
+            </View>
           </View>
 
-          <TouchableOpacity 
-            style={styles.forgotPassword}
-            onPress={handleForgotPassword}
-          >
-            <Text style={[styles.forgotPasswordText, { color: colors.primary }]}>
-              ¿Olvidaste tu contraseña?
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Action Buttons */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.loginButton, { backgroundColor: colors.primary }]}
-            onPress={handlePasswordLogin}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Text style={styles.loginButtonText}>INGRESAR</Text>
-            )}
-          </TouchableOpacity>
-
-          {biometricAvailable && (
+          {/* Bottom Section */}
+          <View style={styles.bottomSection}>
+            {/* New Account */}
             <TouchableOpacity 
-              style={[styles.biometricButton, { backgroundColor: colors.secondary }]}
-              onPress={handleBiometricLogin}
-              disabled={isBiometricLoading}
+              style={styles.newAccountButton}
+              onPress={handleNewAccount}
             >
-              {isBiometricLoading ? (
-                <ActivityIndicator size="small" color="white" />
-              ) : (
-                <Ionicons name="finger-print" size={24} color="white" />
-              )}
+              <Text style={[styles.newAccountText, { color: colors.primary }]}>
+                ABRIR CUENTA NUEVA
+              </Text>
             </TouchableOpacity>
-          )}
-        </View>
 
-        {/* PIN Login Option */}
-        <TouchableOpacity 
-          style={styles.pinButton}
-          onPress={handlePinLogin}
-        >
-          <Ionicons name="keypad" size={20} color={colors.primary} />
-          <Text style={[styles.pinButtonText, { color: colors.primary }]}>
-            Usar PIN
-          </Text>
-        </TouchableOpacity>
-
-        {/* Remember Me */}
-        <View style={styles.rememberContainer}>
-          <TouchableOpacity 
-            style={styles.checkbox}
-            onPress={() => setRememberMe(!rememberMe)}
-          >
-            {rememberMe && (
-              <Ionicons name="checkmark" size={16} color={colors.primary} />
-            )}
-          </TouchableOpacity>
-          <Text style={[styles.rememberText, { color: colors.text }]}>
-            Recuérdame
-          </Text>
-        </View>
-
-            </View>
-
-            {/* Bottom Section */}
-            <View style={styles.bottomSection}>
-              {/* New Account */}
-              <TouchableOpacity 
-                style={styles.newAccountButton}
-                onPress={handleNewAccount}
-              >
-                <Text style={[styles.newAccountText, { color: colors.primary }]}>
-                  ABRIR CUENTA NUEVA
-                </Text>
-              </TouchableOpacity>
-
-              {/* Change User Option */}
-              <TouchableOpacity 
-                style={styles.changeUserButton}
-                onPress={handleLogout}
-              >
-                <Ionicons name="person-add" size={20} color={colors.primary} />
-                <Text style={[styles.changeUserText, { color: colors.primary }]}>
-                  Cambiar Usuario
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
       </ScrollView>
-
-      {/* PIN Modal */}
-      <PinLoginModal
-        visible={showPinModal}
-        onClose={() => setShowPinModal(false)}
-        onSuccess={handlePinSuccess}
-      />
 
       {/* Backend Switcher Modal */}
       <Modal
         visible={showBackendSwitcher}
         transparent={true}
         animationType="slide"
+        onRequestClose={() => setShowBackendSwitcher(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
-            <BackendSwitcher onClose={() => setShowBackendSwitcher(false)} />
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setShowBackendSwitcher(false)}
+            >
+              <Ionicons name="close" size={28} color={colors.textPrimary} />
+            </TouchableOpacity>
+            <BackendSwitcher />
           </View>
         </View>
       </Modal>
+
+      {/* PIN Login Modal */}
+      <PinLoginModal
+        visible={showPinModal}
+        onClose={() => setShowPinModal(false)}
+        onSuccess={handlePinLogin}
+      />
+
     </KeyboardAvoidingView>
   );
 };
@@ -604,68 +525,50 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 20,
-    minHeight: '100%',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 20,
-    paddingBottom: 10,
-    marginTop: 20,
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 20,
   },
   logoContainer: {
     flex: 1,
   },
-  logoText: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  logoImage: {
+    width: 120,
+    height: 40,
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  mainContent: {
-    flex: 1,
-    flexDirection: 'column',
-  },
-  topSection: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  middleSection: {
-    flex: 2,
-    justifyContent: 'center',
-    paddingVertical: 20,
-  },
-  bottomSection: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    paddingBottom: 20,
+    gap: 12,
   },
   chatButton: {
     padding: 8,
-    marginLeft: 8,
+  },
+  mainContent: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  topSection: {
+    flex: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
   },
   userContainer: {
     alignItems: 'center',
-    marginVertical: 60,
   },
   greeting: {
     fontSize: 24,
-    fontWeight: '600',
+    fontWeight: 'bold',
     marginBottom: 20,
   },
   profileContainer: {
     alignItems: 'center',
-  },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 12,
   },
   profileImageLarge: {
     width: 100,
@@ -673,109 +576,130 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginBottom: 16,
   },
-  logoSection: {
-    alignItems: 'center',
+  avatarPlaceholder: {
+    backgroundColor: '#6366f1',
     justifyContent: 'center',
-  },
-  welcomeText: {
-    fontSize: 16,
-    marginTop: 8,
-  },
-  quickChangeUserButton: {
-    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#6366f1',
-    backgroundColor: 'rgba(99, 102, 241, 0.1)',
   },
-  quickChangeUserText: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginLeft: 6,
+  avatarText: {
+    color: 'white',
+    fontSize: 36,
+    fontWeight: 'bold',
   },
   userName: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   userEmail: {
     fontSize: 14,
+    marginBottom: 16,
+  },
+  logoSection: {
+    alignItems: 'center',
+  },
+  logoImageLarge: {
+    width: 200,
+    height: 80,
+    marginBottom: 16,
+  },
+  welcomeText: {
+    fontSize: 20,
+    fontWeight: '500',
+  },
+  middleSection: {
+    flex: 3,
+    justifyContent: 'center',
+  },
+  emailContainer: {
+    marginBottom: 16,
   },
   passwordContainer: {
-    marginBottom: 40,
+    marginBottom: 16,
   },
-  inputContainer: {
-    position: 'relative',
-    marginBottom: 20,
-  },
-  input: {
+  inputLabel: {
     fontSize: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    paddingRight: 50,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  emailInput: {
+    flex: 1,
+    height: 50,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    fontSize: 16,
+  },
+  passwordInput: {
+    flex: 1,
+    height: 50,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    fontSize: 16,
   },
   eyeButton: {
     position: 'absolute',
-    right: 0,
-    top: 12,
+    right: 12,
     padding: 8,
   },
   forgotPassword: {
     alignSelf: 'flex-end',
-    marginBottom: 20,
+    marginTop: 4,
   },
   forgotPasswordText: {
     fontSize: 14,
     fontWeight: '500',
   },
   buttonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 16,
   },
   loginButton: {
-    flex: 1,
-    paddingVertical: 15,
+    height: 50,
     borderRadius: 8,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginBottom: 12,
   },
   loginButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
   },
+  loginRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   biometricButton: {
     width: 50,
     height: 50,
-    borderRadius: 8,
-    alignItems: 'center',
+    borderRadius: 25,
     justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
   },
   pinButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: 'center',
-    paddingVertical: 12,
-    marginBottom: 20,
-  },
-  pinButtonText: {
-    marginLeft: 8,
-    fontSize: 16,
-    fontWeight: '500',
+    alignItems: 'center',
+    borderWidth: 1,
   },
   rememberContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 40,
+    marginTop: 8,
   },
   checkbox: {
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 24,
     borderWidth: 2,
     borderColor: '#6366f1',
     borderRadius: 4,
@@ -785,32 +709,20 @@ const styles = StyleSheet.create({
   },
   rememberText: {
     fontSize: 14,
+    fontWeight: '500',
+  },
+  bottomSection: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingBottom: 40,
   },
   newAccountButton: {
-    alignItems: 'center',
-    marginBottom: 20,
-    alignSelf: 'center',
+    marginBottom: 16,
   },
   newAccountText: {
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  changeUserButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#6366f1',
-    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-  },
-  changeUserText: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
   },
   modalOverlay: {
     flex: 1,
@@ -823,6 +735,28 @@ const styles = StyleSheet.create({
     maxHeight: '80%',
     borderRadius: 12,
     padding: 20,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    zIndex: 1,
+    padding: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    borderRadius: 20,
+  },
+  quickChangeUserButton: {
+    backgroundColor: '#fbbf24', // Amarillo
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginTop: 8,
+    alignSelf: 'center',
+  },
+  quickChangeUserText: {
+    color: '#1f2937', // Gris oscuro para contraste
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
 

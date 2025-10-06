@@ -296,7 +296,7 @@ const SellerDashboardScreen: React.FC = () => {
         <View style={styles.quickActionsGrid}>
           <QuickAction
             title="Consulta de Precios"
-            icon="dollar-sign"
+            icon="cash"
             onPress={() => handleQuickAction('Consulta de Precios')}
           />
           <QuickAction

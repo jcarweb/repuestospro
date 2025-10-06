@@ -5,6 +5,7 @@ import apiService from '../services/api'; // Usar servicio real de API
 // import { forceCorrectNetworkConfig } from '../utils/networkUtils'; // Forzar configuración correcta
 import authVerificationService from '../services/authVerification';
 import { userPersistenceService } from '../services/userPersistenceService';
+import { getBaseURL } from '../config/api';
 // import { useToast } from './ToastContext';
 
 interface AuthContextType {
@@ -14,6 +15,8 @@ interface AuthContextType {
   requiresTwoFactor: boolean;
   pendingUser: User | null;
   savedUser: any | null;
+  setUser: (user: User | null) => void;
+  setRequiresTwoFactor: (requires: boolean) => void;
   login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: (googleToken: string, userInfo: any) => Promise<void>;
   verifyTwoFactor: (code: string) => Promise<void>;
@@ -36,6 +39,7 @@ interface AuthContextType {
   saveUser: (user: any) => Promise<void>;
   clearSavedUser: () => Promise<void>;
   hasSavedUser: () => Promise<boolean>;
+  testTokenStatus: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -77,6 +81,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [pendingUser, setPendingUser] = useState<User | null>(null);
   const [savedUser, setSavedUser] = useState<any | null>(null);
   // const { showToast } = useToast();
+
+  // Debug: Log cuando cambia el estado del usuario
+  useEffect(() => {
+    console.log('🔍 AuthContext - Estado del usuario cambió:', user ? `${user.email} (${user.role})` : 'null');
+    if (user) {
+      console.log('🔍 AuthContext - user.profileImage:', user.profileImage);
+      console.log('🔍 AuthContext - user.avatar:', user.avatar);
+      console.log('🔍 AuthContext - user keys:', Object.keys(user));
+    }
+  }, [user]);
+
+  // Función de test para verificar el token
+  const testTokenStatus = async () => {
+    try {
+      console.log('🧪 TEST TOKEN STATUS:');
+      const storedToken = await AsyncStorage.getItem('authToken');
+      console.log('🧪 Token en AsyncStorage:', storedToken ? `${storedToken.substring(0, 20)}...` : 'null');
+      
+      // Verificar si apiService tiene el token
+      await apiService.refreshToken();
+      console.log('🧪 apiService refreshToken() ejecutado');
+      
+      // Intentar una llamada simple
+      try {
+        const testResponse = await apiService.getUserProfile();
+        console.log('🧪 Test getUserProfile() exitoso:', testResponse.success);
+      } catch (error) {
+        console.log('🧪 Test getUserProfile() falló:', error);
+      }
+    } catch (error) {
+      console.error('🧪 Error en test token:', error);
+    }
+  };
   const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
     console.log(`Toast ${type}: ${message}`);
   };
@@ -94,8 +131,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         // Verificar si hay un usuario guardado
         const storedUser = await AsyncStorage.getItem('user');
+        console.log('🔍 AuthContext - storedUser en AsyncStorage:', storedUser ? 'existe' : 'null');
         if (storedUser) {
           const userData = JSON.parse(storedUser);
+          console.log('🔍 AuthContext - userData parseado:', userData);
           setUser(userData);
           console.log('✅ Usuario cargado desde AsyncStorage:', userData);
           console.log('🔍 Rol del usuario cargado:', userData.role);
@@ -182,31 +221,114 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setRequiresTwoFactor(true);
           setPendingUser(response.data.user);
           
-          // Guardar el tempToken para usar en la verificación 2FA
+          // Guardar el tempToken y usuario pendiente para usar en la verificación 2FA
           await AsyncStorage.setItem('tempToken', response.tempToken);
+          await AsyncStorage.setItem('pendingUser', JSON.stringify(response.data.user));
           
           showToast('Ingresa el código de 2FA', 'info');
         } else {
-          // Login directo sin 2FA
-          setUser(response.data.user);
-          await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
-          
           // IMPORTANTE: Guardar también el token en AsyncStorage
+          console.log('🔍 response.data completo:', JSON.stringify(response.data, null, 2));
+          console.log('🔍 response.data.token existe:', !!response.data.token);
+          console.log('🔍 response.data.token valor:', response.data.token);
+          console.log('🔍 response.data.token tipo:', typeof response.data.token);
+          console.log('🔍 response.data.token longitud:', response.data.token?.length);
+          
           if (response.data.token) {
+            console.log('🔍 response.data.token existe:', response.data.token);
             await AsyncStorage.setItem('authToken', response.data.token);
             console.log('✅ Token guardado en AsyncStorage:', `${response.data.token.substring(0, 20)}...`);
+            
+            // Verificar que se guardó correctamente
+            const verifyToken = await AsyncStorage.getItem('authToken');
+            console.log('🔍 Token verificado en AsyncStorage:', verifyToken ? `${verifyToken.substring(0, 20)}...` : 'null');
+            
+            // Pequeño delay para asegurar que el token se guarde
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Notificar al apiService que tiene un nuevo token
+            await apiService.refreshToken();
+            console.log('✅ apiService notificado del nuevo token');
           } else {
+            console.log('⚠️ No hay token en response.data.token, creando token simulado');
             // Si no hay token del backend, crear uno simulado para admin
             const mockToken = createMockAdminToken(response.data.user);
+            console.log('🔍 Mock token creado:', mockToken);
             await AsyncStorage.setItem('authToken', mockToken);
             console.log('✅ Token simulado de admin guardado en AsyncStorage:', `${mockToken.substring(0, 20)}...`);
+            
+            // Verificar que se guardó correctamente
+            const verifyToken = await AsyncStorage.getItem('authToken');
+            console.log('🔍 Token simulado verificado en AsyncStorage:', verifyToken ? `${verifyToken.substring(0, 20)}...` : 'null');
+            
+            // Pequeño delay para asegurar que el token se guarde
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Notificar al apiService que tiene un nuevo token
+            await apiService.refreshToken();
+            console.log('✅ apiService notificado del token simulado');
           }
+          
+          // Intentar cargar y guardar la imagen del perfil localmente
+          let finalUser = response.data.user;
+          try {
+            console.log('🔄 Intentando cargar imagen del perfil...');
+            console.log('🔍 Usuario del login:', response.data.user);
+            console.log('🔍 ¿Tiene profileImage en login?', !!response.data.user.profileImage);
+            
+            const profileResponse = await apiService.getUserProfile();
+            console.log('🔍 Respuesta de getUserProfile:', profileResponse);
+            console.log('🔍 profileResponse.success:', profileResponse.success);
+            console.log('🔍 profileResponse.data:', profileResponse.data);
+            console.log('🔍 profileResponse.data.profileImage:', profileResponse.data?.profileImage);
+            console.log('🔍 profileResponse.data.avatar:', profileResponse.data?.avatar);
+            console.log('🔍 profileResponse.data completo:', JSON.stringify(profileResponse.data, null, 2));
+            
+            if (profileResponse.success && profileResponse.data.profileImage) {
+              // Construir la URL completa de la imagen
+              const imageUrl = profileResponse.data.profileImage.startsWith('http') 
+                ? profileResponse.data.profileImage 
+                : `${getBaseURL()}${profileResponse.data.profileImage}`;
+              
+              finalUser = {
+                ...response.data.user,
+                profileImage: imageUrl
+              };
+              console.log('✅ Imagen del perfil cargada y guardada localmente:', imageUrl);
+            } else {
+              console.log('⚠️ No se pudo cargar imagen del perfil, guardando usuario sin imagen');
+              console.log('⚠️ profileResponse.success:', profileResponse.success);
+              console.log('⚠️ profileResponse.data:', profileResponse.data);
+            }
+          } catch (error) {
+            console.log('⚠️ Error cargando imagen del perfil, guardando usuario sin imagen:', error);
+          }
+          
+          // Establecer usuario final y guardarlo
+          console.log('🔍 AuthContext - Estableciendo usuario final:', finalUser);
+          console.log('🔍 AuthContext - finalUser.profileImage:', finalUser.profileImage);
+          console.log('🔍 AuthContext - finalUser.avatar:', finalUser.avatar);
+          console.log('🔍 AuthContext - finalUser completo:', JSON.stringify(finalUser, null, 2));
+          setUser(finalUser);
+          await AsyncStorage.setItem('user', JSON.stringify(finalUser));
+          console.log('✅ Usuario final establecido en AuthContext:', finalUser.name, finalUser.profileImage ? 'con imagen' : 'sin imagen');
+          console.log('✅ Usuario guardado en AsyncStorage');
+          
+          // Verificar que se guardó correctamente
+          const savedUserData = await AsyncStorage.getItem('user');
+          const parsedUser = JSON.parse(savedUserData || '{}');
+          console.log('🔍 AuthContext - Usuario guardado en AsyncStorage:', parsedUser);
+          console.log('🔍 AuthContext - parsedUser.profileImage:', parsedUser.profileImage);
+          console.log('🔍 AuthContext - parsedUser.avatar:', parsedUser.avatar);
           
           // Guardar credenciales para uso futuro con PIN/biometría
           await AsyncStorage.setItem('savedCredentials', JSON.stringify({
             email: email,
             password: password
           }));
+          
+          // Actualizar el estado del usuario en el contexto
+          setUser(response.data.user);
           
           // Guardar usuario en persistencia para pantalla simplificada
           await saveUser({
@@ -216,6 +338,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             role: response.data.user.role,
           });
           
+          console.log('✅ Usuario autenticado y guardado:', response.data.user.name);
           showToast('Login exitoso', 'success');
         }
       } else {
@@ -273,6 +396,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (response.data.token) {
           await AsyncStorage.setItem('authToken', response.data.token);
           console.log('✅ Token real guardado en AsyncStorage:', `${response.data.token.substring(0, 20)}...`);
+          // Pequeño delay para asegurar que el token se guarde
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Notificar al apiService que tiene un nuevo token
+          await apiService.refreshToken();
+          console.log('✅ apiService notificado del token real');
         }
         
         setRequiresTwoFactor(false);
@@ -536,6 +665,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     requiresTwoFactor,
     pendingUser,
     savedUser,
+    setUser,
+    setRequiresTwoFactor,
     login,
     loginWithGoogle,
     verifyTwoFactor,
@@ -553,6 +684,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     saveUser,
     clearSavedUser,
     hasSavedUser,
+    // Método de test
+    testTokenStatus,
   };
 
   return (
