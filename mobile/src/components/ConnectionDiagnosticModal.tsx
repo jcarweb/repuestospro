@@ -68,15 +68,15 @@ const ConnectionDiagnosticModal: React.FC<ConnectionDiagnosticModalProps> = ({
         details: `Backend: ${generalCheck.backend}`,
       }]);
 
-      // 2. Verificar endpoint de salud
-      const healthCheck = await connectionMonitorService.checkSpecificEndpoint('/api/health');
+      // 2. Verificar endpoint de productos
+      const productsCheck = await connectionMonitorService.checkSpecificEndpoint('/api/products');
       setDiagnostics(prev => [...prev, {
-        test: 'Endpoint de Salud',
-        status: healthCheck.isConnected ? 'success' : 'error',
-        message: healthCheck.isConnected 
-          ? `OK (${healthCheck.responseTime}ms)` 
-          : healthCheck.error || 'Error',
-        details: '/api/health',
+        test: 'Endpoint de Productos',
+        status: productsCheck.isConnected ? 'success' : 'error',
+        message: productsCheck.isConnected 
+          ? `OK (${productsCheck.responseTime}ms)` 
+          : productsCheck.error || 'Error',
+        details: '/api/products',
       }]);
 
       // 3. Verificar endpoint de autenticación

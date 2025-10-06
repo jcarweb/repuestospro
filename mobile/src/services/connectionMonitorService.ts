@@ -36,11 +36,15 @@ class ConnectionMonitorService {
       console.log('🔍 Verificando conexión con:', baseURL);
 
       // Intentar hacer una petición simple al backend
-      const response = await fetch(`${baseURL}/api/health`, {
-        method: 'GET',
+      const response = await fetch(`${baseURL}/api/auth/login`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          email: 'test@test.com',
+          password: 'test123'
+        }),
         timeout: 10000, // 10 segundos de timeout
       });
 

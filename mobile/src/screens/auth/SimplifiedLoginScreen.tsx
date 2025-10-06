@@ -30,6 +30,7 @@ interface SavedUser {
   name: string;
   email: string;
   avatar?: string;
+  role?: string;
   lastLogin: string;
 }
 
