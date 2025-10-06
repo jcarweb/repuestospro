@@ -76,8 +76,10 @@ const StoreManagerProfileScreen: React.FC = () => {
         const data = JSON.parse(savedProfileData);
         setProfileData(data);
         // Usar la imagen del usuario actualizado si está disponible, sino usar la guardada localmente
-        const avatarUrl = user.avatar || data.profileImage || null;
+        const avatarUrl = user.profileImage || user.avatar || data.profileImage || null;
         console.log('🖼️ Avatar URL encontrada:', avatarUrl);
+        console.log('🔍 user.profileImage:', user.profileImage);
+        console.log('🔍 user.avatar:', user.avatar);
         if (avatarUrl && !avatarUrl.startsWith('http')) {
           // Si es una ruta relativa, construir la URL completa
           const baseUrl = await getBaseUrl();
@@ -91,8 +93,10 @@ const StoreManagerProfileScreen: React.FC = () => {
         console.log(`Datos del perfil cargados para usuario ${user.id}:`, data);
       } else {
         // Si no hay datos guardados localmente, usar los datos del usuario actualizado
-        const avatarUrl = user.avatar || null;
+        const avatarUrl = user.profileImage || user.avatar || null;
         console.log('🖼️ Avatar URL del usuario:', avatarUrl);
+        console.log('🔍 user.profileImage:', user.profileImage);
+        console.log('🔍 user.avatar:', user.avatar);
         if (avatarUrl && !avatarUrl.startsWith('http')) {
           // Si es una ruta relativa, construir la URL completa
           const baseUrl = await getBaseUrl();
@@ -201,6 +205,28 @@ const StoreManagerProfileScreen: React.FC = () => {
           >
             <Ionicons name="create-outline" size={20} color="white" />
             <Text style={styles.editButtonText}>Editar</Text>
+          </TouchableOpacity>
+          
+          {/* BOTONES DE DEBUG TEMPORALES */}
+          <TouchableOpacity 
+            style={[styles.editButton, { backgroundColor: '#FF6B6B', marginTop: 10 }]} 
+            onPress={async () => {
+              const { testTokenStatus } = useAuth();
+              await testTokenStatus();
+            }}
+          >
+            <Text style={[styles.editButtonText, { color: 'white' }]}>🔐 TEST TOKEN</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.editButton, { backgroundColor: '#4CAF50', marginTop: 5 }]} 
+            onPress={async () => {
+              console.log('🧪 TEST IMAGEN STORE MANAGER:');
+              console.log('🧪 user.profileImage:', user?.profileImage);
+              console.log('🧪 user.avatar:', user?.avatar);
+            }}
+          >
+            <Text style={[styles.editButtonText, { color: 'white' }]}>🧪 TEST IMAGEN</Text>
           </TouchableOpacity>
         </View>
 
