@@ -333,19 +333,26 @@ const AdminProfileScreen: React.FC = () => {
             onPress={async () => {
               console.log('🧪 TEST USUARIOS ALTERNATIVOS:');
               try {
-                // Probar con diferentes usuarios que no estén bloqueados
-                const users = [
-                  { email: 'admin@repuestospro.com', password: 'Test123!' },
-                  { email: 'cliente@repuestospro.com', password: 'cliente123' },
-                  { email: 'vendedor@repuestospro.com', password: 'vendedor123' },
-                  { email: 'delivery@repuestospro.com', password: 'delivery123' },
-                  { email: 'tienda@repuestospro.com', password: 'tienda123' }
+                // Evitar contraseñas en texto plano: obtener password de AsyncStorage (solo para entorno de pruebas)
+                const testPassword = await AsyncStorage.getItem('TEST_LOGIN_PASSWORD');
+                if (!testPassword) {
+                  console.log('⚠️ TEST_LOGIN_PASSWORD no está configurado en AsyncStorage. Abortando prueba.');
+                  return;
+                }
+
+                // Probar con diferentes usuarios que no estén bloqueados (solo emails)
+                const userEmails = [
+                  'admin@repuestospro.com',
+                  'cliente@repuestospro.com',
+                  'vendedor@repuestospro.com',
+                  'delivery@repuestospro.com',
+                  'tienda@repuestospro.com'
                 ];
-                
-                for (const user of users) {
+
+                for (const email of userEmails) {
                   try {
-                    console.log(`🧪 Probando usuario: ${user.email}`);
-                    const loginResponse = await apiService.login(user);
+                    console.log(`🧪 Probando usuario: ${email}`);
+                    const loginResponse = await apiService.login({ email, password: testPassword });
                     if (loginResponse.success && loginResponse.data?.token) {
                       console.log('✅ Usuario válido encontrado!');
                       console.log('✅ Token obtenido:', loginResponse.data.token);
@@ -355,7 +362,7 @@ const AdminProfileScreen: React.FC = () => {
                       break;
                     }
                   } catch (error) {
-                    console.log(`❌ Falló con usuario: ${user.email} - ${error.message}`);
+                    console.log(`❌ Falló con usuario: ${email} - ${error.message}`);
                   }
                 }
               } catch (error) {

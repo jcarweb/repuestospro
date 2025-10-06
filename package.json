@@ -14,7 +14,9 @@
     "install:all": "npm install && cd backend && npm install",
     "start": "cd backend && npm start",
     "test:servers": "node test-servers.js",
-    "kill": "taskkill /F /IM node.exe"
+    "kill": "taskkill /F /IM node.exe",
+    "prepare": "husky || true && husky install",
+    "precommit:secrets": "node scripts/pre-commit-security.js"
   },
   "keywords": [
     "ecommerce",
@@ -111,6 +113,7 @@
     "@vitejs/plugin-react": "^4.0.0",
     "autoprefixer": "^10.4.14",
     "concurrently": "^8.2.2",
+    "husky": "^9.1.7",
     "postcss": "^8.4.24",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.0.2",
