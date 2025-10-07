@@ -278,7 +278,7 @@ app.put('/api/debug/users/:id', async (req, res) => {
     
     // Solo permitir actualizar campos específicos por seguridad
     const allowedFields = ['avatar', 'twoFactorEnabled', 'name', 'email', 'loginAttempts', 'lockUntil'];
-    const filteredData = {};
+    const filteredData: any = {};
     
     for (const field of allowedFields) {
       if (updateData[field] !== undefined) {
@@ -289,10 +289,11 @@ app.put('/api/debug/users/:id', async (req, res) => {
     const user = await User.findByIdAndUpdate(id, filteredData, { new: true });
     
     if (!user) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Usuario no encontrado'
       });
+      return;
     }
     
     res.json({
