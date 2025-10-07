@@ -268,6 +268,54 @@ app.get('/api/debug/users', async (req, res) => {
     });
   }
 });
+
+// Ruta temporal para actualizar usuarios sin autenticación (SOLO PARA DEBUG)
+app.put('/api/debug/users/:id', async (req, res) => {
+  try {
+    const User = require('./models/User').default;
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    // Solo permitir actualizar campos específicos por seguridad
+    const allowedFields = ['avatar', 'twoFactorEnabled', 'name', 'email', 'loginAttempts', 'lockUntil'];
+    const filteredData = {};
+    
+    for (const field of allowedFields) {
+      if (updateData[field] !== undefined) {
+        filteredData[field] = updateData[field];
+      }
+    }
+    
+    const user = await User.findByIdAndUpdate(id, filteredData, { new: true });
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Usuario actualizado exitosamente',
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        twoFactorEnabled: user.twoFactorEnabled
+      }
+    });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+});
+
 // Ruta de prueba de base de datos
 app.get('/api/db-status', async (req, res) => {
   try {
