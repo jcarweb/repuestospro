@@ -68,46 +68,50 @@ const DeliveryProfileScreen: React.FC = () => {
         console.log('No se pudieron cargar datos del backend, usando datos locales');
       }
 
-      // Cargar datos del perfil guardados específicos del usuario
+      // Priorizar datos del backend sobre datos locales
+      // Usar datos del usuario actualizado (que viene del backend) como fuente principal
+      const avatarUrl = user.profileImage || user.avatar || null;
+      console.log('🖼️ Avatar URL del usuario (backend):', avatarUrl);
+      console.log('🔍 user.profileImage:', user.profileImage);
+      console.log('🔍 user.avatar:', user.avatar);
+      
+      if (avatarUrl && !avatarUrl.startsWith('http')) {
+        // Si es una ruta relativa, construir la URL completa
+        const baseUrl = await getBaseUrl();
+        const fullImageUrl = `${baseUrl}${avatarUrl}`;
+        console.log('🖼️ URL completa de imagen construida:', fullImageUrl);
+        setProfileImage(fullImageUrl);
+      } else {
+        console.log('🖼️ Usando URL de imagen directa:', avatarUrl);
+        setProfileImage(avatarUrl);
+      }
+
+      // Cargar datos locales solo como fallback para campos que no están en el backend
       const userProfileKey = `profileData_${user.id}`;
       const savedProfileData = await AsyncStorage.getItem(userProfileKey);
       
       if (savedProfileData) {
-        const data = JSON.parse(savedProfileData);
-        setProfileData(data);
-        // Usar la imagen del usuario actualizado si está disponible, sino usar la guardada localmente
-        const avatarUrl = user.profileImage || user.avatar || data.profileImage || null;
-        console.log('🖼️ Avatar URL encontrada:', avatarUrl);
-        console.log('🔍 user.profileImage:', user.profileImage);
-        console.log('🔍 user.avatar:', user.avatar);
-        if (avatarUrl && !avatarUrl.startsWith('http')) {
-          // Si es una ruta relativa, construir la URL completa
-          const baseUrl = await getBaseUrl();
-          const fullImageUrl = `${baseUrl}${avatarUrl}`;
-          console.log('🖼️ URL completa de imagen construida:', fullImageUrl);
-          setProfileImage(fullImageUrl);
-        } else {
-          console.log('🖼️ Usando URL de imagen directa:', avatarUrl);
-          setProfileImage(avatarUrl);
-        }
-        console.log(`Datos del perfil cargados para usuario ${user.id}:`, data);
+        const localData = JSON.parse(savedProfileData);
+        console.log('Datos locales encontrados (usando como fallback):', localData);
+        
+        // Solo usar datos locales para campos que no están en el usuario del backend
+        const fallbackData = {
+          phone: user.phone || localData.phone || '',
+          address: user.address || localData.address || '',
+          location: user.location || localData.location || null
+        };
+        
+        setProfileData(fallbackData);
+        console.log(`Datos del perfil cargados (backend + fallback local) para usuario ${user.id}:`, fallbackData);
       } else {
-        // Si no hay datos guardados localmente, usar los datos del usuario actualizado
-        const avatarUrl = user.profileImage || user.avatar || null;
-        console.log('🖼️ Avatar URL del usuario:', avatarUrl);
-        console.log('🔍 user.profileImage:', user.profileImage);
-        console.log('🔍 user.avatar:', user.avatar);
-        if (avatarUrl && !avatarUrl.startsWith('http')) {
-          // Si es una ruta relativa, construir la URL completa
-          const baseUrl = await getBaseUrl();
-          const fullImageUrl = `${baseUrl}${avatarUrl}`;
-          console.log('🖼️ URL completa de imagen construida:', fullImageUrl);
-          setProfileImage(fullImageUrl);
-        } else {
-          console.log('🖼️ Usando URL de imagen directa:', avatarUrl);
-          setProfileImage(avatarUrl);
-        }
-        console.log(`No hay datos de perfil guardados para usuario ${user.id}, usando datos del usuario actualizado`);
+        // Usar datos del backend directamente
+        const backendData = {
+          phone: user.phone || '',
+          address: user.address || '',
+          location: user.location || null
+        };
+        setProfileData(backendData);
+        console.log(`Datos del perfil cargados desde backend para usuario ${user.id}:`, backendData);
       }
     } catch (error) {
       console.error('Error cargando datos del perfil:', error);

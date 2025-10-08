@@ -718,6 +718,9 @@ export class AuthController {
             name: updatedUser.name,
             email: updatedUser.email,
             phone: updatedUser.phone,
+            address: updatedUser.address,
+            location: updatedUser.location,
+            avatar: updatedUser.avatar,
             isEmailVerified: updatedUser.isEmailVerified,
             role: updatedUser.role
           }

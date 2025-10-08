@@ -32,6 +32,7 @@ interface AuthContextType {
   verifyEmail: (token: string) => Promise<void>;
   loadUserProfile: (forceReload?: boolean) => Promise<void>;
   clearLocalProfileData: () => Promise<void>;
+  updateUserAfterProfileEdit: (updatedUserData: any) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
   error: string | null;
@@ -550,27 +551,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         let updatedUser = { ...response.data };
         
-        // Si no es una recarga forzada, intentar combinar con datos locales
+        // Priorizar datos del backend sobre datos locales
+        // Solo usar datos locales como fallback si el backend no tiene esos campos
         if (!forceReload) {
           const userProfileKey = `profileData_${user.id}`;
           const savedProfileData = await AsyncStorage.getItem(userProfileKey);
           
           if (savedProfileData) {
             const localData = JSON.parse(savedProfileData);
-            console.log('Datos locales encontrados:', localData);
+            console.log('Datos locales encontrados (usando como fallback):', localData);
             
-            // Solo usar datos locales si el backend no tiene esos campos
+            // Solo usar datos locales si el backend no tiene esos campos o están vacíos
             updatedUser = {
               ...updatedUser,
               name: updatedUser.name || localData.name,
               email: updatedUser.email || localData.email,
               phone: updatedUser.phone || localData.phone,
               address: updatedUser.address || localData.address,
-              avatar: updatedUser.avatar || localData.profileImage,
+              avatar: updatedUser.avatar || updatedUser.profileImage || localData.profileImage,
+              profileImage: updatedUser.profileImage || updatedUser.avatar || localData.profileImage,
               location: updatedUser.location || localData.location
             };
             
-            console.log('Usuario actualizado con datos locales:', updatedUser);
+            console.log('Usuario actualizado (backend primero, local como fallback):', updatedUser);
           }
         }
         
@@ -601,6 +604,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await loadUserProfile(true);
     } catch (error) {
       console.error('Error limpiando datos locales:', error);
+    }
+  };
+
+  const updateUserAfterProfileEdit = async (updatedUserData: any) => {
+    try {
+      if (!user?.id) {
+        console.log('No hay usuario logueado');
+        return;
+      }
+
+      console.log('🔄 Actualizando usuario después de editar perfil:', updatedUserData);
+      
+      // Actualizar el usuario con los nuevos datos
+      const newUser = {
+        ...user,
+        ...updatedUserData,
+        // Asegurar que la imagen se maneje correctamente
+        avatar: updatedUserData.avatar || updatedUserData.profileImage || user.avatar,
+        profileImage: updatedUserData.profileImage || updatedUserData.avatar || user.profileImage
+      };
+      
+      setUser(newUser);
+      await AsyncStorage.setItem('user', JSON.stringify(newUser));
+      
+      // Limpiar datos locales para forzar recarga desde backend
+      const userProfileKey = `profileData_${user.id}`;
+      await AsyncStorage.removeItem(userProfileKey);
+      
+      console.log('✅ Usuario actualizado después de editar perfil');
+    } catch (error) {
+      console.error('Error actualizando usuario después de editar perfil:', error);
     }
   };
 
@@ -683,6 +717,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     verifyEmail,
     loadUserProfile,
     clearLocalProfileData,
+    updateUserAfterProfileEdit,
     logout,
     clearError,
     error,
