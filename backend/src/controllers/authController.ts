@@ -632,7 +632,7 @@ export class AuthController {
   static async updateProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?._id;
-      const { name, email, phone } = req.body;
+      const { name, email, phone, address } = req.body;
       // Validar email si se está cambiando
       if (email) {
         const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
@@ -659,7 +659,8 @@ export class AuthController {
         {
           name,
           email,
-          phone
+          phone,
+          address
         },
         { new: true, runValidators: true }
       );
