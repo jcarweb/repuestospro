@@ -7,6 +7,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   phone?: string;
+  address?: string;
   googleId?: string;
   avatar?: string; // URL de la imagen de perfil
   role: 'admin' | 'client' | 'delivery' | 'store_manager' | 'seller';
@@ -138,6 +139,10 @@ const userSchema = new Schema<IUser>({
     maxlength: 100 // Aumentado para permitir el hash de argon2
   },
   phone: {
+    type: String,
+    trim: true
+  },
+  address: {
     type: String,
     trim: true
   },
