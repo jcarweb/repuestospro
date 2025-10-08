@@ -541,6 +541,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (response.success && response.data) {
         console.log('Perfil del usuario cargado desde backend:', response.data);
+        console.log('📥 Datos específicos del backend:');
+        console.log('  - name:', response.data.name);
+        console.log('  - email:', response.data.email);
+        console.log('  - phone:', response.data.phone);
+        console.log('  - address:', response.data.address);
+        console.log('  - location:', response.data.location);
         
         let updatedUser = { ...response.data };
         

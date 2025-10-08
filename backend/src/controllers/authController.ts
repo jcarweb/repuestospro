@@ -568,6 +568,15 @@ export class AuthController {
         });
         return;
       }
+      
+      console.log('📥 getProfile devolviendo datos:', {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        location: user.location
+      });
+      
       res.json({
         success: true,
         data: user
