@@ -633,6 +633,15 @@ export class AuthController {
     try {
       const userId = req.user?._id;
       const { name, email, phone, address, location } = req.body;
+      
+      console.log('🔄 Backend recibió datos:', { name, email, phone, address, location });
+      console.log('🔄 Tipos de datos:', {
+        name: typeof name,
+        email: typeof email,
+        phone: typeof phone,
+        address: typeof address,
+        location: typeof location
+      });
       // Validar email si se está cambiando
       if (email) {
         const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
@@ -672,6 +681,14 @@ export class AuthController {
         });
         return;
       }
+      
+      console.log('✅ Usuario actualizado en BD:', {
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        address: updatedUser.address,
+        location: updatedUser.location
+      });
       // Registrar actividad
       await Activity.create({
         userId: updatedUser._id,
