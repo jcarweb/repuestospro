@@ -57,27 +57,6 @@ const ProfileScreen: React.FC = () => {
     }
   }, [user]);
 
-  // Función de test directo para verificar imagen
-  const testImageDirectly = async () => {
-    try {
-      console.log('🧪 TEST DIRECTO DE IMAGEN:');
-      console.log('🧪 user.profileImage:', user?.profileImage);
-      console.log('🧪 user.avatar:', user?.avatar);
-      
-      if (user?.profileImage) {
-        console.log('🧪 Intentando cargar imagen directa:', user.profileImage);
-        setProfileImage(user.profileImage);
-      } else if (user?.avatar) {
-        console.log('🧪 Intentando cargar avatar directo:', user.avatar);
-        setProfileImage(user.avatar);
-      } else {
-        console.log('🧪 No hay imagen disponible');
-        setProfileImage(null);
-      }
-    } catch (error) {
-      console.error('🧪 Error en test directo:', error);
-    }
-  };
 
   const getBaseUrl = async () => {
     try {

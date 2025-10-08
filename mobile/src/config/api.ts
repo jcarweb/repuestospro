@@ -64,7 +64,8 @@ export class DynamicAPIConfig {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    return this.currentConfig?.baseUrl || 'http://192.168.31.122:5000/api';
+    // Si no hay config, usar Render por defecto
+    return this.currentConfig?.baseUrl || 'https://piezasya-back.onrender.com/api';
   }
 
   // Obtener la configuración completa
@@ -77,16 +78,19 @@ export class DynamicAPIConfig {
 
   // Forzar rescan de la red
   async rescan(): Promise<NetworkConfig> {
-    // Usar la IP real de la red local
+    // Rescan no debe forzar a IP local; mantener entorno actual
+    if (!this.currentEnvironment) {
+      await this.initialize();
+    }
     this.currentConfig = {
-      baseUrl: 'http://192.168.31.122:5000/api',
-      isLocal: true,
-      networkName: 'Backend Principal (Forzado)',
+      baseUrl: this.currentEnvironment!.baseUrl,
+      isLocal: this.currentEnvironment!.isLocal,
+      networkName: this.currentEnvironment!.name,
       lastTested: Date.now(),
       isWorking: true,
     };
     this.isInitialized = true;
-    console.log('Rescan FORCED to network IP:', this.currentConfig);
+    console.log('Rescan reloaded current environment:', this.currentConfig);
     return this.currentConfig;
   }
 

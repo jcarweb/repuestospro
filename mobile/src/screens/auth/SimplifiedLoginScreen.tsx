@@ -56,13 +56,17 @@ const SimplifiedLoginScreen: React.FC<SimplifiedLoginScreenProps> = ({ navigatio
 
   // Sincronizar imagen del AuthContext con usuario persistente
   useEffect(() => {
-    if (savedUser && user && user.profileImage && !savedUser.avatar) {
-      const userWithImage = {
-        ...savedUser,
-        avatar: user.profileImage
-      };
-      setSavedUser(userWithImage);
-      console.log('✅ Imagen sincronizada desde AuthContext');
+    if (savedUser && user && (user.profileImage || user.avatar)) {
+      const avatarUrl = user.profileImage || user.avatar;
+      
+      // Solo actualizar si el avatar es diferente o no existe
+      if (savedUser.avatar !== avatarUrl) {
+        const userWithImage = {
+          ...savedUser,
+          avatar: avatarUrl
+        };
+        setSavedUser(userWithImage);
+      }
     }
   }, [user, savedUser]);
 
