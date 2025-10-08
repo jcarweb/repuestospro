@@ -22,7 +22,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AdminEditProfileScreen: React.FC = () => {
   const { colors } = useTheme();
-  const { user, loadUserProfile } = useAuth();
+  const { user, loadUserProfile, updateUserAfterProfileEdit } = useAuth();
   const { showToast } = useToast();
   
   const [name, setName] = useState(user?.name || '');
@@ -251,8 +251,14 @@ const AdminEditProfileScreen: React.FC = () => {
         if (response.success) {
           console.log('✅ Backend actualizado exitosamente');
           showToast('Perfil actualizado exitosamente', 'success');
-          // Recargar perfil del usuario
-          await loadUserProfile();
+          
+          // Actualizar el usuario con los nuevos datos del backend
+          if (response.data?.user) {
+            await updateUserAfterProfileEdit(response.data.user);
+          } else {
+            // Fallback: recargar perfil del usuario
+            await loadUserProfile(true);
+          }
         } else {
           console.log('❌ Backend falló:', response.message);
           showToast('Perfil guardado localmente', 'info');
