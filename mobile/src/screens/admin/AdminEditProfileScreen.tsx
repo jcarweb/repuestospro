@@ -62,6 +62,7 @@ const AdminEditProfileScreen: React.FC = () => {
     }, [])
   );
 
+
   const loadProfileData = async () => {
     try {
       if (!user?.id) {
@@ -71,13 +72,18 @@ const AdminEditProfileScreen: React.FC = () => {
 
       // Primero intentar cargar datos reales del backend
       try {
-        console.log('Cargando datos reales del usuario desde el backend...');
         await loadUserProfile();
       } catch (error) {
         console.log('No se pudieron cargar datos del backend, usando datos locales');
       }
 
       // Usar datos del usuario actualizado del backend
+      console.log('📥 Cargando datos en AdminEditProfile:');
+      console.log('  - name:', user?.name);
+      console.log('  - email:', user?.email);
+      console.log('  - phone:', user?.phone);
+      console.log('  - address:', user?.address);
+      
       setName(user?.name || '');
       setEmail(user?.email || '');
       setPhone(user?.phone || '');
@@ -85,28 +91,23 @@ const AdminEditProfileScreen: React.FC = () => {
       
       // Cargar imagen de perfil
       const avatarUrl = user?.avatar || null;
-      console.log('🖼️ Avatar URL del usuario:', avatarUrl);
       
       if (avatarUrl) {
         if (avatarUrl.startsWith('http')) {
           // URL completa de Cloudinary o externa
-          console.log('🖼️ Usando URL completa:', avatarUrl);
           setProfileImage(avatarUrl);
         } else if (avatarUrl.startsWith('/uploads/')) {
           // Ruta relativa del servidor
           const baseUrl = await getBaseUrl();
           const fullImageUrl = `${baseUrl}${avatarUrl}`;
-          console.log('🖼️ URL completa construida desde ruta relativa:', fullImageUrl);
           setProfileImage(fullImageUrl);
         } else {
           // Otra ruta relativa
           const baseUrl = await getBaseUrl();
           const fullImageUrl = `${baseUrl}${avatarUrl}`;
-          console.log('🖼️ URL completa construida:', fullImageUrl);
           setProfileImage(fullImageUrl);
         }
       } else {
-        console.log('🖼️ No hay avatar del usuario');
         setProfileImage(null);
       }
 
@@ -223,23 +224,41 @@ const AdminEditProfileScreen: React.FC = () => {
       
       // Intentar guardar en el backend
       try {
-        const response = await apiService.updateUserProfile({
+        const backendData = {
           name,
           email,
           phone,
           address,
-          location: profileData.location
-        });
+          location: location ? {
+            type: 'Point',
+            coordinates: [location.longitude, location.latitude],
+            address: location.address
+          } : null
+        };
+        
+        console.log('🔄 Enviando datos al backend:', backendData);
+        console.log('🔄 Datos individuales:');
+        console.log('  - name:', name, '(tipo:', typeof name, ')');
+        console.log('  - email:', email, '(tipo:', typeof email, ')');
+        console.log('  - phone:', phone, '(tipo:', typeof phone, ')');
+        console.log('  - address:', address, '(tipo:', typeof address, ')');
+        console.log('  - location:', location);
+        
+        const response = await apiService.updateUserProfile(backendData);
+        
+        console.log('📡 Respuesta del backend:', response);
         
         if (response.success) {
+          console.log('✅ Backend actualizado exitosamente');
           showToast('Perfil actualizado exitosamente', 'success');
           // Recargar perfil del usuario
           await loadUserProfile();
         } else {
+          console.log('❌ Backend falló:', response.message);
           showToast('Perfil guardado localmente', 'info');
         }
       } catch (error) {
-        console.error('Error guardando en backend:', error);
+        console.error('❌ Error guardando en backend:', error);
         if (isManualSave) {
           showToast('Error al guardar en el servidor. Datos guardados localmente.', 'warning');
         } else {

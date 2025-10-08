@@ -30,7 +30,8 @@ interface AuthContextType {
   resetPassword: (token: string, password: string) => Promise<void>;
   resendVerificationEmail: (email: string) => Promise<void>;
   verifyEmail: (token: string) => Promise<void>;
-  loadUserProfile: () => Promise<void>;
+  loadUserProfile: (forceReload?: boolean) => Promise<void>;
+  clearLocalProfileData: () => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
   error: string | null;
@@ -39,7 +40,6 @@ interface AuthContextType {
   saveUser: (user: any) => Promise<void>;
   clearSavedUser: () => Promise<void>;
   hasSavedUser: () => Promise<boolean>;
-  testTokenStatus: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -92,28 +92,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [user]);
 
-  // Función de test para verificar el token
-  const testTokenStatus = async () => {
-    try {
-      console.log('🧪 TEST TOKEN STATUS:');
-      const storedToken = await AsyncStorage.getItem('authToken');
-      console.log('🧪 Token en AsyncStorage:', storedToken ? `${storedToken.substring(0, 20)}...` : 'null');
-      
-      // Verificar si apiService tiene el token
-      await apiService.refreshToken();
-      console.log('🧪 apiService refreshToken() ejecutado');
-      
-      // Intentar una llamada simple
-      try {
-        const testResponse = await apiService.getUserProfile();
-        console.log('🧪 Test getUserProfile() exitoso:', testResponse.success);
-      } catch (error) {
-        console.log('🧪 Test getUserProfile() falló:', error);
-      }
-    } catch (error) {
-      console.error('🧪 Error en test token:', error);
-    }
-  };
   const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
     console.log(`Toast ${type}: ${message}`);
   };
@@ -304,7 +282,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.log('⚠️ Error cargando imagen del perfil, guardando usuario sin imagen:', error);
           }
           
-          // Establecer usuario final y guardarlo
+          // Normalizar identificador y establecer usuario final con imagen preservada
+          if ((finalUser as any)._id && !(finalUser as any).id) {
+            (finalUser as any).id = (finalUser as any)._id;
+          }
           console.log('🔍 AuthContext - Estableciendo usuario final:', finalUser);
           console.log('🔍 AuthContext - finalUser.profileImage:', finalUser.profileImage);
           console.log('🔍 AuthContext - finalUser.avatar:', finalUser.avatar);
@@ -327,15 +308,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             password: password
           }));
           
-          // Actualizar el estado del usuario en el contexto
-          setUser(response.data.user);
+          // No sobrescribir con response.data.user para no perder profileImage
           
           // Guardar usuario en persistencia para pantalla simplificada
           await saveUser({
-            name: response.data.user.name,
-            email: response.data.user.email,
-            avatar: response.data.user.avatar,
-            role: response.data.user.role,
+            name: finalUser.name,
+            email: finalUser.email,
+            avatar: finalUser.profileImage || finalUser.avatar,
+            role: finalUser.role,
           });
           
           console.log('✅ Usuario autenticado y guardado:', response.data.user.name);
@@ -549,7 +529,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const loadUserProfile = async () => {
+  const loadUserProfile = async (forceReload = false) => {
     try {
       if (!user?.id) {
         console.log('No hay usuario logueado, no se pueden cargar datos del perfil');
@@ -562,28 +542,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.success && response.data) {
         console.log('Perfil del usuario cargado desde backend:', response.data);
         
-        // Combinar datos del backend con datos locales guardados
-        const userProfileKey = `profileData_${user.id}`;
-        const savedProfileData = await AsyncStorage.getItem(userProfileKey);
-        
         let updatedUser = { ...response.data };
         
-        if (savedProfileData) {
-          const localData = JSON.parse(savedProfileData);
-          console.log('Datos locales encontrados:', localData);
+        // Si no es una recarga forzada, intentar combinar con datos locales
+        if (!forceReload) {
+          const userProfileKey = `profileData_${user.id}`;
+          const savedProfileData = await AsyncStorage.getItem(userProfileKey);
           
-          // Combinar datos locales con datos del backend
-          updatedUser = {
-            ...updatedUser,
-            name: localData.name || updatedUser.name,
-            email: localData.email || updatedUser.email,
-            phone: localData.phone || updatedUser.phone,
-            address: localData.address || updatedUser.address,
-            avatar: localData.profileImage || updatedUser.avatar,
-            location: localData.location || updatedUser.location
-          };
-          
-          console.log('Usuario actualizado con datos locales:', updatedUser);
+          if (savedProfileData) {
+            const localData = JSON.parse(savedProfileData);
+            console.log('Datos locales encontrados:', localData);
+            
+            // Solo usar datos locales si el backend no tiene esos campos
+            updatedUser = {
+              ...updatedUser,
+              name: updatedUser.name || localData.name,
+              email: updatedUser.email || localData.email,
+              phone: updatedUser.phone || localData.phone,
+              address: updatedUser.address || localData.address,
+              avatar: updatedUser.avatar || localData.profileImage,
+              location: updatedUser.location || localData.location
+            };
+            
+            console.log('Usuario actualizado con datos locales:', updatedUser);
+          }
         }
         
         setUser(updatedUser);
@@ -595,6 +577,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Error cargando perfil del usuario:', error);
       showToast('Error cargando perfil del usuario', 'error');
+    }
+  };
+
+  const clearLocalProfileData = async () => {
+    try {
+      if (!user?.id) {
+        console.log('No hay usuario logueado');
+        return;
+      }
+
+      const userProfileKey = `profileData_${user.id}`;
+      await AsyncStorage.removeItem(userProfileKey);
+      console.log('✅ Datos locales del perfil eliminados');
+      
+      // Recargar perfil desde el backend
+      await loadUserProfile(true);
+    } catch (error) {
+      console.error('Error limpiando datos locales:', error);
     }
   };
 
@@ -676,6 +676,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     resendVerificationEmail,
     verifyEmail,
     loadUserProfile,
+    clearLocalProfileData,
     logout,
     clearError,
     error,
@@ -684,8 +685,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     saveUser,
     clearSavedUser,
     hasSavedUser,
-    // Método de test
-    testTokenStatus,
   };
 
   return (

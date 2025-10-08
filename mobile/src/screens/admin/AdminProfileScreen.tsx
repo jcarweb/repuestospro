@@ -56,8 +56,9 @@ const AdminProfileScreen: React.FC = () => {
 
   const loadProfileData = async () => {
     try {
-      if (!user?.id) {
-        console.log('No hay usuario logueado, no se pueden cargar datos del perfil');
+      const userId = (user as any)?.id || (user as any)?._id;
+      if (!userId) {
+        console.log('No hay usuario logueado (sin id/_id), no se pueden cargar datos del perfil');
         return;
       }
 
@@ -71,35 +72,28 @@ const AdminProfileScreen: React.FC = () => {
 
       // Usar la imagen del usuario actualizado
       const avatarUrl = user.profileImage || user.avatar || null;
-      console.log('🖼️ Avatar URL del usuario:', avatarUrl);
-      console.log('🔍 user.profileImage:', user.profileImage);
-      console.log('🔍 user.avatar:', user.avatar);
       
       if (avatarUrl) {
         if (avatarUrl.startsWith('http')) {
           // URL completa de Cloudinary o externa
-          console.log('🖼️ Usando URL completa:', avatarUrl);
           setProfileImage(avatarUrl);
         } else if (avatarUrl.startsWith('/uploads/')) {
           // Ruta relativa del servidor
           const baseUrl = await getBaseUrl();
           const fullImageUrl = `${baseUrl}${avatarUrl}`;
-          console.log('🖼️ URL completa construida desde ruta relativa:', fullImageUrl);
           setProfileImage(fullImageUrl);
         } else {
           // Otra ruta relativa
           const baseUrl = await getBaseUrl();
           const fullImageUrl = `${baseUrl}${avatarUrl}`;
-          console.log('🖼️ URL completa construida:', fullImageUrl);
           setProfileImage(fullImageUrl);
         }
       } else {
-        console.log('🖼️ No hay avatar del usuario');
         setProfileImage(null);
       }
 
       // Cargar datos del perfil guardados específicos del usuario para información adicional
-      const userProfileKey = `profileData_${user.id}`;
+      const userProfileKey = `profileData_${userId}`;
       const savedProfileData = await AsyncStorage.getItem(userProfileKey);
       
       if (savedProfileData) {
@@ -184,7 +178,10 @@ const AdminProfileScreen: React.FC = () => {
           <View style={styles.profileSection}>
             <View style={styles.avatarContainer}>
               {profileImage ? (
-                <Image source={{ uri: profileImage }} style={styles.avatar} />
+                <Image 
+                  source={{ uri: profileImage }} 
+                  style={styles.avatar}
+                />
               ) : (
                 <View style={[styles.avatarPlaceholder, { backgroundColor: colors.primary }]}>
                   <Ionicons name="person" size={40} color="white" />
@@ -211,166 +208,6 @@ const AdminProfileScreen: React.FC = () => {
           >
             <Ionicons name="create-outline" size={20} color="white" />
             <Text style={styles.editButtonText}>Editar</Text>
-          </TouchableOpacity>
-          
-          {/* BOTONES DE DEBUG TEMPORALES */}
-          <TouchableOpacity 
-            style={[styles.editButton, { backgroundColor: '#FF6B6B', marginTop: 10 }]} 
-            onPress={async () => {
-              const { testTokenStatus } = useAuth();
-              await testTokenStatus();
-            }}
-          >
-            <Text style={[styles.editButtonText, { color: 'white' }]}>🔐 TEST TOKEN</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.editButton, { backgroundColor: '#4CAF50', marginTop: 5 }]} 
-            onPress={async () => {
-              console.log('🧪 TEST IMAGEN ADMIN:');
-              console.log('🧪 user.profileImage:', user?.profileImage);
-              console.log('🧪 user.avatar:', user?.avatar);
-            }}
-          >
-            <Text style={[styles.editButtonText, { color: 'white' }]}>🧪 TEST IMAGEN</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.editButton, { backgroundColor: '#9C27B0', marginTop: 5 }]} 
-            onPress={async () => {
-              console.log('🧪 TEST BACKEND DIRECTO:');
-              try {
-                const response = await apiService.getUserProfile();
-                console.log('🧪 Respuesta directa del backend:', response);
-                console.log('🧪 response.success:', response.success);
-                console.log('🧪 response.data:', response.data);
-                console.log('🧪 response.data.profileImage:', response.data?.profileImage);
-                console.log('🧪 response.data.avatar:', response.data?.avatar);
-              } catch (error) {
-                console.log('🧪 Error en test backend:', error);
-              }
-            }}
-          >
-            <Text style={[styles.editButtonText, { color: 'white' }]}>🔍 TEST BACKEND</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.editButton, { backgroundColor: '#FF9800', marginTop: 5 }]} 
-            onPress={async () => {
-              console.log('🧪 TEST ASYNCSTORAGE:');
-              try {
-                const token = await AsyncStorage.getItem('authToken');
-                const user = await AsyncStorage.getItem('user');
-                console.log('🧪 Token en AsyncStorage:', token ? `${token.substring(0, 20)}...` : 'null');
-                console.log('🧪 Usuario en AsyncStorage:', user ? JSON.parse(user) : 'null');
-              } catch (error) {
-                console.log('🧪 Error en test AsyncStorage:', error);
-              }
-            }}
-          >
-            <Text style={[styles.editButtonText, { color: 'white' }]}>💾 TEST STORAGE</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.editButton, { backgroundColor: '#E91E63', marginTop: 5 }]} 
-            onPress={async () => {
-              console.log('🧪 FORZAR TOKEN SIMULADO:');
-              try {
-                // Crear un token simulado
-                const mockToken = `mock_token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                await AsyncStorage.setItem('authToken', mockToken);
-                console.log('🧪 Token simulado creado:', mockToken);
-                
-                // Verificar que se guardó
-                const verifyToken = await AsyncStorage.getItem('authToken');
-                console.log('🧪 Token verificado:', verifyToken);
-                
-                // Notificar al apiService
-                await apiService.refreshToken();
-                console.log('🧪 apiService notificado del token simulado');
-              } catch (error) {
-                console.log('🧪 Error creando token simulado:', error);
-              }
-            }}
-          >
-            <Text style={[styles.editButtonText, { color: 'white' }]}>🔧 FORZAR TOKEN</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.editButton, { backgroundColor: '#795548', marginTop: 5 }]} 
-            onPress={async () => {
-              console.log('🧪 TEST LOGIN DIRECTO:');
-              try {
-                // Obtener credenciales del usuario actual
-                const user = await AsyncStorage.getItem('user');
-                const userData = user ? JSON.parse(user) : null;
-                console.log('🧪 Usuario actual:', userData);
-                
-                // Hacer login directo para obtener token real
-                const loginResponse = await apiService.login({
-                  email: 'admin@repuestospro.com',
-                  password: 'Test123!'
-                });
-                console.log('🧪 Login directo exitoso:', loginResponse.success);
-                console.log('🧪 Token del login directo:', loginResponse.data?.token);
-                
-                if (loginResponse.data?.token) {
-                  await AsyncStorage.setItem('authToken', loginResponse.data.token);
-                  console.log('🧪 Token real guardado en AsyncStorage');
-                  await apiService.refreshToken();
-                  console.log('🧪 apiService notificado del token real');
-                }
-              } catch (error) {
-                console.log('🧪 Error en login directo:', error);
-              }
-            }}
-          >
-            <Text style={[styles.editButtonText, { color: 'white' }]}>🔑 LOGIN DIRECTO</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.editButton, { backgroundColor: '#607D8B', marginTop: 5 }]} 
-            onPress={async () => {
-              console.log('🧪 TEST USUARIOS ALTERNATIVOS:');
-              try {
-                // Evitar contraseñas en texto plano: obtener password de AsyncStorage (solo para entorno de pruebas)
-                const testPassword = await AsyncStorage.getItem('TEST_LOGIN_PASSWORD');
-                if (!testPassword) {
-                  console.log('⚠️ TEST_LOGIN_PASSWORD no está configurado en AsyncStorage. Abortando prueba.');
-                  return;
-                }
-
-                // Probar con diferentes usuarios que no estén bloqueados (solo emails)
-                const userEmails = [
-                  'admin@repuestospro.com',
-                  'cliente@repuestospro.com',
-                  'vendedor@repuestospro.com',
-                  'delivery@repuestospro.com',
-                  'tienda@repuestospro.com'
-                ];
-
-                for (const email of userEmails) {
-                  try {
-                    console.log(`🧪 Probando usuario: ${email}`);
-                    const loginResponse = await apiService.login({ email, password: testPassword });
-                    if (loginResponse.success && loginResponse.data?.token) {
-                      console.log('✅ Usuario válido encontrado!');
-                      console.log('✅ Token obtenido:', loginResponse.data.token);
-                      await AsyncStorage.setItem('authToken', loginResponse.data.token);
-                      await apiService.refreshToken();
-                      console.log('✅ Token guardado y apiService notificado');
-                      break;
-                    }
-                  } catch (error) {
-                    console.log(`❌ Falló con usuario: ${email} - ${error.message}`);
-                  }
-                }
-              } catch (error) {
-                console.log('🧪 Error probando usuarios:', error);
-              }
-            }}
-          >
-            <Text style={[styles.editButtonText, { color: 'white' }]}>👥 PROBAR USUARIOS</Text>
           </TouchableOpacity>
         </View>
 
