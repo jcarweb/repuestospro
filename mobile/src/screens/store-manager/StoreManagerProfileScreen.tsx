@@ -206,28 +206,6 @@ const StoreManagerProfileScreen: React.FC = () => {
             <Ionicons name="create-outline" size={20} color="white" />
             <Text style={styles.editButtonText}>Editar</Text>
           </TouchableOpacity>
-          
-          {/* BOTONES DE DEBUG TEMPORALES */}
-          <TouchableOpacity 
-            style={[styles.editButton, { backgroundColor: '#FF6B6B', marginTop: 10 }]} 
-            onPress={async () => {
-              const { testTokenStatus } = useAuth();
-              await testTokenStatus();
-            }}
-          >
-            <Text style={[styles.editButtonText, { color: 'white' }]}>🔐 TEST TOKEN</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.editButton, { backgroundColor: '#4CAF50', marginTop: 5 }]} 
-            onPress={async () => {
-              console.log('🧪 TEST IMAGEN STORE MANAGER:');
-              console.log('🧪 user.profileImage:', user?.profileImage);
-              console.log('🧪 user.avatar:', user?.avatar);
-            }}
-          >
-            <Text style={[styles.editButtonText, { color: 'white' }]}>🧪 TEST IMAGEN</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Store Management Actions */}

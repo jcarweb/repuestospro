@@ -468,19 +468,7 @@ class ApiService {
    * Obtener estadísticas del delivery
    */
   async getDeliveryStats(): Promise<ApiResponse<any>> {
-    try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/delivery/stats/personal`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error getting delivery stats:', error);
-      throw error;
-    }
+    return this.request<ApiResponse<any>>('/delivery/stats/personal', { method: 'GET' });
   }
 
   /**
@@ -488,20 +476,13 @@ class ApiService {
    */
   async getDeliveryOrders(params?: { status?: string; limit?: number; page?: number }): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
       const queryParams = new URLSearchParams();
       
       if (params?.status) queryParams.append('status', params.status);
       if (params?.limit) queryParams.append('limit', params.limit.toString());
       if (params?.page) queryParams.append('page', params.page.toString());
 
-      const response = await fetch(`${baseURL}/api/delivery/orders?${queryParams}`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      const data = await response.json();
-      return data;
+      return this.request<ApiResponse<any>>(`/delivery/orders?${queryParams}`, { method: 'GET' });
     } catch (error) {
       console.error('Error getting delivery orders:', error);
       throw error;
@@ -513,15 +494,10 @@ class ApiService {
    */
   async updateOrderStatus(orderId: string, status: string, notes?: string, location?: any): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/delivery/orders/${orderId}/status`, {
+      return this.request<ApiResponse<any>>(`/delivery/orders/${orderId}/status`, {
         method: 'PUT',
-        headers: this.getHeaders(),
         body: JSON.stringify({ status, notes, location }),
       });
-
-      const data = await response.json();
-      return data;
     } catch (error) {
       console.error('Error updating order status:', error);
       throw error;
@@ -533,18 +509,11 @@ class ApiService {
    */
   async getDeliveryLocations(status?: string): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
       const queryParams = new URLSearchParams();
       
       if (status) queryParams.append('status', status);
 
-      const response = await fetch(`${baseURL}/api/delivery/locations?${queryParams}`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      const data = await response.json();
-      return data;
+      return this.request<ApiResponse<any>>(`/delivery/locations?${queryParams}`, { method: 'GET' });
     } catch (error) {
       console.error('Error getting delivery locations:', error);
       throw error;
@@ -556,20 +525,13 @@ class ApiService {
    */
   async getDeliveryReports(params?: { period?: string; dateFrom?: string; dateTo?: string }): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
       const queryParams = new URLSearchParams();
       
       if (params?.period) queryParams.append('period', params.period);
       if (params?.dateFrom) queryParams.append('dateFrom', params.dateFrom);
       if (params?.dateTo) queryParams.append('dateTo', params.dateTo);
 
-      const response = await fetch(`${baseURL}/api/delivery/reports?${queryParams}`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      const data = await response.json();
-      return data;
+      return this.request<ApiResponse<any>>(`/delivery/reports?${queryParams}`, { method: 'GET' });
     } catch (error) {
       console.error('Error getting delivery reports:', error);
       throw error;
@@ -606,14 +568,7 @@ class ApiService {
    */
   async getDeliverySchedule(): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/delivery/schedule`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      const data = await response.json();
-      return data;
+      return this.request<ApiResponse<any>>('/delivery/schedule', { method: 'GET' });
     } catch (error) {
       console.error('Error getting delivery schedule:', error);
       throw error;
@@ -625,15 +580,10 @@ class ApiService {
    */
   async updateDeliverySchedule(scheduleData: any): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/delivery/schedule`, {
+      return this.request<ApiResponse<any>>('/delivery/schedule', {
         method: 'PUT',
-        headers: this.getHeaders(),
         body: JSON.stringify(scheduleData),
       });
-
-      const data = await response.json();
-      return data;
     } catch (error) {
       console.error('Error updating delivery schedule:', error);
       throw error;
@@ -645,14 +595,7 @@ class ApiService {
    */
   async getDeliverySettings(): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/delivery/settings`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      const data = await response.json();
-      return data;
+      return this.request<ApiResponse<any>>('/delivery/settings', { method: 'GET' });
     } catch (error) {
       console.error('Error getting delivery settings:', error);
       throw error;
@@ -664,15 +607,10 @@ class ApiService {
    */
   async updateDeliverySettings(settingsData: any): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/delivery/settings`, {
+      return this.request<ApiResponse<any>>('/delivery/settings', {
         method: 'PUT',
-        headers: this.getHeaders(),
         body: JSON.stringify(settingsData),
       });
-
-      const data = await response.json();
-      return data;
     } catch (error) {
       console.error('Error updating delivery settings:', error);
       throw error;
@@ -684,14 +622,7 @@ class ApiService {
    */
   async getDeliveryLocation(): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/delivery/location`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      const data = await response.json();
-      return data;
+      return this.request<ApiResponse<any>>('/delivery/location', { method: 'GET' });
     } catch (error) {
       console.error('Error getting delivery location:', error);
       throw error;
@@ -703,15 +634,10 @@ class ApiService {
    */
   async updateDeliveryLocation(locationData: any): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/delivery/location`, {
+      return this.request<ApiResponse<any>>('/delivery/location', {
         method: 'PUT',
-        headers: this.getHeaders(),
         body: JSON.stringify(locationData),
       });
-
-      const data = await response.json();
-      return data;
     } catch (error) {
       console.error('Error updating delivery location:', error);
       throw error;
@@ -723,20 +649,13 @@ class ApiService {
    */
   async getDeliveryEarnings(params?: { period?: string; dateFrom?: string; dateTo?: string }): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
       const queryParams = new URLSearchParams();
       
       if (params?.period) queryParams.append('period', params.period);
       if (params?.dateFrom) queryParams.append('dateFrom', params.dateFrom);
       if (params?.dateTo) queryParams.append('dateTo', params.dateTo);
 
-      const response = await fetch(`${baseURL}/api/delivery/earnings?${queryParams}`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      const data = await response.json();
-      return data;
+      return this.request<ApiResponse<any>>(`/delivery/earnings?${queryParams}`, { method: 'GET' });
     } catch (error) {
       console.error('Error getting delivery earnings:', error);
       throw error;
@@ -748,15 +667,10 @@ class ApiService {
    */
   async updateDeliveryStatus(statusData: any): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/admin/delivery/status`, {
+      return this.request<ApiResponse<any>>('/admin/delivery/status', {
         method: 'PUT',
-        headers: this.getHeaders(),
         body: JSON.stringify(statusData),
       });
-
-      const data = await response.json();
-      return data;
     } catch (error) {
       console.error('Error updating delivery status:', error);
       throw error;
@@ -770,14 +684,7 @@ class ApiService {
    */
   async getStoreConfiguration(storeId: string): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/stores/${storeId}`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      const data = await response.json();
-      return data;
+      return this.request<ApiResponse<any>>(`/stores/${storeId}`, { method: 'GET' });
     } catch (error) {
       console.error('Error getting store configuration:', error);
       throw error;
@@ -789,15 +696,10 @@ class ApiService {
    */
   async updateStoreConfiguration(storeId: string, configData: any): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/stores/${storeId}`, {
+      return this.request<ApiResponse<any>>(`/stores/${storeId}`, {
         method: 'PUT',
-        headers: this.getHeaders(),
         body: JSON.stringify(configData),
       });
-
-      const data = await response.json();
-      return data;
     } catch (error) {
       console.error('Error updating store configuration:', error);
       throw error;
@@ -809,14 +711,7 @@ class ApiService {
    */
   async getStoreExchangeRatePreference(storeId: string): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/monetization/store/${storeId}/exchange-rate/preference`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      const data = await response.json();
-      return data;
+      return this.request<ApiResponse<any>>(`/monetization/store/${storeId}/exchange-rate/preference`, { method: 'GET' });
     } catch (error) {
       console.error('Error getting store exchange rate preference:', error);
       throw error;
@@ -828,15 +723,10 @@ class ApiService {
    */
   async updateStoreExchangeRatePreference(storeId: string, preferredExchangeRate: 'USD' | 'EUR'): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/monetization/store/${storeId}/exchange-rate/preference`, {
+      return this.request<ApiResponse<any>>(`/monetization/store/${storeId}/exchange-rate/preference`, {
         method: 'PUT',
-        headers: this.getHeaders(),
         body: JSON.stringify({ preferredExchangeRate }),
       });
-
-      const data = await response.json();
-      return data;
     } catch (error) {
       console.error('Error updating store exchange rate preference:', error);
       throw error;
@@ -848,14 +738,7 @@ class ApiService {
    */
   async getStoreExchangeRate(storeId: string): Promise<ApiResponse<any>> {
     try {
-      const baseURL = await getBaseURL();
-      const response = await fetch(`${baseURL}/api/monetization/store/${storeId}/exchange-rate/current`, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
-
-      const data = await response.json();
-      return data;
+      return this.request<ApiResponse<any>>(`/monetization/store/${storeId}/exchange-rate/current`, { method: 'GET' });
     } catch (error) {
       console.error('Error getting store exchange rate:', error);
       throw error;

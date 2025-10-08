@@ -247,31 +247,6 @@ const AdminDashboardScreen: React.FC = () => {
               )}
             </TouchableOpacity>
           </View>
-          
-          {/* BOTONES DE DEBUG TEMPORALES */}
-          <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
-            <TouchableOpacity 
-              style={[styles.editButton, { backgroundColor: '#FF6B6B', flex: 1 }]} 
-              onPress={async () => {
-                const { testTokenStatus } = useAuth();
-                await testTokenStatus();
-              }}
-            >
-              <Text style={[styles.editButtonText, { color: 'white' }]}>🔐 TEST TOKEN</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.editButton, { backgroundColor: '#4CAF50', flex: 1 }]} 
-              onPress={async () => {
-                console.log('🧪 TEST IMAGEN ADMIN DASHBOARD:');
-                console.log('🧪 user.profileImage:', user?.profileImage);
-                console.log('🧪 user.avatar:', user?.avatar);
-                console.log('🧪 userImage state:', userImage);
-              }}
-            >
-              <Text style={[styles.editButtonText, { color: 'white' }]}>🧪 TEST IMAGEN</Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
         {/* Estadísticas */}
