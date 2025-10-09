@@ -2207,25 +2207,39 @@ const AdminController = {
       const imageUrl = req.file.path;
       console.log('🖼️ Imagen subida a Cloudinary:', imageUrl);
 
-      const photoData = {
-        id: Date.now().toString(),
+      // Importar el modelo StorePhoto
+      const StorePhoto = (await import('../models/StorePhoto')).default;
+
+      // Crear el documento en la base de datos
+      const storePhoto = new StorePhoto({
         name: name.trim(),
-        phone: phone?.trim() || null,
-        location: {
-          latitude: parseFloat(lat),
-          longitude: parseFloat(lng)
-        },
+        phone: phone?.trim() || undefined,
         imageUrl: imageUrl,
-        uploadedBy: req.user?.id,
-        uploadedAt: new Date(),
-        status: 'pending_processing'
-      };
-      
-      console.log('📸 Foto de tienda guardada:', photoData);
+        lat: parseFloat(lat),
+        lng: parseFloat(lng),
+        uploadedBy: req.user?._id || req.user?.id,
+        status: 'pending'
+      });
+
+      await storePhoto.save();
+      console.log('📸 Foto de tienda guardada en base de datos:', storePhoto._id);
+
       res.json({
         success: true,
         message: 'Foto de tienda subida exitosamente',
-        data: photoData
+        data: {
+          id: storePhoto._id,
+          name: storePhoto.name,
+          phone: storePhoto.phone,
+          location: {
+            latitude: storePhoto.lat,
+            longitude: storePhoto.lng
+          },
+          imageUrl: storePhoto.imageUrl,
+          uploadedBy: storePhoto.uploadedBy,
+          uploadedAt: storePhoto.createdAt,
+          status: storePhoto.status
+        }
       });
     } catch (error) {
       console.error('Error subiendo foto de tienda:', error);
@@ -2241,40 +2255,52 @@ const AdminController = {
   getStorePhotos: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       console.log('📸 Obteniendo fotos de tiendas...');
-      // En una implementación real, obtendrías las fotos de la base de datos
-      const mockPhotos = [
-        {
-          id: '1',
-          name: 'Repuestos El Motor',
-          phone: '+584121234567',
-          location: {
-            latitude: 10.4806,
-            longitude: -66.9036
-          },
-          imageUrl: '/uploads/store-photos/tienda1.jpg',
-          uploadedBy: req.user?.id,
-          uploadedAt: new Date(Date.now() - 86400000), // 1 día atrás
-          status: 'processed'
+      
+      // Importar el modelo StorePhoto
+      const StorePhoto = (await import('../models/StorePhoto')).default;
+      
+      const { page = 1, limit = 50, status } = req.query;
+      
+      const filter: any = {};
+      if (status) {
+        filter.status = status;
+      }
+      
+      const photos = await StorePhoto.find(filter)
+        .populate('uploadedBy', 'name email')
+        .sort({ createdAt: -1 })
+        .limit(Number(limit) * 1)
+        .skip((Number(page) - 1) * Number(limit));
+      
+      const total = await StorePhoto.countDocuments(filter);
+      
+      // Transformar los datos al formato esperado por el frontend
+      const transformedPhotos = photos.map(photo => ({
+        id: photo._id,
+        name: photo.name,
+        phone: photo.phone,
+        location: {
+          latitude: photo.lat,
+          longitude: photo.lng
         },
-        {
-          id: '2',
-          name: 'Auto Parts Center',
-          phone: '+584129876543',
-          location: {
-            latitude: 10.4906,
-            longitude: -66.9136
-          },
-          imageUrl: '/uploads/store-photos/tienda2.jpg',
-          uploadedBy: req.user?.id,
-          uploadedAt: new Date(Date.now() - 172800000), // 2 días atrás
-          status: 'pending_processing'
-        }
-      ];
+        imageUrl: photo.imageUrl,
+        uploadedBy: photo.uploadedBy,
+        uploadedAt: photo.createdAt,
+        status: photo.status === 'pending' ? 'pending_processing' : 
+                photo.status === 'enriched' ? 'processed' : 
+                photo.status
+      }));
+      
       res.json({
         success: true,
         data: {
-          photos: mockPhotos,
-          total: mockPhotos.length
+          photos: transformedPhotos,
+          total: total,
+          pagination: {
+            current: parseInt(String(page)),
+            pages: Math.ceil(total / Number(limit)),
+            total
+          }
         }
       });
     } catch (error) {
@@ -2902,22 +2928,45 @@ const AdminController = {
     try {
       console.log('📊 Obteniendo estadísticas de fotos de tiendas...');
       
-      // En una implementación real, calcularías las estadísticas de la base de datos
-      const mockStats = {
-        total: 3,
-        byStatus: {
-          pending: 1,
-          processing: 1,
-          enriched: 1,
-          error: 0
-        },
-        isRunning: false
+      // Importar el modelo StorePhoto
+      const StorePhoto = (await import('../models/StorePhoto')).default;
+      
+      // Calcular estadísticas reales de la base de datos
+      const stats = await StorePhoto.aggregate([
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 }
+          }
+        }
+      ]);
+      
+      const total = await StorePhoto.countDocuments();
+      
+      // Transformar las estadísticas al formato esperado
+      const byStatus = {
+        pending: 0,
+        processing: 0,
+        enriched: 0,
+        error: 0
       };
       
-      console.log('📊 Estadísticas calculadas:', mockStats);
+      stats.forEach(stat => {
+        if (stat._id in byStatus) {
+          byStatus[stat._id as keyof typeof byStatus] = stat.count;
+        }
+      });
+      
+      const realStats = {
+        total,
+        byStatus,
+        isRunning: false // TODO: Implementar verificación del worker
+      };
+      
+      console.log('📊 Estadísticas calculadas:', realStats);
       res.json({
         success: true,
-        data: mockStats
+        data: realStats
       });
     } catch (error) {
       console.error('Error obteniendo estadísticas:', error);
@@ -3807,6 +3856,80 @@ const AdminController = {
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Probar configuración de Cloudinary
+   */
+  testCloudinaryConfig: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      console.log('🔧 Probando configuración de Cloudinary...');
+      
+      // Importar configuración segura
+      const { secureConfig } = await import('../config/secureConfig');
+      const cloudinaryConfig = secureConfig.get('cloudinary');
+      
+      console.log('📋 Configuración de Cloudinary:', {
+        cloudName: cloudinaryConfig.cloudName,
+        apiKey: cloudinaryConfig.apiKey ? '***configurado***' : 'no configurado',
+        apiSecret: cloudinaryConfig.apiSecret ? '***configurado***' : 'no configurado',
+        isConfigured: cloudinaryConfig.isConfigured
+      });
+      
+      if (!cloudinaryConfig.isConfigured) {
+        res.json({
+          success: false,
+          message: 'Cloudinary no está configurado correctamente',
+          data: {
+            cloudName: cloudinaryConfig.cloudName,
+            apiKey: cloudinaryConfig.apiKey,
+            apiSecret: cloudinaryConfig.apiSecret,
+            isConfigured: cloudinaryConfig.isConfigured,
+            error: 'Faltan variables de entorno: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET'
+          }
+        });
+        return;
+      }
+      
+      // Probar conexión con Cloudinary
+      const cloudinary = (await import('../config/cloudinary')).default;
+      
+      try {
+        // Hacer una consulta simple para verificar la conexión
+        const result = await cloudinary.api.ping();
+        console.log('✅ Conexión con Cloudinary exitosa:', result);
+        
+        res.json({
+          success: true,
+          message: 'Cloudinary configurado correctamente',
+          data: {
+            cloudName: cloudinaryConfig.cloudName,
+            isConfigured: cloudinaryConfig.isConfigured,
+            connectionTest: 'success',
+            pingResult: result
+          }
+        });
+      } catch (cloudinaryError) {
+        console.error('❌ Error conectando con Cloudinary:', cloudinaryError);
+        res.json({
+          success: false,
+          message: 'Error conectando con Cloudinary',
+          data: {
+            cloudName: cloudinaryConfig.cloudName,
+            isConfigured: cloudinaryConfig.isConfigured,
+            connectionTest: 'failed',
+            error: cloudinaryError instanceof Error ? cloudinaryError.message : 'Error desconocido'
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error probando configuración de Cloudinary:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: error instanceof Error ? error.message : 'Error desconocido'
       });
     }
   }

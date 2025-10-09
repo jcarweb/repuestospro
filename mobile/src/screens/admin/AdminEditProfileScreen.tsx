@@ -89,25 +89,33 @@ const AdminEditProfileScreen: React.FC = () => {
       setPhone(user?.phone || '');
       setAddress(user?.address || '');
       
-      // Cargar imagen de perfil
-      const avatarUrl = user?.avatar || null;
+      // Cargar imagen de perfil actual del usuario
+      const avatarUrl = user?.avatar || user?.profileImage || null;
+      console.log('🖼️ Cargando imagen de perfil en edición:');
+      console.log('  - user.avatar:', user?.avatar);
+      console.log('  - user.profileImage:', user?.profileImage);
+      console.log('  - avatarUrl final:', avatarUrl);
       
       if (avatarUrl) {
         if (avatarUrl.startsWith('http')) {
           // URL completa de Cloudinary o externa
+          console.log('🖼️ Usando URL completa:', avatarUrl);
           setProfileImage(avatarUrl);
         } else if (avatarUrl.startsWith('/uploads/')) {
           // Ruta relativa del servidor
           const baseUrl = await getBaseUrl();
           const fullImageUrl = `${baseUrl}${avatarUrl}`;
+          console.log('🖼️ Construyendo URL completa:', fullImageUrl);
           setProfileImage(fullImageUrl);
         } else {
           // Otra ruta relativa
           const baseUrl = await getBaseUrl();
           const fullImageUrl = `${baseUrl}${avatarUrl}`;
+          console.log('🖼️ Construyendo URL completa (otra ruta):', fullImageUrl);
           setProfileImage(fullImageUrl);
         }
       } else {
+        console.log('🖼️ No hay imagen de perfil, usando avatar por defecto');
         setProfileImage(null);
       }
 

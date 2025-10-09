@@ -86,32 +86,21 @@ const DeliveryProfileScreen: React.FC = () => {
         setProfileImage(avatarUrl);
       }
 
-      // Cargar datos locales solo como fallback para campos que no están en el backend
+      // Usar datos del backend directamente (prioridad absoluta)
+      const backendData = {
+        phone: user.phone || '',
+        address: user.address || '',
+        location: user.location || null
+      };
+      setProfileData(backendData);
+      console.log(`Datos del perfil cargados desde backend para usuario ${user.id}:`, backendData);
+      
+      // Limpiar datos locales para evitar conflictos
       const userProfileKey = `profileData_${user.id}`;
       const savedProfileData = await AsyncStorage.getItem(userProfileKey);
-      
       if (savedProfileData) {
-        const localData = JSON.parse(savedProfileData);
-        console.log('Datos locales encontrados (usando como fallback):', localData);
-        
-        // Solo usar datos locales para campos que no están en el usuario del backend
-        const fallbackData = {
-          phone: user.phone || localData.phone || '',
-          address: user.address || localData.address || '',
-          location: user.location || localData.location || null
-        };
-        
-        setProfileData(fallbackData);
-        console.log(`Datos del perfil cargados (backend + fallback local) para usuario ${user.id}:`, fallbackData);
-      } else {
-        // Usar datos del backend directamente
-        const backendData = {
-          phone: user.phone || '',
-          address: user.address || '',
-          location: user.location || null
-        };
-        setProfileData(backendData);
-        console.log(`Datos del perfil cargados desde backend para usuario ${user.id}:`, backendData);
+        console.log('Limpiando datos locales obsoletos');
+        await AsyncStorage.removeItem(userProfileKey);
       }
     } catch (error) {
       console.error('Error cargando datos del perfil:', error);
