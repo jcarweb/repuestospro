@@ -27,8 +27,8 @@ const AdminEditProfileScreen: React.FC = () => {
   
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [address, setAddress] = useState(user?.address || '');
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [location, setLocation] = useState<{
     latitude: number;
@@ -52,14 +52,22 @@ const AdminEditProfileScreen: React.FC = () => {
 
   useEffect(() => {
     requestPermissions();
-    loadProfileData();
   }, []);
+
+  // Cargar datos cuando el usuario esté disponible
+  useEffect(() => {
+    if (user?.id) {
+      loadProfileData();
+    }
+  }, [user?.id]);
 
   // Recargar datos cuando se regrese a la pantalla
   useFocusEffect(
     React.useCallback(() => {
-      loadProfileData();
-    }, [])
+      if (user?.id) {
+        loadProfileData();
+      }
+    }, [user?.id])
   );
 
 
@@ -90,27 +98,31 @@ const AdminEditProfileScreen: React.FC = () => {
       setAddress(user?.address || '');
       
       // Cargar imagen de perfil actual del usuario
-      const avatarUrl = user?.avatar || user?.profileImage || null;
       console.log('🖼️ Cargando imagen de perfil en edición:');
+      console.log('  - user completo:', JSON.stringify(user, null, 2));
       console.log('  - user.avatar:', user?.avatar);
       console.log('  - user.profileImage:', user?.profileImage);
-      console.log('  - avatarUrl final:', avatarUrl);
       
-      if (avatarUrl) {
+      const avatarUrl = user?.avatar || user?.profileImage || null;
+      console.log('  - avatarUrl final:', avatarUrl);
+      console.log('  - tipo de avatarUrl:', typeof avatarUrl);
+      console.log('  - longitud de avatarUrl:', avatarUrl?.length);
+      
+      if (avatarUrl && avatarUrl.trim() !== '') {
         if (avatarUrl.startsWith('http')) {
           // URL completa de Cloudinary o externa
           console.log('🖼️ Usando URL completa:', avatarUrl);
           setProfileImage(avatarUrl);
-        } else if (avatarUrl.startsWith('/uploads/')) {
+        } else if (avatarUrl.startsWith('/uploads/') || avatarUrl.startsWith('uploads/')) {
           // Ruta relativa del servidor
           const baseUrl = await getBaseUrl();
-          const fullImageUrl = `${baseUrl}${avatarUrl}`;
+          const fullImageUrl = `${baseUrl}${avatarUrl.startsWith('/') ? '' : '/'}${avatarUrl}`;
           console.log('🖼️ Construyendo URL completa:', fullImageUrl);
           setProfileImage(fullImageUrl);
         } else {
           // Otra ruta relativa
           const baseUrl = await getBaseUrl();
-          const fullImageUrl = `${baseUrl}${avatarUrl}`;
+          const fullImageUrl = `${baseUrl}/${avatarUrl}`;
           console.log('🖼️ Construyendo URL completa (otra ruta):', fullImageUrl);
           setProfileImage(fullImageUrl);
         }
@@ -232,25 +244,47 @@ const AdminEditProfileScreen: React.FC = () => {
       
       // Intentar guardar en el backend
       try {
-        const backendData = {
-          name,
-          email,
-          phone,
-          address,
-          location: location ? {
+        // Validar que al menos hay datos para guardar
+        if (!name && !email && !phone && !address && !location) {
+          console.log('⚠️ No hay datos para guardar en el backend');
+          return;
+        }
+        
+        const backendData: any = {};
+        
+        // Solo incluir campos que no estén vacíos
+        if (name && name.trim() !== '') {
+          backendData.name = name;
+        }
+        if (email && email.trim() !== '') {
+          backendData.email = email;
+        }
+        if (phone && phone.trim() !== '') {
+          backendData.phone = phone;
+        }
+        if (address && address.trim() !== '') {
+          backendData.address = address;
+        }
+        if (location) {
+          backendData.location = {
             type: 'Point',
             coordinates: [location.longitude, location.latitude],
             address: location.address
-          } : null
-        };
+          };
+        }
         
         console.log('🔄 Enviando datos al backend:', backendData);
         console.log('🔄 Datos individuales:');
-        console.log('  - name:', name, '(tipo:', typeof name, ')');
-        console.log('  - email:', email, '(tipo:', typeof email, ')');
-        console.log('  - phone:', phone, '(tipo:', typeof phone, ')');
-        console.log('  - address:', address, '(tipo:', typeof address, ')');
+        console.log('  - name:', name, '(tipo:', typeof name, ', longitud:', name?.length, ')');
+        console.log('  - email:', email, '(tipo:', typeof email, ', longitud:', email?.length, ')');
+        console.log('  - phone:', phone, '(tipo:', typeof phone, ', longitud:', phone?.length, ')');
+        console.log('  - address:', address, '(tipo:', typeof address, ', longitud:', address?.length, ')');
         console.log('  - location:', location);
+        console.log('🔄 Estados actuales del componente:');
+        console.log('  - name state:', name);
+        console.log('  - email state:', email);
+        console.log('  - phone state:', phone);
+        console.log('  - address state:', address);
         
         const response = await apiService.updateUserProfile(backendData);
         
@@ -292,17 +326,26 @@ const AdminEditProfileScreen: React.FC = () => {
     saveProfileData(true);
   };
 
-  // Auto-guardar después de cambios
+  // Auto-guardar después de cambios (solo si hay cambios reales)
   useEffect(() => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
     
-    saveTimeoutRef.current = setTimeout(() => {
-      if (name || email || phone || address) {
+    // Solo auto-guardar si hay cambios reales y no estamos en el proceso de carga inicial
+    const hasRealChanges = (name && name !== user?.name) || 
+                          (email && email !== user?.email) || 
+                          (phone && phone !== user?.phone) || 
+                          (address && address !== user?.address) ||
+                          profileImage !== null ||
+                          location !== null;
+    
+    if (hasRealChanges) {
+      console.log('🔄 Auto-guardado detectado - hay cambios reales');
+      saveTimeoutRef.current = setTimeout(() => {
         saveProfileData();
-      }
-    }, 2000);
+      }, 2000);
+    }
 
     return () => {
       if (saveTimeoutRef.current) {

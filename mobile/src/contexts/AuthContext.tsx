@@ -548,12 +548,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('  - phone:', response.data.phone);
         console.log('  - address:', response.data.address);
         console.log('  - location:', response.data.location);
+        console.log('  - avatar:', response.data.avatar);
+        console.log('📥 Avatar completo del backend:', response.data.avatar);
+        console.log('📥 Tipo de avatar del backend:', typeof response.data.avatar);
         
         let updatedUser = { ...response.data };
         
-        // Priorizar datos del backend sobre datos locales
-        // Solo usar datos locales como fallback si el backend no tiene esos campos
-        if (!forceReload) {
+        // Si es una recarga forzada, usar solo datos del backend
+        if (forceReload) {
+          console.log('Recarga forzada - usando solo datos del backend:', updatedUser);
+        } else {
+          // Solo usar datos locales como fallback si el backend no tiene esos campos
           const userProfileKey = `profileData_${user.id}`;
           const savedProfileData = await AsyncStorage.getItem(userProfileKey);
           
@@ -635,10 +640,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(newUser);
       await AsyncStorage.setItem('user', JSON.stringify(newUser));
       
-      // Limpiar datos locales para forzar recarga desde backend
-      const userProfileKey = `profileData_${user.id}`;
-      await AsyncStorage.removeItem(userProfileKey);
-      
+      // NO limpiar datos locales aquí - mantenerlos como respaldo
       console.log('✅ Usuario actualizado después de editar perfil');
     } catch (error) {
       console.error('Error actualizando usuario después de editar perfil:', error);
