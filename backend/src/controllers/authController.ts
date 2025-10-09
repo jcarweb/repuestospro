@@ -574,12 +574,27 @@ export class AuthController {
         email: user.email,
         phone: user.phone,
         address: user.address,
-        location: user.location
+        location: user.location,
+        avatar: user.avatar
       });
+      console.log('📥 getProfile - avatar completo:', user.avatar);
+      console.log('📥 getProfile - tipo de avatar:', typeof user.avatar);
       
       res.json({
         success: true,
-        data: user
+        data: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          address: user.address,
+          location: user.location,
+          avatar: user.avatar,
+          isEmailVerified: user.isEmailVerified,
+          role: user.role,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
+        }
       });
     } catch (error) {
       console.error('Error obteniendo perfil:', error);
@@ -651,6 +666,27 @@ export class AuthController {
         address: typeof address,
         location: typeof location
       });
+      console.log('🔄 Valores exactos:', {
+        name: JSON.stringify(name),
+        email: JSON.stringify(email),
+        phone: JSON.stringify(phone),
+        address: JSON.stringify(address),
+        location: JSON.stringify(location)
+      });
+      
+      // Validar que los datos no estén vacíos
+      if (name === '' || name === null || name === undefined) {
+        console.log('⚠️ ADVERTENCIA: name está vacío o undefined');
+      }
+      if (email === '' || email === null || email === undefined) {
+        console.log('⚠️ ADVERTENCIA: email está vacío o undefined');
+      }
+      if (phone === '' || phone === null || phone === undefined) {
+        console.log('⚠️ ADVERTENCIA: phone está vacío o undefined');
+      }
+      if (address === '' || address === null || address === undefined) {
+        console.log('⚠️ ADVERTENCIA: address está vacío o undefined');
+      }
       // Validar email si se está cambiando
       if (email) {
         const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
@@ -671,16 +707,31 @@ export class AuthController {
           return;
         }
       }
-      // Actualizar usuario
+      // Preparar datos para actualización (solo campos no vacíos)
+      const updateData: any = {};
+      
+      if (name !== '' && name !== null && name !== undefined) {
+        updateData.name = name;
+      }
+      if (email !== '' && email !== null && email !== undefined) {
+        updateData.email = email;
+      }
+      if (phone !== '' && phone !== null && phone !== undefined) {
+        updateData.phone = phone;
+      }
+      if (address !== '' && address !== null && address !== undefined) {
+        updateData.address = address;
+      }
+      if (location !== null && location !== undefined) {
+        updateData.location = location;
+      }
+      
+      console.log('🔄 Datos a actualizar en BD:', updateData);
+      
+      // Actualizar usuario solo con campos no vacíos
       const updatedUser = await User.findByIdAndUpdate(
         userId,
-        {
-          name,
-          email,
-          phone,
-          address,
-          location
-        },
+        updateData,
         { new: true, runValidators: true }
       );
       if (!updatedUser) {

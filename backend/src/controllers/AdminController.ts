@@ -2184,6 +2184,8 @@ const AdminController = {
       console.log('📸 Subiendo foto de tienda...');
       console.log('📋 Body:', req.body);
       console.log('📁 File:', req.file);
+      console.log('👤 User:', req.user);
+      console.log('🔑 Headers:', req.headers);
       
       const { name, phone, lat, lng } = req.body;
       
@@ -2206,6 +2208,17 @@ const AdminController = {
       // La imagen ya fue procesada por multer y subida a Cloudinary
       const imageUrl = req.file.path;
       console.log('🖼️ Imagen subida a Cloudinary:', imageUrl);
+      
+      // Verificar si Cloudinary está configurado
+      const { secureConfig } = await import('../config/secureConfig');
+      const cloudinaryConfig = secureConfig.get('cloudinary');
+      
+      if (!cloudinaryConfig.isConfigured) {
+        console.log('⚠️ Cloudinary no está configurado, usando URL temporal');
+        // Usar una URL temporal para pruebas
+        const tempImageUrl = `temp_${Date.now()}_${req.file.originalname}`;
+        console.log('🖼️ URL temporal:', tempImageUrl);
+      }
 
       // Importar el modelo StorePhoto
       const StorePhoto = (await import('../models/StorePhoto')).default;
@@ -3856,6 +3869,37 @@ const AdminController = {
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Endpoint de prueba simple para diagnosticar problemas
+   */
+  testEndpoint: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      console.log('🧪 Endpoint de prueba ejecutado');
+      console.log('👤 User:', req.user);
+      console.log('📋 Body:', req.body);
+      console.log('📁 File:', req.file);
+      console.log('🔑 Headers:', req.headers);
+      
+      res.json({
+        success: true,
+        message: 'Endpoint de prueba funcionando',
+        data: {
+          user: req.user,
+          hasFile: !!req.file,
+          bodyKeys: Object.keys(req.body || {}),
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('Error en endpoint de prueba:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: error instanceof Error ? error.message : 'Error desconocido'
       });
     }
   },

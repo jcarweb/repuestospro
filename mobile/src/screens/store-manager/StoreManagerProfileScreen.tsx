@@ -94,14 +94,6 @@ const StoreManagerProfileScreen: React.FC = () => {
       };
       setProfileData(backendData);
       console.log(`Datos del perfil cargados desde backend para usuario ${user.id}:`, backendData);
-      
-      // Limpiar datos locales para evitar conflictos
-      const userProfileKey = `profileData_${user.id}`;
-      const savedProfileData = await AsyncStorage.getItem(userProfileKey);
-      if (savedProfileData) {
-        console.log('Limpiando datos locales obsoletos');
-        await AsyncStorage.removeItem(userProfileKey);
-      }
     } catch (error) {
       console.error('Error cargando datos del perfil:', error);
     }
