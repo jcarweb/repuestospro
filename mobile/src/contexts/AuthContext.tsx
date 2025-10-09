@@ -616,14 +616,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       console.log('🔄 Actualizando usuario después de editar perfil:', updatedUserData);
       
-      // Actualizar el usuario con los nuevos datos
+      // Actualizar el usuario con los nuevos datos del backend
       const newUser = {
         ...user,
-        ...updatedUserData,
-        // Asegurar que la imagen se maneje correctamente
-        avatar: updatedUserData.avatar || updatedUserData.profileImage || user.avatar,
-        profileImage: updatedUserData.profileImage || updatedUserData.avatar || user.profileImage
+        name: updatedUserData.name || user.name,
+        email: updatedUserData.email || user.email,
+        phone: updatedUserData.phone || user.phone,
+        address: updatedUserData.address || user.address,
+        location: updatedUserData.location || user.location,
+        avatar: updatedUserData.avatar || user.avatar,
+        profileImage: updatedUserData.profileImage || user.profileImage,
+        isEmailVerified: updatedUserData.isEmailVerified || user.isEmailVerified,
+        role: updatedUserData.role || user.role
       };
+      
+      console.log('🔄 Usuario actualizado:', newUser);
       
       setUser(newUser);
       await AsyncStorage.setItem('user', JSON.stringify(newUser));
