@@ -17,6 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 
 interface LocationData {
@@ -35,6 +36,7 @@ const StorePhotoCaptureScreen: React.FC = () => {
   
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -239,10 +241,10 @@ const StorePhotoCaptureScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar 
-        barStyle="dark-content" 
-        backgroundColor="#fff"
+        barStyle={colors.isDark ? "light-content" : "dark-content"} 
+        backgroundColor={colors.surface}
         translucent={false}
       />
       <ScrollView 
@@ -253,16 +255,16 @@ const StorePhotoCaptureScreen: React.FC = () => {
         ]}
         showsVerticalScrollIndicator={false}
       >
-      <View style={styles.header}>
-        <Text style={styles.title}>Capturar Foto de Local</Text>
-        <Text style={styles.subtitle}>
+      <View style={[styles.header, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Capturar Foto de Local</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Toma una foto del local con GPS para enriquecimiento de datos
         </Text>
       </View>
 
       {/* Sección de foto */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Foto del Local</Text>
+      <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Foto del Local</Text>
         
         {image ? (
           <View style={styles.imageContainer}>
@@ -271,94 +273,94 @@ const StorePhotoCaptureScreen: React.FC = () => {
               style={styles.removeImageButton}
               onPress={() => setImage(null)}
             >
-              <Ionicons name="close-circle" size={24} color="#FF3B30" />
+              <Ionicons name="close-circle" size={24} color={colors.error} />
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={styles.imagePlaceholder}>
-            <Ionicons name="camera" size={48} color="#8E8E93" />
-            <Text style={styles.placeholderText}>Selecciona una foto</Text>
+          <View style={[styles.imagePlaceholder, { borderColor: colors.border }]}>
+            <Ionicons name="camera" size={48} color={colors.textTertiary} />
+            <Text style={[styles.placeholderText, { color: colors.textTertiary }]}>Selecciona una foto</Text>
           </View>
         )}
 
         <View style={styles.imageButtons}>
-          <TouchableOpacity style={styles.imageButton} onPress={takePhoto}>
-            <Ionicons name="camera" size={20} color="#007AFF" />
-            <Text style={styles.imageButtonText}>Tomar Foto</Text>
+          <TouchableOpacity style={[styles.imageButton, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]} onPress={takePhoto}>
+            <Ionicons name="camera" size={20} color={colors.primary} />
+            <Text style={[styles.imageButtonText, { color: colors.primary }]}>Tomar Foto</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.imageButton} onPress={selectFromGallery}>
-            <Ionicons name="images" size={20} color="#007AFF" />
-            <Text style={styles.imageButtonText}>Galería</Text>
+          <TouchableOpacity style={[styles.imageButton, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]} onPress={selectFromGallery}>
+            <Ionicons name="images" size={20} color={colors.primary} />
+            <Text style={[styles.imageButtonText, { color: colors.primary }]}>Galería</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Sección de ubicación */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Ubicación GPS</Text>
+      <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Ubicación GPS</Text>
         
         {location ? (
-          <View style={styles.locationContainer}>
-            <Ionicons name="location" size={20} color="#34C759" />
-            <Text style={styles.locationText}>
+          <View style={[styles.locationContainer, { backgroundColor: colors.surfaceSecondary, borderColor: colors.success }]}>
+            <Ionicons name="location" size={20} color={colors.success} />
+            <Text style={[styles.locationText, { color: colors.textPrimary }]}>
               Lat: {location.latitude.toFixed(6)}
             </Text>
-            <Text style={styles.locationText}>
+            <Text style={[styles.locationText, { color: colors.textPrimary }]}>
               Lng: {location.longitude.toFixed(6)}
             </Text>
             {location.accuracy && (
-              <Text style={styles.accuracyText}>
+              <Text style={[styles.accuracyText, { color: colors.textSecondary }]}>
                 Precisión: {location.accuracy.toFixed(0)}m
               </Text>
             )}
           </View>
         ) : (
-          <View style={styles.locationPlaceholder}>
-            <Ionicons name="location-outline" size={32} color="#8E8E93" />
-            <Text style={styles.placeholderText}>Ubicación no obtenida</Text>
+          <View style={[styles.locationPlaceholder, { borderColor: colors.border }]}>
+            <Ionicons name="location-outline" size={32} color={colors.textTertiary} />
+            <Text style={[styles.placeholderText, { color: colors.textTertiary }]}>Ubicación no obtenida</Text>
           </View>
         )}
 
         <TouchableOpacity
-          style={[styles.locationButton, isLoadingLocation && styles.disabledButton]}
+          style={[styles.locationButton, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }, isLoadingLocation && styles.disabledButton]}
           onPress={getCurrentLocation}
           disabled={isLoadingLocation}
         >
           {isLoadingLocation ? (
-            <ActivityIndicator size="small" color="#007AFF" />
+            <ActivityIndicator size="small" color={colors.primary} />
           ) : (
-            <Ionicons name="locate" size={20} color="#007AFF" />
+            <Ionicons name="locate" size={20} color={colors.primary} />
           )}
-          <Text style={styles.locationButtonText}>
+          <Text style={[styles.locationButtonText, { color: colors.primary }]}>
             {isLoadingLocation ? 'Obteniendo...' : 'Obtener Ubicación'}
           </Text>
         </TouchableOpacity>
       </View>
 
       {/* Sección de información del local */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Información del Local</Text>
+      <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Información del Local</Text>
         
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Nombre del Local *</Text>
+          <Text style={[styles.inputLabel, { color: colors.textPrimary }]}>Nombre del Local *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border, color: colors.textPrimary }]}
             value={storeName}
             onChangeText={setStoreName}
             placeholder="Ej: Repuestos El Motor"
-            placeholderTextColor="#8E8E93"
+            placeholderTextColor={colors.textTertiary}
           />
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Teléfono (opcional)</Text>
+          <Text style={[styles.inputLabel, { color: colors.textPrimary }]}>Teléfono (opcional)</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border, color: colors.textPrimary }]}
             value={storePhone}
             onChangeText={setStorePhone}
             placeholder="+584121234567"
-            placeholderTextColor="#8E8E93"
+            placeholderTextColor={colors.textTertiary}
             keyboardType="phone-pad"
           />
         </View>
@@ -366,7 +368,7 @@ const StorePhotoCaptureScreen: React.FC = () => {
 
       {/* Botón de subida */}
       <TouchableOpacity
-        style={[styles.uploadButton, isUploading && styles.disabledButton]}
+        style={[styles.uploadButton, { backgroundColor: colors.primary }, isUploading && styles.disabledButton]}
         onPress={uploadPhoto}
         disabled={isUploading}
       >
@@ -380,8 +382,8 @@ const StorePhotoCaptureScreen: React.FC = () => {
         </Text>
       </TouchableOpacity>
 
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>
+      <View style={[styles.footer, { backgroundColor: colors.surfaceSecondary }]}>
+        <Text style={[styles.footerText, { color: colors.textSecondary }]}>
           La foto será procesada automáticamente para extraer información del local.
         </Text>
       </View>
@@ -393,7 +395,6 @@ const StorePhotoCaptureScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   scrollView: {
     flex: 1,
@@ -402,7 +403,6 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   header: {
-    backgroundColor: '#fff',
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
@@ -410,15 +410,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
   },
   section: {
-    backgroundColor: '#fff',
     margin: 16,
     padding: 20,
     borderRadius: 12,
@@ -431,7 +428,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 16,
   },
   imageContainer: {
@@ -459,13 +455,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     borderWidth: 2,
-    borderColor: '#e0e0e0',
     borderStyle: 'dashed',
   },
   placeholderText: {
     marginTop: 8,
     fontSize: 14,
-    color: '#8E8E93',
   },
   imageButtons: {
     flexDirection: 'row',
@@ -477,33 +471,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    backgroundColor: '#f8f9fa',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
     gap: 8,
   },
   imageButtonText: {
     fontSize: 14,
-    color: '#007AFF',
     fontWeight: '500',
   },
   locationContainer: {
-    backgroundColor: '#f0f9ff',
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#34C759',
   },
   locationText: {
     fontSize: 14,
-    color: '#333',
     marginTop: 4,
   },
   accuracyText: {
     fontSize: 12,
-    color: '#666',
     marginTop: 4,
   },
   locationPlaceholder: {
@@ -514,7 +501,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     borderWidth: 2,
-    borderColor: '#e0e0e0',
     borderStyle: 'dashed',
   },
   locationButton: {
@@ -522,15 +508,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    backgroundColor: '#f8f9fa',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
     gap: 8,
   },
   locationButtonText: {
     fontSize: 14,
-    color: '#007AFF',
     fontWeight: '500',
   },
   inputContainer: {
@@ -539,18 +522,14 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#e0e0e0',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#333',
-    backgroundColor: '#fff',
   },
   uploadButton: {
     flexDirection: 'row',
@@ -558,7 +537,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     margin: 16,
     paddingVertical: 16,
-    backgroundColor: '#007AFF',
     borderRadius: 8,
     gap: 8,
   },
@@ -573,12 +551,10 @@ const styles = StyleSheet.create({
   footer: {
     margin: 16,
     padding: 16,
-    backgroundColor: '#e3f2fd',
     borderRadius: 8,
   },
   footerText: {
     fontSize: 14,
-    color: '#1976d2',
     textAlign: 'center',
   },
   restrictedContainer: {

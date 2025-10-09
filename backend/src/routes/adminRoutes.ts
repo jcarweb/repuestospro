@@ -195,6 +195,9 @@ router.delete('/store-photos/:id', AdminController.deleteStorePhoto);
 // Probar configuración de Cloudinary
 router.get('/test-cloudinary', AdminController.testCloudinaryConfig);
 
+// Endpoint de prueba para diagnosticar problemas
+router.post('/test-endpoint', storePhotoUpload.single('image'), AdminController.testEndpoint);
+
 // ===== GESTIÓN DE TIENDAS =====
 
 // Obtener todas las tiendas
