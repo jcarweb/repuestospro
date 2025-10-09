@@ -192,6 +192,9 @@ router.post('/run-enrichment', AdminController.runEnrichment);
 // Eliminar foto de tienda
 router.delete('/store-photos/:id', AdminController.deleteStorePhoto);
 
+// Probar configuración de Cloudinary
+router.get('/test-cloudinary', AdminController.testCloudinaryConfig);
+
 // ===== GESTIÓN DE TIENDAS =====
 
 // Obtener todas las tiendas

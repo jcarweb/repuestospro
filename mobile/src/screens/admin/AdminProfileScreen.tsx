@@ -92,16 +92,21 @@ const AdminProfileScreen: React.FC = () => {
         setProfileImage(null);
       }
 
-      // Cargar datos del perfil guardados específicos del usuario para información adicional
+      // Usar datos del backend directamente (prioridad absoluta)
+      const backendData = {
+        phone: user.phone || '',
+        address: user.address || '',
+        location: user.location || null
+      };
+      setProfileData(backendData);
+      console.log(`Datos del perfil cargados desde backend para usuario ${user.id}:`, backendData);
+      
+      // Limpiar datos locales para evitar conflictos
       const userProfileKey = `profileData_${userId}`;
       const savedProfileData = await AsyncStorage.getItem(userProfileKey);
-      
       if (savedProfileData) {
-        const data = JSON.parse(savedProfileData);
-        setProfileData(data);
-        console.log(`Datos del perfil cargados para usuario ${user.id}:`, data);
-      } else {
-        console.log(`No hay datos de perfil guardados para usuario ${user.id}`);
+        console.log('Limpiando datos locales obsoletos');
+        await AsyncStorage.removeItem(userProfileKey);
       }
     } catch (error) {
       console.error('Error cargando datos del perfil:', error);
