@@ -19,6 +19,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface LocationData {
   latitude: number;
@@ -142,28 +143,10 @@ const StorePhotoCaptureScreen: React.FC = () => {
     try {
       setIsUploading(true);
 
-      // Crear FormData para la subida
-      const formData = new FormData();
-      formData.append('name', storeName.trim());
-      if (storePhone.trim()) {
-        formData.append('phone', storePhone.trim());
-      }
-      formData.append('lat', location.latitude.toString());
-      formData.append('lng', location.longitude.toString());
-      
-      // Agregar la imagen
-      formData.append('image', {
-        uri: image,
-        type: 'image/jpeg',
-        name: 'store_photo.jpg',
-      } as any);
-
-      // Llamada real a la API para subir la foto
-      const { getBaseURL } = await import('../../config/api');
-      const baseUrl = await getBaseURL();
+      // Usar el servicio API para subir la foto
+      const { apiService } = await import('../../services/api');
       
       console.log('📤 Subiendo foto de local...');
-      console.log('🌐 URL:', `${baseUrl}/admin/upload-store-photo`);
       console.log('📋 Datos del formulario:', {
         name: storeName.trim(),
         phone: storePhone.trim(),
@@ -172,24 +155,13 @@ const StorePhotoCaptureScreen: React.FC = () => {
         image: 'presente'
       });
       
-      const response = await fetch(`${baseUrl}/admin/upload-store-photo`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user?.token}`,
-          // No incluir Content-Type para multipart/form-data, el navegador lo maneja automáticamente
-        },
-        body: formData,
+      const result = await apiService.uploadStorePhoto({
+        name: storeName.trim(),
+        phone: storePhone.trim() || undefined,
+        lat: location.latitude,
+        lng: location.longitude,
+        imageUri: image
       });
-
-      console.log('📡 Respuesta del servidor:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Error del servidor:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
       console.log('📊 Resultado de la subida:', result);
       
       if (!result.success) {

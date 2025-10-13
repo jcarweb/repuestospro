@@ -544,6 +544,61 @@ class ApiService {
     }
   }
 
+  async uploadStorePhoto(photoData: {
+    name: string;
+    phone?: string;
+    lat: number;
+    lng: number;
+    imageUri: string;
+  }): Promise<ApiResponse<any>> {
+    try {
+      // Forzar recarga del token antes de la llamada
+      await this.refreshToken();
+      
+      const baseUrl = await getBaseURL();
+      const url = `${baseUrl}/admin/upload-store-photo`;
+      
+      // Crear FormData para la imagen
+      const formData = new FormData();
+      formData.append('name', photoData.name);
+      if (photoData.phone) {
+        formData.append('phone', photoData.phone);
+      }
+      formData.append('lat', photoData.lat.toString());
+      formData.append('lng', photoData.lng.toString());
+      formData.append('image', {
+        uri: photoData.imageUri,
+        type: 'image/jpeg',
+        name: 'store_photo.jpg',
+      } as any);
+      
+      const headers = this.getHeaders();
+      // Remover Content-Type para que el navegador lo establezca automáticamente con el boundary
+      delete headers['Content-Type'];
+      
+      console.log('📤 Subiendo foto de tienda:', photoData.name);
+      console.log('📤 URL:', url);
+      console.log('📤 Headers:', headers);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || `Error ${response.status}: ${response.statusText}`);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error uploading store photo:', error);
+      throw error;
+    }
+  }
+
   // Check if user is authenticated
   async isAuthenticated(): Promise<boolean> {
     try {
