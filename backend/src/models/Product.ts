@@ -151,6 +151,17 @@ ProductSchema.index({ updatedBy: 1 });
 ProductSchema.index({ deleted: 1 });
 ProductSchema.index({ deletedAt: 1 });
 
+// Índices compuestos para optimizar consultas frecuentes
+ProductSchema.index({ category: 1, isActive: 1, deleted: 1 });
+ProductSchema.index({ store: 1, isActive: 1, deleted: 1 });
+ProductSchema.index({ brand: 1, category: 1, isActive: 1 });
+ProductSchema.index({ subcategory: 1, isActive: 1, deleted: 1 });
+ProductSchema.index({ vehicleType: 1, isActive: 1, deleted: 1 });
+ProductSchema.index({ isActive: 1, isFeatured: 1, deleted: 1 });
+ProductSchema.index({ store: 1, category: 1, isActive: 1 });
+ProductSchema.index({ createdAt: -1, isActive: 1, deleted: 1 });
+ProductSchema.index({ popularity: -1, isActive: 1, deleted: 1 });
+
 // Índice compuesto para SKU único por tienda (solo productos no eliminados)
 ProductSchema.index({ sku: 1, store: 1, deleted: 1 }, { unique: true, partialFilterExpression: { deleted: { $ne: true } } });
 

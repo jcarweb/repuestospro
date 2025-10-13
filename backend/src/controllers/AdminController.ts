@@ -2222,9 +2222,10 @@ const AdminController = {
 
       // Importar el modelo StorePhoto
       const StorePhoto = (await import('../models/StorePhoto')).default;
+      console.log('📋 Modelo StorePhoto importado correctamente');
 
-      // Crear el documento en la base de datos
-      const storePhoto = new StorePhoto({
+      // Verificar datos antes de crear el documento
+      const photoData = {
         name: name.trim(),
         phone: phone?.trim() || undefined,
         imageUrl: imageUrl,
@@ -2232,10 +2233,23 @@ const AdminController = {
         lng: parseFloat(lng),
         uploadedBy: req.user?._id || req.user?.id,
         status: 'pending'
-      });
+      };
+      
+      console.log('📋 Datos a guardar:', photoData);
+      console.log('👤 Usuario ID:', req.user?._id || req.user?.id);
 
-      await storePhoto.save();
-      console.log('📸 Foto de tienda guardada en base de datos:', storePhoto._id);
+      // Crear el documento en la base de datos
+      const storePhoto = new StorePhoto(photoData);
+      console.log('📋 Documento StorePhoto creado:', storePhoto);
+
+      try {
+        const savedPhoto = await storePhoto.save();
+        console.log('✅ Foto de tienda guardada exitosamente en base de datos:', savedPhoto._id);
+        console.log('📋 Documento guardado completo:', savedPhoto);
+      } catch (saveError) {
+        console.error('❌ Error guardando en base de datos:', saveError);
+        throw saveError;
+      }
 
       res.json({
         success: true,
@@ -3061,14 +3075,17 @@ const AdminController = {
         filters.isActive = status === 'active';
       }
       
-      // Obtener productos con populate
+      // Optimizar consulta con select específico y populate limitado
       const products = await Product.find(filters)
+        .select('name description price images category brand subcategory sku stock isActive isFeatured store createdBy createdAt updatedAt')
         .populate('store', 'name city state')
         .populate('createdBy', 'name email')
         .sort({ createdAt: -1 })
         .limit(Number(limit))
-        .skip((Number(page) - 1) * Number(limit));
+        .skip((Number(page) - 1) * Number(limit))
+        .lean(); // Usar lean() para mejor rendimiento
       
+      // Usar countDocuments con el mismo filtro para consistencia
       const total = await Product.countDocuments(filters);
       
       res.json({
@@ -3869,6 +3886,198 @@ const AdminController = {
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
+      });
+    }
+  },
+
+  /**
+   * Verificar estado de la conexión a la base de datos
+   */
+  checkDatabaseStatus: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      console.log('🔍 Verificando estado de la base de datos...');
+      
+      // Importar el servicio de base de datos
+      const DatabaseService = (await import('../config/database')).default;
+      const dbService = DatabaseService.getInstance();
+      
+      // Verificar estado de conexión
+      const isConnected = dbService.isConnectedToDatabase();
+      const connectionState = dbService.getConnectionState();
+      
+      console.log('📊 Estado de conexión:', { isConnected, connectionState });
+      
+      // Hacer health check
+      const healthCheck = await dbService.healthCheck();
+      console.log('🏥 Health check:', healthCheck);
+      
+      // Verificar mongoose
+      const mongoose = (await import('mongoose')).default;
+      const mongooseState = mongoose.connection.readyState;
+      const mongooseStates = {
+        0: 'disconnected',
+        1: 'connected',
+        2: 'connecting',
+        3: 'disconnecting'
+      };
+      
+      console.log('📊 Estado de Mongoose:', mongooseState, mongooseStates[mongooseState as keyof typeof mongooseStates]);
+      
+      res.json({
+        success: true,
+        message: 'Estado de base de datos verificado',
+        data: {
+          isConnected,
+          connectionState,
+          mongooseState: mongooseState,
+          mongooseStateText: mongooseStates[mongooseState as keyof typeof mongooseStates],
+          healthCheck,
+          databaseName: mongoose.connection.db?.databaseName || 'No disponible'
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error verificando estado de base de datos:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error verificando estado de base de datos',
+        error: error instanceof Error ? error.message : 'Error desconocido'
+      });
+    }
+  },
+
+  /**
+   * Probar conexión a base de datos y modelo StorePhoto
+   */
+  testDatabase: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      console.log('🧪 Probando conexión a base de datos...');
+      
+      // Importar el modelo StorePhoto
+      const StorePhoto = (await import('../models/StorePhoto')).default;
+      console.log('📋 Modelo StorePhoto importado correctamente');
+      
+      // Probar crear un documento de prueba
+      const testData = {
+        name: 'Test Store',
+        phone: '+584121234567',
+        imageUrl: 'https://example.com/test.jpg',
+        lat: 10.4806,
+        lng: -66.9036,
+        uploadedBy: req.user?._id || req.user?.id || '507f1f77bcf86cd799439011', // ID de prueba
+        status: 'pending'
+      };
+      
+      console.log('📋 Datos de prueba:', testData);
+      
+      // Crear documento de prueba
+      const testPhoto = new StorePhoto(testData);
+      console.log('📋 Documento de prueba creado:', testPhoto);
+      
+      // Intentar guardar
+      const savedPhoto = await testPhoto.save();
+      console.log('✅ Documento de prueba guardado exitosamente:', savedPhoto._id);
+      
+      // Contar documentos en la colección
+      const count = await StorePhoto.countDocuments();
+      console.log('📊 Total de documentos en la colección:', count);
+      
+      // Obtener el documento recién guardado
+      const retrievedPhoto = await StorePhoto.findById(savedPhoto._id);
+      console.log('📋 Documento recuperado:', retrievedPhoto);
+      
+      // Eliminar el documento de prueba
+      await StorePhoto.findByIdAndDelete(savedPhoto._id);
+      console.log('🗑️ Documento de prueba eliminado');
+      
+      res.json({
+        success: true,
+        message: 'Conexión a base de datos funcionando correctamente',
+        data: {
+          modelImported: true,
+          documentCreated: true,
+          documentSaved: true,
+          documentRetrieved: !!retrievedPhoto,
+          totalDocuments: count,
+          testDocumentId: savedPhoto._id
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error probando base de datos:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error en conexión a base de datos',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+    }
+  },
+
+  /**
+   * Endpoint simple para probar guardado sin archivo
+   */
+  testSimpleSave: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      console.log('🧪 Probando guardado simple sin archivo...');
+      console.log('👤 User:', req.user);
+      console.log('📋 Body:', req.body);
+      
+      const { name, phone, lat, lng } = req.body;
+      
+      if (!name || !lat || !lng) {
+        res.status(400).json({
+          success: false,
+          message: 'Nombre, latitud y longitud son requeridos'
+        });
+        return;
+      }
+
+      // Importar el modelo StorePhoto
+      const StorePhoto = (await import('../models/StorePhoto')).default;
+      console.log('📋 Modelo StorePhoto importado correctamente');
+
+      // Crear datos de prueba
+      const photoData = {
+        name: name.trim(),
+        phone: phone?.trim() || undefined,
+        imageUrl: 'https://example.com/test-image.jpg', // URL de prueba
+        lat: parseFloat(lat),
+        lng: parseFloat(lng),
+        uploadedBy: req.user?._id || req.user?.id,
+        status: 'pending'
+      };
+      
+      console.log('📋 Datos a guardar:', photoData);
+
+      // Crear y guardar documento
+      const storePhoto = new StorePhoto(photoData);
+      const savedPhoto = await storePhoto.save();
+      
+      console.log('✅ Documento guardado exitosamente:', savedPhoto._id);
+      
+      res.json({
+        success: true,
+        message: 'Guardado simple exitoso',
+        data: {
+          id: savedPhoto._id,
+          name: savedPhoto.name,
+          phone: savedPhoto.phone,
+          location: {
+            latitude: savedPhoto.lat,
+            longitude: savedPhoto.lng
+          },
+          imageUrl: savedPhoto.imageUrl,
+          uploadedBy: savedPhoto.uploadedBy,
+          uploadedAt: savedPhoto.createdAt,
+          status: savedPhoto.status
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error en guardado simple:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error en guardado simple',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+        stack: error instanceof Error ? error.stack : undefined
       });
     }
   },

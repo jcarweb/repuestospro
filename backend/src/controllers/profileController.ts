@@ -23,10 +23,33 @@ const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<voi
           success: false,
           message: 'Usuario no encontrado'
         });
+        return;
       }
+      
+      console.log('📥 ProfileController getProfile devolviendo datos:', {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        location: user.location,
+        avatar: user.avatar
+      });
+      
       res.json({
         success: true,
-        data: user
+        data: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          address: user.address,
+          location: user.location,
+          avatar: user.avatar,
+          isEmailVerified: user.isEmailVerified,
+          role: user.role,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
+        }
       });
     } catch (error) {
       console.error('Error getting profile:', error);
@@ -40,39 +63,56 @@ const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<voi
 const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?._id || req.user?.id;
-      const { name, email, phone } = req.body;
+      const { name, email, phone, address, location } = req.body;
+      
+      console.log('🔄 ProfileController recibió datos:', { name, email, phone, address, location });
+      
       const user = await User.findById(userId);
       if (!user) {
         res.status(404).json({
           success: false,
           message: 'Usuario no encontrado'
         });
+        return;
       }
+      
       // Verificar si el email ya existe (si se está cambiando)
-      if (email && email !== user!.email) {
+      if (email && email !== user.email) {
         const existingUser = await User.findOne({ email, _id: { $ne: userId } });
         if (existingUser) {
           res.status(400).json({
             success: false,
             message: 'El email ya está en uso'
           });
+          return;
         }
       }
+      
       // Actualizar campos
       const updatedFields: string[] = [];
-      if (name && name !== user!.name) {
-        user!.name = name;
+      if (name && name !== user.name) {
+        user.name = name;
         updatedFields.push('name');
       }
-      if (email && email !== user!.email) {
-        user!.email = email;
+      if (email && email !== user.email) {
+        user.email = email;
         updatedFields.push('email');
       }
-      if (phone !== undefined && phone !== user!.phone) {
-        user!.phone = phone;
+      if (phone !== undefined && phone !== user.phone) {
+        user.phone = phone;
         updatedFields.push('phone');
       }
-      await user!.save();
+      if (address !== undefined && address !== user.address) {
+        user.address = address;
+        updatedFields.push('address');
+      }
+      if (location !== undefined && location !== user.location) {
+        user.location = location;
+        updatedFields.push('location');
+      }
+      
+      await user.save();
+      
       // Registrar actividad
       if (updatedFields.length > 0) {
         await (Activity as any).createActivity(
@@ -83,14 +123,30 @@ const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<
           true
         );
       }
+      
+      console.log('✅ ProfileController actualizado exitosamente:', {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        location: user.location,
+        avatar: user.avatar
+      });
+      
       res.json({
         success: true,
         message: 'Perfil actualizado correctamente',
         data: {
-          name: user!.name,
-          email: user!.email,
-          phone: user!.phone,
-          avatar: user!.avatar
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          address: user.address,
+          location: user.location,
+          avatar: user.avatar,
+          isEmailVerified: user.isEmailVerified,
+          role: user.role,
+          updatedAt: user.updatedAt
         }
       });
     } catch (error) {

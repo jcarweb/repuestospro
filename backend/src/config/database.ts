@@ -16,11 +16,35 @@ class DatabaseService {
       console.log('🔌 Conectando a la base de datos...');
       const uri = config.MONGODB_URI || 'mongodb://127.0.0.1:27017/repuestos-pro';
       await mongoose.connect(uri, {
-        serverSelectionTimeoutMS: 10000,
-        socketTimeoutMS: 45000,
+        // Timeouts optimizados
+        serverSelectionTimeoutMS: 5000, // Reducido de 10s a 5s
+        socketTimeoutMS: 30000, // Reducido de 45s a 30s
+        connectTimeoutMS: 10000, // Timeout de conexión inicial
+        
+        // Pool de conexiones optimizado
+        maxPoolSize: 10, // Máximo 10 conexiones simultáneas
+        minPoolSize: 2, // Mínimo 2 conexiones siempre activas
+        maxIdleTimeMS: 30000, // Cerrar conexiones inactivas después de 30s
+        
+        // Configuración de rendimiento
+        bufferCommands: false, // Deshabilitar buffering de comandos
+        
+        // Compresión para reducir ancho de banda
+        compressors: ['zlib'],
+        
+        // Configuración de heartbeat
+        heartbeatFrequencyMS: 10000, // Heartbeat cada 10s
+        
+        // Configuración de retry
+        retryWrites: true,
+        retryReads: true,
+        
+        // Configuración de lectura
+        readPreference: 'secondaryPreferred', // Leer de secundarios cuando estén disponibles
       });
       this.isConnected = true;
       this.connectionState = 'connected';
+      console.log('✅ Conectado a MongoDB con configuración optimizada');
     } catch (error) {
       console.error('❌ Error conectando a MongoDB:', error);
       this.isConnected = false;
