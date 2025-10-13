@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import compression from 'compression';
+// import compression from 'compression'; // Removido temporalmente por problemas de tipos
 import path from 'path';
 import { createServer } from 'http';
 import DatabaseService from './config/database';
@@ -119,18 +119,18 @@ app.use(session({
 // Inicializar Passport
 app.use(passport.initialize());
 app.use(passport.session());
-// Middleware de compresión (debe ir antes de otros middlewares)
-app.use(compression({
-  level: 6, // Nivel de compresión balanceado
-  threshold: 1024, // Comprimir archivos > 1KB
-  filter: (req: express.Request, res: express.Response) => {
-    // No comprimir si el cliente no lo soporta
-    if (req.headers['x-no-compression']) {
-      return false;
-    }
-    return compression.filter(req, res);
-  }
-}));
+// Middleware de compresión (debe ir antes de otros middlewares) - DESHABILITADO
+// app.use(compression({
+//   level: 6, // Nivel de compresión balanceado
+//   threshold: 1024, // Comprimir archivos > 1KB
+//   filter: (req: express.Request, res: express.Response) => {
+//     // No comprimir si el cliente no lo soporta
+//     if (req.headers['x-no-compression']) {
+//       return false;
+//     }
+//     return compression.filter(req, res);
+//   }
+// }));
 
 // Middleware de seguridad
 app.use(helmet({
