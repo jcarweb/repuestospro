@@ -18,9 +18,9 @@ export const config = {
   // Configuración de CORS
   CORS_ORIGIN: process.env['CORS_ORIGIN'] || '*',
 
-  // Configuración de Rate Limiting
+  // Configuración de Rate Limiting (más permisivo)
   RATE_LIMIT_WINDOW_MS: parseInt(process.env['RATE_LIMIT_WINDOW_MS'] || '900000'), // 15 minutos
-  RATE_LIMIT_MAX_REQUESTS: parseInt(process.env['RATE_LIMIT_MAX_REQUESTS'] || '300'), // Aumentado de 100 a 300
+  RATE_LIMIT_MAX_REQUESTS: parseInt(process.env['RATE_LIMIT_MAX_REQUESTS'] || '500'), // Aumentado a 500 requests por 15 minutos
 
   // Configuración de argon2
   ARGON2_MEMORY_COST: parseInt(process.env['ARGON2_MEMORY_COST'] || '65536'),

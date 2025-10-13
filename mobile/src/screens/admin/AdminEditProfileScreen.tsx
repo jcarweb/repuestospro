@@ -36,6 +36,7 @@ const AdminEditProfileScreen: React.FC = () => {
     address: string;
   } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const saveAttemptRef = useRef(0);
 
@@ -54,40 +55,34 @@ const AdminEditProfileScreen: React.FC = () => {
     requestPermissions();
   }, []);
 
-  // Cargar datos cuando el usuario esté disponible
+  // Cargar datos cuando el usuario esté disponible (solo una vez)
   useEffect(() => {
     if (user?.id) {
       loadProfileData();
     }
   }, [user?.id]);
 
-  // Recargar datos cuando se regrese a la pantalla
+  // Recargar datos cuando se regrese a la pantalla (solo si es necesario)
   useFocusEffect(
     React.useCallback(() => {
-      if (user?.id) {
+      if (user?.id && isInitialLoad) {
+        // Solo recargar en la carga inicial
         loadProfileData();
       }
-    }, [user?.id])
+    }, [user?.id, isInitialLoad])
   );
 
 
   const loadProfileData = async () => {
     try {
       console.log('🔄 loadProfileData iniciado');
-      console.log('🔄 user completo:', JSON.stringify(user, null, 2));
-      console.log('🔄 user?.id:', user?.id);
-      console.log('🔄 user?.name:', user?.name);
-      console.log('🔄 user?.email:', user?.email);
-      console.log('🔄 user?.phone:', user?.phone);
-      console.log('🔄 user?.address:', user?.address);
-      console.log('🔄 user?.avatar:', user?.avatar);
       
       if (!user?.id) {
         console.log('❌ No hay usuario logueado, no se pueden cargar datos del perfil');
         return;
       }
 
-      // SIEMPRE cargar datos frescos del backend
+      // Cargar datos frescos del backend sin actualizar el contexto (para evitar bucles)
       let userData = null;
       
       try {
@@ -97,9 +92,6 @@ const AdminEditProfileScreen: React.FC = () => {
         if (response.success && response.data) {
           console.log('✅ Datos del backend obtenidos directamente:', response.data);
           userData = response.data;
-          
-          // Actualizar el usuario en el contexto con los datos frescos
-          await loadUserProfile(true);
         } else {
           console.log('❌ No se pudieron obtener datos del backend, usando usuario actual');
           userData = user;
@@ -183,8 +175,12 @@ const AdminEditProfileScreen: React.FC = () => {
         avatar: userData?.avatar,
         location: userData?.location
       });
+      
+      // Marcar que la carga inicial está completa
+      setIsInitialLoad(false);
     } catch (error) {
       console.error('Error cargando datos del perfil:', error);
+      setIsInitialLoad(false);
     }
   };
 
@@ -364,10 +360,7 @@ const AdminEditProfileScreen: React.FC = () => {
           
           await updateUserAfterProfileEdit(updatedUserData);
           
-          // Recargar datos en la pantalla de edición para mostrar los cambios
-          setTimeout(() => {
-            loadProfileData();
-          }, 500);
+          // No recargar automáticamente - los datos ya están actualizados en el contexto
         } else {
           console.log('❌ Backend falló:', response.message);
           showToast('Perfil guardado localmente', 'info');
@@ -393,6 +386,11 @@ const AdminEditProfileScreen: React.FC = () => {
     saveProfileData(true);
   };
 
+  const handleRefreshData = () => {
+    setIsInitialLoad(true);
+    loadProfileData();
+  };
+
   // Auto-guardar después de cambios (solo si hay cambios reales)
   useEffect(() => {
     if (saveTimeoutRef.current) {
@@ -404,14 +402,17 @@ const AdminEditProfileScreen: React.FC = () => {
                           (email && email !== user?.email) || 
                           (phone && phone !== user?.phone) || 
                           (address && address !== user?.address) ||
-                          profileImage !== null ||
-                          location !== null;
+                          (profileImage && profileImage !== user?.avatar && profileImage !== user?.profileImage) ||
+                          (location && JSON.stringify(location) !== JSON.stringify(user?.location));
     
-    if (hasRealChanges) {
+    // Solo auto-guardar si hay datos cargados y no estamos en carga inicial
+    const hasLoadedData = name || email || phone || address;
+    
+    if (hasRealChanges && hasLoadedData && !isInitialLoad) {
       console.log('🔄 Auto-guardado detectado - hay cambios reales');
       saveTimeoutRef.current = setTimeout(() => {
         saveProfileData();
-      }, 2000);
+      }, 3000); // Aumentar delay para evitar guardados excesivos
     }
 
     return () => {
@@ -419,7 +420,7 @@ const AdminEditProfileScreen: React.FC = () => {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [name, email, phone, address, profileImage, location]);
+  }, [name, email, phone, address, profileImage, location, user?.name, user?.email, user?.phone, user?.address, user?.avatar, user?.profileImage, user?.location, isInitialLoad]);
 
   const handleLocationSelect = (selectedLocation: {
     latitude: number;
@@ -539,7 +540,7 @@ const AdminEditProfileScreen: React.FC = () => {
           />
         </View>
 
-        {/* Save Button */}
+        {/* Action Buttons */}
         <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <TouchableOpacity
             style={[styles.saveButton, { backgroundColor: colors.primary }]}
@@ -553,6 +554,17 @@ const AdminEditProfileScreen: React.FC = () => {
             )}
             <Text style={styles.saveButtonText}>
               {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.refreshButton, { backgroundColor: colors.background, borderColor: colors.primary }]}
+            onPress={handleRefreshData}
+            disabled={isSaving}
+          >
+            <Ionicons name="refresh" size={20} color={colors.primary} />
+            <Text style={[styles.refreshButtonText, { color: colors.primary }]}>
+              Recargar Datos
             </Text>
           </TouchableOpacity>
         </View>
@@ -655,6 +667,21 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  refreshButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 10,
+  },
+  refreshButtonText: {
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
