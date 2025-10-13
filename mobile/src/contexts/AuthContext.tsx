@@ -629,18 +629,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         phone: updatedUserData.phone || user.phone,
         address: updatedUserData.address || user.address,
         location: updatedUserData.location || user.location,
-        avatar: updatedUserData.avatar || user.avatar,
-        profileImage: updatedUserData.profileImage || user.profileImage,
+        avatar: updatedUserData.avatar || updatedUserData.profileImage || user.avatar,
+        profileImage: updatedUserData.profileImage || updatedUserData.avatar || user.profileImage,
         isEmailVerified: updatedUserData.isEmailVerified || user.isEmailVerified,
-        role: updatedUserData.role || user.role
+        role: updatedUserData.role || user.role,
+        updatedAt: updatedUserData.updatedAt || new Date().toISOString()
       };
       
       console.log('🔄 Usuario actualizado:', newUser);
+      console.log('✅ Avatar actualizado:', newUser.avatar);
+      console.log('✅ ProfileImage actualizado:', newUser.profileImage);
       
       setUser(newUser);
       await AsyncStorage.setItem('user', JSON.stringify(newUser));
       
-      // NO limpiar datos locales aquí - mantenerlos como respaldo
+      // Limpiar datos locales del perfil para forzar recarga desde backend
+      const userProfileKey = `profileData_${user.id}`;
+      await AsyncStorage.removeItem(userProfileKey);
+      
       console.log('✅ Usuario actualizado después de editar perfil');
     } catch (error) {
       console.error('Error actualizando usuario después de editar perfil:', error);

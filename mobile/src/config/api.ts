@@ -2,12 +2,12 @@ import { getNetworkConfig, rescanNetwork, NetworkConfig } from '../utils/network
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BACKEND_ENVIRONMENTS, BackendEnvironment, getEnvironmentById } from './environments';
 
-// Configuración base de la API
+// Configuración base de la API optimizada para móvil
 const BASE_API_CONFIG = {
-  TIMEOUT: 15000, // 15 segundos para mejor estabilidad
-  RETRY_ATTEMPTS: 3,
-  RETRY_DELAY: 1000, // 1 segundo base para backoff
-  MAX_RETRY_DELAY: 5000, // Máximo 5 segundos entre reintentos
+  TIMEOUT: 8000, // 8 segundos optimizado para móvil
+  RETRY_ATTEMPTS: 2, // Reducido de 3 a 2 reintentos
+  RETRY_DELAY: 500, // Reducido a 500ms base
+  MAX_RETRY_DELAY: 2000, // Máximo 2 segundos entre reintentos
 };
 
 // Clase para manejar la configuración dinámica de la API
@@ -175,7 +175,7 @@ export class DynamicAPIConfig {
     attempt: number = 1
   ): Promise<Response> {
     const isProduction = this.currentEnvironment?.isProduction || false;
-    const timeout = isProduction ? 20000 : BASE_API_CONFIG.TIMEOUT; // 20s para producción, 15s para desarrollo
+    const timeout = isProduction ? 10000 : BASE_API_CONFIG.TIMEOUT; // 10s para producción, 8s para desarrollo
     
     try {
       console.log(`🌐 ${operation} (intento ${attempt}/${BASE_API_CONFIG.RETRY_ATTEMPTS}): ${url}`);

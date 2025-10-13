@@ -429,6 +429,15 @@ userSchema.index({ deliveryStatus: 1 });
 userSchema.index({ stores: 1 });
 userSchema.index({ assignedStore: 1 });
 
+// Índices compuestos para optimizar consultas frecuentes
+userSchema.index({ role: 1, isActive: 1 });
+userSchema.index({ email: 1, isActive: 1 });
+userSchema.index({ deliveryStatus: 1, isActive: 1 });
+userSchema.index({ stores: 1, isActive: 1 });
+userSchema.index({ assignedStore: 1, isActive: 1 });
+userSchema.index({ createdAt: -1, isActive: 1 });
+userSchema.index({ lastLogin: -1, isActive: 1 });
+
 // Métodos de instancia
 userSchema.methods['comparePassword'] = async function(this: IUser, candidatePassword: string): Promise<boolean> {
   try {

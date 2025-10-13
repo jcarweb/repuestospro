@@ -84,8 +84,10 @@ class ApiService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    // Forzar recarga del token antes de cada llamada
-    await this.refreshToken();
+    // Solo recargar token si no existe (optimización)
+    if (!this.token) {
+      await this.refreshToken();
+    }
     
     const baseUrl = await getBaseURL();
     const url = `${baseUrl}${endpoint}`;
@@ -98,10 +100,8 @@ class ApiService {
       },
     };
 
-    console.log('🌐 apiService.request() - Endpoint:', endpoint);
-    console.log('🌐 apiService.request() - URL:', url);
-    console.log('🌐 apiService.request() - Headers:', headers);
-    console.log('🌐 apiService.request() - Token disponible:', this.token ? 'SÍ' : 'NO');
+    // Logging reducido para mejor rendimiento
+    console.log(`🌐 ${endpoint} -> ${url}`);
 
     return await this.requestWithRetry(url, config, endpoint);
   }
@@ -116,9 +116,9 @@ class ApiService {
     try {
       console.log(`🌐 ${operation} (intento ${attempt}/${API_CONFIG.RETRY_ATTEMPTS}): ${url}`);
       
-      // Timeout dinámico basado en el entorno
+      // Timeout optimizado para móvil
       const isProduction = url.includes('onrender.com');
-      const timeout = isProduction ? 20000 : API_CONFIG.TIMEOUT; // 20s para Render, 15s para local
+      const timeout = isProduction ? 10000 : 8000; // 10s para Render, 8s para local
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -450,6 +450,49 @@ class ApiService {
       method: 'PUT',
       body: JSON.stringify(profileData),
     });
+  }
+
+  async uploadProfileImage(imageUri: string): Promise<ApiResponse<any>> {
+    try {
+      // Forzar recarga del token antes de la llamada
+      await this.refreshToken();
+      
+      const baseUrl = await getBaseURL();
+      const url = `${baseUrl}/api/profile/avatar`;
+      
+      // Crear FormData para la imagen
+      const formData = new FormData();
+      formData.append('avatar', {
+        uri: imageUri,
+        type: 'image/jpeg',
+        name: 'profile.jpg',
+      } as any);
+      
+      const headers = this.getHeaders();
+      // Remover Content-Type para que el navegador lo establezca automáticamente con el boundary
+      delete headers['Content-Type'];
+      
+      console.log('📤 Subiendo imagen de perfil:', imageUri);
+      console.log('📤 URL:', url);
+      console.log('📤 Headers:', headers);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || `Error ${response.status}: ${response.statusText}`);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      throw error;
+    }
   }
 
   // Check if user is authenticated

@@ -73,37 +73,68 @@ const AdminEditProfileScreen: React.FC = () => {
 
   const loadProfileData = async () => {
     try {
+      console.log('🔄 loadProfileData iniciado');
+      console.log('🔄 user completo:', JSON.stringify(user, null, 2));
+      console.log('🔄 user?.id:', user?.id);
+      console.log('🔄 user?.name:', user?.name);
+      console.log('🔄 user?.email:', user?.email);
+      console.log('🔄 user?.phone:', user?.phone);
+      console.log('🔄 user?.address:', user?.address);
+      console.log('🔄 user?.avatar:', user?.avatar);
+      
       if (!user?.id) {
-        console.log('No hay usuario logueado, no se pueden cargar datos del perfil');
+        console.log('❌ No hay usuario logueado, no se pueden cargar datos del perfil');
         return;
       }
 
-      // Primero intentar cargar datos reales del backend
+      // SIEMPRE cargar datos frescos del backend
+      let userData = null;
+      
       try {
-        await loadUserProfile();
+        console.log('🔄 Cargando datos directamente del backend...');
+        const response = await apiService.getUserProfile();
+        
+        if (response.success && response.data) {
+          console.log('✅ Datos del backend obtenidos directamente:', response.data);
+          userData = response.data;
+          
+          // Actualizar el usuario en el contexto con los datos frescos
+          await loadUserProfile(true);
+        } else {
+          console.log('❌ No se pudieron obtener datos del backend, usando usuario actual');
+          userData = user;
+        }
       } catch (error) {
-        console.log('No se pudieron cargar datos del backend, usando datos locales');
+        console.log('❌ Error cargando datos del backend, usando usuario actual:', error);
+        userData = user;
       }
 
-      // Usar datos del usuario actualizado del backend
+      // Usar datos del usuario (del backend o actual)
       console.log('📥 Cargando datos en AdminEditProfile:');
-      console.log('  - name:', user?.name);
-      console.log('  - email:', user?.email);
-      console.log('  - phone:', user?.phone);
-      console.log('  - address:', user?.address);
+      console.log('  - name:', userData?.name);
+      console.log('  - email:', userData?.email);
+      console.log('  - phone:', userData?.phone);
+      console.log('  - address:', userData?.address);
+      console.log('  - avatar:', userData?.avatar);
       
-      setName(user?.name || '');
-      setEmail(user?.email || '');
-      setPhone(user?.phone || '');
-      setAddress(user?.address || '');
+      setName(userData?.name || '');
+      setEmail(userData?.email || '');
+      setPhone(userData?.phone || '');
+      setAddress(userData?.address || '');
+      
+      console.log('📝 Estados establecidos:');
+      console.log('  - name state:', userData?.name || '');
+      console.log('  - email state:', userData?.email || '');
+      console.log('  - phone state:', userData?.phone || '');
+      console.log('  - address state:', userData?.address || '');
       
       // Cargar imagen de perfil actual del usuario
       console.log('🖼️ Cargando imagen de perfil en edición:');
-      console.log('  - user completo:', JSON.stringify(user, null, 2));
-      console.log('  - user.avatar:', user?.avatar);
-      console.log('  - user.profileImage:', user?.profileImage);
+      console.log('  - userData completo:', JSON.stringify(userData, null, 2));
+      console.log('  - userData.avatar:', userData?.avatar);
+      console.log('  - userData.profileImage:', userData?.profileImage);
       
-      const avatarUrl = user?.avatar || user?.profileImage || null;
+      const avatarUrl = userData?.avatar || userData?.profileImage || null;
       console.log('  - avatarUrl final:', avatarUrl);
       console.log('  - tipo de avatarUrl:', typeof avatarUrl);
       console.log('  - longitud de avatarUrl:', avatarUrl?.length);
@@ -132,24 +163,25 @@ const AdminEditProfileScreen: React.FC = () => {
       }
 
       // Cargar ubicación GPS si existe
-      if (user?.location && user.location.coordinates && user.location.coordinates.length === 2) {
+      if (userData?.location && userData.location.coordinates && userData.location.coordinates.length === 2) {
         const locationData = {
-          latitude: user.location.coordinates[1],
-          longitude: user.location.coordinates[0],
-          address: user.location.address || 'Ubicación guardada'
+          latitude: userData.location.coordinates[1],
+          longitude: userData.location.coordinates[0],
+          address: userData.location.address || 'Ubicación guardada'
         };
         setLocation(locationData);
-        console.log('Ubicación GPS cargada:', locationData);
+        console.log('📍 Ubicación GPS cargada:', locationData);
       } else {
-        console.log('No hay datos de ubicación GPS del usuario');
+        console.log('📍 No hay datos de ubicación GPS del usuario');
       }
 
-      console.log(`Datos del perfil cargados para usuario ${user.id}:`, {
-        name: user?.name,
-        email: user?.email,
-        phone: user?.phone,
-        address: user?.address,
-        avatar: user?.avatar
+      console.log(`✅ Datos del perfil cargados para usuario ${user.id}:`, {
+        name: userData?.name,
+        email: userData?.email,
+        phone: userData?.phone,
+        address: userData?.address,
+        avatar: userData?.avatar,
+        location: userData?.location
       });
     } catch (error) {
       console.error('Error cargando datos del perfil:', error);
@@ -245,9 +277,27 @@ const AdminEditProfileScreen: React.FC = () => {
       // Intentar guardar en el backend
       try {
         // Validar que al menos hay datos para guardar
-        if (!name && !email && !phone && !address && !location) {
+        if (!name && !email && !phone && !address && !location && !profileImage) {
           console.log('⚠️ No hay datos para guardar en el backend');
           return;
+        }
+        
+        // Primero subir la imagen si es una nueva imagen local
+        let uploadedImageUrl = null;
+        if (profileImage && profileImage.startsWith('file://')) {
+          try {
+            console.log('📤 Subiendo nueva imagen de perfil...');
+            const uploadResponse = await apiService.uploadProfileImage(profileImage);
+            if (uploadResponse.success && uploadResponse.data?.avatar) {
+              uploadedImageUrl = uploadResponse.data.avatar;
+              console.log('✅ Imagen subida exitosamente:', uploadedImageUrl);
+            } else {
+              console.log('❌ Error subiendo imagen:', uploadResponse.message);
+            }
+          } catch (uploadError) {
+            console.error('❌ Error subiendo imagen:', uploadError);
+            showToast('Error subiendo imagen de perfil', 'warning');
+          }
         }
         
         const backendData: any = {};
@@ -280,11 +330,14 @@ const AdminEditProfileScreen: React.FC = () => {
         console.log('  - phone:', phone, '(tipo:', typeof phone, ', longitud:', phone?.length, ')');
         console.log('  - address:', address, '(tipo:', typeof address, ', longitud:', address?.length, ')');
         console.log('  - location:', location);
+        console.log('  - profileImage:', profileImage);
+        console.log('  - uploadedImageUrl:', uploadedImageUrl);
         console.log('🔄 Estados actuales del componente:');
         console.log('  - name state:', name);
         console.log('  - email state:', email);
         console.log('  - phone state:', phone);
         console.log('  - address state:', address);
+        console.log('  - profileImage state:', profileImage);
         
         const response = await apiService.updateUserProfile(backendData);
         
@@ -295,12 +348,26 @@ const AdminEditProfileScreen: React.FC = () => {
           showToast('Perfil actualizado exitosamente', 'success');
           
           // Actualizar el usuario con los nuevos datos del backend
+          let updatedUserData = response.data;
           if (response.data?.user) {
-            await updateUserAfterProfileEdit(response.data.user);
-          } else {
-            // Fallback: recargar perfil del usuario
-            await loadUserProfile(true);
+            updatedUserData = response.data.user;
           }
+          
+          // Si se subió una nueva imagen, actualizar el avatar
+          if (uploadedImageUrl) {
+            updatedUserData = {
+              ...updatedUserData,
+              avatar: uploadedImageUrl,
+              profileImage: uploadedImageUrl
+            };
+          }
+          
+          await updateUserAfterProfileEdit(updatedUserData);
+          
+          // Recargar datos en la pantalla de edición para mostrar los cambios
+          setTimeout(() => {
+            loadProfileData();
+          }, 500);
         } else {
           console.log('❌ Backend falló:', response.message);
           showToast('Perfil guardado localmente', 'info');

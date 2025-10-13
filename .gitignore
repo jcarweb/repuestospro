@@ -303,6 +303,20 @@ public
 tmp/
 temp/
 
+# Monitoring and performance configuration files with sensitive data
+backend/src/config/monitoring.ts
+backend/src/config/performance.ts
+backend/OPTIMIZATION_GUIDE.md
+backend/PERFORMANCE_OPTIMIZATION_PLAN.md
+
+# Mobile optimization files
+mobile/MOBILE_OPTIMIZATION_GUIDE.md
+mobile/src/hooks/useMobileApi.ts
+mobile/src/services/mobileApiService.ts
+
+# New mobile routes (temporary)
+backend/src/routes/mobileRoutes.ts
+
 # Logs
 logs
 *.log
