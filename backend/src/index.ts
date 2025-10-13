@@ -9,8 +9,8 @@ import { createServer } from 'http';
 import DatabaseService from './config/database';
 import config from './config/env';
 import passport from './config/passport';
-import PerformanceConfig from './config/performance';
-import MonitoringConfig from './config/monitoring';
+// import PerformanceConfig from './config/performance';
+// import MonitoringConfig from './config/monitoring';
 import session from 'express-session';
 import { ChatService } from './services/ChatService';
 import { ChatController } from './controllers/ChatController';
@@ -56,7 +56,7 @@ import quotationRoutes from './routes/quotationRoutes';
 import quotationConfigRoutes from './routes/quotationConfigRoutes';
 import advancedSearchRoutes from './routes/advancedSearchRoutes';
 import userManagementRoutes from './routes/userManagementRoutes';
-import mobileRoutes from './routes/mobileRoutes';
+// import mobileRoutes from './routes/mobileRoutes';
 // Importaciones problemáticas removidas - se crearán las rutas directamente
 // import whatsappTestRoutes from './routes/whatsappTestRoutes';
 import { enrichmentWorker } from './services/enrichmentWorker';
@@ -151,7 +151,7 @@ if (config.NODE_ENV === 'production') {
 }
 
 // Middleware de tracing y monitoreo
-app.use(MonitoringConfig.createTracingMiddleware());
+// app.use(MonitoringConfig.createTracingMiddleware());
 // Configurar archivos estáticos para uploads (ANTES del rate limiter)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
   setHeaders: (res, filePath) => {
@@ -486,7 +486,7 @@ app.use('/api/advanced-search', advancedSearchRoutes);
 app.use('/api/admin/users', userManagementRoutes);
 
 // Rutas optimizadas para móvil (DEBEN IR ANTES de las rutas generales)
-app.use('/api/mobile', mobileRoutes);
+// app.use('/api/mobile', mobileRoutes);
 
 // Crear rutas directamente para evitar problemas de importación
 const userManagementTestRoutes = Router();
@@ -587,10 +587,10 @@ const initializeApp = async () => {
     console.log('🚀 Iniciando aplicación con base de datos...');
     
     // Inicializar optimizaciones de rendimiento
-    PerformanceConfig.initialize();
+    // PerformanceConfig.initialize();
     
     // Inicializar sistema de monitoreo
-    MonitoringConfig.initialize();
+    // MonitoringConfig.initialize();
     
     // Conectar a la base de datos
     const dbService = DatabaseService.getInstance();
