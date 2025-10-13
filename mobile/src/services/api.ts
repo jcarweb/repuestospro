@@ -5,6 +5,10 @@ import { offlineService } from './offlineService';
 
 class ApiService {
   private token: string | null = null;
+  private requestCache: Map<string, { data: any; timestamp: number }> = new Map();
+  private readonly CACHE_DURATION = 5000; // 5 segundos de cache
+  private lastRequestTime: number = 0;
+  private readonly MIN_REQUEST_INTERVAL = 100; // 100ms entre peticiones
 
   constructor() {
     console.log('🔧 apiService constructor - Inicializando...');
@@ -63,6 +67,26 @@ class ApiService {
     }
   }
 
+  private getCachedRequest<T>(key: string): T | null {
+    const cached = this.requestCache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+      console.log(`📦 Cache hit para ${key}`);
+      return cached.data;
+    }
+    return null;
+  }
+
+  private setCachedRequest<T>(key: string, data: T): void {
+    this.requestCache.set(key, {
+      data,
+      timestamp: Date.now()
+    });
+  }
+
+  private clearCache(): void {
+    this.requestCache.clear();
+  }
+
   private getHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -88,6 +112,15 @@ class ApiService {
     if (!this.token) {
       await this.refreshToken();
     }
+    
+    // Aplicar delay entre peticiones para evitar rate limiting
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTime;
+    if (timeSinceLastRequest < this.MIN_REQUEST_INTERVAL) {
+      const delay = this.MIN_REQUEST_INTERVAL - timeSinceLastRequest;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    this.lastRequestTime = Date.now();
     
     const baseUrl = await getBaseURL();
     const url = `${baseUrl}${endpoint}`;
@@ -442,14 +475,27 @@ class ApiService {
 
   // User profile endpoints
   async getUserProfile(): Promise<ApiResponse<User>> {
-    return this.request<ApiResponse<User>>('/auth/profile');
+    const cacheKey = 'user_profile';
+    const cached = this.getCachedRequest<ApiResponse<User>>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const result = await this.request<ApiResponse<User>>('/auth/profile');
+    this.setCachedRequest(cacheKey, result);
+    return result;
   }
 
   async updateUserProfile(profileData: any): Promise<ApiResponse<User>> {
-    return this.request<ApiResponse<User>>('/auth/profile', {
+    const result = await this.request<ApiResponse<User>>('/auth/profile', {
       method: 'PUT',
       body: JSON.stringify(profileData),
     });
+    
+    // Limpiar cache después de actualizar
+    this.clearCache();
+    
+    return result;
   }
 
   async uploadProfileImage(imageUri: string): Promise<ApiResponse<any>> {
@@ -487,6 +533,9 @@ class ApiService {
       if (!response.ok) {
         throw new Error(data.message || `Error ${response.status}: ${response.statusText}`);
       }
+      
+      // Limpiar cache después de subir imagen
+      this.clearCache();
       
       return data;
     } catch (error) {

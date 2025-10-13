@@ -63,10 +63,10 @@ import { enrichmentWorker } from './services/enrichmentWorker';
 import autoUpdateService from './services/autoUpdateService';
 // import { initializeWhatsAppForVenezuela } from './scripts/initWhatsApp';
 const app = express();
-// Configurar rate limiting optimizado
+// Configurar rate limiting optimizado (más permisivo)
 const limiter = rateLimit({
   windowMs: config.RATE_LIMIT_WINDOW_MS,
-  max: config.RATE_LIMIT_MAX_REQUESTS,
+  max: config.RATE_LIMIT_MAX_REQUESTS * 2, // Duplicar el límite
   message: {
     success: false,
     message: 'Demasiadas solicitudes desde esta IP, intenta de nuevo más tarde.'
@@ -74,15 +74,18 @@ const limiter = rateLimit({
   standardHeaders: true, // Retornar rate limit info en headers
   legacyHeaders: false, // Deshabilitar headers legacy
   skip: (req) => {
-    // Saltar rate limiting para health checks
-    return req.path === '/health' || req.path === '/api/health';
+    // Saltar rate limiting para health checks y rutas de perfil
+    return req.path === '/health' || 
+           req.path === '/api/health' ||
+           req.path.startsWith('/api/profile') ||
+           req.path.startsWith('/api/auth/profile');
   }
 });
 
-// Rate limiter específico para rutas de perfil (más permisivo)
+// Rate limiter específico para rutas de perfil (muy permisivo)
 const profileLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 200, // Reducido de 500 a 200 requests por 15 minutos
+  max: 1000, // Aumentado a 1000 requests por 15 minutos para perfil
   message: {
     success: false,
     message: 'Demasiadas solicitudes de perfil desde esta IP, intenta de nuevo más tarde.'
