@@ -131,13 +131,10 @@ export class AuthController {
   static async login(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
-      // Buscar usuario con información de tiendas
+      // Buscar usuario sin populate inicial para mejor rendimiento
       const user = await User.findOne({ email })
-        .select('+password +loginAttempts +lockUntil')
-        .populate({
-          path: 'stores',
-          select: 'name address city state isMainStore _id'
-        });
+        .select('+password +loginAttempts +lockUntil name email role isEmailVerified isActive stores assignedStore')
+        .lean(); // Usar lean() para mejor rendimiento
       if (!user) {
         res.status(401).json({
           success: false,

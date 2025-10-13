@@ -195,6 +195,15 @@ router.delete('/store-photos/:id', AdminController.deleteStorePhoto);
 // Probar configuración de Cloudinary
 router.get('/test-cloudinary', AdminController.testCloudinaryConfig);
 
+// Verificar estado de la base de datos
+router.get('/check-database-status', AdminController.checkDatabaseStatus);
+
+// Probar conexión a base de datos
+router.get('/test-database', AdminController.testDatabase);
+
+// Endpoint simple para probar guardado sin archivo
+router.post('/test-simple-save', AdminController.testSimpleSave);
+
 // Endpoint de prueba para diagnosticar problemas
 router.post('/test-endpoint', storePhotoUpload.single('image'), AdminController.testEndpoint);
 

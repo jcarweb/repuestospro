@@ -3,11 +3,14 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import compression from 'compression';
 import path from 'path';
 import { createServer } from 'http';
 import DatabaseService from './config/database';
 import config from './config/env';
 import passport from './config/passport';
+import PerformanceConfig from './config/performance';
+import MonitoringConfig from './config/monitoring';
 import session from 'express-session';
 import { ChatService } from './services/ChatService';
 import { ChatController } from './controllers/ChatController';
@@ -53,29 +56,52 @@ import quotationRoutes from './routes/quotationRoutes';
 import quotationConfigRoutes from './routes/quotationConfigRoutes';
 import advancedSearchRoutes from './routes/advancedSearchRoutes';
 import userManagementRoutes from './routes/userManagementRoutes';
+import mobileRoutes from './routes/mobileRoutes';
 // Importaciones problemáticas removidas - se crearán las rutas directamente
 // import whatsappTestRoutes from './routes/whatsappTestRoutes';
 import { enrichmentWorker } from './services/enrichmentWorker';
 import autoUpdateService from './services/autoUpdateService';
 // import { initializeWhatsAppForVenezuela } from './scripts/initWhatsApp';
 const app = express();
-// Configurar rate limiting
+// Configurar rate limiting optimizado
 const limiter = rateLimit({
   windowMs: config.RATE_LIMIT_WINDOW_MS,
   max: config.RATE_LIMIT_MAX_REQUESTS,
   message: {
     success: false,
     message: 'Demasiadas solicitudes desde esta IP, intenta de nuevo más tarde.'
+  },
+  standardHeaders: true, // Retornar rate limit info en headers
+  legacyHeaders: false, // Deshabilitar headers legacy
+  skip: (req) => {
+    // Saltar rate limiting para health checks
+    return req.path === '/health' || req.path === '/api/health';
   }
 });
+
 // Rate limiter específico para rutas de perfil (más permisivo)
 const profileLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 500, // 500 requests por 15 minutos para perfil
+  max: 200, // Reducido de 500 a 200 requests por 15 minutos
   message: {
     success: false,
     message: 'Demasiadas solicitudes de perfil desde esta IP, intenta de nuevo más tarde.'
-  }
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Rate limiter estricto para autenticación
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 10, // Solo 10 intentos de login por 15 minutos
+  message: {
+    success: false,
+    message: 'Demasiados intentos de autenticación, intenta de nuevo más tarde.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true // No contar requests exitosos
 });
 // Configurar sesiones para Passport
 app.use(session({
@@ -90,8 +116,25 @@ app.use(session({
 // Inicializar Passport
 app.use(passport.initialize());
 app.use(passport.session());
+// Middleware de compresión (debe ir antes de otros middlewares)
+app.use(compression({
+  level: 6, // Nivel de compresión balanceado
+  threshold: 1024, // Comprimir archivos > 1KB
+  filter: (req: express.Request, res: express.Response) => {
+    // No comprimir si el cliente no lo soporta
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
+
 // Middleware de seguridad
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false, // Deshabilitar CSP para desarrollo
+  crossOriginEmbedderPolicy: false
+}));
+
 // Configurar CORS
 app.use(cors({
   origin: true, // Permitir todos los orígenes en desarrollo
@@ -99,8 +142,16 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
-// Middleware de logging
-app.use(morgan('combined'));
+
+// Middleware de logging optimizado
+if (config.NODE_ENV === 'production') {
+  app.use(morgan('combined'));
+} else {
+  app.use(morgan('dev'));
+}
+
+// Middleware de tracing y monitoreo
+app.use(MonitoringConfig.createTracingMiddleware());
 // Configurar archivos estáticos para uploads (ANTES del rate limiter)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
   setHeaders: (res, filePath) => {
@@ -338,7 +389,7 @@ app.get('/api/db-status', async (req, res) => {
 });
 // Rutas de la API
 app.use('/api/products', productRoutes);
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes); // Aplicar rate limiting estricto a auth
 app.use('/api', categoryRoutes);
 app.use('/api', brandRoutes);
 app.use('/api', subcategoryRoutes);
@@ -433,6 +484,9 @@ app.use('/api/quotations', quotationRoutes);
 app.use('/api/quotation-config', quotationConfigRoutes);
 app.use('/api/advanced-search', advancedSearchRoutes);
 app.use('/api/admin/users', userManagementRoutes);
+
+// Rutas optimizadas para móvil (DEBEN IR ANTES de las rutas generales)
+app.use('/api/mobile', mobileRoutes);
 
 // Crear rutas directamente para evitar problemas de importación
 const userManagementTestRoutes = Router();
@@ -531,6 +585,13 @@ const startServer = async () => {
 const initializeApp = async () => {
   try {
     console.log('🚀 Iniciando aplicación con base de datos...');
+    
+    // Inicializar optimizaciones de rendimiento
+    PerformanceConfig.initialize();
+    
+    // Inicializar sistema de monitoreo
+    MonitoringConfig.initialize();
+    
     // Conectar a la base de datos
     const dbService = DatabaseService.getInstance();
     await dbService.connectToDatabase();
