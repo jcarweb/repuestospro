@@ -78,11 +78,11 @@ class SecureConfigManager {
     const secret = process.env['JWT_SECRET'];
     
     if (!secret || this.isInsecureValue(secret)) {
-      // Generar un secreto temporal seguro para desarrollo
-      const tempSecret = this.generateSecureSecret();
-      console.warn('⚠️ Usando JWT_SECRET temporal para desarrollo. Configura JWT_SECRET en producción.');
+      // Usar un secreto fijo para desarrollo (no cambiar entre reinicios)
+      const devSecret = 'dev-jwt-secret-repuestospro-2024-secure-key-for-development-only';
+      console.warn('⚠️ Usando JWT_SECRET fijo para desarrollo. Configura JWT_SECRET en producción.');
       return {
-        secret: tempSecret,
+        secret: devSecret,
         expiresIn: process.env['JWT_EXPIRES_IN'] || '24h'
       };
     }
