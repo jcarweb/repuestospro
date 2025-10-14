@@ -6,7 +6,7 @@ import apiService from '../services/api'; // Usar servicio real de API
 import authVerificationService from '../services/authVerification';
 import { userPersistenceService } from '../services/userPersistenceService';
 import { getBaseURL } from '../config/api';
-import { forceLocalBackend } from '../utils/forceLocalBackend';
+import { verifyBackendConfig } from '../utils/forceLocalBackend';
 // import { useToast } from './ToastContext';
 
 interface AuthContextType {
@@ -106,8 +106,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         console.log('🔧 API REAL: Inicializando autenticación con configuración correcta');
         
-        // Asegurar que se use el entorno local
-        await forceLocalBackend();
+        // Asegurar que se use el entorno configurado (render por defecto)
+        await verifyBackendConfig();
         
         // Forzar configuración de red correcta
         // await forceCorrectNetworkConfig();

@@ -45,17 +45,19 @@ export const verifyBackendConfig = async (): Promise<void> => {
     console.log('📱 Entorno almacenado:', currentEnv);
     console.log('🌐 URL actual:', currentConfig);
     
-    // Si está usando producción o no hay configuración, forzar local
-    if (!currentEnv || currentEnv === 'render' || currentConfig.includes('render.com')) {
-      console.log('⚠️ Detectado backend de producción, cambiando a local...');
-      await forceLocalBackend();
+    // Si no hay configuración, usar render por defecto
+    if (!currentEnv) {
+      console.log('⚠️ No hay configuración de backend, usando render por defecto...');
+      await AsyncStorage.setItem('selected_backend_environment', 'render');
+      await apiConfig.reloadConfiguration();
     } else {
-      console.log('✅ Backend local configurado correctamente');
+      console.log('✅ Backend configurado correctamente:', currentEnv);
     }
     
   } catch (error) {
     console.error('❌ Error verificando configuración del backend:', error);
-    // En caso de error, forzar local
-    await forceLocalBackend();
+    // En caso de error, usar render por defecto
+    await AsyncStorage.setItem('selected_backend_environment', 'render');
+    await apiConfig.reloadConfiguration();
   }
 };

@@ -62,6 +62,10 @@ type AdminStackParamList = {
   AdminSettings: undefined;
   AdminDelivery: undefined;
   AdminSearchConfig: undefined;
+  AdminProfile: undefined;
+  AdminEditProfile: undefined;
+  AdminCreateUser: undefined;
+  AdminCreateProduct: undefined;
   StorePhotoCapture: undefined;
   StorePhotosList: undefined;
   OrderDetails: { orderId: string };
@@ -314,7 +318,15 @@ const AdminDashboardScreen: React.FC = () => {
             <TouchableOpacity
               style={[styles.enrichmentCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => {
-                navigation.navigate('StorePhotoCapture');
+                console.log('🔍 AdminDashboard - Navegando a StorePhotoCapture');
+                console.log('🔍 AdminDashboard - navigation object:', navigation);
+                console.log('🔍 AdminDashboard - user role:', user?.role);
+                try {
+                  navigation.navigate('StorePhotoCapture');
+                  console.log('✅ AdminDashboard - Navegación exitosa a StorePhotoCapture');
+                } catch (error) {
+                  console.error('❌ AdminDashboard - Error navegando a StorePhotoCapture:', error);
+                }
               }}
             >
               <View style={[styles.enrichmentIcon, { backgroundColor: '#10B981' }]}>
@@ -334,7 +346,15 @@ const AdminDashboardScreen: React.FC = () => {
             <TouchableOpacity
               style={[styles.enrichmentCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => {
-                navigation.navigate('StorePhotosList');
+                console.log('🔍 AdminDashboard - Navegando a StorePhotosList');
+                console.log('🔍 AdminDashboard - navigation object:', navigation);
+                console.log('🔍 AdminDashboard - user role:', user?.role);
+                try {
+                  navigation.navigate('StorePhotosList');
+                  console.log('✅ AdminDashboard - Navegación exitosa a StorePhotosList');
+                } catch (error) {
+                  console.error('❌ AdminDashboard - Error navegando a StorePhotosList:', error);
+                }
               }}
             >
               <View style={[styles.enrichmentIcon, { backgroundColor: '#8B5CF6' }]}>

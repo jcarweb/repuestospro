@@ -3011,19 +3011,12 @@ const AdminController = {
     try {
       console.log('🔄 Iniciando proceso de enriquecimiento...');
       
-      // En una implementación real, iniciarías el proceso de enriquecimiento
-      // Por ahora simulamos el inicio del proceso
+      // Importar el StorePhotoController para usar la implementación real
+      const { StorePhotoController } = await import('./storePhotoController');
       
-      console.log('🔄 Proceso de enriquecimiento iniciado');
-      res.json({
-        success: true,
-        message: 'Proceso de enriquecimiento iniciado exitosamente',
-        data: {
-          processId: Date.now().toString(),
-          status: 'running',
-          estimatedTime: '5-10 minutos'
-        }
-      });
+      // Usar la implementación real del enriquecimiento
+      await StorePhotoController.runEnrichment(req, res);
+      
     } catch (error) {
       console.error('Error ejecutando enriquecimiento:', error);
       res.status(500).json({
