@@ -4,7 +4,14 @@ import { authMiddleware, adminMiddleware, storeManagerMiddleware } from '../midd
 
 const router = Router();
 
-// Endpoint de debug removido por seguridad
+// Endpoint de prueba simple
+router.get('/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Backend funcionando correctamente',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Rutas para todos los usuarios autenticados
 router.get('/', productController.getProducts);

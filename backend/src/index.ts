@@ -390,6 +390,18 @@ app.get('/api/db-status', async (req, res) => {
     });
   }
 });
+
+// Endpoint de prueba general
+app.get('/api/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Backend funcionando correctamente',
+    timestamp: new Date().toISOString(),
+    environment: config.NODE_ENV,
+    version: '1.0.0'
+  });
+});
+
 // Rutas de la API
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authLimiter, authRoutes); // Aplicar rate limiting estricto a auth

@@ -34,7 +34,7 @@ export const BACKEND_ENVIRONMENTS: BackendEnvironment[] = [
   }
 ];
 
-export const DEFAULT_ENVIRONMENT = 'render';
+export const DEFAULT_ENVIRONMENT = 'local';
 
 export const getEnvironmentById = (id: string): BackendEnvironment | undefined => {
   return BACKEND_ENVIRONMENTS.find(env => env.id === id);

@@ -1,7 +1,7 @@
 import { getBaseURL } from '../config/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { makeRequestWithRetry, requestSemaphore, randomDelay, makeCachedRequest, circuitBreaker } from '../utils/requestUtils';
-import { mockStates, mockMunicipalities, mockParishes } from '../utils/mockData';
+// Eliminado: import de datos mock - solo usar datos reales
 
 export interface State {
   _id: string;
@@ -127,15 +127,7 @@ class AdministrativeDivisionService {
     } catch (error) {
       console.error('❌ Error fetching municipalities, usando datos mock:', error);
       
-      // Si el circuit breaker está abierto o hay error, usar datos mock
-      if (circuitBreaker.getState() === 'OPEN' || error instanceof Error) {
-        const mockData = (mockMunicipalities as any)[stateId] || [];
-        console.log(`🔄 Usando datos mock para municipios del estado ${stateId}`);
-        return {
-          success: true,
-          data: mockData
-        };
-      }
+      // No usar datos mock - solo datos reales
       
       return {
         success: false,
@@ -158,15 +150,7 @@ class AdministrativeDivisionService {
     } catch (error) {
       console.error('❌ Error fetching parishes, usando datos mock:', error);
       
-      // Si el circuit breaker está abierto o hay error, usar datos mock
-      if (circuitBreaker.getState() === 'OPEN' || error instanceof Error) {
-        const mockData = (mockParishes as any)[municipalityId] || [];
-        console.log(`🔄 Usando datos mock para parroquias del municipio ${municipalityId}`);
-        return {
-          success: true,
-          data: mockData
-        };
-      }
+      // No usar datos mock - solo datos reales
       
       return {
         success: false,

@@ -3873,14 +3873,10 @@ const AdminController = {
       const { id } = req.params;
       console.log('🗑️ Eliminando foto de tienda:', id);
       
-      // En una implementación real, eliminarías la foto de la base de datos y Cloudinary
-      // Por ahora simulamos la eliminación
+      // Importar el controlador de StorePhoto para usar la implementación real
+      const StorePhotoController = await import('./storePhotoController');
+      await StorePhotoController.default.deleteStorePhoto(req, res);
       
-      console.log('🗑️ Foto eliminada exitosamente');
-      res.json({
-        success: true,
-        message: 'Foto eliminada exitosamente'
-      });
     } catch (error) {
       console.error('Error eliminando foto de tienda:', error);
       res.status(500).json({

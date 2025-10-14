@@ -599,6 +599,34 @@ class ApiService {
     }
   }
 
+  // Test endpoint para verificar conectividad
+  async testConnection(): Promise<ApiResponse<any>> {
+    try {
+      const baseUrl = await getBaseURL();
+      const url = `${baseUrl}/products/test`;
+      
+      console.log('🧪 Probando conexión con backend:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || `Error ${response.status}: ${response.statusText}`);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error testing connection:', error);
+      throw error;
+    }
+  }
+
   // Check if user is authenticated
   async isAuthenticated(): Promise<boolean> {
     try {
