@@ -56,9 +56,9 @@ export const detectBestBackend = async (): Promise<string> => {
     }
   }
   
-  // Si ningún backend está disponible, usar local por defecto
-  console.log('⚠️ Ningún backend disponible, usando local por defecto');
-  return 'local';
+  // Si ningún backend está disponible, usar render por defecto
+  console.log('⚠️ Ningún backend disponible, usando render por defecto');
+  return 'render';
 };
 
 /**
