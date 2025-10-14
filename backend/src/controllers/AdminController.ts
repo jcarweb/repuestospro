@@ -3874,8 +3874,8 @@ const AdminController = {
       console.log('🗑️ Eliminando foto de tienda:', id);
       
       // Importar el controlador de StorePhoto para usar la implementación real
-      const StorePhotoController = await import('./storePhotoController');
-      await StorePhotoController.default.deleteStorePhoto(req, res);
+      const { StorePhotoController } = await import('./storePhotoController');
+      await StorePhotoController.deleteStorePhoto(req, res);
       
     } catch (error) {
       console.error('Error eliminando foto de tienda:', error);
