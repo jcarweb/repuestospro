@@ -34,22 +34,67 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [categoriesResponse, productsResponse] = await Promise.all([
+      console.log('🏠 HomeScreen - Iniciando carga de datos...');
+      
+      // Primero probar la conectividad
+      try {
+        const testResponse = await apiService.testConnection();
+        console.log('✅ HomeScreen - Conexión con backend OK:', testResponse);
+      } catch (testError) {
+        console.error('❌ HomeScreen - Error de conectividad:', testError);
+        // Continuar con la carga normal aunque falle la prueba
+      }
+      
+      // Cargar categorías y productos con timeout individual
+      const categoriesPromise = Promise.race([
         apiService.getCategories(),
-        apiService.getProducts({ limit: 10 })
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout categorías')), 10000)
+        )
+      ]);
+      
+      const productsPromise = Promise.race([
+        apiService.getProducts({ limit: 10 }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout productos')), 10000)
+        )
+      ]);
+      
+      const [categoriesResponse, productsResponse] = await Promise.allSettled([
+        categoriesPromise,
+        productsPromise
       ]);
 
-      if (categoriesResponse.success) {
-        setCategories(categoriesResponse.data || []);
+      console.log('📊 HomeScreen - Respuesta categorías:', categoriesResponse);
+      console.log('📊 HomeScreen - Respuesta productos:', productsResponse);
+
+      // Manejar categorías
+      if (categoriesResponse.status === 'fulfilled' && categoriesResponse.value.success) {
+        setCategories(categoriesResponse.value.data || []);
+        console.log('✅ HomeScreen - Categorías cargadas:', categoriesResponse.value.data?.length || 0);
+      } else {
+        console.error('❌ HomeScreen - Error cargando categorías:', 
+          categoriesResponse.status === 'rejected' ? categoriesResponse.reason : categoriesResponse.value?.message);
+        setCategories([]); // Usar array vacío como fallback
       }
 
-      if (productsResponse.success) {
-        setFeaturedProducts(productsResponse.data || []);
+      // Manejar productos
+      if (productsResponse.status === 'fulfilled' && productsResponse.value.success) {
+        setFeaturedProducts(productsResponse.value.data || []);
+        console.log('✅ HomeScreen - Productos cargados:', productsResponse.value.data?.length || 0);
+      } else {
+        console.error('❌ HomeScreen - Error cargando productos:', 
+          productsResponse.status === 'rejected' ? productsResponse.reason : productsResponse.value?.message);
+        setFeaturedProducts([]); // Usar array vacío como fallback
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('❌ HomeScreen - Error loading data:', error);
+      // Asegurar que siempre se muestren arrays vacíos en caso de error
+      setCategories([]);
+      setFeaturedProducts([]);
     } finally {
       setLoading(false);
+      console.log('🏠 HomeScreen - Carga de datos completada');
     }
   };
 
@@ -115,6 +160,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       </View>
     </TouchableOpacity>
   );
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Cargando datos...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -254,6 +309,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+  },
+  loadingText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#6B7280',
   },
   header: {
     backgroundColor: '#FFFFFF',

@@ -31,7 +31,7 @@ export class DynamicAPIConfig {
     try {
       // Obtener el entorno seleccionado desde AsyncStorage
       const selectedEnvironmentId = await AsyncStorage.getItem('selected_backend_environment') || 'local';
-      const environment = getEnvironmentById(selectedEnvironmentId) || BACKEND_ENVIRONMENTS[0];
+      const environment = getEnvironmentById(selectedEnvironmentId) || getEnvironmentById('local') || BACKEND_ENVIRONMENTS[0];
       
       this.currentEnvironment = environment;
       this.currentConfig = {
@@ -45,8 +45,8 @@ export class DynamicAPIConfig {
       console.log('API Config initialized (DYNAMIC):', this.currentConfig);
     } catch (error) {
       console.error('Error initializing API config:', error);
-      // Fallback a configuración por defecto
-      const defaultEnv = BACKEND_ENVIRONMENTS[0];
+      // Fallback a configuración por defecto (local)
+      const defaultEnv = getEnvironmentById('local') || BACKEND_ENVIRONMENTS[0];
       this.currentEnvironment = defaultEnv;
       this.currentConfig = {
         baseUrl: defaultEnv.baseUrl,

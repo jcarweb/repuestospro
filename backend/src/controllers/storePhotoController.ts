@@ -270,14 +270,16 @@ export class StorePhotoController {
           success: false,
           message: 'Foto no encontrada'
         });
+        return;
       }
 
       // Verificar permisos
-      if (user.role !== 'admin' && photo?.uploadedBy.toString() !== user._id.toString()) {
+      if (user.role !== 'admin' && photo.uploadedBy.toString() !== user._id.toString()) {
         res.status(403).json({
           success: false,
           message: 'Acceso denegado'
         });
+        return;
       }
 
       // Extraer public_id de la URL de Cloudinary
@@ -302,7 +304,8 @@ export class StorePhotoController {
         }
       }
 
-      await StorePhoto.findByIdAndDelete(id);
+      const deletedPhoto = await StorePhoto.findByIdAndDelete(id);
+      console.log('🗑️ Foto eliminada de la base de datos:', deletedPhoto ? 'Sí' : 'No');
 
       res.json({
         success: true,
