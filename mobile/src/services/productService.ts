@@ -501,7 +501,12 @@ class ProductService {
 
   async getDashboardStats(): Promise<DashboardStatsResponse> {
     try {
-      const url = `${this.baseUrl}/admin/dashboard/stats`;
+      // Asegurar que la URL base esté inicializada
+      if (!this.baseUrl) {
+        await this.initializeBaseUrl();
+      }
+      
+      const url = `${this.baseUrl}/admin/dashboard-stats`;
       console.log('📊 Fetching dashboard stats from:', url);
 
       const response = await fetch(url, {

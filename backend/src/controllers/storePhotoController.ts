@@ -166,11 +166,15 @@ export class StorePhotoController {
    */
   static runEnrichment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
+      console.log('🔄 StorePhotoController.runEnrichment - Iniciando proceso de enriquecimiento');
       const { photoId } = req.body;
+      console.log('📸 photoId recibido:', photoId);
 
       if (photoId) {
+        console.log(`🎯 Procesando foto específica con ID: ${photoId}`);
         // Procesar una foto específica
         const success = await enrichmentWorker.processPhotoById(photoId);
+        console.log(`✅ Resultado del procesamiento: ${success}`);
         
         if (success) {
           res.json({
@@ -184,6 +188,7 @@ export class StorePhotoController {
           });
         }
       } else {
+        console.log('🔄 Procesando todas las fotos pendientes');
         // Procesar todas las fotos pendientes
         await (enrichmentWorker as any).processPendingPhotos();
         
@@ -193,7 +198,7 @@ export class StorePhotoController {
         });
       }
     } catch (error) {
-      console.error('Error ejecutando enriquecimiento:', error);
+      console.error('❌ Error ejecutando enriquecimiento:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
