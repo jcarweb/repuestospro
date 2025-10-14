@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchUsers, createUser, updateUser, deleteUser } from './userService';
 import type { User } from './userService';
 import { makeRequestWithRetry, requestSemaphore, randomDelay, makeCachedRequest, circuitBreaker } from '../utils/requestUtils';
-import { mockStores, mockStoreStats } from '../utils/mockData';
+// Eliminado: import de datos mock - solo usar datos reales
 
 export interface Store {
   _id: string;
@@ -366,16 +366,7 @@ class StoreService {
       console.log('✅ Store stats loaded successfully:', response);
       return response;
     } catch (error) {
-      console.error('❌ Error fetching store stats, usando datos mock:', error);
-      
-      // Si el circuit breaker está abierto o hay error, usar datos mock
-      if (circuitBreaker.getState() === 'OPEN' || error instanceof Error) {
-        console.log('🔄 Usando datos mock para estadísticas de tiendas');
-        return {
-          success: true,
-          data: mockStoreStats
-        };
-      }
+      console.error('❌ Error fetching store stats:', error);
       
       return {
         success: false,

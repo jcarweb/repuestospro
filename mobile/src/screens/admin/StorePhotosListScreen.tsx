@@ -17,6 +17,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { verifyBackendConfig, forceLocalBackend } from '../../utils/forceLocalBackend';
+import { autoFixBackendConfig } from '../../utils/backendConnectivity';
 
 interface StorePhoto {
   _id: string;
@@ -79,10 +82,24 @@ const StorePhotosListScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRunningEnrichment, setIsRunningEnrichment] = useState(false);
+  const [currentBackendUrl, setCurrentBackendUrl] = useState<string>('');
   
   const { user } = useAuth();
   const { showToast } = useToast();
   const insets = useSafeAreaInsets();
+
+  // Verificar configuración del backend al cargar la pantalla
+  useEffect(() => {
+    const initializeScreen = async () => {
+      await verifyBackendConfig();
+      // Obtener la URL actual del backend
+      const { getBaseURL } = await import('../../config/api');
+      const currentUrl = await getBaseURL();
+      setCurrentBackendUrl(currentUrl);
+      await loadData();
+    };
+    initializeScreen();
+  }, []);
 
   const loadPhotos = async () => {
     try {
@@ -92,9 +109,12 @@ const StorePhotosListScreen: React.FC = () => {
       const url = `${baseUrl}/admin/store-photos`;
       console.log('🌐 URL de fotos:', url);
       
+      // Obtener el token correcto del AsyncStorage
+      const token = await AsyncStorage.getItem('authToken');
+      
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${user?.token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -172,9 +192,12 @@ const StorePhotosListScreen: React.FC = () => {
       const url = `${baseUrl}/admin/store-photos/stats`;
       console.log('🌐 URL de estadísticas:', url);
       
+      // Obtener el token correcto del AsyncStorage
+      const token = await AsyncStorage.getItem('authToken');
+      
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${user?.token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -232,16 +255,21 @@ const StorePhotosListScreen: React.FC = () => {
     try {
       setIsRunningEnrichment(true);
       console.log('🔄 Iniciando proceso de enriquecimiento...');
+      console.log('👤 Usuario actual:', user ? `${user.email} (${user.role})` : 'null');
       
       const { getBaseURL } = await import('../../config/api');
       const baseUrl = await getBaseURL();
       const url = `${baseUrl}/admin/run-enrichment`;
       console.log('🌐 URL de enriquecimiento:', url);
       
+      // Obtener el token correcto del AsyncStorage
+      const token = await AsyncStorage.getItem('authToken');
+      console.log('🔐 Token para enriquecimiento:', token ? `${token.substring(0, 20)}...` : 'null');
+      
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${user?.token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -303,10 +331,13 @@ const StorePhotosListScreen: React.FC = () => {
               const url = `${baseUrl}/admin/store-photos/${photoId}`;
               console.log('🌐 URL de eliminación:', url);
               
+              // Obtener el token correcto del AsyncStorage
+              const token = await AsyncStorage.getItem('authToken');
+              
               const response = await fetch(url, {
                 method: 'DELETE',
                 headers: {
-                  'Authorization': `Bearer ${user?.token}`,
+                  'Authorization': `Bearer ${token}`,
                   'Content-Type': 'application/json'
                 }
               });
@@ -323,6 +354,11 @@ const StorePhotosListScreen: React.FC = () => {
               if (result.success) {
                 setPhotos(prevPhotos => prevPhotos.filter(photo => photo._id !== photoId));
                 showToast('Foto eliminada exitosamente', 'success');
+                
+                // Recargar datos para asegurar consistencia
+                setTimeout(() => {
+                  refreshData();
+                }, 500);
               } else {
                 throw new Error(result.message || 'Error eliminando foto');
               }
@@ -499,10 +535,25 @@ const StorePhotosListScreen: React.FC = () => {
         translucent={false}
       />
       <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top + 10 : insets.top + 20 }]}>
-        <Text style={styles.title}>Fotos de Locales</Text>
-        <Text style={styles.subtitle}>
-          Gestión y enriquecimiento de datos de locales
-        </Text>
+        <View style={styles.headerTop}>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Fotos de Locales</Text>
+            <Text style={styles.subtitle}>
+              Gestión y enriquecimiento de datos de locales
+            </Text>
+            {currentBackendUrl && (
+              <Text style={styles.debugText}>
+                Backend: {currentBackendUrl.includes('render.com') ? '🌐 Producción' : '🏠 Local'}
+              </Text>
+            )}
+          </View>
+          <TouchableOpacity 
+            style={styles.debugButton}
+            onPress={autoFixBackendConfig}
+          >
+            <Ionicons name="refresh" size={20} color="#007AFF" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {stats && (
@@ -593,6 +644,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  headerText: {
+    flex: 1,
+  },
+  debugButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#f0f8ff',
+    marginLeft: 10,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -602,6 +667,12 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: '#666',
+  },
+  debugText: {
+    fontSize: 12,
+    color: '#007AFF',
+    marginTop: 4,
+    fontWeight: '500',
   },
   statsContainer: {
     backgroundColor: '#fff',

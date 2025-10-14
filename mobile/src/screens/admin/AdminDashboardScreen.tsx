@@ -131,22 +131,30 @@ const AdminDashboardScreen: React.FC = () => {
         setStats(statsResponse.data);
         console.log('✅ Estadísticas del dashboard cargadas:', statsResponse.data);
       } else {
-        console.warn('⚠️ No se pudieron cargar las estadísticas del dashboard');
-        showToast('No se pudieron cargar las estadísticas', 'warning');
+        console.warn('⚠️ No se pudieron cargar las estadísticas del dashboard, mostrando valores en 0');
+        
+        // Mostrar estadísticas con valores en 0 cuando no hay datos reales
+        const emptyStats: DashboardStats = {
+          users: { total: 0, active: 0, newThisMonth: 0, byRole: [] },
+          products: { total: 0, active: 0, lowStock: 0, outOfStock: 0, byCategory: [] },
+          stores: { total: 0, active: 0, byCity: [] },
+          orders: { total: 0, pending: 0, completed: 0, pendingDeliveries: 0, recent: [] },
+          revenue: { total: 0, monthly: 0 }
+        };
+        setStats(emptyStats);
       }
     } catch (error) {
       console.error('Error cargando estadísticas:', error);
-      showToast('Error al cargar estadísticas del dashboard', 'error');
       
-      // Fallback a datos mock en caso de error
-      const mockStats: DashboardStats = {
+      // Mostrar estadísticas con valores en 0 cuando hay error de conexión
+      const emptyStats: DashboardStats = {
         users: { total: 0, active: 0, newThisMonth: 0, byRole: [] },
         products: { total: 0, active: 0, lowStock: 0, outOfStock: 0, byCategory: [] },
         stores: { total: 0, active: 0, byCity: [] },
         orders: { total: 0, pending: 0, completed: 0, pendingDeliveries: 0, recent: [] },
         revenue: { total: 0, monthly: 0 }
       };
-      setStats(mockStats);
+      setStats(emptyStats);
     } finally {
       setLoading(false);
     }
