@@ -1,325 +1,237 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IDelivery extends Document {
-  orderId: mongoose.Schema.Types.ObjectId;
-  storeId: mongoose.Schema.Types.ObjectId;
-  customerId: mongoose.Schema.Types.ObjectId;
-  
-  // Información del rider
-  riderId?: mongoose.Schema.Types.ObjectId; // Para riders internos
-  externalRiderId?: string; // Para riders externos
-  riderType: 'internal' | 'external';
-  riderName: string;
-  riderPhone: string;
-  riderVehicle?: {
-    type: 'motorcycle' | 'bicycle' | 'car';
-    plate?: string;
-    model?: string;
+  _id: string;
+  userId: string; // Referencia al usuario del sistema principal
+  personalInfo: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    documentType: 'cedula' | 'pasaporte' | 'licencia';
+    documentNumber: string;
+    birthDate: Date;
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      coordinates: {
+        lat: number;
+        lng: number;
+      };
+    };
   };
-  
-  // Estado del delivery
-  status: 'pending' | 'assigned' | 'accepted' | 'picked_up' | 'in_transit' | 'delivered' | 'cancelled' | 'failed';
-  
-  // Ubicaciones
-  pickupLocation: {
-    address: string;
-    coordinates: {
+  vehicleInfo: {
+    type: 'moto' | 'bicicleta' | 'carro' | 'camion';
+    brand: string;
+    model: string;
+    year: number;
+    plate: string;
+    color: string;
+    insurance: {
+      company: string;
+      policyNumber: string;
+      expiryDate: Date;
+    };
+  };
+  workInfo: {
+    zones: string[]; // Zonas donde puede trabajar
+    maxDistance: number; // Distancia máxima en km
+    workSchedule: {
+      monday: { start: string; end: string; active: boolean };
+      tuesday: { start: string; end: string; active: boolean };
+      wednesday: { start: string; end: string; active: boolean };
+      thursday: { start: string; end: string; active: boolean };
+      friday: { start: string; end: string; active: boolean };
+      saturday: { start: string; end: string; active: boolean };
+      sunday: { start: string; end: string; active: boolean };
+    };
+    availabilityStatus: 'available' | 'busy' | 'offline' | 'break';
+    currentLocation?: {
       lat: number;
       lng: number;
+      lastUpdate: Date;
     };
-    storeName: string;
   };
-  
-  deliveryLocation: {
-    address: string;
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
-    customerName: string;
-    customerPhone: string;
-    instructions?: string;
+  performance: {
+    rating: number; // 1-5 estrellas
+    totalDeliveries: number;
+    completedDeliveries: number;
+    cancelledDeliveries: number;
+    averageDeliveryTime: number; // en minutos
+    onTimeDeliveries: number;
+    totalEarnings: number;
+    totalBonuses: number;
+    joinDate: Date;
+    lastActiveDate: Date;
   };
-  
-  // Tiempos
-  estimatedPickupTime?: Date;
-  estimatedDeliveryTime?: Date;
-  actualPickupTime?: Date;
-  actualDeliveryTime?: Date;
-  
-  // Costos
-  deliveryFee: number;
-  riderPayment: number;
-  platformFee: number;
-  
-  // Calificaciones
-  customerRating?: number;
-  customerReview?: string;
-  riderRating?: number;
-  riderReview?: string;
-  
-  // Tracking
-  trackingCode: string;
-  trackingUrl?: string;
-  
-  // Notificaciones
-  notifications: {
-    customerSmsSent: boolean;
-    customerEmailSent: boolean;
-    riderSmsSent: boolean;
-    riderWhatsappSent: boolean;
+  wallet: {
+    walletId: string; // Referencia a la wallet del delivery
+    currentBalance: number;
+    totalEarned: number;
+    totalWithdrawn: number;
+    pendingWithdrawal: number;
   };
-  
-  // Configuración de asignación
-  assignmentConfig: {
-    priority: 'internal_first' | 'external_first' | 'mixed';
-    internalPercentage: number; // 0-100
-    maxWaitTime: number; // minutos
-    maxDistance: number; // km
+  documents: {
+    idFront: string; // URL de la imagen
+    idBack: string;
+    driverLicense: string;
+    vehicleRegistration: string;
+    insuranceDocument: string;
+    backgroundCheck: string;
+    status: 'pending' | 'approved' | 'rejected';
+    rejectionReason?: string;
   };
-  
-  // Historial de estados
-  statusHistory: Array<{
-    status: string;
-    timestamp: Date;
-    notes?: string;
-    updatedBy?: string;
-  }>;
-  
-  // Para riders externos
-  externalProvider?: {
-    name: string;
-    type: 'mototaxista' | 'courier' | 'independent';
-    agreementId?: string;
-    commissionRate: number;
-  };
-  
+  status: 'pending' | 'approved' | 'suspended' | 'rejected' | 'inactive' | 'assigned' | 'delivered' | 'cancelled';
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  
+  // Properties for delivery orders
+  pickupLocation?: {
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+  };
+  deliveryLocation?: {
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+  };
+  deliveryFee?: number;
+  riderId?: string;
+  riderType?: string;
+  riderName?: string;
+  riderPhone?: string;
+  riderVehicle?: {
+    type: string;
+    brand: string;
+    model: string;
+    plate: string;
+  };
+  trackingCode?: string;
+  trackingUrl?: string;
+  statusHistory?: Array<{
+    status: string;
+    timestamp: Date;
+    note?: string;
+  }>;
+  estimatedDeliveryTime?: Date;
+  actualDeliveryTime?: Date;
+  actualPickupTime?: Date;
+  riderPayment?: number;
 }
 
 const DeliverySchema = new Schema<IDelivery>({
-  orderId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Order',
-    required: true,
-    index: true
-  },
-  storeId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Store',
-    required: true,
-    index: true
-  },
-  customerId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    index: true
-  },
-  
-  // Información del rider
-  riderId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Rider',
-    index: true
-  },
-  externalRiderId: {
-    type: String,
-    index: true
-  },
-  riderType: {
-    type: String,
-    enum: ['internal', 'external'],
-    required: true,
-    index: true
-  },
-  riderName: {
-    type: String,
-    required: true
-  },
-  riderPhone: {
-    type: String,
-    required: true
-  },
-  riderVehicle: {
-    type: {
-      type: String,
-      enum: ['motorcycle', 'bicycle', 'car']
-    },
-    plate: String,
-    model: String
-  },
-  
-  // Estado del delivery
-  status: {
-    type: String,
-    enum: ['pending', 'assigned', 'accepted', 'picked_up', 'in_transit', 'delivered', 'cancelled', 'failed'],
-    default: 'pending',
-    index: true
-  },
-  
-  // Ubicaciones
-  pickupLocation: {
-    address: { type: String, required: true },
-    coordinates: {
-      lat: { type: Number, required: true },
-      lng: { type: Number, required: true }
-    },
-    storeName: { type: String, required: true }
-  },
-  
-  deliveryLocation: {
-    address: { type: String, required: true },
-    coordinates: {
-      lat: { type: Number, required: true },
-      lng: { type: Number, required: true }
-    },
-    customerName: { type: String, required: true },
-    customerPhone: { type: String, required: true },
-    instructions: String
-  },
-  
-  // Tiempos
-  estimatedPickupTime: Date,
-  estimatedDeliveryTime: Date,
-  actualPickupTime: Date,
-  actualDeliveryTime: Date,
-  
-  // Costos
-  deliveryFee: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  riderPayment: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  platformFee: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  
-  // Calificaciones
-  customerRating: {
-    type: Number,
-    min: 1,
-    max: 5
-  },
-  customerReview: String,
-  riderRating: {
-    type: Number,
-    min: 1,
-    max: 5
-  },
-  riderReview: String,
-  
-  // Tracking
-  trackingCode: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
-  },
-  trackingUrl: String,
-  
-  // Notificaciones
-  notifications: {
-    customerSmsSent: { type: Boolean, default: false },
-    customerEmailSent: { type: Boolean, default: false },
-    riderSmsSent: { type: Boolean, default: false },
-    riderWhatsappSent: { type: Boolean, default: false }
-  },
-  
-  // Configuración de asignación
-  assignmentConfig: {
-    priority: {
-      type: String,
-      enum: ['internal_first', 'external_first', 'mixed'],
-      default: 'internal_first'
-    },
-    internalPercentage: {
-      type: Number,
-      min: 0,
-      max: 100,
-      default: 80
-    },
-    maxWaitTime: {
-      type: Number,
-      min: 1,
-      default: 15 // 15 minutos
-    },
-    maxDistance: {
-      type: Number,
-      min: 1,
-      default: 10 // 10 km
+  userId: { type: String, required: true, unique: true },
+  personalInfo: {
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    email: { type: String, required: true },
+    phone: { type: String, required: true },
+    documentType: { type: String, enum: ['cedula', 'pasaporte', 'licencia'], required: true },
+    documentNumber: { type: String, required: true },
+    birthDate: { type: Date, required: true },
+    address: {
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      zipCode: { type: String, required: true },
+      coordinates: {
+        lat: { type: Number, required: true },
+        lng: { type: Number, required: true }
+      }
     }
   },
-  
-  // Historial de estados
-  statusHistory: [{
-    status: { type: String, required: true },
-    timestamp: { type: Date, default: Date.now },
-    notes: String,
-    updatedBy: String
-  }],
-  
-  // Para riders externos
-  externalProvider: {
-    name: String,
-    type: {
-      type: String,
-      enum: ['mototaxista', 'courier', 'independent']
-    },
-    agreementId: String,
-    commissionRate: {
-      type: Number,
-      min: 0,
-      max: 100
+  vehicleInfo: {
+    type: { type: String, enum: ['moto', 'bicicleta', 'carro', 'camion'], required: true },
+    brand: { type: String, required: true },
+    model: { type: String, required: true },
+    year: { type: Number, required: true },
+    plate: { type: String, required: true },
+    color: { type: String, required: true },
+    insurance: {
+      company: { type: String, required: true },
+      policyNumber: { type: String, required: true },
+      expiryDate: { type: Date, required: true }
     }
-  }
+  },
+  workInfo: {
+    zones: [{ type: String, required: true }],
+    maxDistance: { type: Number, default: 10 },
+    workSchedule: {
+      monday: { start: String, end: String, active: { type: Boolean, default: false } },
+      tuesday: { start: String, end: String, active: { type: Boolean, default: false } },
+      wednesday: { start: String, end: String, active: { type: Boolean, default: false } },
+      thursday: { start: String, end: String, active: { type: Boolean, default: false } },
+      friday: { start: String, end: String, active: { type: Boolean, default: false } },
+      saturday: { start: String, end: String, active: { type: Boolean, default: false } },
+      sunday: { start: String, end: String, active: { type: Boolean, default: false } }
+    },
+    availabilityStatus: { 
+      type: String, 
+      enum: ['available', 'busy', 'offline', 'break'], 
+      default: 'offline' 
+    },
+    currentLocation: {
+      lat: Number,
+      lng: Number,
+      lastUpdate: Date
+    }
+  },
+  performance: {
+    rating: { type: Number, default: 0, min: 0, max: 5 },
+    totalDeliveries: { type: Number, default: 0 },
+    completedDeliveries: { type: Number, default: 0 },
+    cancelledDeliveries: { type: Number, default: 0 },
+    averageDeliveryTime: { type: Number, default: 0 },
+    onTimeDeliveries: { type: Number, default: 0 },
+    totalEarnings: { type: Number, default: 0 },
+    totalBonuses: { type: Number, default: 0 },
+    joinDate: { type: Date, default: Date.now },
+    lastActiveDate: { type: Date, default: Date.now }
+  },
+  wallet: {
+    walletId: { type: String, required: true },
+    currentBalance: { type: Number, default: 0 },
+    totalEarned: { type: Number, default: 0 },
+    totalWithdrawn: { type: Number, default: 0 },
+    pendingWithdrawal: { type: Number, default: 0 }
+  },
+  documents: {
+    idFront: String,
+    idBack: String,
+    driverLicense: String,
+    vehicleRegistration: String,
+    insuranceDocument: String,
+    backgroundCheck: String,
+    status: { 
+      type: String, 
+      enum: ['pending', 'approved', 'rejected'], 
+      default: 'pending' 
+    },
+    rejectionReason: String
+  },
+  status: { 
+    type: String, 
+    enum: ['pending', 'approved', 'suspended', 'rejected', 'inactive'], 
+    default: 'pending' 
+  },
+  isActive: { type: Boolean, default: true }
 }, {
-  timestamps: true
+  timestamps: true,
+  collection: 'deliverys'
 });
 
-// Índices compuestos para consultas eficientes
-DeliverySchema.index({ status: 1, createdAt: -1 });
-DeliverySchema.index({ storeId: 1, status: 1 });
-DeliverySchema.index({ riderId: 1, status: 1 });
-// trackingCode ya tiene índice único automático por unique: true e index: true
-
-// Método para generar código de tracking único
-DeliverySchema.methods['generateTrackingCode'] = function(): string {
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substr(2, 5);
-  return `DEL-${timestamp}-${random}`.toUpperCase();
-};
-
-// Método para calcular distancia entre dos puntos
-DeliverySchema.methods['calculateDistance'] = function(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371; // Radio de la Tierra en km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLng/2) * Math.sin(dLng/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
-};
-
-// Método para actualizar estado
-DeliverySchema.methods['updateStatus'] = function(newStatus: string, notes?: string, updatedBy?: string) {
-  this['status'] = newStatus;
-  this['statusHistory'].push({
-    status: newStatus,
-    timestamp: new Date(),
-    notes,
-    updatedBy
-  });
-  return this['save']();
-};
+// Índices para optimizar consultas
+DeliverySchema.index({ userId: 1 });
+DeliverySchema.index({ 'workInfo.zones': 1 });
+DeliverySchema.index({ 'workInfo.availabilityStatus': 1 });
+DeliverySchema.index({ 'workInfo.currentLocation': '2dsphere' });
+DeliverySchema.index({ status: 1, isActive: 1 });
+DeliverySchema.index({ 'performance.rating': -1 });
 
 export default mongoose.model<IDelivery>('Delivery', DeliverySchema);

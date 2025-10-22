@@ -55,6 +55,7 @@ import AdminDeliveryScreen from '../screens/admin/AdminDeliveryScreen';
 import AdminSearchConfigScreen from '../screens/admin/AdminSearchConfigScreen';
 import StorePhotoCaptureScreen from '../screens/admin/StorePhotoCaptureScreen';
 import StorePhotosListScreen from '../screens/admin/StorePhotosListScreen';
+import PhotoDetailsScreen from '../screens/admin/PhotoDetailsScreen';
 
 // Store Manager Screens
 import StoreManagerDashboardScreen from '../screens/store-manager/StoreManagerDashboardScreen';
@@ -494,6 +495,15 @@ const AppNavigator = () => {
                     headerShown: true,
                     title: 'Fotos de Locales',
                     headerBackTitle: 'Dashboard'
+                  }} 
+                />
+                <Stack.Screen 
+                  name="PhotoDetails" 
+                  component={PhotoDetailsScreen} 
+                  options={{ 
+                    headerShown: true,
+                    title: 'Detalles de la Foto',
+                    headerBackTitle: 'Fotos'
                   }} 
                 />
                 <Stack.Screen 

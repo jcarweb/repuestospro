@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import https from 'https';
 import ExchangeRate from '../models/ExchangeRate';
-import { sendNotificationToAdmin } from './notificationService';
+// import { sendNotificationToAdmin } from './notificationService';
 
 export interface ExchangeRateResult {
   success: boolean;
@@ -148,7 +148,7 @@ export class ExchangeRateService {
     try {
       const message = `⚠️ Error al obtener tasa BCV\n\nURL: ${url}\nError: ${(error as Error).message}\nFecha: ${new Date().toLocaleString()}\n\nPor favor, configure la tasa manualmente en el panel de administración.`;
       
-      await sendNotificationToAdmin('Error en Tasa de Cambio BCV', message, 'error', 'high');
+        // await sendNotificationToAdmin('Error en Tasa de Cambio BCV', message, 'error', 'high');
 
       console.log('Notificación enviada al administrador');
     } catch (notificationError) {

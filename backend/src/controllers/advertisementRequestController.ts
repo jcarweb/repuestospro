@@ -3,7 +3,7 @@ import AdvertisementRequest from '../models/AdvertisementRequest';
 import Advertisement from '../models/Advertisement';
 import User from '../models/User';
 import Store from '../models/Store';
-import emailService from '../services/emailService';
+import { emailService } from '../services/emailService';
 
 interface AuthenticatedRequest extends Request {
   user?: any;
@@ -79,8 +79,7 @@ export class AdvertisementRequestController {
       try {
         await emailService.sendAdvertisementRequestConfirmation(
           req.user.email,
-          request.campaignName,
-          estimates
+          request._id.toString()
         );
       } catch (emailError) {
         console.error('Error enviando email de confirmación:', emailError);
@@ -270,8 +269,7 @@ export class AdvertisementRequestController {
         for (const admin of admins) {
           await emailService.sendAdvertisementRequestNotification(
             admin.email,
-            request.campaignName,
-            request.storeManager.toString()
+            request._id.toString()
           );
         }
       } catch (emailError) {
@@ -393,9 +391,7 @@ export class AdvertisementRequestController {
       try {
         await emailService.sendAdvertisementApproval(
           (request.storeManager as any).email,
-          request.campaignName,
-          (advertisement._id as any).toString(),
-          adminNotes
+          (advertisement._id as any).toString()
         );
       } catch (emailError) {
         console.error('Error enviando email de aprobación:', emailError);

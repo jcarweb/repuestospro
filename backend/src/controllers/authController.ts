@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import User, { IUser } from '../models/User';
 import Activity from '../models/Activity';
 import config from '../config/env';
-import emailService from '../services/emailService';
+import { emailService } from '../services/emailService';
 // import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { LoyaltyService } from '../services/loyaltyService';
@@ -508,7 +508,7 @@ export class AuthController {
       });
       // Enviar correo de bienvenida específico para cada rol después de la verificación
       try {
-        await emailService.sendWelcomeEmail(user, user.role);
+        await emailService.sendWelcomeEmail(user.email, user.name);
       } catch (emailError) {
         console.error('Error enviando email de bienvenida:', emailError);
         // No fallar la verificación si el email falla

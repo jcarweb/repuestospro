@@ -7,7 +7,7 @@ import Category from '../models/Category';
 import Promotion from '../models/Promotion';
 import { Quotation } from '../models/Quotation';
 import { SubscriptionService } from '../services/subscriptionService';
-import emailService from '../services/emailService';
+import { emailService } from '../services/emailService';
 import crypto from 'crypto';
 import { getRandomImages } from '../data/repuestoImages';
 import cloudinaryCleanupService from '../services/cloudinaryCleanupService';
@@ -906,7 +906,7 @@ const AdminController = {
       user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
       await user.save();
       // Enviar email con contraseña temporal y enlace para cambiar
-      await emailService.sendAdminPasswordResetEmail(user.email, user.name, tempPassword, resetToken);
+      await emailService.sendAdminPasswordResetEmail(user.email, resetToken);
       res.json({
         success: true,
         message: 'Contraseña reseteada exitosamente. Se ha enviado un email al usuario con la contraseña temporal.',
@@ -3012,10 +3012,10 @@ const AdminController = {
       console.log('🔄 Iniciando proceso de enriquecimiento...');
       
       // Importar el StorePhotoController para usar la implementación real
-      const { StorePhotoController } = await import('./storePhotoController');
+      const StorePhotoController = (await import('./storePhotoController'));
       
       // Usar la implementación real del enriquecimiento
-      await StorePhotoController.runEnrichment(req, res);
+      await (StorePhotoController as any).runEnrichment(req, res);
       
     } catch (error) {
       console.error('Error ejecutando enriquecimiento:', error);

@@ -1,90 +1,23 @@
 import { Request, Response, NextFunction } from 'express';
 
-export interface AuthRequest extends Request {
+interface AuthenticatedRequest extends Request {
   user?: any;
 }
 
-type UserRole = 'admin' | 'client' | 'delivery' | 'store_manager' | 'seller';
-
-// Middleware para verificar si el usuario es cliente
-export const clientMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const user = req.user;
-  
-  if (!user) {
-    return res.status(401).json({
-      success: false,
-      message: 'Acceso no autorizado'
-    });
-  }
-
-  if ((user.role as string) !== 'client') {
-    return res.status(403).json({
-      success: false,
-      message: 'Acceso denegado. Se requiere rol de cliente.'
-    });
-  }
-
-  return next();
-};
-
-// Middleware para verificar si el usuario es store manager
-export const storeManagerMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const user = req.user;
-  
-  if (!user) {
-    return res.status(401).json({
-      success: false,
-      message: 'Acceso no autorizado'
-    });
-  }
-
-  if ((user.role as string) !== 'store_manager') {
-    return res.status(403).json({
-      success: false,
-      message: 'Acceso denegado. Se requiere rol de store manager.'
-    });
-  }
-
-  return next();
-};
-
-// Middleware para verificar si el usuario es admin
-export const adminMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const user = req.user;
-  
-  if (!user) {
-    return res.status(401).json({
-      success: false,
-      message: 'Acceso no autorizado'
-    });
-  }
-
-  if ((user.role as string) !== 'admin') {
-    return res.status(403).json({
-      success: false,
-      message: 'Acceso denegado. Se requiere rol de administrador.'
-    });
-  }
-
-  return next();
-};
-
-// Middleware para verificar múltiples roles
-export const hasAnyRole = (roles: UserRole[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction) => {
-    const user = req.user;
-    
-    if (!user) {
+// Middleware para verificar roles específicos
+export const requireRole = (roles: string[]) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: 'Acceso no autorizado'
+        message: 'Token de autenticación requerido'
       });
     }
 
-    if (!roles.includes(user.role as UserRole)) {
+    if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: `Acceso denegado. Se requiere uno de los siguientes roles: ${roles.join(', ')}`
+        message: 'No tienes permisos para acceder a este recurso'
       });
     }
 
@@ -92,26 +25,22 @@ export const hasAnyRole = (roles: UserRole[]) => {
   };
 };
 
-// Middleware para verificar si el usuario es delivery
-export const deliveryMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const user = req.user;
-  
-  if (!user) {
-    return res.status(401).json({
-      success: false,
-      message: 'Acceso no autorizado'
-    });
-  }
+// Export roleMiddleware for backward compatibility
+export const roleMiddleware = requireRole;
 
-  if ((user.role as string) !== 'delivery') {
-    return res.status(403).json({
-      success: false,
-      message: 'Acceso denegado. Se requiere rol de delivery.'
-    });
-  }
+// Export hasAnyRole for backward compatibility
+export const hasAnyRole = requireRole;
 
-  return next();
-};
+// Export additional middleware for backward compatibility
+export const clientMiddleware = requireRole(['client']);
+export const storeManagerMiddleware = requireRole(['store_manager', 'admin']);
+export const adminMiddleware = requireRole(['admin']);
 
-// Middleware genérico para verificar roles (alias de hasAnyRole para compatibilidad)
-export const roleMiddleware = hasAnyRole;
+// Middleware para verificar si es admin
+export const requireAdmin = requireRole(['admin']);
+
+// Middleware para verificar si es store_manager o admin
+export const requireStoreManager = requireRole(['admin', 'store_manager']);
+
+// Middleware para verificar si es store_manager, seller o admin
+export const requireStoreAccess = requireRole(['admin', 'store_manager', 'seller']);

@@ -13,7 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -87,6 +87,7 @@ const StorePhotosListScreen: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
 
   // Verificar configuración del backend al cargar la pantalla
   useEffect(() => {
@@ -251,6 +252,130 @@ const StorePhotosListScreen: React.FC = () => {
     setIsRefreshing(false);
   };
 
+  const runEnrichmentForPhoto = async (photoId: string) => {
+    try {
+      console.log('🔄 Iniciando enriquecimiento para foto específica:', photoId);
+      
+      const { getBaseURL } = await import('../../config/api');
+      const baseUrl = await getBaseURL();
+      const url = `${baseUrl}/admin/run-enrichment`;
+      console.log('🌐 URL de enriquecimiento:', url);
+      
+      // Obtener el token correcto del AsyncStorage
+      const token = await AsyncStorage.getItem('authToken');
+      console.log('🔐 Token para enriquecimiento:', token ? `${token.substring(0, 20)}...` : 'null');
+      
+      const requestBody = { photoId };
+      console.log('📤 Enviando petición:', {
+        url,
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token ? token.substring(0, 20) + '...' : 'null'}`,
+          'Content-Type': 'application/json'
+        },
+        body: requestBody
+      });
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      console.log('📡 Respuesta del servidor:', response.status);
+      
+      if (!response.ok) {
+        // Intentar leer el cuerpo de la respuesta de error
+        try {
+          const errorBody = await response.text();
+          console.log('❌ Cuerpo de error del servidor:', errorBody);
+        } catch (e) {
+          console.log('❌ No se pudo leer el cuerpo de error');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('📊 Resultado del enriquecimiento individual:', result);
+      
+      if (result.success) {
+        showToast('Foto enriquecida exitosamente', 'success');
+        console.log('✅ Enriquecimiento exitoso, recargando datos...');
+        
+        // Recargar datos después de un breve delay
+        setTimeout(() => {
+          console.log('🔄 Recargando datos después del enriquecimiento...');
+          refreshData();
+        }, 2000);
+        
+        // Recargar datos nuevamente después de más tiempo para ver cambios
+        setTimeout(() => {
+          console.log('🔄 Segunda recarga de datos...');
+          refreshData();
+        }, 8000);
+      } else {
+        throw new Error(result.message || 'Error enriqueciendo foto');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error enriqueciendo foto individual:', error);
+      let errorMessage = 'Error enriqueciendo foto';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Network request failed')) {
+          errorMessage = 'Error de conexión. Verifica tu internet.';
+        } else if (error.message.includes('HTTP error')) {
+          errorMessage = 'Error del servidor. Intenta nuevamente.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      showToast(errorMessage, 'error');
+    }
+  };
+
+  const testEnrichmentWorker = async () => {
+    try {
+      console.log('🧪 Probando worker de enriquecimiento...');
+      
+      const { getBaseURL } = await import('../../config/api');
+      const baseUrl = await getBaseURL();
+      const url = `${baseUrl}/api/test-enrichment`;
+      console.log('🌐 URL de prueba:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('📡 Respuesta del servidor:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('📊 Resultado de prueba del worker:', result);
+      
+      if (result.success) {
+        showToast('Worker funcionando correctamente', 'success');
+        console.log('📈 Estadísticas del worker:', result.stats);
+      } else {
+        throw new Error(result.message || 'Error en worker');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error probando worker:', error);
+      showToast('Error probando worker', 'error');
+    }
+  };
+
   const runEnrichment = async () => {
     try {
       setIsRunningEnrichment(true);
@@ -289,7 +414,12 @@ const StorePhotosListScreen: React.FC = () => {
         // Recargar datos después de un breve delay
         setTimeout(() => {
           refreshData();
-        }, 1000);
+        }, 2000);
+        
+        // Recargar datos nuevamente después de más tiempo para ver cambios
+        setTimeout(() => {
+          refreshData();
+        }, 10000);
       } else {
         throw new Error(result.message || 'Error iniciando enriquecimiento');
       }
@@ -486,12 +616,22 @@ const StorePhotosListScreen: React.FC = () => {
           style={styles.actionButton}
           onPress={() => {
             // Navegar a detalles de la foto
-            // navigation.navigate('PhotoDetails', { photoId: item._id });
+            navigation.navigate('PhotoDetails', { photo: item });
           }}
         >
           <Ionicons name="eye" size={20} color="#007AFF" />
           <Text style={styles.actionButtonText}>Ver Detalles</Text>
         </TouchableOpacity>
+
+        {item.status === 'pending' && (
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: '#34C759' }]}
+            onPress={() => runEnrichmentForPhoto(item._id)}
+          >
+            <Ionicons name="refresh" size={20} color="#fff" />
+            <Text style={[styles.actionButtonText, { color: '#fff' }]}>Enriquecer</Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: '#FF3B30' }]}
@@ -547,12 +687,20 @@ const StorePhotosListScreen: React.FC = () => {
               </Text>
             )}
           </View>
-          <TouchableOpacity 
-            style={styles.debugButton}
-            onPress={autoFixBackendConfig}
-          >
-            <Ionicons name="refresh" size={20} color="#007AFF" />
-          </TouchableOpacity>
+          <View style={styles.debugButtons}>
+            <TouchableOpacity 
+              style={styles.debugButton}
+              onPress={autoFixBackendConfig}
+            >
+              <Ionicons name="refresh" size={20} color="#007AFF" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.debugButton, { backgroundColor: '#34C759' }]}
+              onPress={testEnrichmentWorker}
+            >
+              <Ionicons name="flask" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -652,11 +800,14 @@ const styles = StyleSheet.create({
   headerText: {
     flex: 1,
   },
+  debugButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   debugButton: {
     padding: 8,
     borderRadius: 8,
     backgroundColor: '#f0f8ff',
-    marginLeft: 10,
   },
   title: {
     fontSize: 24,

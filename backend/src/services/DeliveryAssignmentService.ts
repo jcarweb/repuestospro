@@ -272,8 +272,8 @@ export class DeliveryAssignmentService {
   ): Promise<RiderCandidate | null> {
     // Verificar distancia
     const distance = (rider as any).calculateDistanceFrom(
-      delivery.pickupLocation.coordinates.lat,
-      delivery.pickupLocation.coordinates.lng
+      delivery.pickupLocation?.coordinates.lat || 0,
+      delivery.pickupLocation?.coordinates.lng || 0
     );
 
     if (distance > config.maxDistance) {
@@ -282,8 +282,8 @@ export class DeliveryAssignmentService {
 
     // Verificar si está en zona de servicio
     if (!(rider as any).isInServiceArea(
-      delivery.pickupLocation.coordinates.lat,
-      delivery.pickupLocation.coordinates.lng
+      delivery.pickupLocation?.coordinates.lat || 0,
+      delivery.pickupLocation?.coordinates.lng || 0
     )) {
       return null;
     }
@@ -305,7 +305,7 @@ export class DeliveryAssignmentService {
     const availability = this.calculateAvailabilityScore(rider);
 
     // Calcular costo (comisión del rider)
-    const cost = (rider as any).calculateCommission(delivery.deliveryFee);
+    const cost = (rider as any).calculateCommission(delivery.deliveryFee || 0);
 
     // Calcular score final
     const score = this.calculateRiderScore({
@@ -415,8 +415,9 @@ export class DeliveryAssignmentService {
     if (rider.vehicle) {
       delivery.riderVehicle = {
         type: rider.vehicle.type,
-        ...(rider.vehicle.plate && { plate: rider.vehicle.plate }),
-        ...(rider.vehicle.model && { model: rider.vehicle.model })
+        brand: rider.vehicle.brand || '',
+        model: rider.vehicle.model || '',
+        plate: rider.vehicle.plate || ''
       };
     }
 
@@ -429,11 +430,13 @@ export class DeliveryAssignmentService {
     delivery.trackingUrl = `${process.env['FRONTEND_URL']}/tracking/${delivery.trackingCode}`;
 
     // Agregar al historial
+    if (!delivery.statusHistory) {
+      delivery.statusHistory = [];
+    }
     delivery.statusHistory.push({
       status: 'assigned',
       timestamp: new Date(),
-      notes: `Asignado a ${rider.firstName} ${rider.lastName} (${rider.type})`,
-      updatedBy: 'system'
+      note: `Asignado a ${rider.firstName} ${rider.lastName} (${rider.type})`
     });
 
     await delivery.save();
@@ -454,14 +457,14 @@ export class DeliveryAssignmentService {
       cancelledDeliveries: deliveries.filter(d => d.status === 'cancelled').length,
       totalEarnings: deliveries
         .filter(d => d.status === 'delivered')
-        .reduce((sum, d) => sum + d.riderPayment, 0),
+        .reduce((sum, d) => sum + (d.riderPayment || 0), 0),
       totalDistance: deliveries
         .filter(d => d.status === 'delivered')
         .reduce((sum, d) => sum + (DeliveryAssignmentService.calculateDistance(
-          d.pickupLocation.coordinates.lat,
-          d.pickupLocation.coordinates.lng,
-          d.deliveryLocation.coordinates.lat,
-          d.deliveryLocation.coordinates.lng
+          d.pickupLocation?.coordinates.lat || 0,
+          d.pickupLocation?.coordinates.lng || 0,
+          d.deliveryLocation?.coordinates.lat || 0,
+          d.deliveryLocation?.coordinates.lng || 0
         )), 0),
       onTimeDeliveries: 0, // Se calcula basado en tiempos estimados vs reales
       lateDeliveries: 0
@@ -552,11 +555,13 @@ export class DeliveryAssignmentService {
       delivery.status = 'assigned';
 
       // Agregar al historial
+      if (!delivery.statusHistory) {
+        delivery.statusHistory = [];
+      }
       delivery.statusHistory.push({
         status: 'assigned',
         timestamp: new Date(),
-        notes: `Reasignado a ${newRider.firstName} ${newRider.lastName}. Razón: ${reason}`,
-        updatedBy: 'system'
+        note: `Reasignado a ${newRider.firstName} ${newRider.lastName}. Razón: ${reason}`
       });
 
       await delivery.save();
