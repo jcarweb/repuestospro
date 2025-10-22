@@ -4,6 +4,7 @@ import Rider, { IRider } from '../models/Rider';
 import Order from '../models/Order';
 import Store from '../models/Store';
 import User from '../models/User';
+import DeliveryWallet from '../models/DeliveryWallet';
 import DeliveryAssignmentService, { AssignmentConfig } from '../services/DeliveryAssignmentService';
 interface AuthenticatedRequest extends Request {
   user?: any;
