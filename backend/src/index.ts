@@ -21,8 +21,16 @@ import { createTransactionRoutes } from './routes/transactionRoutes';
 import { createOrderRoutes } from './routes/orderRoutes';
 import { createSalesReportRoutes } from './routes/salesReportRoutes';
 import deliveryRoutes from './routes/deliveryRoutes';
+import deliveryWalletRoutes from './routes/deliveryWalletRoutes';
+import deliveryOrderRoutes from './routes/deliveryOrderRoutes';
+import adminDeliveryRoutes from './routes/adminDeliveryRoutes';
+import logisticFundRoutes from './routes/logisticFundRoutes';
+import adminLogisticRoutes from './routes/adminLogisticRoutes';
+import simulationRoutes from './routes/simulationRoutes';
 import riderRoutes from './routes/riderRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
+import walletRoutes from './routes/walletRoutes';
+import adminWalletRoutes from './routes/adminWalletRoutes';
 // Importar rutas
 import productRoutes from './routes/productRoutes';
 import authRoutes from './routes/authRoutes';
@@ -402,6 +410,27 @@ app.get('/api/test', (req, res) => {
   });
 });
 
+// Endpoint de prueba para enriquecimiento
+app.get('/api/test-enrichment', async (req, res) => {
+  try {
+    const { enrichmentWorker } = await import('./services/enrichmentWorker');
+    const stats = await enrichmentWorker.getStats();
+    
+    res.json({
+      success: true,
+      message: 'Worker de enriquecimiento funcionando',
+      stats: stats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error en worker de enriquecimiento',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+});
+
 // Rutas de la API
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authLimiter, authRoutes); // Aplicar rate limiting estricto a auth
@@ -490,8 +519,16 @@ app.use('/api/transactions', createTransactionRoutes());
 app.use('/api/orders', createOrderRoutes());
 app.use('/api/sales-reports', createSalesReportRoutes());
 app.use('/api/delivery', deliveryRoutes);
+app.use('/api/delivery/wallet', deliveryWalletRoutes);
+app.use('/api/delivery/orders', deliveryOrderRoutes);
+app.use('/api/admin/delivery', adminDeliveryRoutes);
+app.use('/api/logistic/fund', logisticFundRoutes);
+app.use('/api/admin/logistic', adminLogisticRoutes);
+app.use('/api/simulation', simulationRoutes);
 app.use('/api/riders', riderRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/wallet', walletRoutes);
+app.use('/api/admin/wallet', adminWalletRoutes);
 app.use('/api/crypto-auth', cryptoAuthRoutes);
 app.use('/api/store-photos', storePhotoRoutes);
 app.use('/api/masters', masterRoutes);

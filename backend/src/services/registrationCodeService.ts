@@ -1,7 +1,7 @@
 import RegistrationCode, { IRegistrationCode } from '../models/RegistrationCode';
 import User from '../models/User';
 import crypto from 'crypto';
-import emailService from './emailService';
+import { emailService } from './emailService';
 import mongoose from 'mongoose';
 
 export class RegistrationCodeService {
@@ -74,8 +74,7 @@ export class RegistrationCodeService {
         await emailService.sendRegistrationCodeEmail(
           email,
           code,
-          role,
-          expiresAt
+          role
         );
       } catch (emailError) {
         console.error('Error enviando email de código de registro:', emailError);
@@ -240,8 +239,7 @@ export class RegistrationCodeService {
         await emailService.sendRegistrationCodeEmail(
           registrationCode.email,
           registrationCode.code,
-          registrationCode.role,
-          registrationCode.expiresAt
+          registrationCode.role
         );
       } catch (emailError) {
         console.error('Error reenviando email:', emailError);

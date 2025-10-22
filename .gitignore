@@ -100,6 +100,48 @@ SECURITY_*.md
 *DIAGNOSTICO*.md
 *TROUBLESHOOTING*.md
 
+# Strategic business documentation (contains sensitive business strategies)
+COMMISSION_FLOW_DETAILED.md
+DELIVERY_FINANCIAL_STRATEGY.md
+DELIVERY_FLOW_DIAGRAMS.md
+DELIVERY_MODULE_DOCUMENTATION.md
+EDUCATION_STRATEGY_DETAILED.md
+FINANCIAL_SIMULATION.md
+LOGISTIC_SYSTEM_API_REFERENCE.md
+LOGISTIC_SYSTEM_ARCHITECTURE.md
+LOGISTIC_SYSTEM_COMPLETE_DOCUMENTATION.md
+LOGISTIC_SYSTEM_FLOW_DIAGRAMS.md
+NOTIFICATION_SYSTEM_DETAILED.md
+WALLET_RECHARGE_SYSTEM.md
+WALLET_STATES_DIAGRAMS.md
+WALLET_STRATEGY_COMPLETE.md
+WALLET_STRATEGY_EXECUTIVE_SUMMARY.md
+WALLET_SYSTEM_DOCUMENTATION.md
+
+# Files with hardcoded API keys, server URLs, and sensitive configuration
+backend/src/controllers/AdminController.ts
+mobile/src/screens/admin/AdminSettingsScreen.tsx
+mobile/src/screens/admin/AdminEditProfileScreen.tsx
+mobile/src/screens/store-manager/StoreManagerProfileScreen.tsx
+mobile/src/screens/delivery/DeliveryProfileScreen.tsx
+mobile/src/screens/admin/AdminProfileScreen.tsx
+mobile/src/screens/client/ProfileScreen.tsx
+src/pages/admin/MasterConfiguration.tsx
+src/pages/VerifyEmail.tsx
+src/pages/StoreSetup.tsx
+src/pages/StoreRegistration.tsx
+src/pages/StoreManagerInventoryAlerts.tsx
+src/pages/StoreManagerInventory.tsx
+src/components/StoreLocationMap.tsx
+src/components/FingerprintSetup.tsx
+src/components/AuthModal.tsx
+src/components/MobileFingerprintTest.tsx
+src/services/pushNotificationService.ts
+src/config/environment.ts
+vercel.json
+DEPLOYMENT_GUIDE.md
+AGENT.md
+
 # Debug and testing scripts (should not be in production)
 backend/src/scripts/debug*.js
 backend/src/scripts/test*.js

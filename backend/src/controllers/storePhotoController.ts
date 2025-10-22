@@ -167,19 +167,40 @@ export class StorePhotoController {
   static runEnrichment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       console.log('🔄 StorePhotoController.runEnrichment - Iniciando proceso de enriquecimiento');
+      console.log('📋 Body completo recibido:', req.body);
       const { photoId } = req.body;
       console.log('📸 photoId recibido:', photoId);
 
       if (photoId) {
         console.log(`🎯 Procesando foto específica con ID: ${photoId}`);
+        
+        // Verificar que la foto existe antes de procesar
+        const photo = await StorePhoto.findById(photoId);
+        if (!photo) {
+          console.log(`❌ Foto no encontrada con ID: ${photoId}`);
+          res.status(404).json({
+            success: false,
+            message: 'Foto no encontrada'
+          });
+          return;
+        }
+        
+        console.log(`📸 Foto encontrada: ${photo.name}, estado actual: ${photo.status}`);
+        
         // Procesar una foto específica
         const success = await enrichmentWorker.processPhotoById(photoId);
         console.log(`✅ Resultado del procesamiento: ${success}`);
         
         if (success) {
+          // Verificar el estado actualizado
+          const updatedPhoto = await StorePhoto.findById(photoId);
+          console.log(`📊 Estado actualizado: ${updatedPhoto?.status}`);
+          
           res.json({
             success: true,
-            message: 'Foto enriquecida exitosamente'
+            message: 'Foto enriquecida exitosamente',
+            photoId: photoId,
+            newStatus: updatedPhoto?.status
           });
         } else {
           res.status(400).json({

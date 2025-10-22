@@ -36,6 +36,10 @@ export interface IStore extends Document {
   subscription?: mongoose.Types.ObjectId; // Plan de suscripción actual
   subscriptionStatus: 'active' | 'inactive' | 'expired' | 'pending'; // Estado de la suscripción
   subscriptionExpiresAt?: Date; // Fecha de expiración de la suscripción
+  
+  // Sistema de Wallet
+  wallet?: mongoose.Types.ObjectId; // Referencia a la Wallet de la tienda
+  cashPaymentEnabled: boolean; // Controla si se puede cobrar en efectivo
   businessHours: {
     monday: { open: string; close: string; isOpen: boolean };
     tuesday: { open: string; close: string; isOpen: boolean };
@@ -192,6 +196,16 @@ const StoreSchema = new Schema<IStore>({
   },
   subscriptionExpiresAt: {
     type: Date
+  },
+  
+  // Sistema de Wallet
+  wallet: {
+    type: Schema.Types.ObjectId,
+    ref: 'StoreWallet'
+  },
+  cashPaymentEnabled: {
+    type: Boolean,
+    default: true
   },
   businessHours: {
     monday: {

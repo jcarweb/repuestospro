@@ -6,7 +6,7 @@ import Tax from '../models/Tax';
 import Store from '../models/Store';
 import exchangeRateService from '../services/exchangeRateService';
 import autoUpdateService from '../services/autoUpdateService';
-import { sendNotificationToAdmin } from '../services/notificationService';
+import { notificationService } from '../services/notificationService';
 
 interface AuthenticatedRequest extends Request {
   user?: any;

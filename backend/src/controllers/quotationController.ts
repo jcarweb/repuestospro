@@ -4,7 +4,7 @@ import { QuotationConfig } from '../models/QuotationConfig';
 import Product from '../models/Product';
 import User from '../models/User';
 import Store from '../models/Store';
-import EmailService from '../services/emailService';
+import { emailService } from '../services/emailService';
 import { WhatsAppService } from '../services/whatsappService';
 import { PDFService } from '../services/pdfService';
 
@@ -327,14 +327,10 @@ export class QuotationController {
           .replace('{validUntil}', quotation.validUntil.toLocaleDateString())
           .replace('{companyName}', config.pdfTemplate.companyInfo.name);
 
-        await EmailService.sendQuotationEmail(
+        await emailService.sendEmail(
           quotation.customer.email,
-          quotation.quotationNumber,
-          quotation.customer.name,
-          quotation.total,
-          quotation.currency,
-          quotation.validUntil,
-          pdfBuffer
+          `Cotización ${quotation.quotationNumber}`,
+          `Estimado ${quotation.customer.name}, adjunto encontrará la cotización solicitada.`
         );
       }
 
