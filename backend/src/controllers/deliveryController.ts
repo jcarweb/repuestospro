@@ -1,13 +1,18 @@
 import { Request, Response } from 'express';
-import Delivery from '../models/Delivery';
-import DeliveryWallet from '../models/DeliveryWallet';
-import DeliveryTransaction from '../models/DeliveryTransaction';
-import DeliverySettings from '../models/DeliverySettings';
-import DeliveryLog from '../models/DeliveryLog';
-import { notificationService } from '../services/notificationService';
-
-// Registrar nuevo delivery
-export const registerDelivery = async (req: Request, res: Response) => {
+import Delivery, { IDelivery } from '../models/Delivery';
+import Rider, { IRider } from '../models/Rider';
+import Order from '../models/Order';
+import Store from '../models/Store';
+import User from '../models/User';
+import DeliveryAssignmentService, { AssignmentConfig } from '../services/DeliveryAssignmentService';
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+export class DeliveryController {
+  /**
+   * Crear un nuevo delivery
+   */
+  static async createDelivery(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
     const {
       userId,
