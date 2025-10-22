@@ -6,7 +6,7 @@ import {
   updateAvailability,
   getAvailableDeliverys,
   updateDeliveryStatus
-} from '../controllers/deliveryController';
+} from '../controllers/DeliveryController';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { roleMiddleware } from '../middleware/roleMiddleware';
 
