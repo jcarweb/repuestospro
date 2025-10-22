@@ -269,7 +269,7 @@ export const getWalletStats = async (req: Request, res: Response) => {
 
     const wallet = await DeliveryWallet.findOne({ deliveryId });
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         currentBalance: wallet?.currentBalance || 0,
@@ -287,7 +287,7 @@ export const getWalletStats = async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error('Error getting wallet stats:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });

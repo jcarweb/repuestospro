@@ -401,7 +401,7 @@ export const getDeliveryOrders = async (req: Request, res: Response) => {
 
     const total = await DeliveryOrder.countDocuments(query);
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         orders,
@@ -415,7 +415,7 @@ export const getDeliveryOrders = async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error('Error getting delivery orders:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
     });
