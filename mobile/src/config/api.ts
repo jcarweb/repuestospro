@@ -4,10 +4,10 @@ import { BACKEND_ENVIRONMENTS, BackendEnvironment, getEnvironmentById } from './
 
 // Configuración base de la API optimizada para móvil
 const BASE_API_CONFIG = {
-  TIMEOUT: 8000, // 8 segundos optimizado para móvil
-  RETRY_ATTEMPTS: 2, // Reducido de 3 a 2 reintentos
-  RETRY_DELAY: 500, // Reducido a 500ms base
-  MAX_RETRY_DELAY: 2000, // Máximo 2 segundos entre reintentos
+  TIMEOUT: 15000, // 15 segundos para Render (servicios gratuitos tardan más)
+  RETRY_ATTEMPTS: 3, // 3 reintentos para servicios que se "duermen"
+  RETRY_DELAY: 1000, // 1 segundo base para dar tiempo al servidor
+  MAX_RETRY_DELAY: 5000, // Máximo 5 segundos entre reintentos
 };
 
 // Clase para manejar la configuración dinámica de la API
@@ -150,6 +150,22 @@ export class DynamicAPIConfig {
   async testCurrentEnvironment(): Promise<boolean> {
     if (!this.currentConfig) return false;
     
+    // Para servicios como Render que se "duermen", intentar despertar primero
+    if (this.currentEnvironment?.isProduction) {
+      try {
+        console.log('🔄 Intentando despertar servidor de Render...');
+        await this.requestWithRetry(
+          `${this.currentConfig.baseUrl}/`,
+          { method: 'GET' },
+          'wake up server'
+        );
+        // Esperar un poco para que el servidor se active completamente
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (error) {
+        console.log('⚠️ No se pudo despertar el servidor, continuando con health check...');
+      }
+    }
+    
     return await this.requestWithRetry(
       `${this.currentConfig.baseUrl}/health`,
       { method: 'GET' },
@@ -175,7 +191,7 @@ export class DynamicAPIConfig {
     attempt: number = 1
   ): Promise<Response> {
     const isProduction = this.currentEnvironment?.isProduction || false;
-    const timeout = isProduction ? 10000 : BASE_API_CONFIG.TIMEOUT; // 10s para producción, 8s para desarrollo
+    const timeout = isProduction ? 20000 : BASE_API_CONFIG.TIMEOUT; // 20s para producción (Render), 15s para desarrollo
     
     try {
       console.log(`🌐 ${operation} (intento ${attempt}/${BASE_API_CONFIG.RETRY_ATTEMPTS}): ${url}`);
@@ -213,7 +229,18 @@ export class DynamicAPIConfig {
         return this.requestWithRetry(url, options, operation, attempt + 1);
       }
       
-      throw error;
+      // Mejorar el manejo de errores para servicios como Render
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new Error(`Timeout: El servidor tardó más de ${timeout/1000} segundos en responder. Esto es común en servicios gratuitos como Render que se "duermen" cuando no hay tráfico.`);
+        } else if (error.message.includes('fetch')) {
+          throw new Error('Error de conexión: No se pudo conectar al servidor. Verifica tu conexión a internet.');
+        } else {
+          throw error;
+        }
+      } else {
+        throw new Error('Error desconocido de conexión');
+      }
     }
   }
 
@@ -233,6 +260,33 @@ export class DynamicAPIConfig {
   // Obtener la configuración actual sin inicializar
   getCurrentConfig(): NetworkConfig | null {
     return this.currentConfig;
+  }
+
+  // Método para verificar si el servidor está "despierto" antes de hacer peticiones importantes
+  async ensureServerIsAwake(): Promise<boolean> {
+    if (!this.currentConfig || !this.currentEnvironment?.isProduction) {
+      return true; // No es necesario para entornos locales
+    }
+
+    try {
+      console.log('🔄 Verificando si el servidor está despierto...');
+      const response = await this.requestWithRetry(
+        `${this.currentConfig.baseUrl}/`,
+        { method: 'GET' },
+        'server wake up check'
+      );
+      
+      if (response.ok) {
+        console.log('✅ Servidor está despierto y funcionando');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.log('⚠️ Servidor puede estar dormido, intentando despertar...');
+      // Esperar un poco más y reintentar
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      return false;
+    }
   }
 }
 
@@ -269,6 +323,11 @@ export const rescanAPINetwork = async (): Promise<NetworkConfig> => {
 // Función helper para verificar estado
 export const checkAPIStatus = async (): Promise<boolean> => {
   return await apiConfig.isAPIWorking();
+};
+
+// Función helper para asegurar que el servidor esté despierto
+export const ensureServerAwake = async (): Promise<boolean> => {
+  return await apiConfig.ensureServerIsAwake();
 };
 
 export default API_CONFIG;

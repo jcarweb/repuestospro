@@ -2,13 +2,17 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import { secureConfig } from '../config/secureConfig';
+
 export interface AuthRequest extends Request {
   user?: any;
 }
+
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    console.log('🔐 AuthMiddleware - Verificando autenticación para:', req.path);
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ AuthMiddleware - No hay token de autorización');
       return res.status(401).json({
         success: false,
         message: 'Token de autenticación requerido'
@@ -33,7 +37,6 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
         if (parts.length === 3) {
           const payload = JSON.parse(Buffer.from(parts[1] || '', 'base64').toString());
           decoded = payload;
-          
         } else {
           throw new Error('Token malformado');
         }
@@ -74,11 +77,13 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
       }
     }
     if (!user?.isActive) {
+      console.log('❌ AuthMiddleware - Usuario inactivo:', user?.email);
       return res.status(401).json({
         success: false,
         message: 'Usuario inactivo'
       });
     }
+    console.log('✅ AuthMiddleware - Usuario autenticado:', user?.email, 'Rol:', user?.role);
     // Agregar el usuario al request
     req.user = user;
     return next();
@@ -102,6 +107,7 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     });
   }
 };
+
 // Middleware para Administrador
 export const adminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -127,6 +133,7 @@ export const adminMiddleware = async (req: AuthRequest, res: Response, next: Nex
     });
   }
 };
+
 // Middleware para Cliente
 export const clientMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -152,6 +159,7 @@ export const clientMiddleware = async (req: AuthRequest, res: Response, next: Ne
     });
   }
 };
+
 // Middleware para Delivery
 export const deliveryMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -177,6 +185,7 @@ export const deliveryMiddleware = async (req: AuthRequest, res: Response, next: 
     });
   }
 };
+
 // Middleware para Gestor de Tienda
 export const storeManagerMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -202,6 +211,7 @@ export const storeManagerMiddleware = async (req: AuthRequest, res: Response, ne
     });
   }
 };
+
 // Middleware para Admin o Store Manager
 export const adminOrStoreManagerMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -227,6 +237,7 @@ export const adminOrStoreManagerMiddleware = async (req: AuthRequest, res: Respo
     });
   }
 };
+
 // Middleware para Admin o Delivery
 export const adminOrDeliveryMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -252,6 +263,7 @@ export const adminOrDeliveryMiddleware = async (req: AuthRequest, res: Response,
     });
   }
 };
+
 // Middleware para cualquier usuario autenticado (excepto clientes)
 export const staffMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -277,3 +289,6 @@ export const staffMiddleware = async (req: AuthRequest, res: Response, next: Nex
     });
   }
 };
+
+// Export authenticateToken for backward compatibility
+export { authMiddleware as authenticateToken };
