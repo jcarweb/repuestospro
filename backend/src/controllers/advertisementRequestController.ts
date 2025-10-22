@@ -79,7 +79,7 @@ export class AdvertisementRequestController {
       try {
         await emailService.sendAdvertisementRequestConfirmation(
           req.user.email,
-          request._id.toString()
+          (request._id as any).toString()
         );
       } catch (emailError) {
         console.error('Error enviando email de confirmación:', emailError);
@@ -269,7 +269,7 @@ export class AdvertisementRequestController {
         for (const admin of admins) {
           await emailService.sendAdvertisementRequestNotification(
             admin.email,
-            request._id.toString()
+            (request._id as any).toString()
           );
         }
       } catch (emailError) {
