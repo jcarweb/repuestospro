@@ -28,13 +28,13 @@ export interface IWalletTransaction extends Document {
 
 const WalletTransactionSchema = new Schema<IWalletTransaction>({
   storeId: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Store',
     required: true,
     index: true
   },
   walletId: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Wallet',
     required: true,
     index: true

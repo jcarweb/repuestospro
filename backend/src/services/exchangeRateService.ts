@@ -94,7 +94,8 @@ class ExchangeRateService {
       console.log(`✅ Tasa ${currency} obtenida del BCV: ${rate}`);
       return { success: true, rate };
     } catch (error) {
-      console.error(`❌ Error obteniendo tasa ${currency} del BCV:`, error.message);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      console.error(`❌ Error obteniendo tasa ${currency} del BCV:`, errorMessage);
       // Retornar tasas por defecto en caso de error
       const defaultRates = {
         USD: 216.37,
