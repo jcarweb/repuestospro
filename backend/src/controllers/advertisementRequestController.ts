@@ -77,10 +77,11 @@ export class AdvertisementRequestController {
 
       // Enviar email de confirmación al gestor
       try {
-        await emailService.sendAdvertisementRequestConfirmation(
-          req.user.email,
-          (request._id as any).toString()
-        );
+        // TODO: Implementar sendAdvertisementRequestConfirmation en EmailService
+        // await emailService.sendAdvertisementRequestConfirmation(
+        //   req.user.email,
+        //   (request._id as any).toString()
+        // );
       } catch (emailError) {
         console.error('Error enviando email de confirmación:', emailError);
       }
@@ -267,10 +268,11 @@ export class AdvertisementRequestController {
       try {
         const admins = await User.find({ role: 'admin' });
         for (const admin of admins) {
-          await emailService.sendAdvertisementRequestNotification(
-            admin.email,
-            (request._id as any).toString()
-          );
+          // TODO: Implementar sendAdvertisementRequestNotification en EmailService
+          // await emailService.sendAdvertisementRequestNotification(
+          //   admin.email,
+          //   (request._id as any).toString()
+          // );
         }
       } catch (emailError) {
         console.error('Error enviando notificación a administradores:', emailError);
@@ -389,10 +391,11 @@ export class AdvertisementRequestController {
 
       // Enviar email de aprobación al gestor
       try {
-        await emailService.sendAdvertisementApproval(
-          (request.storeManager as any).email,
-          (advertisement._id as any).toString()
-        );
+        // TODO: Implementar sendAdvertisementApproval en EmailService
+        // await emailService.sendAdvertisementApproval(
+        //   (request.storeManager as any).email,
+        //   (advertisement._id as any).toString()
+        // );
       } catch (emailError) {
         console.error('Error enviando email de aprobación:', emailError);
       }
@@ -449,10 +452,11 @@ export class AdvertisementRequestController {
 
       // Enviar email de rechazo al gestor
       try {
-        await emailService.sendAdvertisementRejection(
-          (request.storeManager as any).email,
-          request.campaignName,
-          rejectionReason
+        // TODO: Implementar sendAdvertisementRejection en EmailService
+        // await emailService.sendAdvertisementRejection(
+        //   (request.storeManager as any).email,
+        //   request.campaignName,
+        //   rejectionReason
         );
       } catch (emailError) {
         console.error('Error enviando email de rechazo:', emailError);

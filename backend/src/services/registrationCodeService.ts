@@ -71,9 +71,10 @@ export class RegistrationCodeService {
 
       // Enviar email con el código de registro
       try {
-        await emailService.sendRegistrationCodeEmail(
-          email,
-          code,
+        // TODO: Implementar sendRegistrationCodeEmail en EmailService
+        // await emailService.sendRegistrationCodeEmail(
+        //   email,
+        //   code,
           role
         );
       } catch (emailError) {

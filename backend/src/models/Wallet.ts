@@ -28,7 +28,7 @@ export interface IWallet extends Document {
 
 const WalletSchema = new Schema<IWallet>({
   storeId: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Store',
     required: true,
     unique: true,

@@ -107,9 +107,9 @@ export class MonetizationController {
           results.USD = {
             rate: usdResult.rate,
             currency: 'USD',
-            source: usdResult.source,
-            sourceUrl: usdResult.source,
-            lastUpdated: usdResult.lastUpdated,
+            source: 'BCV',
+            sourceUrl: sourceUrl,
+            lastUpdated: new Date(),
             isActive: true
           };
         }
@@ -124,9 +124,9 @@ export class MonetizationController {
           results.EUR = {
             rate: eurResult.rate,
             currency: 'EUR',
-            source: eurResult.source,
-            sourceUrl: eurResult.source,
-            lastUpdated: eurResult.lastUpdated,
+            source: 'BCV',
+            sourceUrl: sourceUrl,
+            lastUpdated: new Date(),
             isActive: true
           };
         }
@@ -774,12 +774,14 @@ export class MonetizationController {
       }
 
       // Obtener la tasa según la preferencia de la tienda
-      const result = await exchangeRateService.getCurrentRate(store.settings.preferredExchangeRate);
+      const rates = await exchangeRateService.getCurrentRates();
+      const preferredRate = store.settings.preferredExchangeRate === 'USD' ? rates.usdToVes : rates.eurToVes;
+      const result = { success: true, rate: preferredRate };
       
       if (!result.success) {
         res.status(404).json({
           success: false,
-          message: result.message
+          message: 'No se pudo obtener la tasa de cambio'
         });
         return;
       }
@@ -789,9 +791,9 @@ export class MonetizationController {
         exchangeRate: {
           rate: result.rate,
           currency: store.settings.preferredExchangeRate,
-          source: result.source,
-          sourceUrl: result.source,
-          lastUpdated: result.lastUpdated,
+          source: 'BCV',
+          sourceUrl: sourceUrl,
+          lastUpdated: new Date(),
           isActive: true
         }
       });

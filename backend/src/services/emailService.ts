@@ -11,13 +11,13 @@ class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
-    this.transporter = nodemailer.createTransporter({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
+    this.transporter = nodemailer.createTransport({
+      host: process.env['SMTP_HOST'] || 'smtp.gmail.com',
+      port: parseInt(process.env['SMTP_PORT'] || '587'),
       secure: false,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
+        user: process.env['SMTP_USER'],
+        pass: process.env['SMTP_PASS']
       }
     });
   }
@@ -30,7 +30,7 @@ class EmailService {
       const html = this.generateEmailTemplate(template, data);
       
       await this.transporter.sendMail({
-        from: process.env.SMTP_FROM || 'noreply@piezasyaya.com',
+        from: process.env['SMTP_FROM'] || 'noreply@piezasyaya.com',
         to,
         subject,
         html
@@ -143,3 +143,6 @@ export const sendEmail = async (emailData: EmailData) => {
   const emailService = new EmailService();
   return await emailService.sendEmail(emailData);
 };
+
+// Exportar instancia para compatibilidad
+export const emailService = new EmailService();

@@ -327,11 +327,12 @@ export class QuotationController {
           .replace('{validUntil}', quotation.validUntil.toLocaleDateString())
           .replace('{companyName}', config.pdfTemplate.companyInfo.name);
 
-        await emailService.sendEmail(
-          quotation.customer.email,
-          `Cotización ${quotation.quotationNumber}`,
-          `Estimado ${quotation.customer.name}, adjunto encontrará la cotización solicitada.`
-        );
+        await emailService.sendEmail({
+          to: quotation.customer.email,
+          subject: `Cotización ${quotation.quotationNumber}`,
+          template: 'quotation',
+          data: { quotation, customer: quotation.customer }
+        });
       }
 
       // Enviar por WhatsApp

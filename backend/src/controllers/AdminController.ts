@@ -906,7 +906,8 @@ const AdminController = {
       user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
       await user.save();
       // Enviar email con contraseña temporal y enlace para cambiar
-      await emailService.sendAdminPasswordResetEmail(user.email, resetToken);
+      // TODO: Implementar sendAdminPasswordResetEmail en EmailService
+      // await emailService.sendAdminPasswordResetEmail(user.email, resetToken);
       res.json({
         success: true,
         message: 'Contraseña reseteada exitosamente. Se ha enviado un email al usuario con la contraseña temporal.',

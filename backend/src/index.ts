@@ -253,7 +253,7 @@ app.get('/api/debug/stores', async (req, res) => {
   }
 });
 // Ruta temporal para crear tienda (SOLO PARA DESARROLLO)
-app.post('/api/stores', async (req, res) => {
+app.post('/api/stores', async (req, res): Promise<Response | void> => {
   try {
     console.log('🔧 Ruta temporal POST /api/stores - Datos recibidos:', req.body);
     
