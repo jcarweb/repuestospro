@@ -122,17 +122,12 @@ class NotificationService {
           //   notification.type,
           //   {
           //     ...notification.metadata,
-              storeName: store.name,
-              userName: user.name,
-              dashboardUrl: `${process.env['FRONTEND_URL'] || 'http://localhost:3000'}/wallet/${store._id}`
-            }
-          );
-
-          if (result.success) {
-            console.log(`Email enviado exitosamente a ${user.email}: ${result.messageId}`);
-          } else {
-            console.error(`Error enviando email a ${user.email}: ${result.error}`);
-          }
+          //     storeName: store.name,
+          //     userName: user.name,
+          //     dashboardUrl: `${process.env['FRONTEND_URL'] || 'http://localhost:3000'}/wallet/${store._id}`
+          //   }
+          // );
+          console.log(`Notificación de wallet para ${user.email}: ${notification.title}`);
         }
       }
     } catch (error) {

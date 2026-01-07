@@ -75,8 +75,8 @@ export class RegistrationCodeService {
         // await emailService.sendRegistrationCodeEmail(
         //   email,
         //   code,
-          role
-        );
+        //   role
+        // );
       } catch (emailError) {
         console.error('Error enviando email de código de registro:', emailError);
         // No fallar la creación del código si el email falla
@@ -237,11 +237,12 @@ export class RegistrationCodeService {
 
       // Enviar email nuevamente
       try {
-        await emailService.sendRegistrationCodeEmail(
-          registrationCode.email,
-          registrationCode.code,
-          registrationCode.role
-        );
+        // TODO: Implementar sendRegistrationCodeEmail en EmailService
+        // await emailService.sendRegistrationCodeEmail(
+        //   registrationCode.email,
+        //   registrationCode.code,
+        //   registrationCode.role
+        // );
       } catch (emailError) {
         console.error('Error reenviando email:', emailError);
         throw new Error('Error enviando email');
