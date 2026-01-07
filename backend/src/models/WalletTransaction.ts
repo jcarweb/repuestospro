@@ -1,80 +1,76 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IWalletTransaction extends Document {
-  walletId: mongoose.Types.ObjectId;
-  storeId: mongoose.Types.ObjectId;
-  orderId?: mongoose.Types.ObjectId; // Referencia a la orden si aplica
-  type: WalletTransactionType;
+  _id: string;
+  storeId: string;
+  walletId: string;
+  rechargeRequestId?: string;
+  type: 'deposit' | 'withdrawal' | 'payment' | 'refund' | 'commission';
   amount: number;
+  currency: 'USD' | 'VES';
+  description: string;
+  reference?: string;
+  status: 'pending' | 'completed' | 'failed' | 'cancelled';
   balanceBefore: number;
   balanceAfter: number;
-  currency: string;
-  status: WalletTransactionStatus;
-  description: string;
-  reference?: string; // Referencia externa (transferencia, pago, etc.)
+  exchangeRate?: number;
+  originalAmount?: number;
+  originalCurrency?: string;
   metadata?: {
     paymentMethod?: string;
-    paymentProvider?: string;
     transactionId?: string;
-    commissionRate?: number;
-    orderNumber?: string;
-    [key: string]: any;
+    fees?: number;
+    notes?: string;
   };
-  processedBy?: mongoose.Types.ObjectId; // Usuario que procesó la transacción
-  processedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type WalletTransactionType = 
-  | 'recharge'           // Recarga de saldo
-  | 'commission_deduction' // Descuento de comisión
-  | 'manual_adjustment'  // Ajuste manual
-  | 'refund'             // Reembolso
-  | 'withdrawal'         // Retiro
-  | 'bonus'              // Bono
-  | 'penalty'            // Penalización
-  | 'system_adjustment'; // Ajuste del sistema
-
-export type WalletTransactionStatus = 
-  | 'pending'    // Pendiente
-  | 'confirmed'  // Confirmado
-  | 'failed'     // Fallido
-  | 'cancelled'  // Cancelado
-  | 'reversed';  // Revertido
-
 const WalletTransactionSchema = new Schema<IWalletTransaction>({
-  walletId: {
-    type: Schema.Types.ObjectId,
-    ref: 'StoreWallet',
-    required: true
-  },
   storeId: {
     type: Schema.Types.ObjectId,
     ref: 'Store',
-    required: true
+    required: true,
+    index: true
   },
-  orderId: {
+  walletId: {
     type: Schema.Types.ObjectId,
-    ref: 'Order'
+    ref: 'Wallet',
+    required: true,
+    index: true
+  },
+  rechargeRequestId: {
+    type: Schema.Types.ObjectId,
+    ref: 'RechargeRequest',
+    sparse: true
   },
   type: {
     type: String,
+    enum: ['deposit', 'withdrawal', 'payment', 'refund', 'commission'],
     required: true,
-    enum: [
-      'recharge',
-      'commission_deduction',
-      'manual_adjustment',
-      'refund',
-      'withdrawal',
-      'bonus',
-      'penalty',
-      'system_adjustment'
-    ]
+    index: true
   },
   amount: {
     type: Number,
     required: true
+  },
+  currency: {
+    type: String,
+    enum: ['USD', 'VES'],
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  reference: {
+    type: String
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'completed', 'failed', 'cancelled'],
+    default: 'pending',
+    index: true
   },
   balanceBefore: {
     type: Number,
@@ -84,55 +80,31 @@ const WalletTransactionSchema = new Schema<IWalletTransaction>({
     type: Number,
     required: true
   },
-  currency: {
-    type: String,
-    default: 'USD',
-    enum: ['USD']
+  exchangeRate: {
+    type: Number,
+    min: 0
   },
-  status: {
-    type: String,
-    required: true,
-    enum: ['pending', 'confirmed', 'failed', 'cancelled', 'reversed'],
-    default: 'pending'
+  originalAmount: {
+    type: Number,
+    min: 0
   },
-  description: {
+  originalCurrency: {
     type: String,
-    required: true,
-    trim: true
-  },
-  reference: {
-    type: String,
-    trim: true
+    enum: ['USD', 'EUR', 'VES']
   },
   metadata: {
-    type: Schema.Types.Mixed,
-    default: {}
-  },
-  processedBy: {
-    type: Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  processedAt: {
-    type: Date
+    paymentMethod: String,
+    transactionId: String,
+    fees: Number,
+    notes: String
   }
 }, {
   timestamps: true
 });
 
 // Índices para optimizar consultas
-WalletTransactionSchema.index({ walletId: 1, createdAt: -1 });
-WalletTransactionSchema.index({ storeId: 1, createdAt: -1 });
-WalletTransactionSchema.index({ orderId: 1 });
-WalletTransactionSchema.index({ type: 1, status: 1 });
-WalletTransactionSchema.index({ status: 1, createdAt: -1 });
-WalletTransactionSchema.index({ reference: 1 });
-
-// Middleware pre-save para actualizar processedAt
-WalletTransactionSchema.pre('save', function(next) {
-  if (this.isModified('status') && this.status === 'confirmed' && !this.processedAt) {
-    this.processedAt = new Date();
-  }
-  next();
-});
+WalletTransactionSchema.index({ storeId: 1, type: 1, createdAt: -1 });
+WalletTransactionSchema.index({ walletId: 1, status: 1 });
+WalletTransactionSchema.index({ createdAt: -1 });
 
 export default mongoose.model<IWalletTransaction>('WalletTransaction', WalletTransactionSchema);

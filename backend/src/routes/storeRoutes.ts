@@ -9,6 +9,9 @@ router.get('/stores/:id', storeController.getStoreById);
 router.get('/stores/search/by-division', storeController.searchByAdministrativeDivision);
 router.get('/stores/managers', storeController.getStoreManagers);
 
+// Ruta para crear tienda (requiere autenticación)
+router.post('/stores', authMiddleware, storeController.createStore);
+
 // Rutas protegidas
 router.use(authMiddleware);
 
@@ -20,7 +23,6 @@ router.get('/user/stores', storeController.getUserStores);
 router.get('/user/stores/complete', storeController.getUserStoresComplete);
 // Endpoints de debug removidos por seguridad
 router.get('/stores/branches', storeController.getBranches);
-router.post('/stores', storeController.createStore);
 router.put('/stores/:id', storeController.updateStore);
 
 // Rutas para gestión de managers (solo owner)

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User, UserRole } from '../types';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL } from '../config/api';
 
 interface AuthContextType {
   user: User | null | undefined;

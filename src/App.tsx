@@ -83,6 +83,7 @@ import StoreManagerInventory from './pages/StoreManagerInventory';
 import StoreManagerInventoryAlerts from './pages/StoreManagerInventoryAlerts';
 import StoreManagerNotifications from './pages/StoreManagerNotifications';
 import StoreManagerSellers from './pages/StoreManagerSellers';
+import { WalletManagement } from './pages/WalletManagement';
 import StoreSetup from './pages/StoreSetup';
 import InventoryManagementPage from './pages/InventoryManagementPage';
 import InventoryReportsPage from './pages/InventoryReportsPage';
@@ -693,6 +694,13 @@ function AppContent() {
                <StoreManagerRoute>
                  <StoreManagerLayout>
                    <StoreManagerReviews />
+                 </StoreManagerLayout>
+               </StoreManagerRoute>
+             } />
+             <Route path="/wallet" element={
+               <StoreManagerRoute>
+                 <StoreManagerLayout>
+                   <WalletManagement />
                  </StoreManagerLayout>
                </StoreManagerRoute>
              } />

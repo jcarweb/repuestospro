@@ -6,9 +6,9 @@ import { offlineService } from './offlineService';
 class ApiService {
   private token: string | null = null;
   private requestCache: Map<string, { data: any; timestamp: number }> = new Map();
-  private readonly CACHE_DURATION = 5000; // 5 segundos de cache
+  private readonly CACHE_DURATION = 30000; // 30 segundos de cache para datos que no cambian frecuentemente
   private lastRequestTime: number = 0;
-  private readonly MIN_REQUEST_INTERVAL = 100; // 100ms entre peticiones
+  private readonly MIN_REQUEST_INTERVAL = 0; // Sin delay artificial - el navegador/OS maneja la concurrencia
 
   constructor() {
     console.log('🔧 apiService constructor - Inicializando...');
@@ -113,14 +113,18 @@ class ApiService {
       await this.refreshToken();
     }
     
-    // Aplicar delay entre peticiones para evitar rate limiting
-    const now = Date.now();
-    const timeSinceLastRequest = now - this.lastRequestTime;
-    if (timeSinceLastRequest < this.MIN_REQUEST_INTERVAL) {
-      const delay = this.MIN_REQUEST_INTERVAL - timeSinceLastRequest;
-      await new Promise(resolve => setTimeout(resolve, delay));
+    // Solo aplicar delay si es necesario (evitar rate limiting agresivo)
+    // Para login y operaciones críticas, no aplicar delay
+    const isCriticalOperation = endpoint.includes('/auth/login') || endpoint.includes('/auth/register');
+    if (!isCriticalOperation && this.MIN_REQUEST_INTERVAL > 0) {
+      const now = Date.now();
+      const timeSinceLastRequest = now - this.lastRequestTime;
+      if (timeSinceLastRequest < this.MIN_REQUEST_INTERVAL) {
+        const delay = this.MIN_REQUEST_INTERVAL - timeSinceLastRequest;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+      this.lastRequestTime = Date.now();
     }
-    this.lastRequestTime = Date.now();
     
     const baseUrl = await getBaseURL();
     const url = `${baseUrl}${endpoint}`;
@@ -147,11 +151,18 @@ class ApiService {
     attempt: number = 1
   ): Promise<T> {
     try {
-      console.log(`🌐 ${operation} (intento ${attempt}/${API_CONFIG.RETRY_ATTEMPTS}): ${url}`);
+      // Logging reducido para mejor rendimiento (solo en desarrollo)
+      if (__DEV__) {
+        console.log(`🌐 ${operation} (intento ${attempt}/${API_CONFIG.RETRY_ATTEMPTS}): ${url}`);
+      }
       
-      // Timeout optimizado para móvil
+      // Timeout optimizado para móvil - reducido para mejor UX
       const isProduction = url.includes('onrender.com');
-      const timeout = isProduction ? 10000 : 8000; // 10s para Render, 8s para local
+      const isLoginOperation = operation.includes('login') || url.includes('/auth/login');
+      // Login tiene timeout más corto para fallar rápido si hay problemas
+      const timeout = isLoginOperation 
+        ? (isProduction ? 5000 : 4000)  // 5s/4s para login
+        : (isProduction ? 6000 : 5000); // 6s/5s para otras operaciones
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -166,28 +177,43 @@ class ApiService {
       const data = await response.json();
 
       if (!response.ok) {
-        // Si es un error del servidor (5xx), reintentar
-        if (response.status >= 500 && attempt < API_CONFIG.RETRY_ATTEMPTS) {
+        // Para errores 4xx (cliente), no reintentar - fallar rápido
+        if (response.status >= 400 && response.status < 500) {
+          throw new Error(data.message || `Error ${response.status}: ${response.statusText}`);
+        }
+        // Si es un error del servidor (5xx), reintentar solo si no es login
+        if (response.status >= 500 && attempt < API_CONFIG.RETRY_ATTEMPTS && !isLoginOperation) {
           throw new Error(`Server error: ${response.status}`);
         }
+        // Para login, no reintentar errores del servidor - fallar rápido
         throw new Error(data.message || `Error ${response.status}: ${response.statusText}`);
       }
 
       return data;
     } catch (error) {
-      console.error(`API Error (intento ${attempt}):`, error);
+      if (__DEV__) {
+        console.error(`API Error (intento ${attempt}):`, error);
+      }
+      
+      const isLoginOperation = operation.includes('login') || url.includes('/auth/login');
+      // Para login, solo 1 reintento máximo
+      const maxAttempts = isLoginOperation ? 1 : API_CONFIG.RETRY_ATTEMPTS;
       
       // Lógica de reintentos
-      if (attempt < API_CONFIG.RETRY_ATTEMPTS) {
+      if (attempt < maxAttempts) {
         const shouldRetry = this.shouldRetry(error);
         
         if (shouldRetry) {
+          // Delay más corto para login
+          const baseDelay = isLoginOperation ? 300 : API_CONFIG.RETRY_DELAY;
           const delay = Math.min(
-            API_CONFIG.RETRY_DELAY * Math.pow(2, attempt - 1),
-            API_CONFIG.MAX_RETRY_DELAY
+            baseDelay * Math.pow(2, attempt - 1),
+            isLoginOperation ? 1000 : API_CONFIG.MAX_RETRY_DELAY
           );
           
-          console.log(`⏳ Reintentando ${operation} en ${delay}ms... (intento ${attempt + 1})`);
+          if (__DEV__) {
+            console.log(`⏳ Reintentando ${operation} en ${delay}ms... (intento ${attempt + 1})`);
+          }
           await new Promise(resolve => setTimeout(resolve, delay));
           
           return this.requestWithRetry(url, config, operation, attempt + 1);
@@ -197,13 +223,13 @@ class ApiService {
       // Si es un error de timeout o conexión, devolver un error más específico
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
-          throw new Error('Timeout: El servidor no respondió en el tiempo esperado. Intenta nuevamente.');
+          throw new Error('Timeout: El servidor no respondió a tiempo. Verifica tu conexión.');
         }
         if (error.message.includes('Network request failed')) {
-          throw new Error('Error de conexión: No se pudo conectar al servidor. Verifica tu conexión a internet.');
+          throw new Error('Error de conexión: Verifica tu conexión a internet.');
         }
         if (error.message.includes('Server error')) {
-          throw new Error('El servidor está experimentando problemas. Intenta nuevamente en unos momentos.');
+          throw new Error('El servidor está experimentando problemas. Intenta nuevamente.');
         }
       }
       
@@ -227,6 +253,7 @@ class ApiService {
 
   // Auth endpoints
   async login(credentials: LoginRequest): Promise<AuthResponse> {
+    // Login no debe usar cache - siempre hacer petición fresca
     const response = await this.request<AuthResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
@@ -234,6 +261,8 @@ class ApiService {
 
     if (response.success && response.data?.token) {
       await this.saveToken(response.data.token);
+      // Limpiar cache después de login para asegurar datos frescos
+      this.clearCache();
     }
 
     return response;
