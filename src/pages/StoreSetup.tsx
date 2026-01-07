@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL } from '../config/api';
 import { useNavigate } from 'react-router-dom';
 import { 
   Store, 
@@ -53,6 +53,11 @@ const StoreSetup: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [checkingStore, setCheckingStore] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
+  const [administrativeDivisions, setAdministrativeDivisions] = useState({
+    stateRef: '',
+    municipalityRef: '',
+    parishRef: ''
+  });
   const [formData, setFormData] = useState<StoreSetupData>({
     name: '',
     description: '',
@@ -84,6 +89,72 @@ const StoreSetup: React.FC = () => {
     }
   });
 
+  // Obtener divisiones administrativas por defecto
+  useEffect(() => {
+    const getDefaultAdministrativeDivisions = async () => {
+      try {
+        // Obtener estados
+        const statesResponse = await fetch(`${API_BASE_URL}/api/locations/states`);
+        const statesData = await statesResponse.json();
+        
+        if (statesData.success && statesData.data.length > 0) {
+          // Buscar Distrito Capital
+          const distritoCapital = statesData.data.find((state: any) => 
+            state.name.toLowerCase().includes('distrito') || 
+            state.name.toLowerCase().includes('capital')
+          );
+          
+          if (distritoCapital) {
+            setAdministrativeDivisions(prev => ({
+              ...prev,
+              stateRef: distritoCapital._id
+            }));
+            
+            // Obtener municipios del Distrito Capital
+            const municipalitiesResponse = await fetch(`${API_BASE_URL}/api/locations/states/${distritoCapital._id}/municipalities`);
+            const municipalitiesData = await municipalitiesResponse.json();
+            
+            if (municipalitiesData.success && municipalitiesData.data.length > 0) {
+              // Buscar Libertador
+              const libertador = municipalitiesData.data.find((municipality: any) => 
+                municipality.name.toLowerCase().includes('libertador')
+              );
+              
+              if (libertador) {
+                setAdministrativeDivisions(prev => ({
+                  ...prev,
+                  municipalityRef: libertador._id
+                }));
+                
+                // Obtener parroquias de Libertador
+                const parishesResponse = await fetch(`${API_BASE_URL}/api/locations/municipalities/${libertador._id}/parishes`);
+                const parishesData = await parishesResponse.json();
+                
+                if (parishesData.success && parishesData.data.length > 0) {
+                  // Usar la primera parroquia como defecto
+                  setAdministrativeDivisions(prev => ({
+                    ...prev,
+                    parishRef: parishesData.data[0]._id
+                  }));
+                }
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error obteniendo divisiones administrativas:', error);
+        // Usar valores por defecto si hay error
+        setAdministrativeDivisions({
+          stateRef: '507f1f77bcf86cd799439011',
+          municipalityRef: '507f1f77bcf86cd799439012',
+          parishRef: '507f1f77bcf86cd799439013'
+        });
+      }
+    };
+
+    getDefaultAdministrativeDivisions();
+  }, []);
+
   // Verificar si el usuario ya tiene una tienda
   useEffect(() => {
     const checkExistingStore = async () => {
@@ -93,35 +164,42 @@ const StoreSetup: React.FC = () => {
       }
 
       try {
-        console.log('Verificando si el usuario ya tiene tiendas...');
+        console.log('🔍 Verificando si el usuario ya tiene tiendas...');
+        console.log('🔍 User ID:', user.id);
+        console.log('🔍 Token disponible:', !!token);
+        console.log('🔍 API_BASE_URL:', API_BASE_URL);
         
-        // Timeout para evitar esperar indefinidamente
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Timeout')), 10000);
-        });
-
-        const fetchPromise = fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"""/api/user/stores', {
+        const url = `${API_BASE_URL}/api/stores/user/stores`;
+        console.log('🔍 URL completa:', url);
+        
+        const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
 
-        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
+        console.log('🔍 Response status:', response.status);
+        console.log('🔍 Response ok:', response.ok);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
-        console.log('Respuesta de verificación de tiendas:', data);
+        console.log('🔍 Respuesta de verificación de tiendas:', data);
         
         if (data.success && data.data && data.data.length > 0) {
           // El usuario ya tiene una tienda, redirigir al dashboard
-          console.log(`Usuario ya tiene ${data.data.length} tienda(s), redirigiendo al dashboard`);
+          console.log(`✅ Usuario ya tiene ${data.data.length} tienda(s), redirigiendo al dashboard`);
           navigate('/store-manager/dashboard', { replace: true });
           return;
         } else {
-          console.log('Usuario no tiene tiendas, mostrando formulario de setup');
+          console.log('✅ Usuario no tiene tiendas, mostrando formulario de setup');
         }
       } catch (error) {
-        console.error('Error verificando tienda existente:', error);
+        console.error('❌ Error verificando tienda existente:', error);
+        console.log('⚠️ Error en verificación, mostrando formulario de setup');
         // En caso de error, mostrar el formulario de setup
-        console.log('Error en verificación, mostrando formulario de setup');
       } finally {
         setCheckingStore(false);
       }
@@ -181,12 +259,29 @@ const StoreSetup: React.FC = () => {
 
     setLoading(true);
     try {
+      // Preparar datos en el formato que espera el backend
       const storeData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        country: formData.country,
+        phone: formData.phone,
+        email: formData.email,
+        website: formData.website,
+        logo: formData.logo,
+        banner: formData.banner,
         coordinates: {
           latitude: Number(formData.latitude) || 0,
           longitude: Number(formData.longitude) || 0
         },
+        // Campos requeridos por el backend - usar IDs reales obtenidos
+        stateRef: administrativeDivisions.stateRef,
+        municipalityRef: administrativeDivisions.municipalityRef,
+        parishRef: administrativeDivisions.parishRef,
+        businessHours: formData.businessHours,
         settings: {
           currency: formData.currency,
           taxRate: Number(formData.taxRate),
@@ -196,7 +291,9 @@ const StoreSetup: React.FC = () => {
         }
       };
 
-      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"/api/stores', {
+      console.log('Enviando datos de tienda:', storeData);
+
+      const response = await fetch(`${API_BASE_URL}/api/stores`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -205,7 +302,10 @@ const StoreSetup: React.FC = () => {
         body: JSON.stringify(storeData)
       });
 
+      console.log('Respuesta del servidor:', response.status, response.statusText);
+
       const data = await response.json();
+      console.log('Datos de respuesta:', data);
       
       if (data.success) {
         alert('¡Tienda creada exitosamente! Ahora puedes comenzar a gestionar tus productos.');
@@ -428,10 +528,38 @@ const StoreSetup: React.FC = () => {
               <h2 className="text-2xl font-semibold text-gray-900 mb-6">Ubicación de la Tienda</h2>
               
               <div className="bg-blue-50 p-4 rounded-md">
-                <p className="text-sm text-blue-800">
+                <div className="text-sm text-blue-800">
                   <strong>Nota:</strong> Las coordenadas son importantes para que los clientes puedan encontrar tu tienda en el mapa. 
                   Puedes obtenerlas desde Google Maps haciendo clic derecho en tu ubicación.
-                </p>
+                  
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (navigator.geolocation) {
+                          navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                              setFormData(prev => ({
+                                ...prev,
+                                latitude: position.coords.latitude.toString(),
+                                longitude: position.coords.longitude.toString()
+                              }));
+                            },
+                            (error) => {
+                              console.error('Error obteniendo ubicación:', error);
+                              alert('No se pudo obtener tu ubicación. Por favor, ingresa las coordenadas manualmente.');
+                            }
+                          );
+                        } else {
+                          alert('Tu navegador no soporta geolocalización. Por favor, ingresa las coordenadas manualmente.');
+                        }
+                      }}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                    >
+                      📍 Obtener mi ubicación actual
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

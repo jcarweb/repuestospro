@@ -31,6 +31,8 @@ import riderRoutes from './routes/riderRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 import walletRoutes from './routes/walletRoutes';
 import adminWalletRoutes from './routes/adminWalletRoutes';
+import rechargeRoutes from './routes/rechargeRoutes';
+import { WebhookController } from './controllers/webhookController';
 // Importar rutas
 import productRoutes from './routes/productRoutes';
 import authRoutes from './routes/authRoutes';
@@ -105,7 +107,7 @@ const profileLimiter = rateLimit({
 // Rate limiter estricto para autenticación
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 10, // Solo 10 intentos de login por 15 minutos
+  max: 100, // Aumentado para desarrollo - 100 intentos de login por 15 minutos
   message: {
     success: false,
     message: 'Demasiados intentos de autenticación, intenta de nuevo más tarde.'
@@ -250,6 +252,123 @@ app.get('/api/debug/stores', async (req, res) => {
     });
   }
 });
+// Ruta temporal para crear tienda (SOLO PARA DESARROLLO)
+app.post('/api/stores', async (req, res) => {
+  try {
+    console.log('🔧 Ruta temporal POST /api/stores - Datos recibidos:', req.body);
+    
+    // Verificar autenticación básica
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        message: 'Token de autenticación requerido'
+      });
+    }
+
+    const token = authHeader.substring(7);
+    console.log('🔧 Token recibido:', token.substring(0, 20) + '...');
+
+    // Decodificar el token para obtener el userId
+    let userId;
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const payload = JSON.parse(Buffer.from(parts[1] || '', 'base64').toString());
+        userId = payload.userId;
+        console.log('🔧 UserId extraído del token:', userId);
+      } else {
+        throw new Error('Token malformado');
+      }
+    } catch (error) {
+      console.error('❌ Error decodificando token:', error);
+      return res.status(401).json({
+        success: false,
+        message: 'Token inválido'
+      });
+    }
+
+    // Importar modelos necesarios
+    const Store = require('./models/Store').default;
+    const User = require('./models/User').default;
+    const State = require('./models/State').default;
+    const Municipality = require('./models/Municipality').default;
+    const Parish = require('./models/Parish').default;
+
+    // Obtener divisiones administrativas por defecto
+    const defaultState = await State.findOne({ name: { $regex: /distrito|capital/i } });
+    const defaultMunicipality = await Municipality.findOne({ name: { $regex: /libertador/i } });
+    const defaultParish = await Parish.findOne();
+
+    console.log('🔧 Divisiones administrativas encontradas:');
+    console.log('🔧 Estado:', defaultState?._id);
+    console.log('🔧 Municipio:', defaultMunicipality?._id);
+    console.log('🔧 Parroquia:', defaultParish?._id);
+
+    // Crear la tienda real en la base de datos
+    const storeData = {
+      name: req.body.name || 'Tienda Temporal',
+      description: req.body.description || '',
+      address: req.body.address || '',
+      city: req.body.city || '',
+      state: req.body.state || '',
+      zipCode: req.body.zipCode || '',
+      country: req.body.country || 'Venezuela',
+      phone: req.body.phone || '',
+      email: req.body.email || '',
+      website: req.body.website || '',
+      coordinates: req.body.coordinates || { latitude: 0, longitude: 0 },
+      stateRef: defaultState?._id,
+      municipalityRef: defaultMunicipality?._id,
+      parishRef: defaultParish?._id,
+      businessHours: req.body.businessHours || {
+        monday: { open: '08:00', close: '18:00', isOpen: true },
+        tuesday: { open: '08:00', close: '18:00', isOpen: true },
+        wednesday: { open: '08:00', close: '18:00', isOpen: true },
+        thursday: { open: '08:00', close: '18:00', isOpen: true },
+        friday: { open: '08:00', close: '18:00', isOpen: true },
+        saturday: { open: '08:00', close: '14:00', isOpen: true },
+        sunday: { open: '08:00', close: '14:00', isOpen: false }
+      },
+      settings: req.body.settings || {
+        currency: 'USD',
+        taxRate: 16,
+        deliveryRadius: 10,
+        minimumOrder: 0,
+        autoAcceptOrders: false
+      },
+      owner: userId,
+      managers: [userId],
+      isActive: true,
+      isMainStore: false
+    };
+
+    console.log('🔧 Creando tienda en la base de datos...');
+    const newStore = new Store(storeData);
+    const savedStore = await newStore.save();
+    console.log('🔧 Tienda guardada con ID:', savedStore._id);
+
+    // Actualizar el usuario para incluir la tienda
+    await User.findByIdAndUpdate(userId, {
+      $push: { stores: savedStore._id }
+    });
+    console.log('🔧 Usuario actualizado con la nueva tienda');
+
+    res.status(201).json({
+      success: true,
+      message: 'Tienda creada exitosamente',
+      data: savedStore
+    });
+  } catch (error) {
+    console.error('❌ Error en ruta temporal:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+});
+
 // Ruta temporal para obtener usuarios sin autenticación
 app.get('/api/debug/users', async (req, res) => {
   try {
@@ -529,6 +648,11 @@ app.use('/api/riders', riderRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/admin/wallet', adminWalletRoutes);
+app.use('/api/recharge', rechargeRoutes);
+
+// Webhooks para pagos
+app.post('/api/webhooks/paypal', WebhookController.paypalWebhook);
+app.post('/api/webhooks/stripe', WebhookController.stripeWebhook);
 app.use('/api/crypto-auth', cryptoAuthRoutes);
 app.use('/api/store-photos', storePhotoRoutes);
 app.use('/api/masters', masterRoutes);

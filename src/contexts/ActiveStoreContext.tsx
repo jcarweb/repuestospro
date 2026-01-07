@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL } from '../config/api';
 import { useAuth } from './AuthContext';
 
 interface Store {
@@ -83,6 +83,10 @@ export const ActiveStoreProvider: React.FC<ActiveStoreProviderProps> = ({ childr
     console.log('ActiveStoreContext: token:', !!token);
     console.log('ActiveStoreContext: user role:', user?.role);
     
+    console.log('ActiveStoreContext: fetchUserStores called');
+    console.log('ActiveStoreContext: token:', !!token);
+    console.log('ActiveStoreContext: user role:', user?.role);
+    
     if (!token || user?.role !== 'store_manager') {
       console.log('ActiveStoreContext: No token or not store_manager, setting loading to false');
       setLoading(false);
@@ -90,12 +94,16 @@ export const ActiveStoreProvider: React.FC<ActiveStoreProviderProps> = ({ childr
     }
 
     console.log('ActiveStoreContext: Iniciando fetch de tiendas...');
+    console.log('ActiveStoreContext: Token disponible:', !!token);
+    console.log('ActiveStoreContext: API_BASE_URL:', API_BASE_URL);
 
     try {
       setLoading(true);
-      console.log('ActiveStoreContext: Haciendo petición a /api/user/stores/complete...');
+      const url = `${API_BASE_URL}/api/stores/user/stores/complete`;
+      console.log('ActiveStoreContext: URL completa:', url);
+      console.log('ActiveStoreContext: Haciendo petición a /api/stores/user/stores/complete...');
       
-      const response = await fetch('process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:5000""/api/user/stores/complete', {
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

@@ -4,7 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useActiveStore } from '../contexts/ActiveStoreContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSidebarConfig } from '../hooks/useSidebarConfig';
-import Logo from './Logo';
 import { 
   Home, 
   Package, 
@@ -19,7 +18,8 @@ import {
   Users,
   Bell,
   TrendingUp,
-  Settings
+  Settings,
+  Wallet
 } from 'lucide-react';
 
 interface StoreManagerSidebarProps {
@@ -50,7 +50,7 @@ const StoreManagerSidebar: React.FC<StoreManagerSidebarProps> = ({ isOpen, onClo
   const getIconComponent = (iconName: string) => {
     const iconMap: { [key: string]: any } = {
       Home, Package, Tag, ShoppingCart, ShoppingBag, Truck, BarChart3,
-      MessageSquare, Star, Building2, Users, Bell, TrendingUp, Settings
+      MessageSquare, Star, Building2, Users, Bell, TrendingUp, Settings, Wallet
     };
     return iconMap[iconName] || Home;
   };
@@ -87,11 +87,13 @@ const StoreManagerSidebar: React.FC<StoreManagerSidebarProps> = ({ isOpen, onClo
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-[#555555]">
             <div className="flex items-center space-x-3">
-              <Logo className="h-8 w-auto" />
+              {/* Logo removido para gestor de tienda */}
               <div className={config.width === 'compact' ? 'hidden' : ''}>
-                <h1 className="text-lg font-bold text-[#333333] dark:text-[#FFC300]">PIEZAS YA</h1>
+                <h1 className="text-lg font-bold text-[#333333] dark:text-[#FFC300]">
+                  {activeStore ? activeStore.name : 'Mi Tienda'}
+                </h1>
                 <p className="text-sm text-gray-500 dark:text-white capitalize">
-                  Gestor de Tienda
+                  Gestión de Tienda
                 </p>
               </div>
             </div>

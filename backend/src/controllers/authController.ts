@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import User, { IUser } from '../models/User';
 import Activity from '../models/Activity';
 import config from '../config/env';
-import { emailService } from '../services/emailService';
+// import { emailService } from '../services/emailService';
 // import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { LoyaltyService } from '../services/loyaltyService';
@@ -83,7 +83,8 @@ export class AuthController {
       await user.save();
       // Enviar email de verificación
       try {
-        await emailService.sendEmailVerificationEmail(user.email, emailVerificationToken);
+        // await emailService.sendEmailVerificationEmail(user.email, emailVerificationToken);
+        console.log('📧 Email de verificación deshabilitado temporalmente');
       } catch (emailError) {
         console.error('❌ Error enviando email de verificación:', emailError);
         // No fallar el registro si el email falla
@@ -131,10 +132,10 @@ export class AuthController {
   static async login(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
-      // Buscar usuario sin populate inicial para mejor rendimiento
-      const user = await User.findOne({ email })
-        .select('+password +loginAttempts +lockUntil name email role isEmailVerified isActive stores assignedStore')
-        .lean(); // Usar lean() para mejor rendimiento
+      
+      // Buscar usuario
+      const user = await User.findOne({ email });
+      
       if (!user) {
         res.status(401).json({
           success: false,
@@ -142,6 +143,7 @@ export class AuthController {
         });
         return;
       }
+      
       // Verificar si la cuenta está bloqueada
       if (user.isAccountLocked()) {
         res.status(423).json({
@@ -150,6 +152,7 @@ export class AuthController {
         });
         return;
       }
+      
       // Verificar contraseña
       const isValidPassword = await user.comparePassword(password);
       if (!isValidPassword) {
@@ -419,7 +422,8 @@ export class AuthController {
       await user.save();
       // Enviar email de recuperación
       try {
-        await emailService.sendPasswordResetEmail(user.email, resetToken);
+        // await emailService.sendPasswordResetEmail(user.email, resetToken);
+        console.log('📧 Email de recuperación deshabilitado temporalmente');
       } catch (emailError) {
         console.error('Error enviando email de recuperación:', emailError);
         res.status(500).json({
@@ -508,7 +512,8 @@ export class AuthController {
       });
       // Enviar correo de bienvenida específico para cada rol después de la verificación
       try {
-        await emailService.sendWelcomeEmail(user.email, user.name);
+        // await emailService.sendWelcomeEmail(user.email, user.name);
+        console.log('📧 Email de bienvenida deshabilitado temporalmente');
       } catch (emailError) {
         console.error('Error enviando email de bienvenida:', emailError);
         // No fallar la verificación si el email falla
@@ -863,7 +868,8 @@ export class AuthController {
       await user.save();
       // Enviar email de verificación
       try {
-        await emailService.sendEmailVerificationEmail(user.email, emailVerificationToken);
+        // await emailService.sendEmailVerificationEmail(user.email, emailVerificationToken);
+        console.log('📧 Email de verificación deshabilitado temporalmente');
       } catch (emailError) {
         console.error('Error enviando email de verificación:', emailError);
         res.status(500).json({

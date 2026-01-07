@@ -179,7 +179,11 @@ backend/*-sample.csv
 *~
 
 # Development scripts and batch files
+# Excluir scripts de desarrollo, pero incluir scripts de deploy
 *.bat
+!deploy-production.bat
+!scripts/*.bat
+!mobile/build-apk*.bat
 *.cmd
 *.sh
 *.ps1

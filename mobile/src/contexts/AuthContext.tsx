@@ -226,10 +226,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const verifyToken = await AsyncStorage.getItem('authToken');
             console.log('🔍 Token verificado en AsyncStorage:', verifyToken ? `${verifyToken.substring(0, 20)}...` : 'null');
             
-            // Pequeño delay para asegurar que el token se guarde
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Notificar al apiService que tiene un nuevo token
+            // Notificar al apiService que tiene un nuevo token (sin delay innecesario)
             await apiService.refreshToken();
             console.log('✅ apiService notificado del nuevo token');
           } else {
@@ -244,68 +241,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const verifyToken = await AsyncStorage.getItem('authToken');
             console.log('🔍 Token simulado verificado en AsyncStorage:', verifyToken ? `${verifyToken.substring(0, 20)}...` : 'null');
             
-            // Pequeño delay para asegurar que el token se guarde
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Notificar al apiService que tiene un nuevo token
+            // Notificar al apiService que tiene un nuevo token (sin delay innecesario)
             await apiService.refreshToken();
             console.log('✅ apiService notificado del token simulado');
           }
           
-          // Intentar cargar y guardar la imagen del perfil localmente
+          // Usar directamente los datos del usuario del login (sin llamada adicional)
+          // La imagen del perfil se cargará de forma lazy cuando sea necesaria
           let finalUser = response.data.user;
-          try {
-            console.log('🔄 Intentando cargar imagen del perfil...');
-            console.log('🔍 Usuario del login:', response.data.user);
-            console.log('🔍 ¿Tiene profileImage en login?', !!response.data.user.profileImage);
-            
-            const profileResponse = await apiService.getUserProfile();
-            console.log('🔍 Respuesta de getUserProfile:', profileResponse);
-            console.log('🔍 profileResponse.success:', profileResponse.success);
-            console.log('🔍 profileResponse.data:', profileResponse.data);
-            console.log('🔍 profileResponse.data.profileImage:', profileResponse.data?.profileImage);
-            console.log('🔍 profileResponse.data.avatar:', profileResponse.data?.avatar);
-            console.log('🔍 profileResponse.data completo:', JSON.stringify(profileResponse.data, null, 2));
-            
-            if (profileResponse.success && profileResponse.data.profileImage) {
-              // Construir la URL completa de la imagen
-              const imageUrl = profileResponse.data.profileImage.startsWith('http') 
-                ? profileResponse.data.profileImage 
-                : `${getBaseURL()}${profileResponse.data.profileImage}`;
-              
-              finalUser = {
-                ...response.data.user,
-                profileImage: imageUrl
-              };
-              console.log('✅ Imagen del perfil cargada y guardada localmente:', imageUrl);
-            } else {
-              console.log('⚠️ No se pudo cargar imagen del perfil, guardando usuario sin imagen');
-              console.log('⚠️ profileResponse.success:', profileResponse.success);
-              console.log('⚠️ profileResponse.data:', profileResponse.data);
-            }
-          } catch (error) {
-            console.log('⚠️ Error cargando imagen del perfil, guardando usuario sin imagen:', error);
-          }
           
-          // Normalizar identificador y establecer usuario final con imagen preservada
+          // Normalizar identificador
           if ((finalUser as any)._id && !(finalUser as any).id) {
             (finalUser as any).id = (finalUser as any)._id;
           }
-          console.log('🔍 AuthContext - Estableciendo usuario final:', finalUser);
-          console.log('🔍 AuthContext - finalUser.profileImage:', finalUser.profileImage);
-          console.log('🔍 AuthContext - finalUser.avatar:', finalUser.avatar);
-          console.log('🔍 AuthContext - finalUser completo:', JSON.stringify(finalUser, null, 2));
+          
+          // Construir URL de imagen si existe pero no está completa
+          if (finalUser.profileImage && !finalUser.profileImage.startsWith('http')) {
+            const baseUrl = await getBaseURL();
+            finalUser.profileImage = `${baseUrl}${finalUser.profileImage}`;
+          }
+          
           setUser(finalUser);
           await AsyncStorage.setItem('user', JSON.stringify(finalUser));
-          console.log('✅ Usuario final establecido en AuthContext:', finalUser.name, finalUser.profileImage ? 'con imagen' : 'sin imagen');
-          console.log('✅ Usuario guardado en AsyncStorage');
-          
-          // Verificar que se guardó correctamente
-          const savedUserData = await AsyncStorage.getItem('user');
-          const parsedUser = JSON.parse(savedUserData || '{}');
-          console.log('🔍 AuthContext - Usuario guardado en AsyncStorage:', parsedUser);
-          console.log('🔍 AuthContext - parsedUser.profileImage:', parsedUser.profileImage);
-          console.log('🔍 AuthContext - parsedUser.avatar:', parsedUser.avatar);
           
           // Guardar credenciales para uso futuro con PIN/biometría
           await AsyncStorage.setItem('savedCredentials', JSON.stringify({
@@ -381,10 +338,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (response.data.token) {
           await AsyncStorage.setItem('authToken', response.data.token);
           console.log('✅ Token real guardado en AsyncStorage:', `${response.data.token.substring(0, 20)}...`);
-          // Pequeño delay para asegurar que el token se guarde
-          await new Promise(resolve => setTimeout(resolve, 100));
           
-          // Notificar al apiService que tiene un nuevo token
+          // Notificar al apiService que tiene un nuevo token (sin delay innecesario)
           await apiService.refreshToken();
           console.log('✅ apiService notificado del token real');
         }

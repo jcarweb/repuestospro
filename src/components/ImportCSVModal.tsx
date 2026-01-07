@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Download, X, AlertCircle, CheckCircle } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 interface ImportCSVModalProps {
   isOpen: boolean;
@@ -38,7 +39,7 @@ const ImportCSVModal: React.FC<ImportCSVModalProps> = ({
   const loadStores = async () => {
     try {
       // Usar el endpoint que funciona en la aplicación
-      const response = await fetch('/api/user/stores', {
+      const response = await fetch(`${API_BASE_URL}/api/stores/user/stores`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

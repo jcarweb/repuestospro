@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL } from '../config/api';
 import { CheckCircle, XCircle, Mail, AlertCircle, ArrowLeft } from 'lucide-react';
 
 const VerifyEmail: React.FC = () => {

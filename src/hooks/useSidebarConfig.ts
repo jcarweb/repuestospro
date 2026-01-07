@@ -121,12 +121,21 @@ const defaultConfig: SidebarConfig = {
       description: 'Mensajería con clientes'
     },
     {
+      id: 'wallet',
+      title: 'Wallet',
+      path: '/store-manager/wallet',
+      icon: 'Wallet',
+      visible: true,
+      order: 10,
+      description: 'Gestión de Wallet y pagos'
+    },
+    {
       id: 'reviews',
       title: 'Reseñas',
       path: '/store-manager/reviews',
       icon: 'Star',
       visible: true,
-      order: 10,
+      order: 11,
       description: 'Reseñas de productos'
     },
     {
@@ -135,7 +144,7 @@ const defaultConfig: SidebarConfig = {
       path: '/store-manager/branches',
       icon: 'Building2',
       visible: true,
-      order: 11,
+      order: 12,
       description: 'Gestión de sucursales'
     },
     {
@@ -144,7 +153,7 @@ const defaultConfig: SidebarConfig = {
       path: '/store-manager/advertisements',
       icon: 'TrendingUp',
       visible: false,
-      order: 12,
+      order: 13,
       description: 'Gestión de publicidad'
     },
     {
@@ -153,7 +162,7 @@ const defaultConfig: SidebarConfig = {
       path: '/store-manager/store-configuration',
       icon: 'Settings',
       visible: true,
-      order: 13,
+      order: 14,
       description: 'Configuración básica de la tienda'
     },
     {
@@ -162,7 +171,7 @@ const defaultConfig: SidebarConfig = {
       path: '/store-manager/settings',
       icon: 'Settings',
       visible: true,
-      order: 14,
+      order: 15,
       description: 'Configuración del sidebar'
     }
   ],
