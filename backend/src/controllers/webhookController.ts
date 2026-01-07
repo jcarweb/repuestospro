@@ -7,7 +7,7 @@ export class WebhookController {
   /**
    * Webhook de PayPal
    */
-  static async paypalWebhook(req: Request, res: Response) {
+  static async paypalWebhook(req: Request, res: Response): Promise<Response | void> {
     try {
       console.log('🔍 Webhook de PayPal recibido:', req.body);
 
@@ -22,7 +22,7 @@ export class WebhookController {
 
       // Procesar webhook
       // const result = await PaymentService.processPayPalWebhook(req.body);
-      const result = { success: false, message: 'Servicio temporalmente deshabilitado' };
+      const result: { success: boolean; message: string; rechargeRequestId?: string } = { success: false, message: 'Servicio temporalmente deshabilitado' };
       
       if (result.success && result.rechargeRequestId) {
         // Aprobar recarga automáticamente
@@ -38,6 +38,7 @@ export class WebhookController {
       }
 
       res.status(200).json({ success: true });
+      return;
     } catch (error) {
       console.error('Error procesando webhook de PayPal:', error);
       res.status(500).json({
@@ -50,7 +51,7 @@ export class WebhookController {
   /**
    * Webhook de Stripe
    */
-  static async stripeWebhook(req: Request, res: Response) {
+  static async stripeWebhook(req: Request, res: Response): Promise<Response | void> {
     try {
       console.log('🔍 Webhook de Stripe recibido:', req.body);
 
@@ -65,7 +66,7 @@ export class WebhookController {
 
       // Procesar webhook
       // const result = await PaymentService.processStripeWebhook(req.body);
-      const result = { success: false, message: 'Servicio temporalmente deshabilitado' };
+      const result: { success: boolean; message: string; rechargeRequestId?: string } = { success: false, message: 'Servicio temporalmente deshabilitado' };
       
       if (result.success && result.rechargeRequestId) {
         // Aprobar recarga automáticamente
@@ -81,6 +82,7 @@ export class WebhookController {
       }
 
       res.status(200).json({ success: true });
+      return;
     } catch (error) {
       console.error('Error procesando webhook de Stripe:', error);
       res.status(500).json({
@@ -109,9 +111,9 @@ export class WebhookController {
    */
   private static async verifyStripeSignature(req: Request): Promise<boolean> {
     try {
-      const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+      const stripe = require('stripe')(process.env['STRIPE_SECRET_KEY']);
       const signature = req.headers['stripe-signature'] as string;
-      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      const webhookSecret = process.env['STRIPE_WEBHOOK_SECRET'];
 
       if (!signature || !webhookSecret) {
         return false;

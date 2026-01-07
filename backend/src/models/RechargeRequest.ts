@@ -33,13 +33,13 @@ export interface IRechargeRequest extends Document {
 
 const RechargeRequestSchema = new Schema<IRechargeRequest>({
   storeId: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'Store',
     required: true,
     index: true
   },
   userId: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId as any,
     ref: 'User',
     required: true,
     index: true

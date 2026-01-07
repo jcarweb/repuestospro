@@ -17,7 +17,7 @@ export class RechargeController {
   /**
    * Crear una nueva solicitud de recarga
    */
-  static async createRechargeRequest(req: AuthenticatedRequest, res: Response) {
+  static async createRechargeRequest(req: AuthenticatedRequest, res: Response): Promise<Response | void> {
     try {
       console.log('🔍 RechargeController: createRechargeRequest called');
       console.log('🔍 RechargeController: req.body:', req.body);
@@ -147,7 +147,7 @@ export class RechargeController {
   /**
    * Obtener solicitudes de recarga de un usuario
    */
-  static async getUserRechargeRequests(req: AuthenticatedRequest, res: Response) {
+  static async getUserRechargeRequests(req: AuthenticatedRequest, res: Response): Promise<Response | void> {
     try {
       const userId = req.user?._id;
       const { page = 1, limit = 10, status } = req.query;
@@ -197,7 +197,7 @@ export class RechargeController {
   /**
    * Subir comprobante de pago
    */
-  static async uploadPaymentProof(req: AuthenticatedRequest, res: Response) {
+  static async uploadPaymentProof(req: AuthenticatedRequest, res: Response): Promise<Response | void> {
     try {
       const { rechargeRequestId } = req.params;
       const { paymentReference, paymentProof } = req.body;
@@ -265,7 +265,7 @@ export class RechargeController {
   /**
    * Validar recarga (solo administradores)
    */
-  static async validateRecharge(req: AuthenticatedRequest, res: Response) {
+  static async validateRecharge(req: AuthenticatedRequest, res: Response): Promise<Response | void> {
     try {
       const { rechargeRequestId } = req.params;
       const { action, adminNotes } = req.body; // action: 'approve' | 'reject'
@@ -421,7 +421,7 @@ export class RechargeController {
   /**
    * Obtener solicitudes pendientes (solo administradores)
    */
-  static async getPendingRecharges(req: AuthenticatedRequest, res: Response) {
+  static async getPendingRecharges(req: AuthenticatedRequest, res: Response): Promise<Response | void> {
     try {
       const { page = 1, limit = 10 } = req.query;
 

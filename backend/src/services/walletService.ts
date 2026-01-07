@@ -328,8 +328,8 @@ class WalletService {
         return { success: false, message: 'Transacción no encontrada' };
       }
 
-      if (originalTransaction.status !== 'confirmed') {
-        return { success: false, message: 'Solo se pueden revertir transacciones confirmadas' };
+      if (originalTransaction.status !== 'completed') {
+        return { success: false, message: 'Solo se pueden revertir transacciones completadas' };
       }
 
       const wallet = await StoreWallet.findOne({ storeId: originalTransaction.storeId });
@@ -345,7 +345,7 @@ class WalletService {
       const reverseTransaction = new WalletTransaction({
         walletId: wallet._id,
         storeId: originalTransaction.storeId,
-        orderId: originalTransaction.orderId,
+        orderId: (originalTransaction as any).orderId,
         type: 'manual_adjustment',
         amount: reverseAmount,
         balanceBefore,
@@ -368,8 +368,8 @@ class WalletService {
       wallet.lastTransactionAt = new Date();
       await wallet.save();
 
-      // Marcar transacción original como revertida
-      originalTransaction.status = 'reversed';
+      // Marcar transacción original como revertida (usar 'cancelled' en lugar de 'reversed')
+      originalTransaction.status = 'cancelled';
       await originalTransaction.save();
 
       return {

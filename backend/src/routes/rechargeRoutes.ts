@@ -10,19 +10,19 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // Rutas para usuarios
-router.post('/:storeId/initiate', RechargeController.createRechargeRequest);
-router.get('/user', RechargeController.getUserRechargeRequests);
+router.post('/:storeId/initiate', RechargeController.createRechargeRequest as express.RequestHandler);
+router.get('/user', RechargeController.getUserRechargeRequests as express.RequestHandler);
 // router.post('/:rechargeRequestId/proof', upload.single('paymentProof'), handleUploadError, RechargeController.uploadPaymentProof);
 
 // Rutas para administradores
 router.get('/admin/pending', 
   requireRole(['admin']), 
-  RechargeController.getPendingRecharges
+  RechargeController.getPendingRecharges as any
 );
 
 router.patch('/:rechargeRequestId/validate', 
   requireRole(['admin']), 
-  RechargeController.validateRecharge
+  RechargeController.validateRecharge as any
 );
 
 export default router;

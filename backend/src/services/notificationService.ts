@@ -98,33 +98,30 @@ class NotificationService {
     try {
       // Enviar email a la tienda
       if (store.email) {
-        const result = await emailService.sendWalletNotification(
-          store.email,
-          notification.title,
-          notification.type,
-          {
-            ...notification.metadata,
-            storeName: store.name,
-            dashboardUrl: `${process.env['FRONTEND_URL'] || 'http://localhost:3000'}/wallet/${store._id}`
-          }
-        );
-
-        if (result.success) {
-          console.log(`Email enviado exitosamente a ${store.email}: ${result.messageId}`);
-        } else {
-          console.error(`Error enviando email a ${store.email}: ${result.error}`);
-        }
+        // TODO: Implementar sendWalletNotification en EmailService
+        // const result = await emailService.sendWalletNotification(
+        //   store.email,
+        //   notification.title,
+        //   notification.type,
+        //   {
+        //     ...notification.metadata,
+        //     storeName: store.name,
+        //     dashboardUrl: `${process.env['FRONTEND_URL'] || 'http://localhost:3000'}/wallet/${store._id}`
+        //   }
+        // );
+        console.log(`Notificación de wallet para ${store.email}: ${notification.title}`);
       }
 
       // Enviar email a usuarios de la tienda
       for (const user of users) {
         if (user.emailNotifications && user.email !== store.email) {
-          const result = await emailService.sendWalletNotification(
-            user.email,
-            notification.title,
-            notification.type,
-            {
-              ...notification.metadata,
+          // TODO: Implementar sendWalletNotification en EmailService
+          // const result = await emailService.sendWalletNotification(
+          //   user.email,
+          //   notification.title,
+          //   notification.type,
+          //   {
+          //     ...notification.metadata,
               storeName: store.name,
               userName: user.name,
               dashboardUrl: `${process.env['FRONTEND_URL'] || 'http://localhost:3000'}/wallet/${store._id}`
