@@ -77,23 +77,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     }
 
     try {
-      // Verificar si el email está verificado en la app móvil
-      const isVerified = await mobileVerificationService.isEmailVerifiedInMobile(email);
-      
-      if (isVerified) {
-        // Usuario ya verificado en móvil, hacer login directamente
-        await login(email, password);
-        
-        // Guardar credenciales para uso futuro con PIN/biometría
-        await AsyncStorage.setItem('savedCredentials', JSON.stringify({ email, password }));
-        return;
-      }
-
-      // Si no está verificado, intentar login normal
+      // Hacer login directamente - el backend manejará la verificación de email
+      // Esto elimina una verificación local innecesaria que añade latencia
       await login(email, password);
       
-      // Guardar credenciales para uso futuro con PIN/biometría
-      await AsyncStorage.setItem('savedCredentials', JSON.stringify({ email, password }));
+      // Guardar credenciales para uso futuro con PIN/biometría (en paralelo, no bloquea)
+      AsyncStorage.setItem('savedCredentials', JSON.stringify({ email, password })).catch(() => {
+        // Ignorar errores de guardado de credenciales - no es crítico
+      });
       
     } catch (error: any) {
       // Si el error es de email no verificado, mostrar opción de verificación

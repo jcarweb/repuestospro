@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useImageUpload } from '../hooks/useImageUpload';
+import { API_BASE_URL } from '../config/api';
 import { Upload, X } from 'lucide-react';
 
 interface ProductFormProps {
@@ -68,7 +69,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       try {
         setLoadingStores(true);
         console.log('🔍 Haciendo fetch a /api/user/stores...');
-        const response = await fetch('/api/user/stores', {
+        const response = await fetch(`${API_BASE_URL}/api/stores/user/stores`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }

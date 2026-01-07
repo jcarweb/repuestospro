@@ -4,10 +4,10 @@ import { BACKEND_ENVIRONMENTS, BackendEnvironment, getEnvironmentById } from './
 
 // Configuración base de la API optimizada para móvil
 const BASE_API_CONFIG = {
-  TIMEOUT: 15000, // 15 segundos para Render (servicios gratuitos tardan más)
-  RETRY_ATTEMPTS: 3, // 3 reintentos para servicios que se "duermen"
-  RETRY_DELAY: 1000, // 1 segundo base para dar tiempo al servidor
-  MAX_RETRY_DELAY: 5000, // Máximo 5 segundos entre reintentos
+  TIMEOUT: 8000, // 8 segundos - reducido para mejor UX en móvil
+  RETRY_ATTEMPTS: 2, // 2 reintentos - reducido para login más rápido
+  RETRY_DELAY: 500, // 500ms base - más rápido
+  MAX_RETRY_DELAY: 2000, // Máximo 2 segundos entre reintentos
 };
 
 // Clase para manejar la configuración dinámica de la API
@@ -159,8 +159,8 @@ export class DynamicAPIConfig {
           { method: 'GET' },
           'wake up server'
         );
-        // Esperar un poco para que el servidor se active completamente
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Esperar un poco para que el servidor se active completamente (reducido)
+        await new Promise(resolve => setTimeout(resolve, 1000));
       } catch (error) {
         console.log('⚠️ No se pudo despertar el servidor, continuando con health check...');
       }
@@ -191,7 +191,7 @@ export class DynamicAPIConfig {
     attempt: number = 1
   ): Promise<Response> {
     const isProduction = this.currentEnvironment?.isProduction || false;
-    const timeout = isProduction ? 20000 : BASE_API_CONFIG.TIMEOUT; // 20s para producción (Render), 15s para desarrollo
+    const timeout = isProduction ? 10000 : BASE_API_CONFIG.TIMEOUT; // 10s para producción (Render), 8s para desarrollo
     
     try {
       console.log(`🌐 ${operation} (intento ${attempt}/${BASE_API_CONFIG.RETRY_ATTEMPTS}): ${url}`);
@@ -283,8 +283,8 @@ export class DynamicAPIConfig {
       return false;
     } catch (error) {
       console.log('⚠️ Servidor puede estar dormido, intentando despertar...');
-      // Esperar un poco más y reintentar
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Esperar un poco más y reintentar (reducido)
+      await new Promise(resolve => setTimeout(resolve, 1500));
       return false;
     }
   }

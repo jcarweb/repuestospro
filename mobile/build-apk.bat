@@ -6,11 +6,20 @@ echo.
 
 echo [1/5] Limpiando proyecto...
 cd android
-call gradlew clean
+REM Limpiar directorios problemáticos primero
+if exist "app\.cxx" (
+    echo Limpiando .cxx...
+    rd /s /q app\.cxx 2>nul
+)
+if exist "app\build" (
+    echo Limpiando build anterior...
+    rd /s /q app\build 2>nul
+)
+REM Intentar limpiar con Gradle, pero no fallar si hay problemas
+call gradlew clean --no-daemon --no-build-cache 2>nul
 if %errorlevel% neq 0 (
-    echo ERROR: Fallo al limpiar el proyecto
-    pause
-    exit /b 1
+    echo [ADVERTENCIA] Gradle clean tuvo problemas, pero continuamos...
+    echo Esto puede ser normal si el cache esta corrupto
 )
 cd ..
 
@@ -26,9 +35,23 @@ if %errorlevel% neq 0 (
 echo.
 echo [3/5] Copiando bundle a la ubicacion correcta...
 if not exist "android\app\src\main\assets" mkdir "android\app\src\main\assets"
-powershell -Command "Copy-Item 'dist\_expo\static\js\android\index-*.hbc' 'android\app\src\main\assets\index.android.bundle'"
-if %errorlevel% neq 0 (
-    echo ERROR: Fallo al copiar el bundle
+REM Buscar el bundle generado y copiarlo
+set BUNDLE_COPIED=0
+if exist "dist\_expo\static\js\android" (
+    for %%f in ("dist\_expo\static\js\android\index-*.hbc") do (
+        if exist "%%f" (
+            copy "%%f" "android\app\src\main\assets\index.android.bundle" >nul
+            echo [OK] Bundle copiado exitosamente: %%f
+            set BUNDLE_COPIED=1
+            goto :bundle_done
+        )
+    )
+)
+:bundle_done
+if %BUNDLE_COPIED%==0 (
+    echo ERROR: No se encontro el bundle generado en dist\_expo\static\js\android\
+    echo Buscando archivos disponibles...
+    dir "dist\_expo\static\js\android\" 2>nul
     pause
     exit /b 1
 )

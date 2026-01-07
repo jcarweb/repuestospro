@@ -10,6 +10,7 @@ export interface AuthRequest extends Request {
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     console.log('🔐 AuthMiddleware - Verificando autenticación para:', req.path);
+    console.log('🔐 AuthMiddleware - Headers:', req.headers);
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.log('❌ AuthMiddleware - No hay token de autorización');

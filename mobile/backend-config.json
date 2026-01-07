@@ -1,10 +1,10 @@
 {
-  "selectedBackend": "render",
+  "selectedBackend": "local",
   "backend": {
-    "id": "render",
-    "name": "Render Production",
-    "baseUrl": "https://piezasya-back.onrender.com/api",
-    "description": "Backend en producción (Render)"
+    "id": "local",
+    "name": "Local Development",
+    "baseUrl": "http://192.168.31.122:5000/api",
+    "description": "Backend local en tu computadora"
   },
-  "timestamp": "2025-09-22T23:55:33.589Z"
+  "timestamp": "2025-01-25T01:15:00.000Z"
 }

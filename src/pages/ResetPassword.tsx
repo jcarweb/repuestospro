@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL } from '../config/api';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const ResetPassword: React.FC = () => {

@@ -120,6 +120,26 @@ class StoreController {
   async getUserStores(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = (req as any).user._id;
+      console.log('🔍 getUserStores - UserId:', userId);
+      console.log('🔍 getUserStores - User:', (req as any).user);
+      
+      // Buscar todas las tiendas del usuario (activas e inactivas)
+      const allStores = await Store.find({
+        $or: [
+          { owner: userId },
+          { managers: userId }
+        ]
+      });
+      console.log('🔍 getUserStores - Todas las tiendas encontradas:', allStores.length);
+      console.log('🔍 getUserStores - Detalles de tiendas:', allStores.map(s => ({
+        id: s._id,
+        name: s.name,
+        owner: s.owner,
+        managers: s.managers,
+        isActive: s.isActive
+      })));
+
+      // Buscar solo tiendas activas
       const stores = await Store.find({
         $or: [
           { owner: userId },
@@ -134,6 +154,14 @@ class StoreController {
         .populate('parishRef', 'name')
         .sort({ createdAt: -1 })
         .select('-__v');
+      
+      console.log('🔍 getUserStores - Tiendas activas encontradas:', stores.length);
+      console.log('🔍 getUserStores - Tiendas activas:', stores.map(s => ({
+        id: s._id,
+        name: s.name,
+        isActive: s.isActive
+      })));
+
       res.json({
         success: true,
         data: stores
