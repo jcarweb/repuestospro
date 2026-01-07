@@ -792,7 +792,7 @@ export class MonetizationController {
           rate: result.rate,
           currency: store.settings.preferredExchangeRate,
           source: 'BCV',
-          sourceUrl: sourceUrl,
+          sourceUrl: 'https://www.bcv.org.ve',
           lastUpdated: new Date(),
           isActive: true
         }

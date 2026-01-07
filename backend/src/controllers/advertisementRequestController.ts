@@ -457,7 +457,7 @@ export class AdvertisementRequestController {
         //   (request.storeManager as any).email,
         //   request.campaignName,
         //   rejectionReason
-        );
+        // );
       } catch (emailError) {
         console.error('Error enviando email de rechazo:', emailError);
       }
