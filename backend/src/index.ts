@@ -253,7 +253,7 @@ app.get('/api/debug/stores', async (req, res) => {
   }
 });
 // Ruta temporal para crear tienda (SOLO PARA DESARROLLO)
-app.post('/api/stores', async (req, res): Promise<Response | void> => {
+app.post('/api/stores', async (req, res) => {
   try {
     console.log('🔧 Ruta temporal POST /api/stores - Datos recibidos:', req.body);
     
@@ -354,14 +354,14 @@ app.post('/api/stores', async (req, res): Promise<Response | void> => {
     });
     console.log('🔧 Usuario actualizado con la nueva tienda');
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'Tienda creada exitosamente',
       data: savedStore
     });
   } catch (error) {
     console.error('❌ Error en ruta temporal:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
       error: error instanceof Error ? error.message : 'Error desconocido'

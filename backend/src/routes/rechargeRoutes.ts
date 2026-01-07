@@ -10,8 +10,8 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // Rutas para usuarios
-router.post('/:storeId/initiate', RechargeController.createRechargeRequest as express.RequestHandler);
-router.get('/user', RechargeController.getUserRechargeRequests as express.RequestHandler);
+router.post('/:storeId/initiate', RechargeController.createRechargeRequest as any);
+router.get('/user', RechargeController.getUserRechargeRequests as any);
 // router.post('/:rechargeRequestId/proof', upload.single('paymentProof'), handleUploadError, RechargeController.uploadPaymentProof);
 
 // Rutas para administradores
