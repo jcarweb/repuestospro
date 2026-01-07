@@ -96,22 +96,24 @@ const ProfileScreen: React.FC = () => {
       // Usar datos del usuario actualizado (que viene del backend) como fuente principal
       const avatarUrl = user.profileImage || user.avatar || null;
       console.log('🖼️ Avatar URL del usuario (backend):', avatarUrl);
-      console.log('🔍 user.profileImage:', user.profileImage);
-      console.log('🔍 user.avatar:', user.avatar);
       
-        if (avatarUrl && !avatarUrl.startsWith('http')) {
-          // Si es una ruta relativa, construir la URL completa
-          const baseUrl = await getBaseUrl();
-          const fullImageUrl = `${baseUrl}${avatarUrl}`;
-          console.log('🖼️ URL completa de imagen construida:', fullImageUrl);
-          setProfileImage(fullImageUrl);
-        } else {
-          console.log('🖼️ Usando URL de imagen directa:', avatarUrl);
-          setProfileImage(avatarUrl);
-        }
+      if (avatarUrl && !avatarUrl.startsWith('http')) {
+        // Si es una ruta relativa, construir la URL completa
+        const baseUrl = await getBaseUrl();
+        const fullImageUrl = `${baseUrl}${avatarUrl}`;
+        console.log('🖼️ URL completa de imagen construida:', fullImageUrl);
+        setProfileImage(fullImageUrl);
+      } else if (avatarUrl) {
+        console.log('🖼️ Usando URL de imagen directa:', avatarUrl);
+        setProfileImage(avatarUrl);
+      } else {
+        setProfileImage(null);
+      }
 
       // Usar datos del backend directamente (prioridad absoluta)
       const backendData = {
+        name: user.name || '',
+        email: user.email || '',
         phone: user.phone || '',
         address: user.address || '',
         location: user.location || null
@@ -165,22 +167,30 @@ const ProfileScreen: React.FC = () => {
     );
   };
 
-  console.log('ProfileScreen render - isLoaded:', isLoaded, 'user:', user);
+  // Validar que el usuario existe antes de renderizar
+  if (!user) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.loadingContainer}>
+          <Text style={[styles.loadingText, { color: colors.textPrimary }]}>
+            No hay usuario autenticado
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!isLoaded) {
-    console.log('Mostrando loading...');
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.loadingContainer}>
           <Text style={[styles.loadingText, { color: colors.textPrimary }]}>
             Cargando perfil...
           </Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
-
-  console.log('Renderizando perfil principal');
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -202,30 +212,11 @@ const ProfileScreen: React.FC = () => {
           )}
         </View>
         
-        {/* BOTÓN DE DEBUG TEMPORAL */}
-        <TouchableOpacity 
-          style={[styles.editButton, { backgroundColor: '#FF6B6B', marginTop: 10 }]} 
-          onPress={testImageDirectly}
-        >
-          <Text style={[styles.editButtonText, { color: 'white' }]}>🧪 TEST IMAGEN</Text>
-        </TouchableOpacity>
-        
-        {/* BOTÓN DE TEST TOKEN */}
-        <TouchableOpacity 
-          style={[styles.editButton, { backgroundColor: '#4CAF50', marginTop: 5 }]} 
-          onPress={async () => {
-            const { testTokenStatus } = useAuth();
-            await testTokenStatus();
-          }}
-        >
-          <Text style={[styles.editButtonText, { color: 'white' }]}>🔐 TEST TOKEN</Text>
-        </TouchableOpacity>
-        
         <Text style={[styles.userName, { color: colors.textPrimary }]}>
-          {profileData?.name || user?.name || 'Usuario PiezasYA'}
+          {user?.name || 'Usuario PiezasYA'}
         </Text>
         <Text style={[styles.userEmail, { color: colors.textSecondary }]}>
-          {profileData?.email || user?.email || 'usuario@piezasya.com'}
+          {user?.email || 'usuario@piezasya.com'}
         </Text>
         
         <TouchableOpacity
